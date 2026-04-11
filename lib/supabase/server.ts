@@ -3,38 +3,30 @@ import { cookies } from 'next/headers'
 import type { CookieOptions } from '@supabase/ssr'
 import type { Database } from '@/types/database'
 
-type SyncCookieStore = {
-    getAll: () => Array<{
-        name: string
-        value: string
-    }>
-    set: (name: string, value: string, options?: CookieOptions) => void
+type CookieToSet = {
+    name: string
+    value: string
+    options: CookieOptions
 }
 
-export function createClient() {
-    const cookieStore = cookies() as unknown as SyncCookieStore
+export async function createClient() {
+    const cookieStore = await cookies()
 
     return createServerClient<Database>(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
             cookies: {
-                getAll() {
+                async getAll() {
                     return cookieStore.getAll()
                 },
-                setAll(
-                    cookiesToSet: Array<{
-                        name: string
-                        value: string
-                        options: CookieOptions
-                    }>
-                ) {
+                async setAll(cookiesToSet: CookieToSet[]) {
                     try {
                         cookiesToSet.forEach(({ name, value, options }) =>
                             cookieStore.set(name, value, options)
                         )
                     } catch {
-                        // safe to ignore in Server Components
+                        // Safe in Server Components when setting is not allowed
                     }
                 },
             },
@@ -48,16 +40,10 @@ export function createServiceClient() {
         process.env.SUPABASE_SERVICE_ROLE_KEY!,
         {
             cookies: {
-                getAll() {
+                async getAll() {
                     return []
                 },
-                setAll(
-                    _cookiesToSet: Array<{
-                        name: string
-                        value: string
-                        options: CookieOptions
-                    }>
-                ) {},
+                async setAll(_cookiesToSet: CookieToSet[]) {},
             },
             auth: {
                 autoRefreshToken: false,

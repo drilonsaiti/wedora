@@ -42,7 +42,7 @@ export async function generateMetadata({
 
 export default async function GalleryPage({ params }: GalleryPageProps) {
   const { token } = await params
-  const supabase = createServiceClient()
+  const supabase = await createServiceClient()
 
   const tokenResult = await supabase
       .from('gallery_tokens')
