@@ -1,0 +1,40 @@
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { AdminLoginForm } from '@/components/admin/login-form'
+
+export default async function AdminLoginPage() {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (user) {
+    const { data: admin } = await supabase
+      .from('admins')
+      .select('id')
+      .eq('id', user.id)
+      .single()
+
+    if (admin) redirect('/admin/photos')
+  }
+
+  return (
+    <main className="min-h-screen flex items-center justify-center px-6 py-16">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-10">
+          <p className="font-sans text-xs tracking-[0.25em] uppercase text-muted-foreground mb-2">
+            Private access
+          </p>
+          <h1 className="font-serif text-4xl font-light text-[hsl(var(--dark))]">
+            Admin Portal
+          </h1>
+          <div className="h-px w-12 bg-[hsl(var(--gold))] opacity-60 mx-auto mt-4" />
+        </div>
+
+        <div className="card-wedding p-8">
+          <AdminLoginForm />
+        </div>
+      </div>
+    </main>
+  )
+}
