@@ -1,10 +1,18 @@
 import { createServerClient } from '@supabase/ssr'
-import { cookies, type UnsafeUnwrappedCookies } from 'next/headers'
+import { cookies } from 'next/headers'
 import type { CookieOptions } from '@supabase/ssr'
 import type { Database } from '@/types/database'
 
+type SyncCookieStore = {
+    getAll: () => Array<{
+        name: string
+        value: string
+    }>
+    set: (name: string, value: string, options?: CookieOptions) => void
+}
+
 export function createClient() {
-    const cookieStore = cookies() as unknown as UnsafeUnwrappedCookies
+    const cookieStore = cookies() as unknown as SyncCookieStore
 
     return createServerClient<Database>(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
