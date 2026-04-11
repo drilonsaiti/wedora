@@ -36,17 +36,47 @@ export function UploadForm({ eventId }: UploadFormProps) {
     resolver: zodResolver(uploadFormSchema),
   })
 
-  const handleFileSelect = useCallback((file: File) => {
-    setFileError(null)
-    const result = fileSchema.safeParse(file)
-    if (!result.success) {
-      setFileError(result.error.errors[0]?.message ?? 'Invalid file')
-      return
-    }
-    setSelectedFile(file)
-    const url = URL.createObjectURL(file)
-    setPreview(url)
-  }, [])
+  const handleFileSelect = useCallback(async (file: File) => {
+  setFileError(null)
+
+  const result = fileSchema.safeParse(file)
+  if (!result.success) {
+    setFileError(result.error.errors[0]?.message ?? 'Invalid file')
+    return
+  }
+
+  // Fix mirror using canvas
+  const img = new Image()
+  const url = URL.createObjectURL(file)
+
+  img.onload = () => {
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')!
+
+    canvas.width = img.width
+    canvas.height = img.height
+
+    // Flip horizontally
+    ctx.translate(canvas.width, 0)
+    ctx.scale(-1, 1)
+
+    ctx.drawImage(img, 0, 0)
+
+    canvas.toBlob((blob) => {
+      if (!blob) return
+
+      const fixedFile = new File([blob], file.name, {
+        type: 'image/jpeg',
+      })
+
+      setSelectedFile(fixedFile)
+      const fixedUrl = URL.createObjectURL(fixedFile)
+      setPreview(fixedUrl)
+    }, 'image/jpeg')
+  }
+
+  img.src = url
+}, [])
 
   const clearFile = useCallback(() => {
     if (preview) URL.revokeObjectURL(preview)
