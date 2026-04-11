@@ -26,7 +26,7 @@ export function AdminLoginForm() {
     setLoading(true)
 
     try {
-      const supabase = createClient()
+      const supabase = await createClient()
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,

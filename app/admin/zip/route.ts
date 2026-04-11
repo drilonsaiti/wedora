@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   // Auth check
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const service = createServiceClient()
+  const service = await createServiceClient()
   const { data: admin } = await service
     .from('admins')
     .select('id')
@@ -44,9 +44,16 @@ export async function GET(request: NextRequest) {
   if (eventId) query = query.eq('event_id', eventId)
   if (filter === 'favourites') query = query.eq('favourite', true)
 
-  const { data: photos, error } = await query
+  const result = await query
 
-  if (error || !photos || photos.length === 0) {
+  const photos = result.data as Array<{
+    id: string
+    original_path: string
+    guest_name: string | null
+    created_at: string
+  }> | null
+
+  if (result.error || !photos || photos.length === 0) {
     return NextResponse.json({ error: 'No photos found' }, { status: 404 })
   }
 

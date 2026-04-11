@@ -1,10 +1,10 @@
 export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+    | string
+    | number
+    | boolean
+    | null
+    | { [key: string]: Json | undefined }
+    | Json[]
 
 export interface Database {
   public: {
@@ -34,6 +34,7 @@ export interface Database {
           active?: boolean
           created_at?: string
         }
+        Relationships: []
       }
       photos: {
         Row: {
@@ -87,6 +88,7 @@ export interface Database {
           favourite?: boolean
           created_at?: string
         }
+        Relationships: []
       }
       admins: {
         Row: {
@@ -104,14 +106,51 @@ export interface Database {
           email?: string
           created_at?: string
         }
+        Relationships: []
+      }
+      gallery_tokens: {
+        Row: {
+          id: string
+          token: string
+          event_id: string
+          label: string | null
+          show_messages: boolean
+          expires_at: string | null
+          created_at: string
+          created_by: string
+        }
+        Insert: {
+          id?: string
+          token?: string
+          event_id: string
+          label?: string | null
+          show_messages?: boolean
+          expires_at?: string | null
+          created_at?: string
+          created_by: string
+        }
+        Update: {
+          id?: string
+          token?: string
+          event_id?: string
+          label?: string | null
+          show_messages?: boolean
+          expires_at?: string | null
+          created_at?: string
+          created_by?: string
+        }
+        Relationships: []
       }
     }
+    Views: Record<string, never>
     Functions: {
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
     }
+    Enums: Record<string, never>
+    CompositeTypes: Record<string, never>
   }
 }
 
@@ -120,8 +159,3 @@ export type PhotoInsert = Database['public']['Tables']['photos']['Insert']
 export type PhotoUpdate = Database['public']['Tables']['photos']['Update']
 export type Event = Database['public']['Tables']['events']['Row']
 export type Admin = Database['public']['Tables']['admins']['Row']
-
-export interface PhotoWithUrls extends Photo {
-  thumbnailUrl: string
-  originalUrl: string
-}

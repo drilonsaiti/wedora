@@ -5,10 +5,10 @@ import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { photoUpdateSchema } from '@/schemas'
 import { PhotoUpdate } from '@/types/database'
-import {hidden} from "next/dist/lib/picocolors";
+
 
 async function requireAdmin() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -39,14 +39,18 @@ export async function updatePhotoAction(
     const { supabase } = await requireAdmin()
 
     const { approved, hidden, favourite } = parsed.data
+    const payload: PhotoUpdate = {}
+
+    if (approved !== undefined) payload.approved = approved
+    if (hidden !== undefined) payload.hidden = hidden
+    if (favourite !== undefined) payload.favourite = favourite
+
+
     const { error } = await supabase
-      .from('photos')
-      .update({
-        ...(approved !== undefined && { approved }),
-        ...(hidden !== undefined && { hidden }),
-        ...(favourite !== undefined && { favourite }),
-      })
-      .eq('id', id)
+        .from('photos')
+        // @ts-ignore
+        .update(payload)
+        .eq('id', id)
 
     if (error) return { success: false, error: error.message }
 
@@ -58,18 +62,23 @@ export async function updatePhotoAction(
 }
 
 export async function deletePhotoAction(
-  id: string
+    id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const { supabase } = await requireAdmin()
 
-    const { data: photo, error: fetchError } = await supabase
-      .from('photos')
-      .select('original_path, thumbnail_path')
-      .eq('id', id)
-      .single()
+    const result = await supabase
+        .from('photos')
+        .select('original_path, thumbnail_path')
+        .eq('id', id)
+        .single()
 
-    if (fetchError || !photo) {
+    const photo = result.data as {
+      original_path: string
+      thumbnail_path: string
+    } | null
+
+    if (result.error || !photo) {
       return { success: false, error: 'Photo not found' }
     }
 
@@ -77,9 +86,9 @@ export async function deletePhotoAction(
     await supabase.storage.from('thumbnails').remove([photo.thumbnail_path])
 
     const { error: dbError } = await supabase
-      .from('photos')
-      .delete()
-      .eq('id', id)
+        .from('photos')
+        .delete()
+        .eq('id', id)
 
     if (dbError) return { success: false, error: dbError.message }
 
@@ -111,34 +120,43 @@ export async function getSignedUrlAction(
 
 // Returns signed URLs for all visible photos — used by gallery token creation
 export async function getBatchSignedUrlsAction(
-  photoIds: string[]
+    photoIds: string[]
 ): Promise<{ urls: Record<string, { thumb: string; original: string }>; error?: string }> {
   try {
     await requireAdmin()
     const supabase = createServiceClient()
 
-    const { data: photos, error } = await supabase
-      .from('photos')
-      .select('id, original_path, thumbnail_path')
-      .in('id', photoIds)
+    const result = await supabase
+        .from('photos')
+        .select('id, original_path, thumbnail_path')
+        .in('id', photoIds)
 
-    if (error || !photos) return { urls: {}, error: error?.message }
+    const photos = result.data as Array<{
+      id: string
+      original_path: string
+      thumbnail_path: string
+    }> | null
+
+    if (result.error || !photos) {
+      return { urls: {}, error: result.error?.message }
+    }
 
     const urls: Record<string, { thumb: string; original: string }> = {}
 
     await Promise.all(
-      photos.map(async (p) => {
-        const [thumbRes, origRes] = await Promise.all([
-          supabase.storage.from('thumbnails').createSignedUrl(p.thumbnail_path, 3600),
-          supabase.storage.from('photos').createSignedUrl(p.original_path, 3600),
-        ])
-        if (thumbRes.data && origRes.data) {
-          urls[p.id] = {
-            thumb: thumbRes.data.signedUrl,
-            original: origRes.data.signedUrl,
+        photos.map(async (p) => {
+          const [thumbRes, origRes] = await Promise.all([
+            supabase.storage.from('thumbnails').createSignedUrl(p.thumbnail_path, 3600),
+            supabase.storage.from('photos').createSignedUrl(p.original_path, 3600),
+          ])
+
+          if (thumbRes.data && origRes.data) {
+            urls[p.id] = {
+              thumb: thumbRes.data.signedUrl,
+              original: origRes.data.signedUrl,
+            }
           }
-        }
-      })
+        })
     )
 
     return { urls }
@@ -191,30 +209,37 @@ export interface GalleryTokenOptions {
 }
 
 export async function createGalleryTokenAction(
-  opts: GalleryTokenOptions
+    opts: GalleryTokenOptions
 ): Promise<{ token?: string; url?: string; error?: string }> {
   try {
     const { user, supabase } = await requireAdmin()
 
     const expiresAt = opts.expiresInDays
-      ? new Date(Date.now() + opts.expiresInDays * 86_400_000).toISOString()
-      : null
+        ? new Date(Date.now() + opts.expiresInDays * 86_400_000).toISOString()
+        : null
 
-    const { data, error } = await supabase
-      .from('gallery_tokens')
-      .insert({
-        event_id: opts.eventId,
-        label: opts.label ?? null,
-        show_messages: opts.showMessages ?? true,
-        expires_at: expiresAt,
-        created_by: user.id,
-      })
-      .select('token')
-      .single()
+    const payload = {
+      event_id: opts.eventId,
+      label: opts.label ?? null,
+      show_messages: opts.showMessages ?? true,
+      expires_at: expiresAt,
+      created_by: user.id,
+    }
 
-    if (error || !data) return { error: error?.message ?? 'Failed to create token' }
+    const result = await (supabase.from('gallery_tokens') as any)
+        .insert(payload)
+        .select('token')
+        .single()
+
+    const data = result.data as { token: string } | null
+    const error = result.error as { message: string } | null
+
+    if (error || !data) {
+      return { error: error?.message ?? 'Failed to create token' }
+    }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+
     return {
       token: data.token,
       url: `${appUrl}/gallery/${data.token}`,
@@ -261,7 +286,7 @@ export async function deleteGalleryTokenAction(
 }
 
 export async function signOutAction() {
-  const supabase = createClient()
+  const supabase = await createClient()
   await supabase.auth.signOut()
   redirect('/admin/login')
 }

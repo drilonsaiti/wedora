@@ -5,45 +5,50 @@ import { AdminDashboard } from '@/components/admin/dashboard'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminPhotosPage({
-  searchParams,
-}: {
-  searchParams: { filter?: string }
-}) {
-  const supabase = createClient()
+type Props = {
+  searchParams: Promise<{
+    filter?: string
+  }>
+}
+
+export default async function AdminPhotosPage({ searchParams }: Props) {
+  const supabase = await createClient()
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
   if (!user) redirect('/admin/login')
 
-  const { data: admin } = await supabase
-    .from('admins')
-    .select('id, email')
-    .eq('id', user.id)
-    .single()
+  const result = await supabase
+      .from('admins')
+      .select('id, email')
+      .eq('id', user.id)
+      .single()
+
+  const admin = result.data as { id: string; email: string } | null
 
   if (!admin) redirect('/admin/login')
 
-  const filter = searchParams.filter
+  const { filter } = await searchParams
 
   const filters =
-    filter === 'favourites'
-      ? { favourite: true }
-      : filter === 'hidden'
-        ? { hidden: true }
-        : filter === 'unapproved'
-          ? { approved: false }
-          : undefined
+      filter === 'favourites'
+          ? { favourite: true }
+          : filter === 'hidden'
+              ? { hidden: true }
+              : filter === 'unapproved'
+                  ? { approved: false }
+                  : undefined
 
   const { photos, error } = await getPhotosAction(filters)
 
   return (
-    <AdminDashboard
-      photos={photos}
-      adminEmail={admin.email}
-      error={error}
-      activeFilter={filter}
-    />
+      <AdminDashboard
+          photos={photos}
+          adminEmail={admin.email}
+          error={error}
+          activeFilter={filter}
+      />
   )
 }
