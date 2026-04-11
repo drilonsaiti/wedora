@@ -6,7 +6,12 @@ export default function UploadPage() {
   return (
     <main className="min-h-screen flex flex-col">
       <header className="px-6 pt-8 pb-4 text-center">
-        <p className="font-sans text-xs tracking-[0.25em] uppercase text-muted-foreground">
+        <p className="text-sm text-muted-foreground mt-3 font-sans">
+  Disa telefona e shfaqin foton si në pasqyrë gjatë kapjes.
+  Mos u shqetësoni — kujtimi juaj do të ruhet dhe shfaqet siç duhet 🤍
+</p>
+
+<p className="font-sans text-xs tracking-[0.25em] uppercase text-muted-foreground">
             Ndaj kujtimin tënd
         </p>
         <h1 className="font-serif text-3xl font-light text-[hsl(var(--dark))] mt-1">
