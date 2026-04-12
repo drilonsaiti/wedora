@@ -17,12 +17,12 @@ export default function UploadPage() {
         </h1>
  
         <div className="h-px w-16 bg-[hsl(var(--gold))] opacity-60 mx-auto mt-4" />
-     <p className="text-sm text-muted-foreground mt-3 font-sans">
-  Disa telefona e shfaqin foton si në pasqyrë gjatë kapjes.
-  Mos u shqetësoni — kujtimi juaj do të ruhet dhe shfaqet siç duhet 🤍
-</p>
+          <p className="text-sm text-muted-foreground mt-3 font-sans">
+              Nëse foto nuk duket siç duhet, përdorni butonin “Rrotullo” për ta rregulluar 🤍
+          </p>
 
- </header>
+
+      </header>
 
       <div className="flex-1 px-6 py-4 max-w-lg mx-auto w-full">
         <UploadForm eventId={eventId} />
