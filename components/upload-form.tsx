@@ -63,19 +63,21 @@ async function bakeFinalImage(
       // 4. Reset for safety
       ctx.restore()
 
-      // Export as JPEG
-      canvas.toBlob(
-          (blob) => {
+      // Export as JPEG - using toDataURL + fetch for MAXIMUM compatibility (fixes the issue on iOS/Android)
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92)
+      fetch(dataUrl)
+          .then((res) => res.blob())
+          .then((blob) => {
             if (blob) {
               const finalFile = new File([blob], 'photo.jpg', { type: 'image/jpeg' })
               resolve(finalFile)
             } else {
-              resolve(originalFile) // fallback (should never happen)
+              resolve(originalFile)
             }
-          },
-          'image/jpeg',
-          0.92
-      )
+          })
+          .catch(() => {
+            resolve(originalFile) // fallback (very rare)
+          })
     }
     img.src = URL.createObjectURL(originalFile)
   })
