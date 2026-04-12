@@ -30,12 +30,11 @@ const filterOptions = [
   { id: 'soft', label: 'E butë', css: 'brightness(110%) contrast(95%) saturate(90%)' },
 ] as const
 
-/** Bake final image with flip + filter + text overlay (using Canvas) */
+/** Bake final image with flip + chosen filter (using Canvas) */
 async function bakeFinalImage(
     originalFile: File,
     isFlipped: boolean,
-    filterCss: string,
-    overlayText: string
+    filterCss: string
 ): Promise<File> {
   return new Promise((resolve) => {
     const img = new Image()
@@ -47,7 +46,7 @@ async function bakeFinalImage(
 
       ctx.save()
 
-      // 1. Horizontal flip (if user tapped the mirror button)
+      // 1. Horizontal flip (if user used the mirror button)
       if (isFlipped) {
         ctx.translate(img.width, 0)
         ctx.scale(-1, 1)
@@ -61,25 +60,8 @@ async function bakeFinalImage(
       // 3. Draw the image (flipped + filtered)
       ctx.drawImage(img, 0, 0, img.width, img.height)
 
-      // 4. Reset transformations & filter for text
+      // 4. Reset for safety
       ctx.restore()
-      ctx.filter = 'none'
-
-      // 5. Draw elegant text overlay (if provided)
-      if (overlayText.trim()) {
-        const fontSize = Math.max(28, Math.min(52, img.width / 14))
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.65)'
-        ctx.shadowBlur = 10
-        ctx.shadowOffsetY = 4
-        ctx.fillStyle = '#ffffff'
-        ctx.font = `700 ${fontSize}px Georgia, serif`
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'bottom'
-
-        const x = img.width / 2
-        const y = img.height - 45
-        ctx.fillText(overlayText.trim(), x, y)
-      }
 
       // Export as JPEG
       canvas.toBlob(
@@ -88,7 +70,7 @@ async function bakeFinalImage(
               const finalFile = new File([blob], 'photo.jpg', { type: 'image/jpeg' })
               resolve(finalFile)
             } else {
-              resolve(originalFile)
+              resolve(originalFile) // fallback (should never happen)
             }
           },
           'image/jpeg',
@@ -105,7 +87,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
   const [preview, setPreview] = useState<string | null>(null)
   const [isFlipped, setIsFlipped] = useState(false)
   const [selectedFilter, setSelectedFilter] = useState<string>('none')
-  const [textOnImage, setTextOnImage] = useState('')
   const [uploadState, setUploadState] = useState<UploadState>('idle')
   const [progress, setProgress] = useState(0)
   const [fileError, setFileError] = useState<string | null>(null)
@@ -125,7 +106,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
     setFileError(null)
     setIsFlipped(false)
     setSelectedFilter('none')
-    setTextOnImage('')
 
     const result = fileSchema.safeParse(file)
     if (!result.success) {
@@ -184,7 +164,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
     setPreview(null)
     setIsFlipped(false)
     setSelectedFilter('none')
-    setTextOnImage('')
     setFileError(null)
     if (cameraRef.current) cameraRef.current.value = ''
     if (galleryRef.current) galleryRef.current.value = ''
@@ -207,7 +186,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
     try {
       let finalFile = selectedFile
 
-      // Extra compression if needed
+      // Extra compression if still too big
       if (finalFile.size > 3 * 1024 * 1024) {
         finalFile = await imageCompression(finalFile, {
           maxSizeMB: 3,
@@ -219,9 +198,9 @@ export function UploadForm({ eventId }: UploadFormProps) {
         })
       }
 
-      // Bake everything: flip + filter + text overlay
+      // Bake flip + filter permanently into the image
       setProgress(35)
-      finalFile = await bakeFinalImage(finalFile, isFlipped, selectedFilter, textOnImage)
+      finalFile = await bakeFinalImage(finalFile, isFlipped, selectedFilter)
 
       setProgress(40)
       setUploadState('uploading')
@@ -308,16 +287,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
                     }}
                 />
 
-                {/* Live text overlay on preview */}
-                {textOnImage && (
-                    <div
-                        className="absolute bottom-12 left-1/2 -translate-x-1/2 px-8 py-3 text-white text-2xl font-medium tracking-wide text-center drop-shadow-2xl pointer-events-none max-w-[85%]"
-                        style={{ fontFamily: 'Georgia, serif' }}
-                    >
-                      {textOnImage}
-                    </div>
-                )}
-
                 {!isLoading && (
                     <>
                       {/* Clear button */}
@@ -337,7 +306,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
                       >
                         <ArrowLeftRight className="w-4 h-4" />
                         {isFlipped ? 'Ktheje normal' : 'Rrotullo'}
-
                       </button>
                     </>
                 )}
@@ -349,12 +317,11 @@ export function UploadForm({ eventId }: UploadFormProps) {
                 )}
               </div>
 
-              {/* === EDIT SECTION: Filters + Text on Image === */}
+              {/* === EDIT SECTION: Filters === */}
               <div className="mt-5 space-y-5">
-                {/* Filters */}
                 <div>
                   <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2 font-sans">
-                    Filters
+                    Filtrat
                   </p>
                   <div className="flex gap-2 overflow-x-auto pb-3 snap-x">
                     {filterOptions.map((filter) => (
@@ -401,7 +368,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
             }}
         />
 
-        {/* Optional fields (guest name + message) */}
+        {/* Optional fields */}
         <div className="space-y-4">
           <div>
             <label className="label-wedding">
