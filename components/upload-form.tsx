@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import {
   Camera, Upload, X, User, MessageSquare,
-  Loader2, ImageIcon, SwitchCamera,
+  Loader2, ImageIcon, SwitchCamera, ZoomIn, ZoomOut, Zap, ZapOff,
 } from 'lucide-react'
 import imageCompression from 'browser-image-compression'
 import { uploadFormSchema, type UploadFormValues, fileSchema } from '@/schemas'
@@ -17,6 +17,9 @@ import { cn } from '@/lib/utils'
 interface UploadFormProps { eventId: string }
 type UploadState = 'idle' | 'compressing' | 'uploading' | 'done' | 'error'
 type CameraFacing = 'user' | 'environment'
+
+// Back-camera optical zoom steps shown as discrete buttons
+const BACK_ZOOM_STEPS = [1, 2, 3]
 
 export function UploadForm({ eventId }: UploadFormProps) {
   const router = useRouter()
@@ -37,30 +40,42 @@ export function UploadForm({ eventId }: UploadFormProps) {
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false)
   const [flipping, setFlipping] = useState(false)
 
+  // ── Flash state ──
+  const [flashSupported, setFlashSupported] = useState(false)
+  const [flashOn, setFlashOn] = useState(false)
+
+  // ── Zoom state ──
+  const [zoomSupported, setZoomSupported] = useState(false)
+  const [zoomMin, setZoomMin] = useState(1)
+  const [zoomMax, setZoomMax] = useState(1)
+  const [currentZoom, setCurrentZoom] = useState(1)
+  const [backZoomStep, setBackZoomStep] = useState(0)
+
   // ── Capture-confirm state ──
-  // After pressing shutter the user sees a preview and can confirm or retake.
   const [capturedPreview, setCapturedPreview] = useState<string | null>(null)
   const [capturedBlob, setCapturedBlob] = useState<Blob | null>(null)
 
-  // ── Refs — stream and facing kept in refs so callbacks don't go stale ──
+  // ── Refs ──
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const facingRef = useRef<CameraFacing>('user')
   const galleryRef = useRef<HTMLInputElement>(null)
+  const pinchStartDistRef = useRef<number | null>(null)
+  const pinchStartZoomRef = useRef<number>(1)
 
   const { register, handleSubmit, formState: { errors } } = useForm<UploadFormValues>({
     resolver: zodResolver(uploadFormSchema),
   })
 
-  // ── Apply mirror transform via ref — avoids remounting the video element ──
+  // ── Apply mirror transform ──
   const applyMirror = useCallback((isFront: boolean) => {
     if (videoRef.current) {
       videoRef.current.style.transform = isFront ? 'scaleX(-1)' : 'none'
     }
   }, [])
 
-  // ── Detect cameras — called AFTER permission is granted so labels are visible ──
+  // ── Detect cameras (after permission so labels are visible) ──
   const detectCameras = useCallback(async () => {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices()
@@ -68,23 +83,62 @@ export function UploadForm({ eventId }: UploadFormProps) {
     } catch { /* ignore */ }
   }, [])
 
+  // ── Probe track capabilities for flash + zoom ──
+  const probeCapabilities = useCallback((stream: MediaStream) => {
+    const track = stream.getVideoTracks()[0]
+    if (!track) return
+    const caps = track.getCapabilities?.() as any
+    // Flash (torch)
+    setFlashSupported(!!caps?.torch)
+    setFlashOn(false)
+    // Zoom
+    if (caps?.zoom) {
+      setZoomSupported(true)
+      setZoomMin(caps.zoom.min ?? 1)
+      setZoomMax(caps.zoom.max ?? 1)
+    } else {
+      setZoomSupported(false)
+    }
+    setCurrentZoom(1)
+    setBackZoomStep(0)
+  }, [])
+
+  // ── Apply zoom to current track ──
+  const applyZoom = useCallback(async (zoom: number) => {
+    const track = streamRef.current?.getVideoTracks()[0]
+    if (!track) return
+    try {
+      await (track.applyConstraints as any)({ advanced: [{ zoom }] })
+      setCurrentZoom(zoom)
+    } catch { /* device doesn't support zoom via constraints */ }
+  }, [])
+
+  // ── Toggle flash (torch) ──
+  const toggleFlash = useCallback(async () => {
+    const track = streamRef.current?.getVideoTracks()[0]
+    if (!track) return
+    const next = !flashOn
+    try {
+      await (track.applyConstraints as any)({ advanced: [{ torch: next }] })
+      setFlashOn(next)
+    } catch { /* torch unavailable */ }
+  }, [flashOn])
+
   // ── Start stream ──
   const startStream = useCallback(async (facingMode: CameraFacing) => {
     setCameraError(null)
     setCameraReady(false)
+    setFlashSupported(false)
+    setFlashOn(false)
+    setZoomSupported(false)
+    setCurrentZoom(1)
+    setBackZoomStep(0)
 
-    // Stop existing tracks
     streamRef.current?.getTracks().forEach(t => t.stop())
     streamRef.current = null
-
-    // Clear old srcObject so iOS doesn't hold onto the dead stream
-    if (videoRef.current) {
-      videoRef.current.srcObject = null
-    }
+    if (videoRef.current) videoRef.current.srcObject = null
 
     let stream: MediaStream | null = null
-
-    // Three fallback constraint levels
     const constraintSets = [
       { video: { facingMode: { ideal: facingMode }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false },
       { video: { facingMode: facingMode }, audio: false },
@@ -98,16 +152,13 @@ export function UploadForm({ eventId }: UploadFormProps) {
       } catch (err: any) {
         const name = err?.name ?? ''
         if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
-          setCameraError(
-              'Camera access denied. Open your browser settings, allow camera access for this site, then try again.'
-          )
+          setCameraError('Camera access denied. Open your browser settings, allow camera access for this site, then try again.')
           return
         }
         if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
           setCameraError('No camera found on this device.')
           return
         }
-        // OverconstrainedError or NotReadableError — try next fallback
       }
     }
 
@@ -117,9 +168,8 @@ export function UploadForm({ eventId }: UploadFormProps) {
     }
 
     streamRef.current = stream
-
-    // Now that permission is granted, labels are visible — detect camera count
     await detectCameras()
+    probeCapabilities(stream)
 
     const video = videoRef.current
     if (!video) {
@@ -130,63 +180,53 @@ export function UploadForm({ eventId }: UploadFormProps) {
     }
 
     video.srcObject = stream
-
-    // Apply mirror before play so first frame is already correct
     applyMirror(facingMode === 'user')
 
-    // Wait for metadata so dimensions are known (required on iOS)
     await new Promise<void>(resolve => {
-      if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
-        resolve()
-        return
-      }
+      if (video.readyState >= HTMLMediaElement.HAVE_METADATA) { resolve(); return }
       const handler = () => { video.removeEventListener('loadedmetadata', handler); resolve() }
       video.addEventListener('loadedmetadata', handler)
     })
 
-    try {
-      await video.play()
-    } catch {
-      // Some browsers block autoplay — the stream still shows a frame
-    }
-
+    try { await video.play() } catch { /* autoplay blocked */ }
     setCameraReady(true)
-  }, [applyMirror, detectCameras])
+  }, [applyMirror, detectCameras, probeCapabilities])
 
-  // ── Open camera — always opens front camera first ──
+  // ── Open camera ──
   const openCamera = useCallback(async () => {
-    // Reset capture-confirm state
     setCapturedBlob(null)
     setCapturedPreview(null)
     setCameraOpen(true)
     facingRef.current = 'user'
     setFacing('user')
-    // Yield to React so the video element's display:block takes effect before we assign srcObject
     await new Promise(r => setTimeout(r, 80))
     await startStream('user')
   }, [startStream])
 
-  // ── Close camera ──
-  const closeCamera = useCallback(() => {
+  // ── Shared stream teardown helper ──
+  const teardownStream = useCallback(() => {
+    const track = streamRef.current?.getVideoTracks()[0]
+    if (track && flashOn) {
+      try { (track.applyConstraints as any)({ advanced: [{ torch: false }] }) } catch { /* ignore */ }
+    }
     streamRef.current?.getTracks().forEach(t => t.stop())
     streamRef.current = null
-    if (videoRef.current) {
-      videoRef.current.srcObject = null
-      videoRef.current.style.transform = 'none'
-    }
+    if (videoRef.current) { videoRef.current.srcObject = null; videoRef.current.style.transform = 'none' }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flashOn])
+
+  // ── Close camera ──
+  const closeCamera = useCallback(() => {
+    teardownStream()
     setCameraOpen(false)
     setCameraReady(false)
     setCameraError(null)
-    // Also clear any pending capture
+    setFlashOn(false)
+    setFlashSupported(false)
+    setZoomSupported(false)
     setCapturedBlob(null)
-    if (capturedPreview) {
-      URL.revokeObjectURL(capturedPreview)
-      setCapturedPreview(null)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-  // Note: capturedPreview intentionally omitted from deps to avoid stale closure
-  // issues — we only need the latest value at call time which we read directly.
+    setCapturedPreview(prev => { if (prev) URL.revokeObjectURL(prev); return null })
+  }, [teardownStream])
 
   // ── Flip camera ──
   const flipCamera = useCallback(async () => {
@@ -199,12 +239,49 @@ export function UploadForm({ eventId }: UploadFormProps) {
     setFlipping(false)
   }, [flipping, startStream])
 
+  // ── Back-camera discrete zoom steps ──
+  const handleBackZoomStep = useCallback(async (stepIndex: number) => {
+    const level = BACK_ZOOM_STEPS[stepIndex]
+    const clamped = Math.min(Math.max(level, zoomMin), zoomMax)
+    await applyZoom(clamped)
+    setBackZoomStep(stepIndex)
+  }, [applyZoom, zoomMin, zoomMax])
+
+  // ── Front-camera pinch-to-zoom ──
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length !== 2) return
+    const dx = e.touches[0].clientX - e.touches[1].clientX
+    const dy = e.touches[0].clientY - e.touches[1].clientY
+    pinchStartDistRef.current = Math.hypot(dx, dy)
+    pinchStartZoomRef.current = currentZoom
+  }, [currentZoom])
+
+  const handleTouchMove = useCallback(async (e: React.TouchEvent) => {
+    if (e.touches.length !== 2 || pinchStartDistRef.current === null) return
+    const dx = e.touches[0].clientX - e.touches[1].clientX
+    const dy = e.touches[0].clientY - e.touches[1].clientY
+    const dist = Math.hypot(dx, dy)
+    const scale = dist / pinchStartDistRef.current
+    const newZoom = Math.min(Math.max(pinchStartZoomRef.current * scale, zoomMin), zoomMax)
+    await applyZoom(newZoom)
+  }, [applyZoom, zoomMin, zoomMax])
+
+  const handleTouchEnd = useCallback(() => {
+    pinchStartDistRef.current = null
+  }, [])
+
+  // ── Front-camera +/- zoom buttons ──
+  const zoomFrontBy = useCallback(async (delta: number) => {
+    const next = Math.min(Math.max(currentZoom + delta, zoomMin), zoomMax)
+    await applyZoom(next)
+  }, [applyZoom, currentZoom, zoomMin, zoomMax])
+
   // ── Cleanup on unmount ──
   useEffect(() => {
     return () => { streamRef.current?.getTracks().forEach(t => t.stop()) }
   }, [])
 
-  // ── Capture photo — writes to capturedPreview/capturedBlob for confirm screen ──
+  // ── Capture photo ──
   const capturePhoto = useCallback(() => {
     const video = videoRef.current
     const canvas = canvasRef.current
@@ -212,50 +289,43 @@ export function UploadForm({ eventId }: UploadFormProps) {
 
     const w = video.videoWidth || 1280
     const h = video.videoHeight || 720
-
     canvas.width = w
     canvas.height = h
     const ctx = canvas.getContext('2d')!
 
-    // Front camera live preview is CSS-mirrored (looks like a mirror to the user).
-    // On capture, flip horizontally so the SAVED image is NOT mirrored.
+    // Flip canvas for front camera so the saved image is not mirrored
     if (facingRef.current === 'user') {
       ctx.translate(w, 0)
       ctx.scale(-1, 1)
     }
-
     ctx.drawImage(video, 0, 0, w, h)
 
     canvas.toBlob(blob => {
       if (!blob) return
-      // Show confirm screen — do NOT close camera yet
       setCapturedBlob(blob)
       setCapturedPreview(URL.createObjectURL(blob))
     }, 'image/jpeg', 0.92)
   }, [cameraReady])
 
-  // ── Confirm captured photo — accept it and close camera ──
+  // ── Confirm captured photo ──
   const confirmCapture = useCallback(() => {
     if (!capturedBlob || !capturedPreview) return
     const file = new File([capturedBlob], 'photo.jpg', { type: 'image/jpeg' })
     if (preview) URL.revokeObjectURL(preview)
     setSelectedFile(file)
-    setPreview(capturedPreview) // hand off ownership — don't revoke
+    setPreview(capturedPreview) // hand off ownership — do NOT revoke
     setCapturedBlob(null)
     setCapturedPreview(null)
-    // Stop stream and close
-    streamRef.current?.getTracks().forEach(t => t.stop())
-    streamRef.current = null
-    if (videoRef.current) {
-      videoRef.current.srcObject = null
-      videoRef.current.style.transform = 'none'
-    }
+    teardownStream()
     setCameraOpen(false)
     setCameraReady(false)
     setCameraError(null)
-  }, [capturedBlob, capturedPreview, preview])
+    setFlashOn(false)
+    setFlashSupported(false)
+    setZoomSupported(false)
+  }, [capturedBlob, capturedPreview, preview, teardownStream])
 
-  // ── Retake — discard captured blob and go back to live viewfinder ──
+  // ── Retake ──
   const retakePhoto = useCallback(() => {
     if (capturedPreview) URL.revokeObjectURL(capturedPreview)
     setCapturedBlob(null)
@@ -267,7 +337,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
     setFileError(null)
     const result = fileSchema.safeParse(file)
     if (!result.success) { setFileError(result.error.errors[0]?.message ?? 'Invalid file'); return }
-
     try {
       const loadImage = (await import('blueimp-load-image')).default
       const orientation = await new Promise<number>(resolve => {
@@ -329,21 +398,23 @@ export function UploadForm({ eventId }: UploadFormProps) {
   }
 
   const isLoading = uploadState === 'compressing' || uploadState === 'uploading'
+  const isFront = facing === 'user'
 
   return (
       <>
         {/*
         VIDEO IS ALWAYS IN THE DOM — never conditionally rendered.
-        This is the key fix for iOS Safari: assigning video.srcObject to an
-        element that isn't mounted yet silently fails and looks like a
-        permissions error even when permission was granted.
-        We show/hide it with CSS only.
+        iOS Safari silently fails when srcObject is assigned to an unmounted element.
+        Show/hide with CSS only.
       */}
         <video
             ref={videoRef}
             autoPlay
             playsInline
             muted
+            onTouchStart={cameraOpen && !capturedPreview && zoomSupported ? handleTouchStart : undefined}
+            onTouchMove={cameraOpen && !capturedPreview && zoomSupported ? handleTouchMove : undefined}
+            onTouchEnd={cameraOpen && !capturedPreview && zoomSupported ? handleTouchEnd : undefined}
             className={cn(
                 'fixed inset-0 w-full h-full object-cover bg-black z-50',
                 cameraOpen ? 'block' : 'hidden'
@@ -351,55 +422,58 @@ export function UploadForm({ eventId }: UploadFormProps) {
         />
         <canvas ref={canvasRef} className="hidden" />
 
-        {/* ── Camera UI overlay — rendered separately so video stays mounted ── */}
+        {/* ── Camera UI overlay ── */}
         {cameraOpen && (
-            <div className="fixed inset-0 z-[51] flex flex-col">
+            <div className="fixed inset-0 z-[51] pointer-events-none">
 
               {/* ── Error state ── */}
               {cameraError && (
-                  <div className="absolute inset-0 flex items-center justify-center p-6 bg-black/90 z-10">
+                  <div className="absolute inset-0 flex items-center justify-center p-6 bg-black/90 z-10 pointer-events-auto">
                     <div className="bg-card rounded-2xl p-6 text-center max-w-xs w-full">
-                      <p className="text-sm font-sans text-foreground leading-relaxed mb-5">
-                        {cameraError}
-                      </p>
-                      <button onClick={closeCamera} className="btn-primary w-full justify-center">
-                        Go Back
-                      </button>
+                      <p className="text-sm font-sans text-foreground leading-relaxed mb-5">{cameraError}</p>
+                      <button onClick={closeCamera} className="btn-primary w-full justify-center">Go Back</button>
                     </div>
                   </div>
               )}
 
-              {/* ── Loading spinner (shown while stream is starting or flipping) ── */}
+              {/* ── Loading spinner ── */}
               {!cameraReady && !cameraError && !capturedPreview && (
                   <div className="absolute inset-0 flex items-center justify-center z-10">
                     <Loader2 className="w-10 h-10 text-white animate-spin" />
                   </div>
               )}
 
-              {/* ── CONFIRM SCREEN — shown after shutter tap, before accepting ── */}
+              {/* ────────────────────────────────────────────────────
+              CONFIRM SCREEN
+              Uses a true flex column that fills the viewport height
+              so the action bar is ALWAYS visible — no scrolling needed.
+          ──────────────────────────────────────────────────── */}
               {capturedPreview && (
-                  <div className="absolute inset-0 z-20 flex flex-col bg-black">
-                    {/* Preview image — object-contain so full photo is visible */}
+                  <div className="absolute inset-0 z-20 flex flex-col bg-black pointer-events-auto">
+                    {/* Image fills all remaining space above the action bar */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src={capturedPreview}
                         alt="Captured photo preview"
-                        className="flex-1 w-full object-contain"
+                        className="flex-1 min-h-0 w-full object-contain"
                     />
-                    <div className="bg-gradient-to-t from-black/90 to-transparent px-6 pt-12 pb-10 pb-safe">
-                      <div className="flex items-center justify-between max-w-sm mx-auto gap-4">
-                        {/* Retake */}
+                    {/* Action bar — always pinned at bottom, never scrolls out of view */}
+                    <div className="flex-shrink-0 bg-black px-6 pt-4 pb-8 safe-area-bottom">
+                      <div className="flex items-center gap-3 max-w-sm mx-auto">
                         <button
                             onClick={retakePhoto}
-                            className="flex-1 h-12 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm font-medium flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                            className="flex-1 h-14 rounded-full bg-white/20 text-white text-sm font-medium
+                               flex items-center justify-center gap-2
+                               active:scale-95 transition-transform"
                         >
                           <X className="w-4 h-4" />
                           Retake
                         </button>
-                        {/* Use photo */}
                         <button
                             onClick={confirmCapture}
-                            className="flex-1 h-12 rounded-full bg-white text-black text-sm font-medium flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                            className="flex-1 h-14 rounded-full bg-white text-black text-sm font-medium
+                               flex items-center justify-center gap-2
+                               active:scale-95 transition-transform"
                         >
                           <Upload className="w-4 h-4" />
                           Use photo
@@ -409,50 +483,131 @@ export function UploadForm({ eventId }: UploadFormProps) {
                   </div>
               )}
 
-              {/* ── Viewfinder controls — only shown when NOT reviewing a capture ── */}
+              {/* ────────────────────────────────────────────────────
+              VIEWFINDER CONTROLS (hidden during confirm)
+          ──────────────────────────────────────────────────── */}
               {!capturedPreview && (
-                  <div className="absolute bottom-0 inset-x-0 pb-safe">
-                    <div className="bg-gradient-to-t from-black/80 to-transparent px-6 pt-12 pb-10">
-                      <div className="flex items-center justify-between max-w-sm mx-auto">
+                  <>
+                    {/* ── Top bar: flash button (top-right) ── */}
+                    {flashSupported && (
+                        <div className="absolute top-0 inset-x-0 flex justify-end px-5 pt-14 pointer-events-auto">
+                          <button
+                              onClick={toggleFlash}
+                              disabled={!cameraReady}
+                              aria-label={flashOn ? 'Turn flash off' : 'Turn flash on'}
+                              className={cn(
+                                  'w-11 h-11 rounded-full flex items-center justify-center transition-colors disabled:opacity-40',
+                                  flashOn
+                                      ? 'bg-yellow-400 text-black'
+                                      : 'bg-black/40 backdrop-blur-sm text-white'
+                              )}
+                          >
+                            {flashOn
+                                ? <Zap className="w-5 h-5 fill-current" />
+                                : <ZapOff className="w-5 h-5" />
+                            }
+                          </button>
+                        </div>
+                    )}
 
-                        {/* Close */}
-                        <button
-                            onClick={closeCamera}
-                            className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
+                    {/* ── Zoom strip (above shutter row) ── */}
+                    {zoomSupported && (
+                        <div className="absolute bottom-[148px] inset-x-0 flex justify-center pointer-events-auto">
+                          {isFront ? (
+                              /* Front camera: pinch-to-zoom + +/- buttons */
+                              <div className="flex items-center gap-3 bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
+                                <button
+                                    onClick={() => zoomFrontBy(-0.5)}
+                                    disabled={!cameraReady || currentZoom <= zoomMin}
+                                    aria-label="Zoom out"
+                                    className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white disabled:opacity-30 active:scale-95 transition-transform"
+                                >
+                                  <ZoomOut className="w-4 h-4" />
+                                </button>
+                                <span className="text-white text-sm font-semibold min-w-[40px] text-center tabular-nums">
+                        {currentZoom.toFixed(1)}×
+                      </span>
+                                <button
+                                    onClick={() => zoomFrontBy(0.5)}
+                                    disabled={!cameraReady || currentZoom >= zoomMax}
+                                    aria-label="Zoom in"
+                                    className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white disabled:opacity-30 active:scale-95 transition-transform"
+                                >
+                                  <ZoomIn className="w-4 h-4" />
+                                </button>
+                              </div>
+                          ) : (
+                              /* Back camera: discrete 1× 2× 3× steps */
+                              <div className="flex items-center gap-2 bg-black/50 backdrop-blur-sm rounded-full px-3 py-2">
+                                {BACK_ZOOM_STEPS.map((step, i) => {
+                                  // Only render steps the device supports
+                                  if (step > zoomMax) return null
+                                  const isActive = backZoomStep === i
+                                  return (
+                                      <button
+                                          key={step}
+                                          onClick={() => handleBackZoomStep(i)}
+                                          disabled={!cameraReady}
+                                          className={cn(
+                                              'w-11 h-11 rounded-full text-sm font-semibold flex items-center justify-center transition-colors disabled:opacity-30 active:scale-95',
+                                              isActive
+                                                  ? 'bg-yellow-400 text-black'
+                                                  : 'bg-white/20 text-white'
+                                          )}
+                                      >
+                                        {step}×
+                                      </button>
+                                  )
+                                })}
+                              </div>
+                          )}
+                        </div>
+                    )}
 
-                        {/* Shutter */}
-                        <button
-                            onClick={capturePhoto}
-                            disabled={!cameraReady}
-                            className="w-20 h-20 rounded-full bg-white flex items-center justify-center
-                               active:scale-95 transition-transform disabled:opacity-40
-                               ring-4 ring-white/40"
-                        >
-                          <div className="w-16 h-16 rounded-full border-4 border-black bg-white" />
-                        </button>
+                    {/* ── Bottom row: close | shutter | flip ── */}
+                    <div className="absolute bottom-0 inset-x-0 pointer-events-auto">
+                      <div className="bg-gradient-to-t from-black/80 to-transparent px-6 pt-16 pb-10">
+                        <div className="flex items-center justify-between max-w-sm mx-auto">
 
-                        {/* Flip — only rendered when ≥2 cameras detected after permission */}
-                        {hasMultipleCameras ? (
-                            <button
-                                onClick={flipCamera}
-                                disabled={!cameraReady || flipping}
-                                className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white disabled:opacity-40"
-                            >
-                              {flipping
-                                  ? <Loader2 className="w-5 h-5 animate-spin" />
-                                  : <SwitchCamera className="w-5 h-5" />
-                              }
-                            </button>
-                        ) : (
-                            <div className="w-12" /> // spacer to keep shutter centred
-                        )}
+                          {/* Close */}
+                          <button
+                              onClick={closeCamera}
+                              className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 transition-transform"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
 
+                          {/* Shutter */}
+                          <button
+                              onClick={capturePhoto}
+                              disabled={!cameraReady}
+                              className="w-20 h-20 rounded-full bg-white flex items-center justify-center
+                                 active:scale-95 transition-transform disabled:opacity-40
+                                 ring-4 ring-white/40"
+                          >
+                            <div className="w-16 h-16 rounded-full border-4 border-black bg-white" />
+                          </button>
+
+                          {/* Flip — only shown when ≥2 cameras detected */}
+                          {hasMultipleCameras ? (
+                              <button
+                                  onClick={flipCamera}
+                                  disabled={!cameraReady || flipping}
+                                  className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white disabled:opacity-40 active:scale-95 transition-transform"
+                              >
+                                {flipping
+                                    ? <Loader2 className="w-5 h-5 animate-spin" />
+                                    : <SwitchCamera className="w-5 h-5" />
+                                }
+                              </button>
+                          ) : (
+                              <div className="w-12" />
+                          )}
+
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </>
               )}
 
             </div>
