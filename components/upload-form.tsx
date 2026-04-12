@@ -6,9 +6,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { Camera, Upload, X, User, MessageSquare, Loader2, ImageIcon } from 'lucide-react'
 import imageCompression from 'browser-image-compression'
+import loadImage from 'blueimp-load-image'
 import { uploadFormSchema, type UploadFormValues, fileSchema } from '@/schemas'
 import { uploadPhotoAction } from '@/actions/upload'
-import { normalizeOrientation } from '@/lib/normalize-orientation'
 import { getOrCreateSessionId, formatBytes } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 
@@ -17,6 +17,24 @@ interface UploadFormProps {
 }
 
 type UploadState = 'idle' | 'compressing' | 'uploading' | 'done' | 'error'
+
+/**
+ * Reads the EXIF orientation from a file using blueimp-load-image,
+ * which correctly parses all 8 EXIF orientation values including
+ * mirrored ones (2, 4, 5, 7) that affect front-camera selfies.
+ * Returns 1 (normal) if no EXIF data is found.
+ */
+async function getExifOrientation(file: File): Promise<number> {
+  return new Promise((resolve) => {
+    loadImage.parseMetaData(file, (data) => {
+      if (data.exif) {
+        resolve(data.exif.get('Orientation') as number || 1)
+      } else {
+        resolve(1)
+      }
+    })
+  })
+}
 
 export function UploadForm({ eventId }: UploadFormProps) {
   const router = useRouter()
@@ -46,14 +64,27 @@ export function UploadForm({ eventId }: UploadFormProps) {
       return
     }
 
-    // Bake EXIF orientation into pixels so the image looks correct
-    // in the preview, after compression, and after server processing.
-    // Falls back to original file if anything goes wrong.
-    const normalized = await normalizeOrientation(file)
+    const orientation = await getExifOrientation(file)
 
-    setSelectedFile(normalized)
-    const url = URL.createObjectURL(normalized)
-    setPreview(url)
+    try {
+      const corrected = await imageCompression(file, {
+        maxSizeMB: 3,
+        maxWidthOrHeight: 2048,
+        useWebWorker: true,
+        fileType: 'image/jpeg',
+        initialQuality: 0.92,
+        exifOrientation: orientation,
+      })
+
+      setSelectedFile(corrected)
+      const url = URL.createObjectURL(corrected)
+      setPreview(url)
+    } catch {
+      // Fallback: use the raw file if compression fails
+      setSelectedFile(file)
+      const url = URL.createObjectURL(file)
+      setPreview(url)
+    }
   }, [])
 
   const clearFile = useCallback(() => {
@@ -76,21 +107,24 @@ export function UploadForm({ eventId }: UploadFormProps) {
     setProgress(10)
 
     try {
-      // File is already orientation-normalized — compress it
-      const compressed = await imageCompression(selectedFile, {
-        maxSizeMB: 3,
-        maxWidthOrHeight: 2048,
-        useWebWorker: true,
-        fileType: 'image/jpeg',
-        initialQuality: 0.85,
-      })
+      let finalFile = selectedFile
+      if (selectedFile.size > 3 * 1024 * 1024) {
+        finalFile = await imageCompression(selectedFile, {
+          maxSizeMB: 3,
+          maxWidthOrHeight: 2048,
+          useWebWorker: true,
+          fileType: 'image/jpeg',
+          initialQuality: 0.85,
+          exifOrientation: 1,
+        })
+      }
 
       setProgress(40)
       setUploadState('uploading')
 
       const sessionId = getOrCreateSessionId()
       const fd = new FormData()
-      fd.append('file', compressed, 'photo.jpg')
+      fd.append('file', finalFile, 'photo.jpg')
       fd.append('eventId', eventId)
       fd.append('sessionId', sessionId)
       if (values.guestName) fd.append('guestName', values.guestName)
@@ -99,7 +133,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
       setProgress(60)
 
       const result = await uploadPhotoAction(fd)
-
       setProgress(100)
 
       if (!result.success) {

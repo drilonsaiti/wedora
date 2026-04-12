@@ -16,6 +16,7 @@
     "@radix-ui/react-toast": "^1.2.2",
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.45.4",
+    "blueimp-load-image": "^5.16.0",
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -32,6 +33,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/blueimp-load-image": "^5.16.6",
     "@types/node": "^20.17.6",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
