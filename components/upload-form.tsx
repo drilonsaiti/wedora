@@ -4,7 +4,7 @@ import { useState, useRef, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
-import { Camera, Upload, X, User, MessageSquare, Loader2, ImageIcon } from 'lucide-react'
+import { Camera, Upload, X, User, MessageSquare, Loader2, ImageIcon, ArrowLeftRight } from 'lucide-react'
 import imageCompression from 'browser-image-compression'
 import loadImage from 'blueimp-load-image'
 import { uploadFormSchema, type UploadFormValues, fileSchema } from '@/schemas'
@@ -18,11 +18,40 @@ interface UploadFormProps {
 
 type UploadState = 'idle' | 'compressing' | 'uploading' | 'done' | 'error'
 
+/** Helper: permanently flip image horizontally using canvas (fixes baked-in mirror from front camera) */
+async function applyHorizontalFlip(file: File): Promise<File> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width
+      canvas.height = img.height
+      const ctx = canvas.getContext('2d')!
+
+      // Flip horizontally
+      ctx.translate(img.width, 0)
+      ctx.scale(-1, 1)
+      ctx.drawImage(img, 0, 0)
+
+      canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const flippedFile = new File([blob], 'photo.jpg', { type: 'image/jpeg' })
+              resolve(flippedFile)
+            } else {
+              resolve(file) // fallback
+            }
+          },
+          'image/jpeg',
+          0.92
+      )
+    }
+    img.src = URL.createObjectURL(file)
+  })
+}
+
 /**
- * Reads the EXIF orientation from a file using blueimp-load-image,
- * which correctly parses all 8 EXIF orientation values including
- * mirrored ones (2, 4, 5, 7) that affect front-camera selfies.
- * Returns 1 (normal) if no EXIF data is found.
+ * Reads the EXIF orientation from a file using blueimp-load-image
  */
 async function getExifOrientation(file: File): Promise<number> {
   return new Promise((resolve) => {
@@ -40,6 +69,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
   const router = useRouter()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
+  const [isFlipped, setIsFlipped] = useState(false)
   const [uploadState, setUploadState] = useState<UploadState>('idle')
   const [progress, setProgress] = useState(0)
   const [fileError, setFileError] = useState<string | null>(null)
@@ -57,6 +87,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
 
   const handleFileSelect = useCallback(async (file: File) => {
     setFileError(null)
+    setIsFlipped(false) // reset flip on new photo
 
     const result = fileSchema.safeParse(file)
     if (!result.success) {
@@ -65,7 +96,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
     }
 
     try {
-      // 1. Use blueimp-load-image to apply EXIF orientation (including mirrors for front-camera selfies)
+      // 1. Blueimp first → handles all classic EXIF orientations
       const orientedBlob = await new Promise<Blob>((resolve, reject) => {
         loadImage(
             file,
@@ -80,12 +111,12 @@ export function UploadForm({ eventId }: UploadFormProps) {
                     else reject(new Error('Failed to create blob from canvas'))
                   },
                   'image/jpeg',
-                  0.92 // initial quality
+                  0.92
               )
             },
             {
-              orientation: true,   // ← automatically reads EXIF and applies correct rotation + mirror
-              canvas: true,        // forces canvas output so we can control the result
+              orientation: true,
+              canvas: true,
               maxWidth: 2048,
               maxHeight: 2048,
             }
@@ -94,22 +125,21 @@ export function UploadForm({ eventId }: UploadFormProps) {
 
       const orientedFile = new File([orientedBlob], 'photo.jpg', { type: 'image/jpeg' })
 
-      // 2. Now compress the already-oriented file (no need to pass exifOrientation again)
+      // 2. Compress the already-oriented file
       const corrected = await imageCompression(orientedFile, {
         maxSizeMB: 3,
         maxWidthOrHeight: 2048,
         useWebWorker: true,
         fileType: 'image/jpeg',
         initialQuality: 0.92,
-        exifOrientation: 1, // already baked in by blueimp
+        exifOrientation: 1,
       })
 
       setSelectedFile(corrected)
       const url = URL.createObjectURL(corrected)
       setPreview(url)
-    } catch (err) {
-      console.error('Orientation correction failed, using fallback', err)
-      // Fallback: raw file
+    } catch {
+      // Fallback: use the raw file
       setSelectedFile(file)
       const url = URL.createObjectURL(file)
       setPreview(url)
@@ -120,10 +150,15 @@ export function UploadForm({ eventId }: UploadFormProps) {
     if (preview) URL.revokeObjectURL(preview)
     setSelectedFile(null)
     setPreview(null)
+    setIsFlipped(false)
     setFileError(null)
     if (cameraRef.current) cameraRef.current.value = ''
     if (galleryRef.current) galleryRef.current.value = ''
   }, [preview])
+
+  const toggleFlip = useCallback(() => {
+    setIsFlipped((prev) => !prev)
+  }, [])
 
   const onSubmit = async (values: UploadFormValues) => {
     if (!selectedFile) {
@@ -137,16 +172,22 @@ export function UploadForm({ eventId }: UploadFormProps) {
 
     try {
       let finalFile = selectedFile
-      if (selectedFile.size > 3 * 1024 * 1024) {
-        finalFile = await imageCompression(selectedFile, {
+
+      // Extra compression if still too big
+      if (finalFile.size > 3 * 1024 * 1024) {
+        finalFile = await imageCompression(finalFile, {
           maxSizeMB: 3,
           maxWidthOrHeight: 2048,
           useWebWorker: true,
           fileType: 'image/jpeg',
           initialQuality: 0.85,
-          // orientation is already baked in — pass 1 (no-op)
           exifOrientation: 1,
         })
+      }
+
+      // Apply horizontal flip if user toggled the unmirror button
+      if (isFlipped) {
+        finalFile = await applyHorizontalFlip(finalFile)
       }
 
       setProgress(40)
@@ -226,17 +267,33 @@ export function UploadForm({ eventId }: UploadFormProps) {
               <img
                   src={preview!}
                   alt="Preview"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform"
+                  style={{ transform: isFlipped ? 'scaleX(-1)' : 'none' }}
               />
+
               {!isLoading && (
-                  <button
-                      type="button"
-                      onClick={clearFile}
-                      className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                  <>
+                    {/* Clear button */}
+                    <button
+                        type="button"
+                        onClick={clearFile}
+                        className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+
+                    {/* Flip / Unmirror button */}
+                    <button
+                        type="button"
+                        onClick={toggleFlip}
+                        className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 hover:bg-black/80 text-white text-xs px-3 h-8 rounded-full font-sans transition-colors"
+                    >
+                      <ArrowLeftRight className="w-4 h-4" />
+                      {isFlipped ? 'Unmirror' : 'Mirror / Flip'}
+                    </button>
+                  </>
               )}
+
               {selectedFile && (
                   <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full font-sans">
                     {formatBytes(selectedFile.size)}
