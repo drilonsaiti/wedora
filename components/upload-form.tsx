@@ -8,6 +8,7 @@ import { Camera, Upload, X, User, MessageSquare, Loader2, ImageIcon } from 'luci
 import imageCompression from 'browser-image-compression'
 import { uploadFormSchema, type UploadFormValues, fileSchema } from '@/schemas'
 import { uploadPhotoAction } from '@/actions/upload'
+import { normalizeOrientation } from '@/lib/normalize-orientation'
 import { getOrCreateSessionId, formatBytes } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 
@@ -25,7 +26,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
   const [progress, setProgress] = useState(0)
   const [fileError, setFileError] = useState<string | null>(null)
   const [serverError, setServerError] = useState<string | null>(null)
-  const [isFrontCamera, setIsFrontCamera] = useState(false)
   const cameraRef = useRef<HTMLInputElement>(null)
   const galleryRef = useRef<HTMLInputElement>(null)
 
@@ -37,7 +37,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
     resolver: zodResolver(uploadFormSchema),
   })
 
-  const handleFileSelect = useCallback((file: File, fromFrontCamera = false) => {
+  const handleFileSelect = useCallback(async (file: File) => {
     setFileError(null)
 
     const result = fileSchema.safeParse(file)
@@ -46,10 +46,13 @@ export function UploadForm({ eventId }: UploadFormProps) {
       return
     }
 
-    setSelectedFile(file)
-    setIsFrontCamera(fromFrontCamera)
+    // Bake EXIF orientation into pixels so the image looks correct
+    // in the preview, after compression, and after server processing.
+    // Falls back to original file if anything goes wrong.
+    const normalized = await normalizeOrientation(file)
 
-    const url = URL.createObjectURL(file)
+    setSelectedFile(normalized)
+    const url = URL.createObjectURL(normalized)
     setPreview(url)
   }, [])
 
@@ -58,7 +61,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
     setSelectedFile(null)
     setPreview(null)
     setFileError(null)
-    setIsFrontCamera(false)
     if (cameraRef.current) cameraRef.current.value = ''
     if (galleryRef.current) galleryRef.current.value = ''
   }, [preview])
@@ -74,6 +76,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
     setProgress(10)
 
     try {
+      // File is already orientation-normalized — compress it
       const compressed = await imageCompression(selectedFile, {
         maxSizeMB: 3,
         maxWidthOrHeight: 2048,
@@ -130,7 +133,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
                 </p>
 
                 <div className="grid grid-cols-2 gap-3">
-                  {/* Front camera */}
                   <button
                       type="button"
                       onClick={() => cameraRef.current?.click()}
@@ -140,7 +142,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
                     <span className="font-sans text-xs font-medium">Camera</span>
                   </button>
 
-                  {/* Gallery */}
                   <button
                       type="button"
                       onClick={() => galleryRef.current?.click()}
@@ -162,14 +163,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
               <img
                   src={preview!}
                   alt="Preview"
-                  className={cn(
-                      'w-full h-full object-cover',
-                      // Mirror the preview ONLY when it came from the front camera.
-                      // This makes the preview look natural to the user.
-                      // The actual file bytes are NOT modified — Sharp handles
-                      // EXIF orientation server-side so the saved image is correct.
-                      isFrontCamera && '[transform:scaleX(-1)]'
-                  )}
+                  className="w-full h-full object-cover"
               />
               {!isLoading && (
                   <button
@@ -188,22 +182,16 @@ export function UploadForm({ eventId }: UploadFormProps) {
             </div>
         )}
 
-        {/*
-        Two separate hidden inputs:
-        - cameraRef: capture="user" → front camera (selfie). We flag isFrontCamera=true
-          so the preview is CSS-mirrored to look natural. The file itself is untouched.
-        - galleryRef: no capture → gallery picker or OS camera chooser.
-          isFrontCamera stays false → no mirror applied anywhere.
-      */}
+        {/* Hidden file inputs */}
         <input
             ref={cameraRef}
             type="file"
             accept="image/*"
-            capture="user"
+            capture="environment"
             className="hidden"
             onChange={(e) => {
               const f = e.target.files?.[0]
-              if (f) handleFileSelect(f, true)
+              if (f) handleFileSelect(f)
             }}
         />
         <input
@@ -213,7 +201,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
             className="hidden"
             onChange={(e) => {
               const f = e.target.files?.[0]
-              if (f) handleFileSelect(f, false)
+              if (f) handleFileSelect(f)
             }}
         />
 
