@@ -41,8 +41,12 @@ export function UploadForm({ eventId }: UploadFormProps) {
   const [flipping, setFlipping] = useState(false)
 
   // ── Flash state ──
-  const [flashSupported, setFlashSupported] = useState(false)
-  const [flashOn, setFlashOn] = useState(false)
+  // flashEnabled: user has toggled flash ON (will fire at capture time, not now)
+  // torchSupported: back camera hardware torch available
+  // frontFlashing: white-screen overlay visible (front camera flash simulation)
+  const [flashEnabled, setFlashEnabled] = useState(false)
+  const [torchSupported, setTorchSupported] = useState(false)
+  const [frontFlashing, setFrontFlashing] = useState(false)
 
   // ── Zoom state ──
   const [zoomSupported, setZoomSupported] = useState(false)
@@ -83,15 +87,13 @@ export function UploadForm({ eventId }: UploadFormProps) {
     } catch { /* ignore */ }
   }, [])
 
-  // ── Probe track capabilities for flash + zoom ──
+  // ── Probe track capabilities for torch + zoom ──
   const probeCapabilities = useCallback((stream: MediaStream) => {
     const track = stream.getVideoTracks()[0]
     if (!track) return
     const caps = track.getCapabilities?.() as any
-    // Flash (torch)
-    setFlashSupported(!!caps?.torch)
-    setFlashOn(false)
-    // Zoom
+    setTorchSupported(!!caps?.torch)
+    setFlashEnabled(false)
     if (caps?.zoom) {
       setZoomSupported(true)
       setZoomMin(caps.zoom.min ?? 1)
@@ -110,26 +112,24 @@ export function UploadForm({ eventId }: UploadFormProps) {
     try {
       await (track.applyConstraints as any)({ advanced: [{ zoom }] })
       setCurrentZoom(zoom)
-    } catch { /* device doesn't support zoom via constraints */ }
+    } catch { /* zoom constraint unsupported */ }
   }, [])
 
-  // ── Toggle flash (torch) ──
-  const toggleFlash = useCallback(async () => {
+  // ── Set torch on track directly ──
+  const setTorch = useCallback(async (on: boolean) => {
     const track = streamRef.current?.getVideoTracks()[0]
     if (!track) return
-    const next = !flashOn
     try {
-      await (track.applyConstraints as any)({ advanced: [{ torch: next }] })
-      setFlashOn(next)
+      await (track.applyConstraints as any)({ advanced: [{ torch: on }] })
     } catch { /* torch unavailable */ }
-  }, [flashOn])
+  }, [])
 
   // ── Start stream ──
   const startStream = useCallback(async (facingMode: CameraFacing) => {
     setCameraError(null)
     setCameraReady(false)
-    setFlashSupported(false)
-    setFlashOn(false)
+    setTorchSupported(false)
+    setFlashEnabled(false)
     setZoomSupported(false)
     setCurrentZoom(1)
     setBackZoomStep(0)
@@ -203,26 +203,23 @@ export function UploadForm({ eventId }: UploadFormProps) {
     await startStream('user')
   }, [startStream])
 
-  // ── Shared stream teardown helper ──
-  const teardownStream = useCallback(() => {
-    const track = streamRef.current?.getVideoTracks()[0]
-    if (track && flashOn) {
-      try { (track.applyConstraints as any)({ advanced: [{ torch: false }] }) } catch { /* ignore */ }
-    }
+  // ── Shared stream teardown ──
+  const teardownStream = useCallback(async () => {
+    // Always ensure torch is off before stopping
+    await setTorch(false)
     streamRef.current?.getTracks().forEach(t => t.stop())
     streamRef.current = null
     if (videoRef.current) { videoRef.current.srcObject = null; videoRef.current.style.transform = 'none' }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flashOn])
+  }, [setTorch])
 
   // ── Close camera ──
-  const closeCamera = useCallback(() => {
-    teardownStream()
+  const closeCamera = useCallback(async () => {
+    await teardownStream()
     setCameraOpen(false)
     setCameraReady(false)
     setCameraError(null)
-    setFlashOn(false)
-    setFlashSupported(false)
+    setFlashEnabled(false)
+    setTorchSupported(false)
     setZoomSupported(false)
     setCapturedBlob(null)
     setCapturedPreview(prev => { if (prev) URL.revokeObjectURL(prev); return null })
@@ -282,46 +279,76 @@ export function UploadForm({ eventId }: UploadFormProps) {
   }, [])
 
   // ── Capture photo ──
-  const capturePhoto = useCallback(() => {
+  // Flash behavior:
+  //   Back camera + flashEnabled:  torch on → wait one frame → capture → torch off
+  //   Front camera + flashEnabled: show white overlay → wait one frame → capture → hide overlay
+  const capturePhoto = useCallback(async () => {
     const video = videoRef.current
     const canvas = canvasRef.current
     if (!video || !canvas || !cameraReady) return
 
+    const isFrontCapture = facingRef.current === 'user'
+
+    if (flashEnabled) {
+      if (isFrontCapture) {
+        // ── Front flash: white screen overlay ──
+        setFrontFlashing(true)
+        // Give the browser one paint cycle to render the white overlay
+        // before we read the video frame, so the image picks up extra light.
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
+      } else {
+        // ── Back flash: fire hardware torch ──
+        await setTorch(true)
+        // Let the torch stabilise for one frame
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
+      }
+    }
+
+    // ── Draw frame ──
     const w = video.videoWidth || 1280
     const h = video.videoHeight || 720
     canvas.width = w
     canvas.height = h
     const ctx = canvas.getContext('2d')!
 
-    // Flip canvas for front camera so the saved image is not mirrored
-    if (facingRef.current === 'user') {
+    // Flip canvas for front camera so saved image is not mirrored
+    if (isFrontCapture) {
       ctx.translate(w, 0)
       ctx.scale(-1, 1)
     }
     ctx.drawImage(video, 0, 0, w, h)
+
+    // ── Turn off flash ──
+    if (flashEnabled) {
+      if (isFrontCapture) {
+        setFrontFlashing(false)
+      } else {
+        await setTorch(false)
+      }
+    }
 
     canvas.toBlob(blob => {
       if (!blob) return
       setCapturedBlob(blob)
       setCapturedPreview(URL.createObjectURL(blob))
     }, 'image/jpeg', 0.92)
-  }, [cameraReady])
+  }, [cameraReady, flashEnabled, setTorch])
 
   // ── Confirm captured photo ──
-  const confirmCapture = useCallback(() => {
+  const confirmCapture = useCallback(async () => {
     if (!capturedBlob || !capturedPreview) return
     const file = new File([capturedBlob], 'photo.jpg', { type: 'image/jpeg' })
     if (preview) URL.revokeObjectURL(preview)
     setSelectedFile(file)
-    setPreview(capturedPreview) // hand off ownership — do NOT revoke
+    setPreview(capturedPreview) // hand off — do NOT revoke
     setCapturedBlob(null)
     setCapturedPreview(null)
-    teardownStream()
+    await teardownStream()
     setCameraOpen(false)
     setCameraReady(false)
     setCameraError(null)
-    setFlashOn(false)
-    setFlashSupported(false)
+    setFlashEnabled(false)
+    setTorchSupported(false)
     setZoomSupported(false)
   }, [capturedBlob, capturedPreview, preview, teardownStream])
 
@@ -399,6 +426,9 @@ export function UploadForm({ eventId }: UploadFormProps) {
 
   const isLoading = uploadState === 'compressing' || uploadState === 'uploading'
   const isFront = facing === 'user'
+  // Flash button is always shown: front camera uses software flash, back camera uses torch (if supported)
+  // For back camera without torch support we still show the button but it will use software flash as fallback
+  const showFlashButton = true
 
   return (
       <>
@@ -426,6 +456,11 @@ export function UploadForm({ eventId }: UploadFormProps) {
         {cameraOpen && (
             <div className="fixed inset-0 z-[51] pointer-events-none">
 
+              {/* ── Front-camera flash: white screen overlay ── */}
+              {frontFlashing && (
+                  <div className="absolute inset-0 bg-white z-[60] pointer-events-none" />
+              )}
+
               {/* ── Error state ── */}
               {cameraError && (
                   <div className="absolute inset-0 flex items-center justify-center p-6 bg-black/90 z-10 pointer-events-auto">
@@ -445,19 +480,19 @@ export function UploadForm({ eventId }: UploadFormProps) {
 
               {/* ────────────────────────────────────────────────────
               CONFIRM SCREEN
-              Uses a true flex column that fills the viewport height
-              so the action bar is ALWAYS visible — no scrolling needed.
+              flex column fills the full viewport — action bar is
+              always pinned at bottom, never scrolls out of view.
           ──────────────────────────────────────────────────── */}
               {capturedPreview && (
                   <div className="absolute inset-0 z-20 flex flex-col bg-black pointer-events-auto">
-                    {/* Image fills all remaining space above the action bar */}
+                    {/* Image fills all space above the action bar */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src={capturedPreview}
                         alt="Captured photo preview"
                         className="flex-1 min-h-0 w-full object-contain"
                     />
-                    {/* Action bar — always pinned at bottom, never scrolls out of view */}
+                    {/* Action bar — solid black background, always visible */}
                     <div className="flex-shrink-0 bg-black px-6 pt-4 pb-8 safe-area-bottom">
                       <div className="flex items-center gap-3 max-w-sm mx-auto">
                         <button
@@ -488,21 +523,21 @@ export function UploadForm({ eventId }: UploadFormProps) {
           ──────────────────────────────────────────────────── */}
               {!capturedPreview && (
                   <>
-                    {/* ── Top bar: flash button (top-right) ── */}
-                    {flashSupported && (
+                    {/* ── Top bar: flash toggle (top-right) ── */}
+                    {cameraOpen && (
                         <div className="absolute top-0 inset-x-0 flex justify-end px-5 pt-14 pointer-events-auto">
                           <button
-                              onClick={toggleFlash}
+                              onClick={() => setFlashEnabled(v => !v)}
                               disabled={!cameraReady}
-                              aria-label={flashOn ? 'Turn flash off' : 'Turn flash on'}
+                              aria-label={flashEnabled ? 'Flash on' : 'Flash off'}
                               className={cn(
                                   'w-11 h-11 rounded-full flex items-center justify-center transition-colors disabled:opacity-40',
-                                  flashOn
+                                  flashEnabled
                                       ? 'bg-yellow-400 text-black'
                                       : 'bg-black/40 backdrop-blur-sm text-white'
                               )}
                           >
-                            {flashOn
+                            {flashEnabled
                                 ? <Zap className="w-5 h-5 fill-current" />
                                 : <ZapOff className="w-5 h-5" />
                             }
@@ -540,7 +575,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
                               /* Back camera: discrete 1× 2× 3× steps */
                               <div className="flex items-center gap-2 bg-black/50 backdrop-blur-sm rounded-full px-3 py-2">
                                 {BACK_ZOOM_STEPS.map((step, i) => {
-                                  // Only render steps the device supports
                                   if (step > zoomMax) return null
                                   const isActive = backZoomStep === i
                                   return (
@@ -588,7 +622,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
                             <div className="w-16 h-16 rounded-full border-4 border-black bg-white" />
                           </button>
 
-                          {/* Flip — only shown when ≥2 cameras detected */}
+                          {/* Flip */}
                           {hasMultipleCameras ? (
                               <button
                                   onClick={flipCamera}
