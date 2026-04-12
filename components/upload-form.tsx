@@ -374,25 +374,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
                     ))}
                   </div>
                 </div>
-
-                {/* Text on image */}
-                <div>
-                  <label className="label-wedding flex items-center gap-1">
-                    <span>Tekst mbi foton (opsionale)</span>
-                  </label>
-                  <input
-                      type="text"
-                      value={textOnImage}
-                      onChange={(e) => setTextOnImage(e.target.value)}
-                      placeholder="p.sh. Dashuri e përjetshme ❤️"
-                      className="input-wedding"
-                      maxLength={60}
-                      disabled={isLoading}
-                  />
-                  <p className="text-[10px] text-muted-foreground mt-1 font-sans">
-                    Teksti do të shtypet bukur në fund të fotos
-                  </p>
-                </div>
               </div>
             </>
         )}
