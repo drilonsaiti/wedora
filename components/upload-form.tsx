@@ -18,7 +18,7 @@ interface UploadFormProps {
 
 type UploadState = 'idle' | 'compressing' | 'uploading' | 'done' | 'error'
 
-/** Filter presets (beautiful for wedding photos) */
+/** Filter presets */
 const filterOptions = [
   { id: 'none', label: 'Normale', css: 'none' },
   { id: 'grayscale', label: 'Bardhë e zi', css: 'grayscale(100%)' },
@@ -30,12 +30,101 @@ const filterOptions = [
   { id: 'soft', label: 'E butë', css: 'brightness(110%) contrast(95%) saturate(90%)' },
 ] as const
 
-/** Bake final image with flip + chosen filter (using Canvas) */
+/** Manual pixel filter – 100% reliable on iOS Safari (bypasses ctx.filter export bugs) */
+function applyPixelFilter(imageData: ImageData, filterCss: string): void {
+  const data = imageData.data
+  const len = data.length
+
+  switch (filterCss) {
+    case 'grayscale(100%)':
+      for (let i = 0; i < len; i += 4) {
+        const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114
+        data[i] = data[i + 1] = data[i + 2] = gray
+      }
+      break
+
+    case 'sepia(85%)':
+      for (let i = 0; i < len; i += 4) {
+        const r = data[i]
+        const g = data[i + 1]
+        const b = data[i + 2]
+        data[i] = Math.min(255, r * 0.393 + g * 0.769 + b * 0.189)
+        data[i + 1] = Math.min(255, r * 0.349 + g * 0.686 + b * 0.168)
+        data[i + 2] = Math.min(255, r * 0.272 + g * 0.534 + b * 0.131)
+      }
+      break
+
+    case 'brightness(108%) contrast(108%) saturate(125%) hue-rotate(8deg)': // warm
+      for (let i = 0; i < len; i += 4) {
+        let r = data[i] * 1.08
+        let g = data[i + 1] * 1.08
+        let b = data[i + 2] * 1.25
+        // simple warm hue shift
+        const temp = r
+        r = r * 1.05 + g * 0.05
+        g = g * 0.95 + b * 0.05
+        b = b * 0.95
+        data[i] = Math.min(255, r)
+        data[i + 1] = Math.min(255, g)
+        data[i + 2] = Math.min(255, b)
+      }
+      break
+
+    case 'brightness(105%) contrast(110%) saturate(115%) hue-rotate(-15deg)': // cool
+      for (let i = 0; i < len; i += 4) {
+        let r = data[i] * 1.05
+        let g = data[i + 1] * 1.1
+        let b = data[i + 2] * 1.15
+        data[i] = Math.min(255, r)
+        data[i + 1] = Math.min(255, g)
+        data[i + 2] = Math.min(255, b)
+      }
+      break
+
+    case 'sepia(45%) contrast(112%) brightness(92%)': // vintage
+      for (let i = 0; i < len; i += 4) {
+        const r = data[i]
+        const g = data[i + 1]
+        const b = data[i + 2]
+        data[i] = Math.min(255, r * 0.393 + g * 0.769 + b * 0.189)
+        data[i + 1] = Math.min(255, r * 0.349 + g * 0.686 + b * 0.168)
+        data[i + 2] = Math.min(255, r * 0.272 + g * 0.534 + b * 0.131)
+      }
+      break
+
+    case 'contrast(125%) brightness(88%) saturate(75%)': // dramatic
+      for (let i = 0; i < len; i += 4) {
+        data[i] = Math.min(255, (data[i] - 128) * 1.25 + 128 * 0.88)
+        data[i + 1] = Math.min(255, (data[i + 1] - 128) * 1.25 + 128 * 0.88)
+        data[i + 2] = Math.min(255, (data[i + 2] - 128) * 1.25 + 128 * 0.88)
+      }
+      break
+
+    case 'brightness(110%) contrast(95%) saturate(90%)': // soft
+      for (let i = 0; i < len; i += 4) {
+        data[i] = Math.min(255, data[i] * 1.1)
+        data[i + 1] = Math.min(255, data[i + 1] * 1.1)
+        data[i + 2] = Math.min(255, data[i + 2] * 0.9)
+      }
+      break
+
+    default:
+      // none
+      break
+  }
+}
+
+/** Bake final image with flip + filter using pixel manipulation (fixes iOS Safari bug) */
 async function bakeFinalImage(
     originalFile: File,
     isFlipped: boolean,
     filterCss: string
 ): Promise<File> {
+  // If nothing to change → return original (fast path)
+  if (!isFlipped && filterCss === 'none') {
+    return originalFile
+  }
+
   return new Promise((resolve) => {
     const img = new Image()
     img.onload = () => {
@@ -46,39 +135,38 @@ async function bakeFinalImage(
 
       ctx.save()
 
-      // 1. Horizontal flip (if user used the mirror button)
       if (isFlipped) {
         ctx.translate(img.width, 0)
         ctx.scale(-1, 1)
       }
 
-      // 2. Apply selected filter
-      if (filterCss && filterCss !== 'none') {
-        ctx.filter = filterCss
-      }
+      // Draw the image (flipped if needed)
+      ctx.drawImage(img, 0, 0)
 
-      // 3. Draw the image (flipped + filtered)
-      ctx.drawImage(img, 0, 0, img.width, img.height)
-
-      // 4. Reset for safety
       ctx.restore()
 
-      // Export as JPEG - using toDataURL + fetch for MAXIMUM compatibility (fixes the issue on iOS/Android)
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.92)
-      fetch(dataUrl)
-          .then((res) => res.blob())
-          .then((blob) => {
+      // Apply filter via pixels (this is the part that works on iOS Safari)
+      if (filterCss !== 'none') {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        applyPixelFilter(imageData, filterCss)
+        ctx.putImageData(imageData, 0, 0)
+      }
+
+      // Export using toBlob (most reliable on Safari)
+      canvas.toBlob(
+          (blob) => {
             if (blob) {
               const finalFile = new File([blob], 'photo.jpg', { type: 'image/jpeg' })
               resolve(finalFile)
             } else {
               resolve(originalFile)
             }
-          })
-          .catch(() => {
-            resolve(originalFile) // fallback (very rare)
-          })
+          },
+          'image/jpeg',
+          0.92
+      )
     }
+
     img.src = URL.createObjectURL(originalFile)
   })
 }
@@ -188,7 +276,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
     try {
       let finalFile = selectedFile
 
-      // Extra compression if still too big
       if (finalFile.size > 3 * 1024 * 1024) {
         finalFile = await imageCompression(finalFile, {
           maxSizeMB: 3,
@@ -200,7 +287,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
         })
       }
 
-      // Bake flip + filter permanently into the image
+      // Bake flip + filter permanently (pixel method = works on iOS Safari)
       setProgress(35)
       finalFile = await bakeFinalImage(finalFile, isFlipped, selectedFilter)
 
@@ -291,7 +378,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
 
                 {!isLoading && (
                     <>
-                      {/* Clear button */}
                       <button
                           type="button"
                           onClick={clearFile}
@@ -300,7 +386,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
                         <X className="w-4 h-4" />
                       </button>
 
-                      {/* Flip button */}
                       <button
                           type="button"
                           onClick={toggleFlip}
@@ -319,7 +404,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
                 )}
               </div>
 
-              {/* === EDIT SECTION: Filters === */}
+              {/* Filters */}
               <div className="mt-5 space-y-5">
                 <div>
                   <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2 font-sans">
