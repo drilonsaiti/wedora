@@ -46,6 +46,7 @@ export async function updatePhotoAction(
     if (favourite !== undefined) payload.favourite = favourite
 
 
+
     const { error } = await supabase
         .from('photos')
         // @ts-ignore
@@ -169,13 +170,13 @@ export async function getPhotosAction(filters?: {
   favourite?: boolean
   hidden?: boolean
   approved?: boolean
-}) {
+}, limit?: number, offset?: number) {
   try {
     const { supabase } = await requireAdmin()
 
     let query = supabase
       .from('photos')
-      .select('*')
+      .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
 
     if (filters?.favourite !== undefined) {
@@ -188,10 +189,16 @@ export async function getPhotosAction(filters?: {
       query = query.eq('approved', filters.approved)
     }
 
-    const { data, error } = await query
+    if (limit !== undefined) {
+      const from = offset ?? 0
+      const to = from + limit - 1
+      query = query.range(from, to)
+    }
+
+    const { data, error, count } = await query
 
     if (error) return { photos: [], error: error.message }
-    return { photos: data ?? [] }
+    return { photos: data ?? [], total: count ?? 0 }
   } catch {
     return { photos: [], error: 'Unexpected error' }
   }
@@ -226,7 +233,8 @@ export async function createGalleryTokenAction(
       created_by: user.id,
     }
 
-    const result = await (supabase.from('gallery_tokens') as any)
+    const result = await supabase.from('gallery_tokens')
+        // @ts-ignore
         .insert(payload)
         .select('token')
         .single()

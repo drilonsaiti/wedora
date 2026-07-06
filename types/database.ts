@@ -52,6 +52,7 @@ export interface Database {
           approved: boolean
           hidden: boolean
           favourite: boolean
+          is_public: boolean
           created_at: string
         }
         Insert: {
@@ -69,6 +70,7 @@ export interface Database {
           approved?: boolean
           hidden?: boolean
           favourite?: boolean
+          is_public?: boolean
           created_at?: string
         }
         Update: {
@@ -86,6 +88,64 @@ export interface Database {
           approved?: boolean
           hidden?: boolean
           favourite?: boolean
+          is_public?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      guests: {
+        Row: {
+          id: string
+          first_name: string
+          last_name: string
+          initials: string
+          table_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          first_name: string
+          last_name: string
+          initials?: string
+          table_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          first_name?: string
+          last_name?: string
+          initials?: string
+          table_id?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      tables: {
+        Row: {
+          id: string
+          number: number
+          seats: number
+          label: string | null
+          pos_x: number
+          pos_y: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          number: number
+          seats: number
+          label?: string | null
+          pos_x?: number
+          pos_y?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          number?: number
+          seats?: number
+          label?: string | null
+          pos_x?: number
+          pos_y?: number
           created_at?: string
         }
         Relationships: []

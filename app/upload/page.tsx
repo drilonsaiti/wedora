@@ -1,10 +1,11 @@
 import { UploadForm } from '@/components/upload-form'
+import { BottomNav } from '@/components/bottom-nav'
 
 export default function UploadPage() {
   const eventId = process.env.NEXT_PUBLIC_EVENT_ID ?? ''
 
   return (
-    <main className="min-h-screen flex flex-col">
+    <main className="min-h-screen flex flex-col pb-24">
       <header className="px-6 pt-8 pb-4 text-center">
        
 
@@ -27,6 +28,8 @@ export default function UploadPage() {
       <div className="flex-1 px-6 py-4 max-w-lg mx-auto w-full">
         <UploadForm eventId={eventId} />
       </div>
+
+      <BottomNav />
     </main>
   )
 }

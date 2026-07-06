@@ -71,13 +71,15 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
 
   const photosResult = await supabase
       .from('photos')
-      .select('id, guest_name, message, thumbnail_path, original_path, created_at, width, height')
+      .select('id, guest_name, message, thumbnail_path, original_path, created_at, width, height', { count: 'exact' })
       .eq('event_id', galleryToken.event_id)
       .eq('approved', true)
       .eq('hidden', false)
       .order('created_at', { ascending: true })
+      .range(0, 49)
 
   const photos = photosResult.data as GalleryPhotoRow[] | null
+  const total = photosResult.count ?? 0
 
   if (photosResult.error || !photos || photos.length === 0) {
     return (
@@ -131,5 +133,13 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
     originalUrl: origUrlMap[p.id] ?? null,
   }))
 
-  return <GallerySlideshow photos={photoData} label={galleryToken.label} />
+  return (
+    <GallerySlideshow
+      initialPhotos={photoData}
+      totalCount={total}
+      label={galleryToken.label}
+      eventId={galleryToken.event_id}
+      showMessages={galleryToken.show_messages}
+    />
+  )
 }

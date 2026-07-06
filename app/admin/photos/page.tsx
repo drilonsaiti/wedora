@@ -41,11 +41,12 @@ export default async function AdminPhotosPage({ searchParams }: Props) {
                   ? { approved: false }
                   : undefined
 
-  const { photos, error } = await getPhotosAction(filters)
+  const { photos, error, total } = await getPhotosAction(filters, 50, 0)
 
   return (
       <AdminDashboard
-          photos={photos}
+          initialPhotos={photos}
+          initialTotal={total || 0}
           adminEmail={admin.email}
           error={error}
           activeFilter={filter}

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Loader2, Mail, Lock, AlertCircle } from 'lucide-react'
 import { adminLoginSchema, type AdminLoginValues } from '@/schemas'
 import { createClient } from '@/lib/supabase/client'
@@ -95,6 +96,14 @@ export function AdminLoginForm() {
         {errors.password && (
           <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>
         )}
+        <div className="flex justify-end mt-1">
+          <Link
+            href="/admin/forgot-password"
+            className="text-xs text-wedding-600 hover:text-wedding-900 transition-colors"
+          >
+            Forgot password?
+          </Link>
+        </div>
       </div>
 
       {error && (

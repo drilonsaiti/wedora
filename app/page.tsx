@@ -1,7 +1,12 @@
 import Link from 'next/link'
-import { Camera, Heart, Image as ImageIcon } from 'lucide-react'
+import { Camera, Heart, Image as ImageIcon, Search, Armchair } from 'lucide-react'
+import {BottomNav} from "@/components/bottom-nav";
+import { getGuests } from '@/actions/seating';
+import { HomeSearch } from '@/components/home-search';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const guests = await getGuests();
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-16 relative overflow-hidden">
       {/* Background decoration */}
@@ -11,13 +16,13 @@ export default function HomePage() {
       </div>
 
       {/* Decorative top line */}
-      <div className="flex items-center gap-3 mb-12">
+      <div className="flex items-center gap-3 mb-8">
         <div className="h-px w-16 bg-[hsl(var(--gold))] opacity-60" />
         <Heart className="w-3 h-3 text-[hsl(var(--primary))] fill-current" />
         <div className="h-px w-16 bg-[hsl(var(--gold))] opacity-60" />
       </div>
 
-      <div className="text-center max-w-sm mx-auto relative z-10">
+      <div className="text-center max-w-sm mx-auto relative z-10 w-full">
         <p className="font-sans text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">
           Jeni të ftuar të festoni me ne
         </p>
@@ -28,9 +33,12 @@ export default function HomePage() {
           </span>
           Drilon
         </h1>
-        <p className="font-serif italic text-lg text-muted-foreground mb-10">
-          Korrik 31, 2026
+        <p className="font-serif italic text-lg text-muted-foreground mb-8">
+          31 Korrik, 2026
         </p>
+
+        {/* Home Search Component */}
+        <HomeSearch guests={guests} />
 
         <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mb-10" />
 
@@ -38,8 +46,8 @@ export default function HomePage() {
           Na ndihmoni të ruajmë çdo moment të bukur të kësaj dite të veçantë. Ndani fotot dhe mesazhet tuaja me çiftin.
         </p>
 
-        <Link href="/upload" className="btn-primary w-full justify-center mb-4">
-          <Camera className="w-4 h-4" />
+        <Link href="/upload" className="btn-primary w-full justify-center mb-4 py-4 rounded-xl shadow-lg">
+          <Camera className="w-5 h-5" />
           Ndaj një foto
         </Link>
 
@@ -50,10 +58,10 @@ export default function HomePage() {
             { icon: Heart, label: 'Shto një mesazh' },
           ].map(({ icon: Icon, label }) => (
             <div key={label} className="flex flex-col items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center">
-                <Icon className="w-4 h-4 text-[hsl(var(--primary))]" />
+              <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--accent))] flex items-center justify-center transition-transform hover:scale-105">
+                <Icon className="w-5 h-5 text-[hsl(var(--primary))]" />
               </div>
-              <p className="font-sans text-xs text-muted-foreground leading-tight">
+              <p className="font-sans text-[10px] uppercase tracking-wider text-muted-foreground leading-tight px-1">
                 {label}
               </p>
             </div>
@@ -62,11 +70,13 @@ export default function HomePage() {
       </div>
 
       {/* Bottom decoration */}
-      <div className="flex items-center gap-3 mt-16">
+      <div className="flex items-center gap-3 mt-12 pb-20">
         <div className="h-px w-16 bg-[hsl(var(--gold))] opacity-60" />
         <Heart className="w-3 h-3 text-[hsl(var(--primary))] fill-current" />
         <div className="h-px w-16 bg-[hsl(var(--gold))] opacity-60" />
       </div>
+
+      <BottomNav />
     </main>
   )
 }

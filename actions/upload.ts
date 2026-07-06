@@ -24,6 +24,7 @@ export async function uploadPhotoAction(
       eventId: formData.get('eventId'),
       guestName: formData.get('guestName') || null,
       message: formData.get('message') || null,
+      isPublic: formData.get('isPublic') === 'true',
       sessionId: formData.get('sessionId'),
       mimeType: file.type,
       fileSize: file.size,
@@ -36,7 +37,7 @@ export async function uploadPhotoAction(
       }
     }
 
-    const { eventId, guestName, message, sessionId } = parsed.data
+    const { eventId, guestName, message, isPublic, sessionId } = parsed.data
 
     const supabase = createServiceClient()
 
@@ -99,9 +100,13 @@ export async function uploadPhotoAction(
       approved: true,
       hidden: false,
       favourite: false,
+      is_public: isPublic,
     }
 
-    const { error: dbError } = await (supabase.from('photos') as any).insert(payload)
+    const { error: dbError } = await supabase
+        .from('photos')
+        // @ts-ignore
+        .insert(payload)
 
     if (dbError) {
       await supabase.storage.from('photos').remove([originalPath])

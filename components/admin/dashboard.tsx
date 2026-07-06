@@ -23,7 +23,9 @@ import {
   Check,
   Link as LinkIcon,
   ExternalLink,
+  Armchair,
 } from 'lucide-react'
+import Link from 'next/link'
 import { Photo } from '@/types/database'
 import {
   updatePhotoAction,
@@ -31,31 +33,40 @@ import {
   getSignedUrlAction,
   signOutAction,
   createGalleryTokenAction,
+  getPhotosAction,
 } from '@/actions/admin'
 import { formatDate, cn } from '@/lib/utils'
 
 interface AdminDashboardProps {
-  photos: Photo[]
+  initialPhotos: Photo[]
+  initialTotal: number
   adminEmail: string
   error?: string
   activeFilter?: string
 }
 
 const FILTERS = [
-  { key: undefined, label: 'All Photos' },
-  { key: 'favourites', label: 'Favourites' },
-  { key: 'hidden', label: 'Hidden' },
-  { key: 'unapproved', label: 'Unapproved' },
+  { key: undefined, label: 'Të gjitha fotot' },
+  { key: 'favourites', label: 'Të preferuarat' },
+  { key: 'hidden', label: 'Të fshehura' },
+  { key: 'unapproved', label: 'Të paaprovuara' },
 ]
 
+const PAGE_SIZE = 50
+
 export function AdminDashboard({
-  photos,
+  initialPhotos,
+  initialTotal,
   adminEmail,
-  error,
+  error: initialError,
   activeFilter,
 }: AdminDashboardProps) {
   const router = useRouter()
   const [, startTransition] = useTransition()
+  const [photos, setPhotos] = useState<Photo[]>(initialPhotos)
+  const [total, setTotal] = useState(initialTotal)
+  const [error, setError] = useState(initialError)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
   const [signedUrls, setSignedUrls] = useState<Record<string, { thumb: string; original: string }>>({})
   const [loadingUrls, setLoadingUrls] = useState<Record<string, boolean>>({})
@@ -158,6 +169,31 @@ export function AdminDashboard({
     }
   }
 
+  const handleLoadMore = async () => {
+    if (loadingMore || photos.length >= total) return
+    setLoadingMore(true)
+    try {
+      const filters =
+        activeFilter === 'favourites'
+          ? { favourite: true }
+          : activeFilter === 'hidden'
+            ? { hidden: true }
+            : activeFilter === 'unapproved'
+              ? { approved: false }
+              : undefined
+
+      const result = await getPhotosAction(filters, PAGE_SIZE, photos.length)
+      if (result.photos) {
+        setPhotos((prev) => [...prev, ...result.photos])
+        if (result.total !== undefined) setTotal(result.total)
+      }
+    } catch (err) {
+      console.error('Load more error:', err)
+    } finally {
+      setLoadingMore(false)
+    }
+  }
+
   // ── GALLERY SHARE ──
   const handleCreateGalleryLink = async () => {
     setShareLoading(true)
@@ -197,14 +233,23 @@ export function AdminDashboard({
       {/* ── HEADER ── */}
       <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div>
-            <h1 className="font-serif text-xl font-light text-[hsl(var(--dark))]">Wedding Photos</h1>
-            <p className="font-sans text-xs text-muted-foreground hidden sm:block">{adminEmail}</p>
-          </div>
+            <div>
+              <h1 className="font-serif text-xl font-light text-[hsl(var(--dark))]">Fotot e Dasmës</h1>
+              <p className="font-sans text-xs text-muted-foreground hidden sm:block">{adminEmail}</p>
+            </div>
           <div className="flex items-center gap-2">
             <span className="font-sans text-sm text-muted-foreground hidden sm:block">
-              {photos.length} photo{photos.length !== 1 ? 's' : ''}
+              {photos.length} foto
             </span>
+
+            {/* Seating button */}
+            <Link
+              href="/admin/seating"
+              className="btn-ghost text-xs py-2 px-3 sm:px-4"
+            >
+              <Armchair className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Sistemimi</span>
+            </Link>
 
             {/* Share Gallery button */}
             <button
@@ -212,7 +257,7 @@ export function AdminDashboard({
               className="btn-ghost text-xs py-2 px-3 sm:px-4"
             >
               <Share2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Share Gallery</span>
+              <span className="hidden sm:inline">Shpërndaj Galerinë</span>
             </button>
 
             {/* ZIP dropdown */}
@@ -227,7 +272,7 @@ export function AdminDashboard({
                   <ArchiveIcon className="w-3.5 h-3.5" />
                 )}
                 <span className="hidden sm:inline">
-                  {zipLoading ? 'Preparing…' : 'Download ZIP'}
+                  {zipLoading ? 'Duke u përgatitur…' : 'Shkarko ZIP'}
                 </span>
               </button>
               {/* Dropdown */}
@@ -238,7 +283,7 @@ export function AdminDashboard({
                   className="w-full text-left px-4 py-2.5 font-sans text-sm hover:bg-muted transition-colors flex items-center gap-2"
                 >
                   <Download className="w-3.5 h-3.5 text-muted-foreground" />
-                  All photos
+                  Të gjitha fotot
                 </button>
                 <button
                   onClick={() => handleZipDownload('favourites')}
@@ -246,14 +291,14 @@ export function AdminDashboard({
                   className="w-full text-left px-4 py-2.5 font-sans text-sm hover:bg-muted transition-colors flex items-center gap-2"
                 >
                   <Heart className="w-3.5 h-3.5 text-muted-foreground" />
-                  Favourites only
+                  Vetëm të preferuarat
                 </button>
               </div>
             </div>
 
             <button onClick={async () => await signOutAction()} className="btn-ghost text-xs py-2 px-3">
               <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Sign out</span>
+              <span className="hidden sm:inline">Çkyçu</span>
             </button>
           </div>
         </div>
@@ -290,9 +335,9 @@ export function AdminDashboard({
             <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
               <Images className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
             </div>
-            <h2 className="font-serif text-2xl font-light text-muted-foreground">No photos yet</h2>
+            <h2 className="font-serif text-2xl font-light text-muted-foreground">Ende nuk ka foto</h2>
             <p className="font-sans text-sm text-muted-foreground mt-2">
-              {activeFilter ? 'No photos match this filter.' : 'Photos will appear here once guests upload them.'}
+              {activeFilter ? 'Asnjë foto nuk përputhet me këtë filtër.' : 'Fotot do të shfaqen këtu pasi të ftuarit t\'i ngarkojnë ato.'}
             </p>
           </div>
         )}
@@ -312,6 +357,25 @@ export function AdminDashboard({
             />
           ))}
         </div>
+
+        {photos.length < total && (
+          <div className="mt-12 flex justify-center">
+            <button
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+              className="btn-primary min-w-[200px]"
+            >
+              {loadingMore ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Duke u ngarkuar...
+                </>
+              ) : (
+                'Ngarko më shumë'
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Photo modal */}

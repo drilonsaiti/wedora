@@ -190,6 +190,9 @@ export function UploadForm({ eventId }: UploadFormProps) {
     formState: { errors },
   } = useForm<UploadFormValues>({
     resolver: zodResolver(uploadFormSchema),
+    defaultValues: {
+      isPublic: true,
+    },
   })
 
   const handleFileSelect = useCallback(async (file: File) => {
@@ -265,7 +268,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
 
   const onSubmit = async (values: UploadFormValues) => {
     if (!selectedFile) {
-      setFileError('Please select a photo first')
+      setFileError('Ju lutem zgjidhni një foto së pari')
       return
     }
 
@@ -299,6 +302,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
       fd.append('file', finalFile, 'photo.jpg')
       fd.append('eventId', eventId)
       fd.append('sessionId', sessionId)
+      fd.append('isPublic', values.isPublic.toString())
       if (values.guestName) fd.append('guestName', values.guestName)
       if (values.message) fd.append('message', values.message)
 
@@ -308,16 +312,19 @@ export function UploadForm({ eventId }: UploadFormProps) {
       setProgress(100)
 
       if (!result.success) {
-        setServerError(result.error ?? 'Upload failed')
+        setServerError(result.error ?? 'Ngarkimi dështoi')
         setUploadState('error')
         return
       }
 
       setUploadState('done')
-      router.push('/success')
+      // Small delay to ensure state update is processed before navigation
+      setTimeout(() => {
+        window.location.href = '/success'
+      }, 100)
     } catch (err) {
       console.error(err)
-      setServerError('Something went wrong. Please try again.')
+      setServerError('Diçka shkoi keq. Ju lutem provoni përsëri.')
       setUploadState('error')
     }
   }
@@ -344,7 +351,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
                       className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border bg-background hover:bg-accent/50 transition-colors"
                   >
                     <Camera className="w-6 h-6 text-[hsl(var(--primary))]" strokeWidth={1.5} />
-                    <span className="font-sans text-xs font-medium">Camera</span>
+                    <span className="font-sans text-xs font-medium">Kamera</span>
                   </button>
 
                   <button
@@ -353,7 +360,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
                       className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border bg-background hover:bg-accent/50 transition-colors"
                   >
                     <Upload className="w-6 h-6 text-[hsl(var(--primary))]" strokeWidth={1.5} />
-                    <span className="font-sans text-xs font-medium">Gallery</span>
+                    <span className="font-sans text-xs font-medium">Galeria</span>
                   </button>
                 </div>
               </div>
@@ -492,6 +499,19 @@ export function UploadForm({ eventId }: UploadFormProps) {
                 <p className="mt-1 text-xs text-destructive">{errors.message.message}</p>
             )}
           </div>
+
+          <div className="flex items-start gap-3 p-4 rounded-2xl bg-[hsl(var(--accent))] border border-[hsl(var(--gold))/20">
+            <input
+              {...register('isPublic')}
+              type="checkbox"
+              id="isPublic"
+              className="mt-1 w-4 h-4 rounded border-[hsl(var(--gold))] text-[hsl(var(--primary))] focus:ring-[hsl(var(--primary))]"
+              disabled={isLoading}
+            />
+            <label htmlFor="isPublic" className="text-xs font-sans text-muted-foreground leading-relaxed cursor-pointer select-none">
+              Fotot janë private dhe shihen vetëm nga çifti, gjithashtu ato mund te shfaqen ne nje public gallery.
+            </label>
+          </div>
         </div>
 
         {/* Progress bar */}
@@ -504,7 +524,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
                 />
               </div>
               <p className="text-xs text-muted-foreground text-center font-sans">
-                {uploadState === 'compressing' ? 'Optimising your photo…' : 'Uploading…'}
+                {uploadState === 'compressing' ? 'Duke optimizuar foton tuaj…' : 'Duke u ngarkuar…'}
               </p>
             </div>
         )}
@@ -525,7 +545,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
           {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                {uploadState === 'compressing' ? 'Optimising…' : 'Uploading…'}
+                {uploadState === 'compressing' ? 'Duke optimizuar…' : 'Duke u ngarkuar…'}
               </>
           ) : (
               <>
@@ -534,10 +554,6 @@ export function UploadForm({ eventId }: UploadFormProps) {
               </>
           )}
         </button>
-
-        <p className="text-xs text-muted-foreground text-center font-sans">
-          Fotot janë private dhe shihen vetëm nga çifti
-        </p>
       </form>
   )
 }

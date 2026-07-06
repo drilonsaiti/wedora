@@ -10,6 +10,7 @@ import {
   Maximize2,
   X,
   Heart,
+  Loader2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -25,13 +26,25 @@ interface GalleryPhoto {
 }
 
 interface GallerySlideshowProps {
-  photos: GalleryPhoto[]
+  initialPhotos: GalleryPhoto[]
+  totalCount: number
   label: string | null
+  eventId: string
+  showMessages: boolean
 }
 
 type ViewMode = 'grid' | 'slideshow'
 
-export function GallerySlideshow({ photos, label }: GallerySlideshowProps) {
+export function GallerySlideshow({
+  initialPhotos,
+  totalCount,
+  label,
+  eventId,
+  showMessages,
+}: GallerySlideshowProps) {
+  const [photos, setPhotos] = useState<GalleryPhoto[]>(initialPhotos)
+  const [total, setTotal] = useState(totalCount)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [mode, setMode] = useState<ViewMode>('grid')
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -95,6 +108,26 @@ export function GallerySlideshow({ photos, label }: GallerySlideshowProps) {
   const openSlideshow = (index: number) => {
     setCurrentIndex(index)
     setMode('slideshow')
+  }
+
+  const handleLoadMore = async () => {
+    if (loadingMore || photos.length >= total) return
+    setLoadingMore(true)
+    try {
+      // Pass the token to the API for security validation
+      const token = window.location.pathname.split('/').pop()
+      const response = await fetch(`/api/gallery/photos?token=${token}&offset=${photos.length}&showMessages=${showMessages}`)
+      if (!response.ok) throw new Error('Failed to fetch photos')
+      const result = await response.json()
+      if (result.photos) {
+        setPhotos((prev) => [...prev, ...result.photos])
+        if (result.total !== undefined) setTotal(result.total)
+      }
+    } catch (err) {
+      console.error('Load more error:', err)
+    } finally {
+      setLoadingMore(false)
+    }
   }
 
   const currentPhoto = photos[currentIndex]
@@ -182,6 +215,25 @@ export function GallerySlideshow({ photos, label }: GallerySlideshowProps) {
               </button>
             ))}
           </div>
+
+          {photos.length < total && (
+            <div className="mt-12 flex justify-center pb-12">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="px-8 py-3 rounded-full border border-[hsl(var(--gold))] text-[hsl(var(--primary))] font-sans text-sm hover:bg-[hsl(var(--accent))] transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {loadingMore ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  'Load More'
+                )}
+              </button>
+            </div>
+          )}
         </div>
       )}
 

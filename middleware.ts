@@ -40,6 +40,15 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
+  // Allow auth-related routes
+  if (
+    pathname === '/admin/forgot-password' ||
+    pathname === '/admin/reset-password' ||
+    pathname.startsWith('/api/auth')
+  ) {
+    return supabaseResponse
+  }
+
   if (pathname.startsWith('/admin/photos')) {
     if (!user) {
       const url = request.nextUrl.clone()
