@@ -191,7 +191,7 @@ export function UploadForm({ eventId }: UploadFormProps) {
   } = useForm<UploadFormValues>({
     resolver: zodResolver(uploadFormSchema),
     defaultValues: {
-      isPublic: true,
+      isPublic: false,
     },
   })
 
@@ -502,14 +502,14 @@ export function UploadForm({ eventId }: UploadFormProps) {
 
           <div className="flex items-start gap-3 p-4 rounded-2xl bg-[hsl(var(--accent))] border border-[hsl(var(--gold))/20">
             <input
-              {...register('isPublic')}
-              type="checkbox"
-              id="isPublic"
-              className="mt-1 w-4 h-4 rounded border-[hsl(var(--gold))] text-[hsl(var(--primary))] focus:ring-[hsl(var(--primary))]"
-              disabled={isLoading}
+                {...register('isPublic')}
+                type="checkbox"
+                id="isPublic"
+                className="mt-1 w-4 h-4 rounded border-[hsl(var(--gold))] text-[hsl(var(--primary))] focus:ring-[hsl(var(--primary))]"
+                disabled={isLoading}
             />
             <label htmlFor="isPublic" className="text-xs font-sans text-muted-foreground leading-relaxed cursor-pointer select-none">
-              Fotot janë private dhe shihen vetëm nga çifti, gjithashtu ato mund te shfaqen ne nje public gallery.
+              Fotot janë private dhe shihen vetëm nga çifti. Nëse e shënoni këtë kutizë, fotoja mund të shfaqet edhe në galerinë publike.
             </label>
           </div>
         </div>

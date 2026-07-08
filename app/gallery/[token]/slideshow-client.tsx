@@ -13,6 +13,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import {getGalleryPhotosAction} from "@/actions/gallery";
 
 interface GalleryPhoto {
   id: string
@@ -31,6 +32,7 @@ interface GallerySlideshowProps {
   label: string | null
   eventId: string
   showMessages: boolean
+  token: string
 }
 
 type ViewMode = 'grid' | 'slideshow'
@@ -41,6 +43,7 @@ export function GallerySlideshow({
   label,
   eventId,
   showMessages,
+    token
 }: GallerySlideshowProps) {
   const [photos, setPhotos] = useState<GalleryPhoto[]>(initialPhotos)
   const [total, setTotal] = useState(totalCount)
@@ -114,14 +117,12 @@ export function GallerySlideshow({
     if (loadingMore || photos.length >= total) return
     setLoadingMore(true)
     try {
-      // Pass the token to the API for security validation
-      const token = window.location.pathname.split('/').pop()
-      const response = await fetch(`/api/gallery/photos?token=${token}&offset=${photos.length}&showMessages=${showMessages}`)
-      if (!response.ok) throw new Error('Failed to fetch photos')
-      const result = await response.json()
+      const result = await getGalleryPhotosAction(token, photos.length)
       if (result.photos) {
         setPhotos((prev) => [...prev, ...result.photos])
-        if (result.total !== undefined) setTotal(result.total)
+      }
+      if (result.error) {
+        console.error('Load more error:', result.error)
       }
     } catch (err) {
       console.error('Load more error:', err)

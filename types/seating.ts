@@ -20,3 +20,5 @@ export interface Guest {
 export interface GuestWithTable extends Guest {
   tables: Table | null;
 }
+
+export const GALLERY_PAGE_SIZE = 30

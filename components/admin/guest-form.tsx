@@ -77,8 +77,8 @@ export function GuestForm({ initialValues, tables, onSuccess, onCancel }: GuestF
         <div>
           <label className="label-wedding">Cakto tavolinën (Opsionale)</label>
           <select
-            {...register('table_id')}
-            className="input-wedding appearance-none bg-white"
+              {...register('table_id')}
+              className="input-wedding appearance-none text-foreground"
           >
             <option value="">Pa Tavolinë</option>
             {tables.map((table) => (

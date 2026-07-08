@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useCallback } from 'react'
+import {useState, useTransition, useCallback, useEffect} from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Heart,
@@ -33,9 +33,10 @@ import {
   getSignedUrlAction,
   signOutAction,
   createGalleryTokenAction,
-  getPhotosAction,
+  getPhotosAction, listGalleryTokensAction, deleteGalleryTokenAction,
 } from '@/actions/admin'
-import { formatDate, cn } from '@/lib/utils'
+import {formatDate, cn, invertUpdate} from '@/lib/utils'
+import {ThemeToggle} from "@/components/theme-toggle";
 
 interface AdminDashboardProps {
   initialPhotos: Photo[]
@@ -79,9 +80,28 @@ export function AdminDashboard({
   const [shareOpen, setShareOpen] = useState(false)
   const [shareLoading, setShareLoading] = useState(false)
   const [shareUrl, setShareUrl] = useState<string | null>(null)
+  const [galleryTokens, setGalleryTokens] = useState<
+      Array<{
+        id: string;
+        token: string;
+        label: string | null;
+        expires_at: string | null;
+        created_at: string;
+        photo_filter: string;
+      }>
+  >([]);
+  const [loadingTokens, setLoadingTokens] = useState(false)
+  const [showCreateForm, setShowCreateForm] = useState(false)
   const [copied, setCopied] = useState(false)
   const [showMessages, setShowMessages] = useState(true)
   const [expiresInDays, setExpiresInDays] = useState<string>('')
+  const [photoFilter, setPhotoFilter] = useState<'all' | 'favourites'>('all')
+  const [galleryLabel, setGalleryLabel] = useState('Wedding Gallery')
+
+  useEffect(() => {
+    setPhotos(initialPhotos)
+    setTotal(initialTotal)
+  }, [activeFilter]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const getSignedUrls = useCallback(async (photo: Photo) => {
     if (signedUrls[photo.id]) return signedUrls[photo.id]
@@ -110,16 +130,25 @@ export function AdminDashboard({
   const closeModal = () => setSelectedPhoto(null)
 
   const handleUpdate = async (
-    id: string,
-    update: { approved?: boolean; hidden?: boolean; favourite?: boolean }
+      id: string,
+      update: { approved?: boolean; hidden?: boolean; favourite?: boolean }
   ) => {
     setActionLoading((prev) => ({ ...prev, [id]: true }))
+
+    setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, ...update } : p)))
+    if (selectedPhoto?.id === id) {
+      setSelectedPhoto((prev) => (prev ? { ...prev, ...update } : null))
+    }
+
     try {
-      await updatePhotoAction(id, update)
-      startTransition(() => router.refresh())
-      if (selectedPhoto?.id === id) {
-        setSelectedPhoto((prev) => prev ? { ...prev, ...update } : null)
+      const result = await updatePhotoAction(id, update)
+      if (!result.success) {
+        // revert on failure
+        setPhotos((prev) =>
+            prev.map((p) => (p.id === id ? { ...p, ...invertUpdate(p, update) } : p))
+        )
       }
+      startTransition(() => router.refresh())
     } finally {
       setActionLoading((prev) => ({ ...prev, [id]: false }))
     }
@@ -129,13 +158,18 @@ export function AdminDashboard({
     if (!confirm('Delete this photo permanently?')) return
     setActionLoading((prev) => ({ ...prev, [id]: true }))
     try {
-      await deletePhotoAction(id)
+      const result = await deletePhotoAction(id)
+      if (result.success) {
+        setPhotos((prev) => prev.filter((p) => p.id !== id))
+        setTotal((prev) => prev - 1)
+      }
       if (selectedPhoto?.id === id) closeModal()
       startTransition(() => router.refresh())
     } finally {
       setActionLoading((prev) => ({ ...prev, [id]: false }))
     }
   }
+
 
   const handleDownload = async (photo: Photo) => {
     const urls = await getSignedUrls(photo)
@@ -202,11 +236,13 @@ export function AdminDashboard({
       eventId,
       showMessages,
       expiresInDays: expiresInDays ? parseInt(expiresInDays, 10) : undefined,
-      label: 'Wedding Gallery',
+      label: galleryLabel || 'Wedding Gallery',
+      photoFilter,
     })
     setShareLoading(false)
     if (result.url) {
       setShareUrl(result.url)
+      loadGalleryTokens()
     } else {
       alert(result.error ?? 'Failed to create link')
     }
@@ -217,6 +253,26 @@ export function AdminDashboard({
     await navigator.clipboard.writeText(shareUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const loadGalleryTokens = useCallback(async () => {
+    setLoadingTokens(true)
+    const result = await listGalleryTokensAction();
+    console.log('Gallery tokens:', result);
+    setGalleryTokens(result.tokens)
+    setLoadingTokens(false)
+  }, [])
+
+  const openShareModal = () => {
+    setShareOpen(true)
+    setShowCreateForm(false)
+    loadGalleryTokens()
+  }
+
+  const handleDeleteToken = async (id: string) => {
+    if (!confirm('Delete this gallery link? It will stop working immediately.')) return
+    await deleteGalleryTokenAction(id)
+    loadGalleryTokens()
   }
 
   const handleFilterChange = (filter?: string) => {
@@ -242,6 +298,8 @@ export function AdminDashboard({
               {photos.length} foto
             </span>
 
+            <ThemeToggle />
+
             {/* Seating button */}
             <Link
               href="/admin/seating"
@@ -253,7 +311,7 @@ export function AdminDashboard({
 
             {/* Share Gallery button */}
             <button
-              onClick={() => setShareOpen(true)}
+              onClick={openShareModal}
               className="btn-ghost text-xs py-2 px-3 sm:px-4"
             >
               <Share2 className="w-3.5 h-3.5" />
@@ -422,90 +480,217 @@ export function AdminDashboard({
             </div>
 
             {!shareUrl ? (
-              <div className="space-y-4">
-                {/* Options */}
-                <div className="space-y-3">
-                  <label className="flex items-center justify-between p-3 rounded-xl border border-border cursor-pointer hover:bg-muted transition-colors">
-                    <div>
-                      <p className="font-sans text-sm font-medium">Show guest messages</p>
-                      <p className="font-sans text-xs text-muted-foreground">Include names and notes in gallery</p>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={showMessages}
-                      onChange={(e) => setShowMessages(e.target.checked)}
-                      className="w-4 h-4 accent-[hsl(var(--primary))]"
-                    />
-                  </label>
+                <div className="space-y-4">
+                  {!showCreateForm ? (
+                      <>
+                        {loadingTokens ? (
+                            <div className="flex justify-center py-8">
+                              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                            </div>
+                        ) : galleryTokens.length === 0 ? (
+                            <p className="text-sm text-muted-foreground text-center py-6 font-sans">
+                              No gallery links yet.
+                            </p>
+                        ) : (
+                            <div className="space-y-2 max-h-64 overflow-y-auto">
+                              {galleryTokens.map((t) => {
+                                const url = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/gallery/${t.token}`;
 
-                  <div>
-                    <label className="label-wedding">Link expires after</label>
-                    <select
-                      value={expiresInDays}
-                      onChange={(e) => setExpiresInDays(e.target.value)}
-                      className="input-wedding"
-                    >
-                      <option value="">Never</option>
-                      <option value="7">7 days</option>
-                      <option value="30">30 days</option>
-                      <option value="90">90 days</option>
-                      <option value="365">1 year</option>
-                    </select>
-                  </div>
-                </div>
+                                return (
+                                    <div
+                                        key={t.id}
+                                        className="flex items-center justify-between p-3 rounded-xl border border-border"
+                                    >
+                                      <div className="min-w-0">
+                                        <p className="font-sans text-sm font-medium truncate">
+                                          {t.label ?? "Wedding Gallery"}
+                                        </p>
+                                        <p className="font-sans text-xs text-muted-foreground">
+                                          {t.expires_at ? `Expires ${formatDate(t.expires_at)}` : 'Never expires'}
+                                          {t.photo_filter === 'favourites' && ' · Favourites only'}
+                                        </p>
+                                      </div>
 
-                <button
-                  onClick={handleCreateGalleryLink}
-                  disabled={shareLoading}
-                  className="btn-primary w-full justify-center"
-                >
-                  {shareLoading ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" />Creating link…</>
+                                      <div className="flex gap-1 shrink-0">
+                                        <button
+                                            onClick={() => setShareUrl(url)}
+                                            className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors"
+                                        >
+                                          <Copy className="w-3.5 h-3.5" />
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleDeleteToken(t.id)}
+                                            className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-destructive/10 hover:text-destructive transition-colors"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                );
+                              })}
+                            </div>
+                        )}
+
+                        <button
+                            onClick={() => setShowCreateForm(true)}
+                            className="btn-primary w-full justify-center"
+                        >
+                          <LinkIcon className="w-4 h-4" />
+                          Create New Gallery Link
+                        </button>
+                      </>
                   ) : (
-                    <><LinkIcon className="w-4 h-4" />Create Gallery Link</>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="label-wedding">Link name</label>
+                          <input
+                              type="text"
+                              value={galleryLabel}
+                              onChange={(e) => setGalleryLabel(e.target.value)}
+                              placeholder="e.g. Ceremony, Reception, Family Only"
+                              className="input-wedding"
+                              maxLength={60}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="label-wedding">Which photos?</label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setPhotoFilter('all')}
+                                className={cn(
+                                    'flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-sans font-medium transition-colors',
+                                    photoFilter === 'all'
+                                        ? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary))] text-white'
+                                        : 'border-border hover:bg-muted'
+                                )}
+                            >
+                              <Images className="w-4 h-4" />
+                              All photos
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setPhotoFilter('favourites')}
+                                className={cn(
+                                    'flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-sans font-medium transition-colors',
+                                    photoFilter === 'favourites'
+                                        ? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary))] text-white'
+                                        : 'border-border hover:bg-muted'
+                                )}
+                            >
+                              <Heart className="w-4 h-4" />
+                              Favourites only
+                            </button>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1.5 font-sans">
+                            Only approved photos guests agreed to share publicly are ever included — this just narrows within that set.
+                          </p>
+                        </div>
+
+                        <label className="flex items-center justify-between p-3 rounded-xl border border-border cursor-pointer hover:bg-muted transition-colors">
+                          <div>
+                            <p className="font-sans text-sm font-medium">Show guest messages</p>
+                            <p className="font-sans text-xs text-muted-foreground">Include names and notes in gallery</p>
+                          </div>
+                          <input
+                              type="checkbox"
+                              checked={showMessages}
+                              onChange={(e) => setShowMessages(e.target.checked)}
+                              className="w-4 h-4 accent-[hsl(var(--primary))]"
+                          />
+                        </label>
+
+                        <div>
+                          <label className="label-wedding">Link expires after</label>
+                          <select
+                              value={expiresInDays}
+                              onChange={(e) => setExpiresInDays(e.target.value)}
+                              className="input-wedding"
+                          >
+                            <option value="">Never</option>
+                            <option value="7">7 days</option>
+                            <option value="30">30 days</option>
+                            <option value="90">90 days</option>
+                            <option value="365">1 year</option>
+                          </select>
+                        </div>
+
+                        <button
+                            onClick={handleCreateGalleryLink}
+                            disabled={shareLoading}
+                            className="btn-primary w-full justify-center"
+                        >
+                          {shareLoading ? (
+                              <><Loader2 className="w-4 h-4 animate-spin" />Creating link…</>
+                          ) : (
+                              <><LinkIcon className="w-4 h-4" />Create Gallery Link</>
+                          )}
+                        </button>
+
+                        <button
+                            onClick={() => setShowCreateForm(false)}
+                            className="w-full text-center font-sans text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          ← Back to gallery list
+                        </button>
+                      </div>
                   )}
-                </button>
-              </div>
+                </div>
             ) : (
-              <div className="space-y-4">
-                <div className="rounded-xl bg-[hsl(var(--accent))] border border-[hsl(var(--primary))]/20 p-4">
-                  <p className="font-sans text-xs text-muted-foreground mb-2">Gallery link</p>
-                  <p className="font-mono text-xs text-foreground break-all leading-relaxed">
-                    {shareUrl}
-                  </p>
-                </div>
+                <div className="space-y-4">
+                  <div className="rounded-xl bg-[hsl(var(--accent))] border border-[hsl(var(--primary))]/20 p-4">
+                    <p className="font-sans text-xs text-muted-foreground mb-2">
+                      Gallery link
+                    </p>
 
-                <div className="flex gap-2">
+                    <p className="font-mono text-xs text-foreground break-all leading-relaxed">
+                      {shareUrl}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                        onClick={handleCopy}
+                        className={cn(
+                            "flex-1 btn-primary justify-center transition-all",
+                            copied && "bg-green-600 hover:opacity-100"
+                        )}
+                    >
+                      {copied ? (
+                          <>
+                            <Check className="w-4 h-4" />
+                            Copied!
+                          </>
+                      ) : (
+                          <>
+                            <Copy className="w-4 h-4" />
+                            Copy Link
+                          </>
+                      )}
+                    </button>
+
+                    <a
+                        href={shareUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-ghost px-4"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </div>
+
                   <button
-                    onClick={handleCopy}
-                    className={cn(
-                      'flex-1 btn-primary justify-center transition-all',
-                      copied && 'bg-green-600 hover:opacity-100'
-                    )}
+                      onClick={() => {
+                        setShareUrl(null);
+                        setShowCreateForm(false);
+                      }}
+                      className="w-full text-center font-sans text-xs text-muted-foreground hover:text-foreground transition-colors pt-1"
                   >
-                    {copied ? (
-                      <><Check className="w-4 h-4" />Copied!</>
-                    ) : (
-                      <><Copy className="w-4 h-4" />Copy Link</>
-                    )}
+                    Back to gallery links
                   </button>
-                  <a
-                    href={shareUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-ghost px-4"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
                 </div>
-
-                <button
-                  onClick={() => setShareUrl(null)}
-                  className="w-full text-center font-sans text-xs text-muted-foreground hover:text-foreground transition-colors pt-1"
-                >
-                  Create another link with different settings
-                </button>
-              </div>
             )}
           </div>
         </div>

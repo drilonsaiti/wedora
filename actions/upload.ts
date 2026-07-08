@@ -97,7 +97,7 @@ export async function uploadPhotoAction(
       file_size: optimizedBuffer.length,
       width,
       height,
-      approved: true,
+      approved: false,
       hidden: false,
       favourite: false,
       is_public: isPublic,

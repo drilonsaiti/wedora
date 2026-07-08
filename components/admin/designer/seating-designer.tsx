@@ -183,13 +183,13 @@ export function SeatingDesigner({ guests, tables }: SeatingDesignerProps) {
         </div>
 
         {/* Canvas Area */}
-        <div 
-          ref={containerRef}
-          className="flex-1 bg-white border border-border rounded-2xl relative overflow-auto shadow-inner min-h-[600px] p-20"
-          style={{ 
-            backgroundImage: 'radial-gradient(circle, #f0f0f0 1px, transparent 1px)',
-            backgroundSize: '30px 30px'
-          }}
+        <div
+            ref={containerRef}
+            className="flex-1 bg-background border border-border rounded-2xl relative overflow-auto shadow-inner min-h-[600px] p-20"
+            style={{
+              backgroundImage: 'radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)',
+              backgroundSize: '30px 30px'
+            }}
         >
           <div className="relative w-full h-full" style={{ minHeight: '800px', minWidth: '1000px' }}>
             {localTables.map(table => (

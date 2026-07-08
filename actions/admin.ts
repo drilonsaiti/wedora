@@ -212,7 +212,8 @@ export interface GalleryTokenOptions {
   eventId: string
   label?: string
   showMessages?: boolean
-  expiresInDays?: number // undefined = never
+  expiresInDays?: number
+  photoFilter?: 'all' | 'favourites'
 }
 
 export async function createGalleryTokenAction(
@@ -231,6 +232,7 @@ export async function createGalleryTokenAction(
       show_messages: opts.showMessages ?? true,
       expires_at: expiresAt,
       created_by: user.id,
+      photo_filter: opts.photoFilter ?? 'all',
     }
 
     const result = await supabase.from('gallery_tokens')
@@ -258,15 +260,23 @@ export async function createGalleryTokenAction(
 }
 
 export async function listGalleryTokensAction(): Promise<{
-  tokens: Array<{ id: string; token: string; label: string | null; expires_at: string | null; created_at: string }>
+  tokens: Array<{
+    id: string
+    token: string
+    label: string | null
+    expires_at: string | null
+    created_at: string
+    photo_filter: string
+  }>
   error?: string
 }> {
   try {
     const { supabase } = await requireAdmin()
     const { data, error } = await supabase
-      .from('gallery_tokens')
-      .select('id, token, label, expires_at, created_at')
-      .order('created_at', { ascending: false })
+        .from('gallery_tokens')
+        .select('id, token, label, expires_at, created_at, photo_filter')
+        .order('created_at', { ascending: false })
+
 
     if (error) return { tokens: [], error: error.message }
     return { tokens: data ?? [] }

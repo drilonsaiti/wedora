@@ -32,6 +32,32 @@
     --dark: 20 20% 12%;
   }
 
+  .dark {
+    --background: 20 16% 8%;
+    --foreground: 30 20% 92%;
+    --card: 20 15% 11%;
+    --card-foreground: 30 20% 92%;
+    --primary: 355 55% 68%;
+    --primary-foreground: 20 20% 10%;
+    --secondary: 20 13% 15%;
+    --secondary-foreground: 30 15% 85%;
+    --muted: 20 13% 16%;
+    --muted-foreground: 30 8% 60%;
+    --accent: 355 32% 22%;
+    --accent-foreground: 355 45% 82%;
+    --destructive: 0 62% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 20 13% 20%;
+    --input: 20 13% 20%;
+    --ring: 355 55% 68%;
+
+    /* Wedding-specific */
+    --gold: 38 70% 64%;
+    --blush: 355 35% 32%;
+    --cream: 20 15% 11%;
+    --dark: 30 20% 92%;
+  }
+
   * {
     @apply border-border;
   }
@@ -39,6 +65,7 @@
   body {
     @apply bg-background text-foreground;
     background-color: hsl(var(--cream));
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -89,7 +116,6 @@
   }
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -102,7 +128,6 @@
   border-radius: 3px;
 }
 
-/* Photo grid masonry-like */
 .photo-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

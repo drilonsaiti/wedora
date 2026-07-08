@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import {Photo} from "@/types/database";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -38,4 +39,14 @@ export function formatDate(dateStr: string): string {
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(dateStr))
+}
+export function invertUpdate(
+    original: Photo,
+    update: { approved?: boolean; hidden?: boolean; favourite?: boolean }
+) {
+  const inverted: typeof update = {}
+  if ('approved' in update) inverted.approved = original.approved
+  if ('hidden' in update) inverted.hidden = original.hidden
+  if ('favourite' in update) inverted.favourite = original.favourite
+  return inverted
 }
