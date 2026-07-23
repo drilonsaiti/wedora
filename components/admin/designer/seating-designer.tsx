@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import {useState, useCallback, useRef, useEffect} from 'react';
 import { toPng } from 'html-to-image';
-import { Download, Image as ImageIcon } from 'lucide-react';
+import { Download, Image as ImageIcon,Maximize2, Minimize2  } from 'lucide-react';
 import {
   DndContext,
   DragOverlay,
@@ -20,19 +20,32 @@ import { DraggableGuest } from './draggable-guest';
 import { GuestAvatar } from '@/components/guest-avatar';
 import { assignGuestToTable, updateTablePosition } from '@/actions/seating';
 import { Toaster } from '@/components/ui/sonner';
+import {cn} from "@/lib/utils";
 
 interface SeatingDesignerProps {
   guests: GuestWithTable[];
   tables: Table[];
 }
 
+const GRID_SIZE = 30;
+
 export function SeatingDesigner({ guests, tables }: SeatingDesignerProps) {
   const [localTables, setLocalTables] = useState<Table[]>(tables);
   const [localGuests, setLocalGuests] = useState<GuestWithTable[]>(guests);
   const [activeGuest, setActiveGuest] = useState<Guest | null>(null);
   const [activeTable, setActiveTable] = useState<Table | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsFullscreen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -63,22 +76,11 @@ export function SeatingDesigner({ guests, tables }: SeatingDesignerProps) {
     // Case 1: Dragging a table
     if (activeData?.type === 'table') {
       const table = activeData.table;
-      
-      if (!containerRef.current) return;
-      
-      const rect = containerRef.current.getBoundingClientRect();
-      
-      // Calculate absolute position relative to the container
-      // Use clientX/Y from the original event for precision
-      const x = event.activatorEvent instanceof PointerEvent || event.activatorEvent instanceof MouseEvent 
-        ? (event.activatorEvent as MouseEvent).clientX + event.delta.x - rect.left - 64 
-        : table.pos_x + event.delta.x;
-      const y = event.activatorEvent instanceof PointerEvent || event.activatorEvent instanceof MouseEvent
-        ? (event.activatorEvent as MouseEvent).clientY + event.delta.y - rect.top - 64
-        : table.pos_y + event.delta.y;
 
-      const newPosX = Math.round(x);
-      const newPosY = Math.round(y);
+      const rawX = table.pos_x + event.delta.x;
+      const rawY = table.pos_y + event.delta.y;
+      const newPosX = Math.round(rawX / GRID_SIZE) * GRID_SIZE;
+      const newPosY = Math.round(rawY / GRID_SIZE) * GRID_SIZE;
 
       // Update local state IMMEDIATELY and OPTIMISTICALLY
       setLocalTables(prev => prev.map(t => t.id === table.id ? { ...t, pos_x: newPosX, pos_y: newPosY } : t));
@@ -156,7 +158,12 @@ export function SeatingDesigner({ guests, tables }: SeatingDesignerProps) {
       onDragEnd={handleDragEnd}
       modifiers={[restrictToWindowEdges]}
     >
-      <div className="flex flex-col h-full gap-6">
+      <div className={cn(
+          "flex flex-col gap-6",
+          isFullscreen
+              ? "fixed inset-0 z-50 bg-background p-6"
+              : "h-full"
+      )}>
         {/* Sidebar: Unassigned Guests */}
         <div className="bg-card border border-border rounded-2xl p-4 flex flex-col sm:flex-row gap-4 justify-between items-start">
           <div className="flex-1">
@@ -179,6 +186,25 @@ export function SeatingDesigner({ guests, tables }: SeatingDesignerProps) {
                 <ImageIcon className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Shkarko si Foto</span>
               </button>
+          </div>
+
+          <div className="flex gap-2 shrink-0">
+            <button
+                onClick={exportAsImage}
+                className="btn-ghost text-xs py-2 px-3 border border-border rounded-xl"
+                title="Shkarko si Foto"
+            >
+              <ImageIcon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Shkarko si Foto</span>
+            </button>
+            <button
+                onClick={() => setIsFullscreen(prev => !prev)}
+                className="btn-ghost text-xs py-2 px-3 border border-border rounded-xl"
+                title={isFullscreen ? "Dil nga ekrani i plotë" : "Ekran i plotë"}
+            >
+              {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{isFullscreen ? "Dil" : "Ekran i plotë"}</span>
+            </button>
           </div>
         </div>
 
