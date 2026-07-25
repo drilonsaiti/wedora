@@ -2,7 +2,7 @@
 
 import {useState, useCallback, useRef, useEffect} from 'react';
 import { toPng } from 'html-to-image';
-import { Download, Image as ImageIcon,Maximize2, Minimize2  } from 'lucide-react';
+import { Download, Image as ImageIcon, Maximize2, Minimize2, Search } from 'lucide-react';
 import {
   DndContext,
   DragOverlay,
@@ -35,8 +35,9 @@ export function SeatingDesigner({ guests, tables }: SeatingDesignerProps) {
   const [activeGuest, setActiveGuest] = useState<Guest | null>(null);
   const [activeTable, setActiveTable] = useState<Table | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  
+  const [guestSearchQuery, setGuestSearchQuery] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
+  const innerContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isFullscreen) return;
@@ -132,24 +133,35 @@ export function SeatingDesigner({ guests, tables }: SeatingDesignerProps) {
     }
   };
 
-  const unassignedGuests = localGuests.filter(g => !g.table_id);
+  const unassignedGuests = localGuests
+      .filter(g => !g.table_id)
+      .filter(g =>
+          `${g.first_name} ${g.last_name}`.toLowerCase().includes(guestSearchQuery.toLowerCase())
+      );
 
   const exportAsImage = useCallback(() => {
-    if (containerRef.current === null) {
+    if (innerContentRef.current === null) {
       return
     }
 
-    toPng(containerRef.current, { cacheBust: true, backgroundColor: '#ffffff' })
-      .then((dataUrl) => {
-        const link = document.createElement('a')
-        link.download = 'seating-plan.png'
-        link.href = dataUrl
-        link.click()
-      })
-      .catch((err) => {
-        console.error('oops, something went wrong!', err)
-      })
-  }, [containerRef])
+    const node = innerContentRef.current;
+
+    toPng(node, {
+      cacheBust: true,
+      backgroundColor: '#ffffff',
+      width: node.scrollWidth,
+      height: node.scrollHeight,
+    })
+        .then((dataUrl) => {
+          const link = document.createElement('a')
+          link.download = 'seating-plan.png'
+          link.href = dataUrl
+          link.click()
+        })
+        .catch((err) => {
+          console.error('oops, something went wrong!', err)
+        })
+  }, [])
 
   return (
     <DndContext
@@ -159,35 +171,36 @@ export function SeatingDesigner({ guests, tables }: SeatingDesignerProps) {
       modifiers={[restrictToWindowEdges]}
     >
       <div className={cn(
-          "flex flex-col gap-6",
+          "flex flex-col gap-6 print:hidden",
           isFullscreen
               ? "fixed inset-0 z-50 bg-background p-6"
               : "h-full"
       )}>
         {/* Sidebar: Unassigned Guests */}
         <div className="bg-card border border-border rounded-2xl p-4 flex flex-col sm:flex-row gap-4 justify-between items-start">
-          <div className="flex-1">
+          <div className="flex-1 w-full">
             <h3 className="font-sans font-medium text-sm mb-4">Të ftuarit e pa caktuar ({unassignedGuests.length})</h3>
+            <div className="relative w-full sm:w-64 mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                  type="text"
+                  placeholder="Kërko sipas emrit..."
+                  value={guestSearchQuery}
+                  onChange={(e) => setGuestSearchQuery(e.target.value)}
+                  className="input-wedding pl-10 py-2 w-full"
+              />
+            </div>
             <div className="flex flex-wrap gap-3 max-h-32 overflow-y-auto p-1">
               {unassignedGuests.map(guest => (
-                <DraggableGuest key={guest.id} guest={guest} />
+                  <DraggableGuest key={guest.id} guest={guest} />
               ))}
               {unassignedGuests.length === 0 && (
-                <p className="text-xs text-muted-foreground italic">Të gjithë të ftuarit janë caktuar.</p>
+                  <p className="text-xs text-muted-foreground italic">
+                    {guestSearchQuery ? 'Asnjë i ftuar nuk përputhet.' : 'Të gjithë të ftuarit janë caktuar.'}
+                  </p>
               )}
             </div>
           </div>
-          <div className="flex gap-2 shrink-0">
-             <button 
-                onClick={exportAsImage}
-                className="btn-ghost text-xs py-2 px-3 border border-border rounded-xl"
-                title="Shkarko si Foto"
-              >
-                <ImageIcon className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Shkarko si Foto</span>
-              </button>
-          </div>
-
           <div className="flex gap-2 shrink-0">
             <button
                 onClick={exportAsImage}
@@ -207,7 +220,7 @@ export function SeatingDesigner({ guests, tables }: SeatingDesignerProps) {
             </button>
           </div>
         </div>
-
+        {/* Canvas Area */}
         {/* Canvas Area */}
         <div
             ref={containerRef}
@@ -217,13 +230,17 @@ export function SeatingDesigner({ guests, tables }: SeatingDesignerProps) {
               backgroundSize: '30px 30px'
             }}
         >
-          <div className="relative w-full h-full" style={{ minHeight: '800px', minWidth: '1000px' }}>
+          <div
+              ref={innerContentRef}
+              className="relative w-full h-full"
+              style={{ minHeight: '800px', minWidth: '1000px' }}
+          >
             {localTables.map(table => (
-              <DraggableTable 
-                key={table.id} 
-                table={table} 
-                guests={localGuests.filter(g => g.table_id === table.id)} 
-              />
+                <DraggableTable
+                    key={table.id}
+                    table={table}
+                    guests={localGuests.filter(g => g.table_id === table.id)}
+                />
             ))}
           </div>
         </div>

@@ -56,6 +56,13 @@ export function SeatingManagement({
     )
   }, [initialGuests, searchQuery])
 
+  const guestStats = useMemo(() => {
+    const total = initialGuests.length
+    const seated = initialGuests.filter(g => g.table_id).length
+    const unseated = total - seated
+    return { total, seated, unseated }
+  }, [initialGuests])
+
   const handleDeleteGuest = async (id: string) => {
     if (!confirm('A jeni të sigurt që dëshironi të fshini këtë të ftuar?')) return
     try {
@@ -91,7 +98,6 @@ export function SeatingManagement({
             </Link>
             <div>
               <h1 className="font-serif text-xl font-light text-[hsl(var(--dark))]">Sistemimi i të ftuarve</h1>
-              <p className="font-sans text-xs text-muted-foreground hidden sm:block">{adminEmail}</p>
             </div>
           </div>
           
@@ -137,47 +143,51 @@ export function SeatingManagement({
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-8">
         {/* Print view */}
-        <div className="hidden print:block print:w-full">
-          <h2 className="text-2xl font-serif mb-6 text-center">Lista e të Ftuarve sipas Tavolinave</h2>
+        {/* Print view */}
+        <div className="hidden print:block print:w-full" style={{ colorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' }}>
+          <h2 className="text-2xl font-serif mb-6 text-center" style={{ color: '#000000' }}>
+            Lista e të Ftuarve sipas Tavolinave
+          </h2>
           <div className="space-y-8">
             {initialTables.sort((a, b) => a.number - b.number).map(table => (
-              <div key={table.id} className="border-b pb-4">
-                <h3 className="text-lg font-bold mb-2">
-                  Tavolina {table.number} {table.label ? `- "${table.label}"` : ''}
-                </h3>
-                <div className="grid grid-cols-2 gap-2">
-                  {initialGuests
-                    .filter(g => g.table_id === table.id)
-                    .sort((a, b) => a.first_name.localeCompare(b.first_name))
-                    .map(guest => (
-                      <div key={guest.id} className="text-sm">
-                        • {guest.first_name} {guest.last_name}
-                      </div>
-                    ))}
+                <div key={table.id} className="border-b pb-4" style={{ borderColor: '#000000' }}>
+                  <h3 className="text-lg  mb-2 font-extrabold" style={{ color: '#000000' }}>
+                    Tavolina <span className="text-2xl"> {table.number}</span> {table.label ? `- "${table.label}"` : ''}
+                  </h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {initialGuests
+                        .filter(g => g.table_id === table.id)
+                        .sort((a, b) => a.first_name.localeCompare(b.first_name))
+                        .map(guest => (
+                            <div key={guest.id} className="text-sm" style={{ color: '#000000' }}>
+                              • {guest.first_name} {guest.last_name}
+                            </div>
+                        ))}
+                  </div>
                 </div>
-              </div>
             ))}
-            {initialGuests.filter(g => !g.table_id).length > 0 && (
-              <div className="border-b pb-4">
-                <h3 className="text-lg font-bold mb-2 text-muted-foreground">Të ftuar pa tavolinë</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  {initialGuests
-                    .filter(g => !g.table_id)
-                    .sort((a, b) => a.first_name.localeCompare(b.first_name))
-                    .map(guest => (
-                      <div key={guest.id} className="text-sm">
-                        • {guest.first_name} {guest.last_name}
-                      </div>
-                    ))}
-                </div>
-              </div>
-            )}
+
           </div>
         </div>
 
         {activeTab === 'guests' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center print:hidden">
+            <div className="space-y-6">
+              <div className="grid grid-cols-3 gap-4 print:hidden">
+                <div className="card-wedding p-4 text-center">
+                  <p className="font-serif text-2xl text-[hsl(var(--primary))]">{guestStats.total}</p>
+                  <p className="font-sans text-xs text-muted-foreground mt-1">Total i të ftuarve</p>
+                </div>
+                <div className="card-wedding p-4 text-center">
+                  <p className="font-serif text-2xl text-[hsl(var(--primary))]">{guestStats.seated}</p>
+                  <p className="font-sans text-xs text-muted-foreground mt-1">Të vendosur</p>
+                </div>
+                <div className="card-wedding p-4 text-center">
+                  <p className="font-serif text-2xl text-[hsl(var(--primary))]">{guestStats.unseated}</p>
+                  <p className="font-sans text-xs text-muted-foreground mt-1">Pa Tavolinë</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center print:hidden">
               <div className="relative w-full sm:w-72">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input 
