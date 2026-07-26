@@ -7,7 +7,8 @@ A production-ready wedding guest photo sharing web app built with Next.js 15, Su
 ## Architecture
 
 - **Next.js 15 App Router** — server components by default, client components only where interactivity is needed
-- **Supabase** — Postgres (photos/events/admins tables), Auth (admin login), Storage (photos + thumbnails buckets), RLS (all enforced server-side)
+- **Supabase** — Postgres (photos/events/admins tables), Auth (admin login), Storage (photos + thumbnails buckets),
+  RLS (all enforced server-side)
 - **Server Actions** — upload processing, admin CRUD, sign-out
 - **Sharp** — server-side image optimisation + thumbnail generation
 - **browser-image-compression** — client-side pre-compression before upload
@@ -73,6 +74,7 @@ npm install
 ```
 
 Key packages:
+
 - `next@15` `react@18` `typescript`
 - `@supabase/ssr` `@supabase/supabase-js`
 - `react-hook-form` `@hookform/resolvers` `zod`
@@ -119,6 +121,7 @@ MAX_FILE_SIZE_MB=10
 Go to **SQL Editor** in your Supabase dashboard and run the full contents of `supabase/schema.sql`.
 
 This creates:
+
 - `events`, `photos`, `admins` tables
 - `is_admin()` helper function
 - All RLS policies
@@ -126,13 +129,15 @@ This creates:
 
 ### 3. Update the event UUID
 
-In `schema.sql`, replace `'YOUR-EVENT-UUID-HERE'` with a real UUID (or let Postgres generate one with `uuid_generate_v4()`), then copy it to `NEXT_PUBLIC_EVENT_ID` in your `.env.local`.
+In `schema.sql`, replace `'YOUR-EVENT-UUID-HERE'` with a real UUID (or let Postgres generate one with
+`uuid_generate_v4()`), then copy it to `NEXT_PUBLIC_EVENT_ID` in your `.env.local`.
 
 ### 4. Create the first admin user
 
 In **Supabase Dashboard → Authentication → Users**, create a user with email + password.
 
 Then in SQL Editor:
+
 ```sql
 insert into public.admins (id, email)
 values ('USER-UUID-FROM-AUTH', 'admin@yourdomain.com');
@@ -142,18 +147,19 @@ values ('USER-UUID-FROM-AUTH', 'admin@yourdomain.com');
 
 ## RLS & Security Summary
 
-| Action | Who |
-|--------|-----|
-| Upload photo | Anyone (anonymous) |
-| Read photos | Admins only |
-| Update photo (approve/hide/favourite) | Admins only |
-| Delete photo | Admins only |
-| List all photos | Admins only |
-| Upload to `photos` bucket | Anyone |
-| Read from `photos` bucket | Admins only |
-| Read from `thumbnails` bucket | Admins only |
+| Action                                | Who                |
+|---------------------------------------|--------------------|
+| Upload photo                          | Anyone (anonymous) |
+| Read photos                           | Admins only        |
+| Update photo (approve/hide/favourite) | Admins only        |
+| Delete photo                          | Admins only        |
+| List all photos                       | Admins only        |
+| Upload to `photos` bucket             | Anyone             |
+| Read from `photos` bucket             | Admins only        |
+| Read from `thumbnails` bucket         | Admins only        |
 
-Guests can **only** write. They can never list or read other guests' photos. The service role key is used exclusively in server actions — never sent to the browser.
+Guests can **only** write. They can never list or read other guests' photos. The service role key is used exclusively in
+server actions — never sent to the browser.
 
 ---
 
@@ -184,11 +190,11 @@ Both buckets are **private**. Admins access via signed URLs (1-hour expiry) gene
 5. Client compresses image (max 3MB, max 2048px) using `browser-image-compression`
 6. Client validates: type (JPEG/PNG/WebP/HEIC) + size
 7. `uploadPhotoAction` (server action):
-   - Validates metadata with Zod
-   - Rate-limits: max 20 uploads per session
-   - Processes with Sharp: optimised WebP + 400×400 thumbnail
-   - Uploads both to Supabase Storage
-   - Inserts record into `photos` table
+    - Validates metadata with Zod
+    - Rate-limits: max 20 uploads per session
+    - Processes with Sharp: optimised WebP + 400×400 thumbnail
+    - Uploads both to Supabase Storage
+    - Inserts record into `photos` table
 8. Redirect to `/success`
 
 ---
@@ -218,7 +224,8 @@ App runs at `http://localhost:3000`
 
 Vercel handles Next.js App Router and server actions automatically.
 
-> Sharp requires Node.js runtime. In `next.config.js`, ensure no edge runtime is set for routes that use Sharp. The default Node.js runtime in App Router server actions is correct.
+> Sharp requires Node.js runtime. In `next.config.js`, ensure no edge runtime is set for routes that use Sharp. The
+> default Node.js runtime in App Router server actions is correct.
 
 ### Custom domain
 
@@ -232,7 +239,8 @@ Update `NEXT_PUBLIC_APP_URL` to your production domain.
 
 1. Deploy the app and get the production URL (e.g. `https://your-domain.com`)
 2. Generate a QR code pointing to `https://your-domain.com/upload` (or `/`)
-3. Use any QR generator: [qr-code-generator.com](https://www.qr-code-generator.com), or programmatically with a library like `qrcode`
+3. Use any QR generator: [qr-code-generator.com](https://www.qr-code-generator.com), or programmatically with a library
+   like `qrcode`
 4. Print and display at the venue — table cards, ceremony programs, welcome sign
 
 Recommended QR code size: at least 5×5cm printed, with a quiet zone border.
@@ -244,11 +252,11 @@ Recommended QR code size: at least 5×5cm printed, with a quiet zone border.
 - URL: `https://your-domain.com/admin/login`
 - Login with the admin email + password set in Supabase Auth
 - Dashboard features:
-  - Filter: All / Favourites / Hidden / Unapproved
-  - Per-photo: Favourite ♥ / Hide / Approve / Download / Delete
-  - Full-size modal with navigation arrows
-  - Guest name + message displayed
-  - Photo metadata (dimensions, file size, upload time)
+    - Filter: All / Favourites / Hidden / Unapproved
+    - Per-photo: Favourite ♥ / Hide / Approve / Download / Delete
+    - Full-size modal with navigation arrows
+    - Guest name + message displayed
+    - Photo metadata (dimensions, file size, upload time)
 
 ---
 

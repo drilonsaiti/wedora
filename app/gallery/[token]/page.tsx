@@ -87,7 +87,7 @@ export default async function GalleryPage({params}: GalleryPageProps) {
     }
 
     const photosResult = await photosQuery
-        .order('created_at', { ascending: true })
+        .order('created_at', {ascending: true})
         .range(0, GALLERY_PAGE_SIZE - 1)
 
     console.log('photosResult', photosResult)

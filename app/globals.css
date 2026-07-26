@@ -1,142 +1,145 @@
 @import "tailwindcss-animate";
 @import "shadcn/tailwind.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 30 20% 97%;
-    --foreground: 20 15% 15%;
-    --card: 30 20% 99%;
-    --card-foreground: 20 15% 15%;
-    --primary: 355 30% 55%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 30 25% 92%;
-    --secondary-foreground: 20 15% 25%;
-    --muted: 30 15% 94%;
-    --muted-foreground: 20 10% 55%;
-    --accent: 355 25% 92%;
-    --accent-foreground: 355 30% 35%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 30 15% 88%;
-    --input: 30 15% 88%;
-    --ring: 355 30% 55%;
-    --radius: 0.5rem;
+    :root {
+        --background: 30 20% 97%;
+        --foreground: 20 15% 15%;
+        --card: 30 20% 99%;
+        --card-foreground: 20 15% 15%;
+        --primary: 355 30% 55%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 30 25% 92%;
+        --secondary-foreground: 20 15% 25%;
+        --muted: 30 15% 94%;
+        --muted-foreground: 20 10% 55%;
+        --accent: 355 25% 92%;
+        --accent-foreground: 355 30% 35%;
+        --destructive: 0 72% 51%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 30 15% 88%;
+        --input: 30 15% 88%;
+        --ring: 355 30% 55%;
+        --radius: 0.5rem;
 
-    /* Wedding-specific */
-    --gold: 38 60% 55%;
-    --blush: 355 40% 85%;
-    --cream: 30 30% 96%;
-    --dark: 20 20% 12%;
-  }
+        /* Wedding-specific */
+        --gold: 38 60% 55%;
+        --blush: 355 40% 85%;
+        --cream: 30 30% 96%;
+        --dark: 20 20% 12%;
+    }
 
-  .dark {
-    --background: 20 16% 8%;
-    --foreground: 30 20% 92%;
-    --card: 20 15% 11%;
-    --card-foreground: 30 20% 92%;
-    --primary: 355 55% 68%;
-    --primary-foreground: 20 20% 10%;
-    --secondary: 20 13% 15%;
-    --secondary-foreground: 30 15% 85%;
-    --muted: 20 13% 16%;
-    --muted-foreground: 30 8% 60%;
-    --accent: 355 32% 22%;
-    --accent-foreground: 355 45% 82%;
-    --destructive: 0 62% 55%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 20 13% 20%;
-    --input: 20 13% 20%;
-    --ring: 355 55% 68%;
+    .dark {
+        --background: 20 16% 8%;
+        --foreground: 30 20% 92%;
+        --card: 20 15% 11%;
+        --card-foreground: 30 20% 92%;
+        --primary: 355 55% 68%;
+        --primary-foreground: 20 20% 10%;
+        --secondary: 20 13% 15%;
+        --secondary-foreground: 30 15% 85%;
+        --muted: 20 13% 16%;
+        --muted-foreground: 30 8% 60%;
+        --accent: 355 32% 22%;
+        --accent-foreground: 355 45% 82%;
+        --destructive: 0 62% 55%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 20 13% 20%;
+        --input: 20 13% 20%;
+        --ring: 355 55% 68%;
 
-    /* Wedding-specific */
-    --gold: 38 70% 64%;
-    --blush: 355 35% 32%;
-    --cream: 20 15% 11%;
-    --dark: 30 20% 92%;
-  }
+        /* Wedding-specific */
+        --gold: 38 70% 64%;
+        --blush: 355 35% 32%;
+        --cream: 20 15% 11%;
+        --dark: 30 20% 92%;
+    }
 
-  * {
-    @apply border-border;
-  }
+    * {
+        @apply border-border;
+    }
 
-  body {
-    @apply bg-background text-foreground;
-    background-color: hsl(var(--cream));
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
+    body {
+        @apply bg-background text-foreground;
+        background-color: hsl(var(--cream));
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
-  }
+    h1, h2, h3, h4, h5, h6 {
+        @apply font-serif;
+    }
 }
 
 @layer components {
-  .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-[hsl(var(--primary))]
-    px-8 py-3 text-sm font-sans font-medium tracking-widest uppercase text-white
-    transition-all duration-200 hover:opacity-90 active:scale-95
-    disabled:opacity-50 disabled:cursor-not-allowed;
-  }
+    .btn-primary {
+        @apply inline-flex items-center justify-center gap-2 rounded-full bg-[hsl(var(--primary))]
+        px-8 py-3 text-sm font-sans font-medium tracking-widest uppercase text-white
+        transition-all duration-200 hover:opacity-90 active:scale-95
+        disabled:opacity-50 disabled:cursor-not-allowed;
+    }
 
-  .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-border
-    px-6 py-2.5 text-sm font-sans font-medium tracking-wide text-foreground
-    transition-all duration-200 hover:bg-secondary active:scale-95
-    disabled:opacity-50 disabled:cursor-not-allowed;
-  }
+    .btn-ghost {
+        @apply inline-flex items-center justify-center gap-2 rounded-full border border-border
+        px-6 py-2.5 text-sm font-sans font-medium tracking-wide text-foreground
+        transition-all duration-200 hover:bg-secondary active:scale-95
+        disabled:opacity-50 disabled:cursor-not-allowed;
+    }
 
-  .card-wedding {
-    @apply rounded-2xl border border-border/50 bg-card shadow-sm;
-  }
+    .card-wedding {
+        @apply rounded-2xl border border-border/50 bg-card shadow-sm;
+    }
 
-  .input-wedding {
-    @apply w-full rounded-xl border border-input bg-background px-4 py-3
-    text-sm font-sans placeholder:text-muted-foreground
-    focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring
-    transition-colors duration-150;
-  }
+    .input-wedding {
+        @apply w-full rounded-xl border border-input bg-background px-4 py-3
+        text-sm font-sans placeholder:text-muted-foreground
+        focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring
+        transition-colors duration-150;
+    }
 
-  .label-wedding {
-    @apply block text-xs font-sans font-medium tracking-widest uppercase
-    text-muted-foreground mb-1.5;
-  }
+    .label-wedding {
+        @apply block text-xs font-sans font-medium tracking-widest uppercase
+        text-muted-foreground mb-1.5;
+    }
 
-  .shimmer {
-    background: linear-gradient(
-            90deg,
-            hsl(var(--muted)) 25%,
-            hsl(var(--secondary)) 50%,
-            hsl(var(--muted)) 75%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-  }
+    .shimmer {
+        background: linear-gradient(
+                90deg,
+                hsl(var(--muted)) 25%,
+                hsl(var(--secondary)) 50%,
+                hsl(var(--muted)) 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+    }
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+    width: 6px;
+    height: 6px;
 }
+
 ::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
+    background: hsl(var(--muted));
 }
+
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
-  border-radius: 3px;
+    background: hsl(var(--border));
+    border-radius: 3px;
 }
 
 .photo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
 }
 
 @media (max-width: 640px) {
-  .photo-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
+    .photo-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
 }

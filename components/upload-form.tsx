@@ -1,117 +1,116 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouter } from 'next/navigation'
-import { Camera, Upload, X, User, MessageSquare, Loader2, ImageIcon, ArrowLeftRight } from 'lucide-react'
+import {useCallback, useRef, useState} from 'react'
+import {useForm} from 'react-hook-form'
+import {zodResolver} from '@hookform/resolvers/zod'
+import {useRouter} from 'next/navigation'
+import {ArrowLeftRight, Camera, ImageIcon, Loader2, MessageSquare, Upload, User, X} from 'lucide-react'
 import imageCompression from 'browser-image-compression'
 import loadImage from 'blueimp-load-image'
-import { uploadFormSchema, type UploadFormValues, fileSchema } from '@/schemas'
-import { uploadPhotoAction } from '@/actions/upload'
-import { getOrCreateSessionId, formatBytes } from '@/lib/utils'
-import { cn } from '@/lib/utils'
+import {fileSchema, uploadFormSchema, type UploadFormValues} from '@/schemas'
+import {uploadPhotoAction} from '@/actions/upload'
+import {cn, formatBytes, getOrCreateSessionId} from '@/lib/utils'
 
 interface UploadFormProps {
-  eventId: string
+    eventId: string
 }
 
 type UploadState = 'idle' | 'compressing' | 'uploading' | 'done' | 'error'
 
 /** Filter presets */
 const filterOptions = [
-  { id: 'none', label: 'Normale', css: 'none' },
-  { id: 'grayscale', label: 'Bardhë e zi', css: 'grayscale(100%)' },
-  { id: 'sepia', label: 'Sepia', css: 'sepia(85%)' },
-  { id: 'warm', label: 'E ngrohtë', css: 'brightness(108%) contrast(108%) saturate(125%) hue-rotate(8deg)' },
-  { id: 'cool', label: 'E ftohtë', css: 'brightness(105%) contrast(110%) saturate(115%) hue-rotate(-15deg)' },
-  { id: 'vintage', label: 'Vintage', css: 'sepia(45%) contrast(112%) brightness(92%)' },
-  { id: 'dramatic', label: 'Dramatike', css: 'contrast(125%) brightness(88%) saturate(75%)' },
-  { id: 'soft', label: 'E butë', css: 'brightness(110%) contrast(95%) saturate(90%)' },
+    {id: 'none', label: 'Normale', css: 'none'},
+    {id: 'grayscale', label: 'Bardhë e zi', css: 'grayscale(100%)'},
+    {id: 'sepia', label: 'Sepia', css: 'sepia(85%)'},
+    {id: 'warm', label: 'E ngrohtë', css: 'brightness(108%) contrast(108%) saturate(125%) hue-rotate(8deg)'},
+    {id: 'cool', label: 'E ftohtë', css: 'brightness(105%) contrast(110%) saturate(115%) hue-rotate(-15deg)'},
+    {id: 'vintage', label: 'Vintage', css: 'sepia(45%) contrast(112%) brightness(92%)'},
+    {id: 'dramatic', label: 'Dramatike', css: 'contrast(125%) brightness(88%) saturate(75%)'},
+    {id: 'soft', label: 'E butë', css: 'brightness(110%) contrast(95%) saturate(90%)'},
 ] as const
 
 /** Manual pixel filter – 100% reliable on iOS Safari (bypasses ctx.filter export bugs) */
 function applyPixelFilter(imageData: ImageData, filterCss: string): void {
-  const data = imageData.data
-  const len = data.length
+    const data = imageData.data
+    const len = data.length
 
-  switch (filterCss) {
-    case 'grayscale(100%)':
-      for (let i = 0; i < len; i += 4) {
-        const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114
-        data[i] = data[i + 1] = data[i + 2] = gray
-      }
-      break
+    switch (filterCss) {
+        case 'grayscale(100%)':
+            for (let i = 0; i < len; i += 4) {
+                const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114
+                data[i] = data[i + 1] = data[i + 2] = gray
+            }
+            break
 
-    case 'sepia(85%)':
-      for (let i = 0; i < len; i += 4) {
-        const r = data[i]
-        const g = data[i + 1]
-        const b = data[i + 2]
-        data[i] = Math.min(255, r * 0.393 + g * 0.769 + b * 0.189)
-        data[i + 1] = Math.min(255, r * 0.349 + g * 0.686 + b * 0.168)
-        data[i + 2] = Math.min(255, r * 0.272 + g * 0.534 + b * 0.131)
-      }
-      break
+        case 'sepia(85%)':
+            for (let i = 0; i < len; i += 4) {
+                const r = data[i]
+                const g = data[i + 1]
+                const b = data[i + 2]
+                data[i] = Math.min(255, r * 0.393 + g * 0.769 + b * 0.189)
+                data[i + 1] = Math.min(255, r * 0.349 + g * 0.686 + b * 0.168)
+                data[i + 2] = Math.min(255, r * 0.272 + g * 0.534 + b * 0.131)
+            }
+            break
 
-    case 'brightness(108%) contrast(108%) saturate(125%) hue-rotate(8deg)': // warm
-      for (let i = 0; i < len; i += 4) {
-        let r = data[i] * 1.08
-        let g = data[i + 1] * 1.08
-        let b = data[i + 2] * 1.25
-        // simple warm hue shift
-        const temp = r
-        r = r * 1.05 + g * 0.05
-        g = g * 0.95 + b * 0.05
-        b = b * 0.95
-        data[i] = Math.min(255, r)
-        data[i + 1] = Math.min(255, g)
-        data[i + 2] = Math.min(255, b)
-      }
-      break
+        case 'brightness(108%) contrast(108%) saturate(125%) hue-rotate(8deg)': // warm
+            for (let i = 0; i < len; i += 4) {
+                let r = data[i] * 1.08
+                let g = data[i + 1] * 1.08
+                let b = data[i + 2] * 1.25
+                // simple warm hue shift
+                const temp = r
+                r = r * 1.05 + g * 0.05
+                g = g * 0.95 + b * 0.05
+                b = b * 0.95
+                data[i] = Math.min(255, r)
+                data[i + 1] = Math.min(255, g)
+                data[i + 2] = Math.min(255, b)
+            }
+            break
 
-    case 'brightness(105%) contrast(110%) saturate(115%) hue-rotate(-15deg)': // cool
-      for (let i = 0; i < len; i += 4) {
-        let r = data[i] * 1.05
-        let g = data[i + 1] * 1.1
-        let b = data[i + 2] * 1.15
-        data[i] = Math.min(255, r)
-        data[i + 1] = Math.min(255, g)
-        data[i + 2] = Math.min(255, b)
-      }
-      break
+        case 'brightness(105%) contrast(110%) saturate(115%) hue-rotate(-15deg)': // cool
+            for (let i = 0; i < len; i += 4) {
+                let r = data[i] * 1.05
+                let g = data[i + 1] * 1.1
+                let b = data[i + 2] * 1.15
+                data[i] = Math.min(255, r)
+                data[i + 1] = Math.min(255, g)
+                data[i + 2] = Math.min(255, b)
+            }
+            break
 
-    case 'sepia(45%) contrast(112%) brightness(92%)': // vintage
-      for (let i = 0; i < len; i += 4) {
-        const r = data[i]
-        const g = data[i + 1]
-        const b = data[i + 2]
-        data[i] = Math.min(255, r * 0.393 + g * 0.769 + b * 0.189)
-        data[i + 1] = Math.min(255, r * 0.349 + g * 0.686 + b * 0.168)
-        data[i + 2] = Math.min(255, r * 0.272 + g * 0.534 + b * 0.131)
-      }
-      break
+        case 'sepia(45%) contrast(112%) brightness(92%)': // vintage
+            for (let i = 0; i < len; i += 4) {
+                const r = data[i]
+                const g = data[i + 1]
+                const b = data[i + 2]
+                data[i] = Math.min(255, r * 0.393 + g * 0.769 + b * 0.189)
+                data[i + 1] = Math.min(255, r * 0.349 + g * 0.686 + b * 0.168)
+                data[i + 2] = Math.min(255, r * 0.272 + g * 0.534 + b * 0.131)
+            }
+            break
 
-    case 'contrast(125%) brightness(88%) saturate(75%)': // dramatic
-      for (let i = 0; i < len; i += 4) {
-        data[i] = Math.min(255, (data[i] - 128) * 1.25 + 128 * 0.88)
-        data[i + 1] = Math.min(255, (data[i + 1] - 128) * 1.25 + 128 * 0.88)
-        data[i + 2] = Math.min(255, (data[i + 2] - 128) * 1.25 + 128 * 0.88)
-      }
-      break
+        case 'contrast(125%) brightness(88%) saturate(75%)': // dramatic
+            for (let i = 0; i < len; i += 4) {
+                data[i] = Math.min(255, (data[i] - 128) * 1.25 + 128 * 0.88)
+                data[i + 1] = Math.min(255, (data[i + 1] - 128) * 1.25 + 128 * 0.88)
+                data[i + 2] = Math.min(255, (data[i + 2] - 128) * 1.25 + 128 * 0.88)
+            }
+            break
 
-    case 'brightness(110%) contrast(95%) saturate(90%)': // soft
-      for (let i = 0; i < len; i += 4) {
-        data[i] = Math.min(255, data[i] * 1.1)
-        data[i + 1] = Math.min(255, data[i + 1] * 1.1)
-        data[i + 2] = Math.min(255, data[i + 2] * 0.9)
-      }
-      break
+        case 'brightness(110%) contrast(95%) saturate(90%)': // soft
+            for (let i = 0; i < len; i += 4) {
+                data[i] = Math.min(255, data[i] * 1.1)
+                data[i + 1] = Math.min(255, data[i + 1] * 1.1)
+                data[i + 2] = Math.min(255, data[i + 2] * 0.9)
+            }
+            break
 
-    default:
-      // none
-      break
-  }
+        default:
+            // none
+            break
+    }
 }
 
 /** Bake final image with flip + filter using pixel manipulation (fixes iOS Safari bug) */
@@ -120,440 +119,445 @@ async function bakeFinalImage(
     isFlipped: boolean,
     filterCss: string
 ): Promise<File> {
-  // If nothing to change → return original (fast path)
-  if (!isFlipped && filterCss === 'none') {
-    return originalFile
-  }
-
-  return new Promise((resolve) => {
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.createElement('canvas')
-      canvas.width = img.width
-      canvas.height = img.height
-      const ctx = canvas.getContext('2d')!
-
-      ctx.save()
-
-      if (isFlipped) {
-        ctx.translate(img.width, 0)
-        ctx.scale(-1, 1)
-      }
-
-      // Draw the image (flipped if needed)
-      ctx.drawImage(img, 0, 0)
-
-      ctx.restore()
-
-      // Apply filter via pixels (this is the part that works on iOS Safari)
-      if (filterCss !== 'none') {
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-        applyPixelFilter(imageData, filterCss)
-        ctx.putImageData(imageData, 0, 0)
-      }
-
-      // Export using toBlob (most reliable on Safari)
-      canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              const finalFile = new File([blob], 'photo.jpg', { type: 'image/jpeg' })
-              resolve(finalFile)
-            } else {
-              resolve(originalFile)
-            }
-          },
-          'image/jpeg',
-          0.92
-      )
+    // If nothing to change → return original (fast path)
+    if (!isFlipped && filterCss === 'none') {
+        return originalFile
     }
 
-    img.src = URL.createObjectURL(originalFile)
-  })
+    return new Promise((resolve) => {
+        const img = new Image()
+        img.onload = () => {
+            const canvas = document.createElement('canvas')
+            canvas.width = img.width
+            canvas.height = img.height
+            const ctx = canvas.getContext('2d')!
+
+            ctx.save()
+
+            if (isFlipped) {
+                ctx.translate(img.width, 0)
+                ctx.scale(-1, 1)
+            }
+
+            // Draw the image (flipped if needed)
+            ctx.drawImage(img, 0, 0)
+
+            ctx.restore()
+
+            // Apply filter via pixels (this is the part that works on iOS Safari)
+            if (filterCss !== 'none') {
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+                applyPixelFilter(imageData, filterCss)
+                ctx.putImageData(imageData, 0, 0)
+            }
+
+            // Export using toBlob (most reliable on Safari)
+            canvas.toBlob(
+                (blob) => {
+                    if (blob) {
+                        const finalFile = new File([blob], 'photo.jpg', {type: 'image/jpeg'})
+                        resolve(finalFile)
+                    } else {
+                        resolve(originalFile)
+                    }
+                },
+                'image/jpeg',
+                0.92
+            )
+        }
+
+        img.src = URL.createObjectURL(originalFile)
+    })
 }
 
-export function UploadForm({ eventId }: UploadFormProps) {
-  const router = useRouter()
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [preview, setPreview] = useState<string | null>(null)
-  const [isFlipped, setIsFlipped] = useState(false)
-  const [selectedFilter, setSelectedFilter] = useState<string>('none')
-  const [uploadState, setUploadState] = useState<UploadState>('idle')
-  const [progress, setProgress] = useState(0)
-  const [fileError, setFileError] = useState<string | null>(null)
-  const [serverError, setServerError] = useState<string | null>(null)
-  const cameraRef = useRef<HTMLInputElement>(null)
-  const galleryRef = useRef<HTMLInputElement>(null)
+export function UploadForm({eventId}: UploadFormProps) {
+    const router = useRouter()
+    const [selectedFile, setSelectedFile] = useState<File | null>(null)
+    const [preview, setPreview] = useState<string | null>(null)
+    const [isFlipped, setIsFlipped] = useState(false)
+    const [selectedFilter, setSelectedFilter] = useState<string>('none')
+    const [uploadState, setUploadState] = useState<UploadState>('idle')
+    const [progress, setProgress] = useState(0)
+    const [fileError, setFileError] = useState<string | null>(null)
+    const [serverError, setServerError] = useState<string | null>(null)
+    const cameraRef = useRef<HTMLInputElement>(null)
+    const galleryRef = useRef<HTMLInputElement>(null)
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<UploadFormValues>({
-    resolver: zodResolver(uploadFormSchema),
-    defaultValues: {
-      isPublic: false,
-    },
-  })
+    const {
+        register,
+        handleSubmit,
+        formState: {errors},
+    } = useForm<UploadFormValues>({
+        resolver: zodResolver(uploadFormSchema),
+        defaultValues: {
+            isPublic: false,
+        },
+    })
 
-  const handleFileSelect = useCallback(async (file: File) => {
-    setFileError(null)
-    setIsFlipped(false)
-    setSelectedFilter('none')
+    const handleFileSelect = useCallback(async (file: File) => {
+        setFileError(null)
+        setIsFlipped(false)
+        setSelectedFilter('none')
 
-    const result = fileSchema.safeParse(file)
-    if (!result.success) {
-      setFileError(result.error.errors[0]?.message ?? 'Invalid file')
-      return
-    }
+        const result = fileSchema.safeParse(file)
+        if (!result.success) {
+            setFileError(result.error.errors[0]?.message ?? 'Invalid file')
+            return
+        }
 
-    try {
-      const orientedBlob = await new Promise<Blob>((resolve, reject) => {
-        loadImage(
-            file,
-            (canvas) => {
-              if (!(canvas instanceof HTMLCanvasElement)) {
-                reject(new Error('Failed to create oriented canvas'))
-                return
-              }
-              canvas.toBlob(
-                  (blob) => (blob ? resolve(blob) : reject()),
-                  'image/jpeg',
-                  0.92
-              )
-            },
-            {
-              orientation: true,
-              canvas: true,
-              maxWidth: 2048,
-              maxHeight: 2048,
+        try {
+            const orientedBlob = await new Promise<Blob>((resolve, reject) => {
+                loadImage(
+                    file,
+                    (canvas) => {
+                        if (!(canvas instanceof HTMLCanvasElement)) {
+                            reject(new Error('Failed to create oriented canvas'))
+                            return
+                        }
+                        canvas.toBlob(
+                            (blob) => (blob ? resolve(blob) : reject()),
+                            'image/jpeg',
+                            0.92
+                        )
+                    },
+                    {
+                        orientation: true,
+                        canvas: true,
+                        maxWidth: 2048,
+                        maxHeight: 2048,
+                    }
+                )
+            })
+
+            const orientedFile = new File([orientedBlob], 'photo.jpg', {type: 'image/jpeg'})
+
+            const corrected = await imageCompression(orientedFile, {
+                maxSizeMB: 3,
+                maxWidthOrHeight: 2048,
+                useWebWorker: true,
+                fileType: 'image/jpeg',
+                initialQuality: 0.92,
+                exifOrientation: 1,
+            })
+
+            setSelectedFile(corrected)
+            const url = URL.createObjectURL(corrected)
+            setPreview(url)
+        } catch {
+            setSelectedFile(file)
+            const url = URL.createObjectURL(file)
+            setPreview(url)
+        }
+    }, [])
+
+    const clearFile = useCallback(() => {
+        if (preview) URL.revokeObjectURL(preview)
+        setSelectedFile(null)
+        setPreview(null)
+        setIsFlipped(false)
+        setSelectedFilter('none')
+        setFileError(null)
+        if (cameraRef.current) cameraRef.current.value = ''
+        if (galleryRef.current) galleryRef.current.value = ''
+    }, [preview])
+
+    const toggleFlip = useCallback(() => {
+        setIsFlipped((prev) => !prev)
+    }, [])
+
+    const onSubmit = async (values: UploadFormValues) => {
+        if (!selectedFile) {
+            setFileError('Ju lutem zgjidhni një foto së pari')
+            return
+        }
+
+        setServerError(null)
+        setUploadState('compressing')
+        setProgress(10)
+
+        try {
+            let finalFile = selectedFile
+
+            if (finalFile.size > 3 * 1024 * 1024) {
+                finalFile = await imageCompression(finalFile, {
+                    maxSizeMB: 3,
+                    maxWidthOrHeight: 2048,
+                    useWebWorker: true,
+                    fileType: 'image/jpeg',
+                    initialQuality: 0.85,
+                    exifOrientation: 1,
+                })
             }
-        )
-      })
 
-      const orientedFile = new File([orientedBlob], 'photo.jpg', { type: 'image/jpeg' })
+            // Bake flip + filter permanently (pixel method = works on iOS Safari)
+            setProgress(35)
+            finalFile = await bakeFinalImage(finalFile, isFlipped, selectedFilter)
 
-      const corrected = await imageCompression(orientedFile, {
-        maxSizeMB: 3,
-        maxWidthOrHeight: 2048,
-        useWebWorker: true,
-        fileType: 'image/jpeg',
-        initialQuality: 0.92,
-        exifOrientation: 1,
-      })
+            setProgress(40)
+            setUploadState('uploading')
 
-      setSelectedFile(corrected)
-      const url = URL.createObjectURL(corrected)
-      setPreview(url)
-    } catch {
-      setSelectedFile(file)
-      const url = URL.createObjectURL(file)
-      setPreview(url)
-    }
-  }, [])
+            const sessionId = getOrCreateSessionId()
+            const fd = new FormData()
+            fd.append('file', finalFile, 'photo.jpg')
+            fd.append('eventId', eventId)
+            fd.append('sessionId', sessionId)
+            fd.append('isPublic', values.isPublic.toString())
+            if (values.guestName) fd.append('guestName', values.guestName)
+            if (values.message) fd.append('message', values.message)
 
-  const clearFile = useCallback(() => {
-    if (preview) URL.revokeObjectURL(preview)
-    setSelectedFile(null)
-    setPreview(null)
-    setIsFlipped(false)
-    setSelectedFilter('none')
-    setFileError(null)
-    if (cameraRef.current) cameraRef.current.value = ''
-    if (galleryRef.current) galleryRef.current.value = ''
-  }, [preview])
+            setProgress(60)
 
-  const toggleFlip = useCallback(() => {
-    setIsFlipped((prev) => !prev)
-  }, [])
+            const result = await uploadPhotoAction(fd)
+            setProgress(100)
 
-  const onSubmit = async (values: UploadFormValues) => {
-    if (!selectedFile) {
-      setFileError('Ju lutem zgjidhni një foto së pari')
-      return
+            if (!result.success) {
+                setServerError(result.error ?? 'Ngarkimi dështoi')
+                setUploadState('error')
+                return
+            }
+
+            setUploadState('done')
+            // Small delay to ensure state update is processed before navigation
+            setTimeout(() => {
+                window.location.href = '/success'
+            }, 100)
+        } catch (err) {
+            console.error(err)
+            setServerError('Diçka shkoi keq. Ju lutem provoni përsëri.')
+            setUploadState('error')
+        }
     }
 
-    setServerError(null)
-    setUploadState('compressing')
-    setProgress(10)
+    const isLoading = uploadState === 'compressing' || uploadState === 'uploading'
 
-    try {
-      let finalFile = selectedFile
+    return (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Photo Selection */}
+            {!selectedFile ? (
+                <div className="space-y-4">
+                    <div className="card-wedding p-6 text-center border-dashed border-2 border-border">
+                        <div
+                            className="w-16 h-16 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center mx-auto mb-4">
+                            <ImageIcon className="w-8 h-8 text-[hsl(var(--primary))]" strokeWidth={1.5}/>
+                        </div>
+                        <p className="font-sans text-sm text-muted-foreground mb-6">
+                            Zgjidh si dëshiron ta shtosh foton
+                        </p>
 
-      if (finalFile.size > 3 * 1024 * 1024) {
-        finalFile = await imageCompression(finalFile, {
-          maxSizeMB: 3,
-          maxWidthOrHeight: 2048,
-          useWebWorker: true,
-          fileType: 'image/jpeg',
-          initialQuality: 0.85,
-          exifOrientation: 1,
-        })
-      }
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                onClick={() => cameraRef.current?.click()}
+                                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border bg-background hover:bg-accent/50 transition-colors"
+                            >
+                                <Camera className="w-6 h-6 text-[hsl(var(--primary))]" strokeWidth={1.5}/>
+                                <span className="font-sans text-xs font-medium">Kamera</span>
+                            </button>
 
-      // Bake flip + filter permanently (pixel method = works on iOS Safari)
-      setProgress(35)
-      finalFile = await bakeFinalImage(finalFile, isFlipped, selectedFilter)
+                            <button
+                                type="button"
+                                onClick={() => galleryRef.current?.click()}
+                                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border bg-background hover:bg-accent/50 transition-colors"
+                            >
+                                <Upload className="w-6 h-6 text-[hsl(var(--primary))]" strokeWidth={1.5}/>
+                                <span className="font-sans text-xs font-medium">Galeria</span>
+                            </button>
+                        </div>
+                    </div>
 
-      setProgress(40)
-      setUploadState('uploading')
+                    {fileError && (
+                        <p className="text-sm text-destructive text-center">{fileError}</p>
+                    )}
+                </div>
+            ) : (
+                <>
+                    <div className="relative rounded-2xl overflow-hidden bg-muted aspect-square">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={preview!}
+                            alt="Preview"
+                            className="w-full h-full object-cover transition-all duration-300"
+                            style={{
+                                filter: selectedFilter,
+                                transform: isFlipped ? 'scaleX(-1)' : 'none',
+                            }}
+                        />
 
-      const sessionId = getOrCreateSessionId()
-      const fd = new FormData()
-      fd.append('file', finalFile, 'photo.jpg')
-      fd.append('eventId', eventId)
-      fd.append('sessionId', sessionId)
-      fd.append('isPublic', values.isPublic.toString())
-      if (values.guestName) fd.append('guestName', values.guestName)
-      if (values.message) fd.append('message', values.message)
+                        {!isLoading && (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={clearFile}
+                                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
+                                >
+                                    <X className="w-4 h-4"/>
+                                </button>
 
-      setProgress(60)
+                                <button
+                                    type="button"
+                                    onClick={toggleFlip}
+                                    className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 hover:bg-black/80 text-white text-xs px-3 h-8 rounded-full font-sans transition-colors"
+                                >
+                                    <ArrowLeftRight className="w-4 h-4"/>
+                                    {isFlipped ? 'Ktheje normal' : 'Rrotullo'}
+                                </button>
+                            </>
+                        )}
 
-      const result = await uploadPhotoAction(fd)
-      setProgress(100)
+                        {selectedFile && (
+                            <div
+                                className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full font-sans">
+                                {formatBytes(selectedFile.size)}
+                            </div>
+                        )}
+                    </div>
 
-      if (!result.success) {
-        setServerError(result.error ?? 'Ngarkimi dështoi')
-        setUploadState('error')
-        return
-      }
+                    {/* Filters */}
+                    <div className="mt-5 space-y-5">
+                        <div>
+                            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2 font-sans">
+                                Filtrat
+                            </p>
+                            <div className="flex gap-2 overflow-x-auto pb-3 snap-x">
+                                {filterOptions.map((filter) => (
+                                    <button
+                                        key={filter.id}
+                                        type="button"
+                                        onClick={() => setSelectedFilter(filter.css)}
+                                        className={cn(
+                                            'flex-shrink-0 snap-start px-5 py-2 text-sm font-medium rounded-3xl border transition-all whitespace-nowrap',
+                                            selectedFilter === filter.css
+                                                ? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary))] text-white shadow-inner'
+                                                : 'border-border hover:border-[hsl(var(--primary))]/30'
+                                        )}
+                                    >
+                                        {filter.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
 
-      setUploadState('done')
-      // Small delay to ensure state update is processed before navigation
-      setTimeout(() => {
-        window.location.href = '/success'
-      }, 100)
-    } catch (err) {
-      console.error(err)
-      setServerError('Diçka shkoi keq. Ju lutem provoni përsëri.')
-      setUploadState('error')
-    }
-  }
+            {/* Hidden file inputs */}
+            <input
+                ref={cameraRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => {
+                    const f = e.target.files?.[0]
+                    if (f) handleFileSelect(f)
+                }}
+            />
+            <input
+                ref={galleryRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                    const f = e.target.files?.[0]
+                    if (f) handleFileSelect(f)
+                }}
+            />
 
-  const isLoading = uploadState === 'compressing' || uploadState === 'uploading'
-
-  return (
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Photo Selection */}
-        {!selectedFile ? (
+            {/* Optional fields */}
             <div className="space-y-4">
-              <div className="card-wedding p-6 text-center border-dashed border-2 border-border">
-                <div className="w-16 h-16 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center mx-auto mb-4">
-                  <ImageIcon className="w-8 h-8 text-[hsl(var(--primary))]" strokeWidth={1.5} />
+                <div>
+                    <label className="label-wedding">
+                        <User className="w-3 h-3 inline mr-1"/>
+                        Emri juaj (opsionale)
+                    </label>
+                    <input
+                        {...register('guestName')}
+                        type="text"
+                        placeholder="e.g. Emma & Tom"
+                        className="input-wedding"
+                        maxLength={100}
+                        disabled={isLoading}
+                    />
+                    {errors.guestName && (
+                        <p className="mt-1 text-xs text-destructive">{errors.guestName.message}</p>
+                    )}
                 </div>
-                <p className="font-sans text-sm text-muted-foreground mb-6">
-                  Zgjidh si dëshiron ta shtosh foton
-                </p>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                      type="button"
-                      onClick={() => cameraRef.current?.click()}
-                      className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border bg-background hover:bg-accent/50 transition-colors"
-                  >
-                    <Camera className="w-6 h-6 text-[hsl(var(--primary))]" strokeWidth={1.5} />
-                    <span className="font-sans text-xs font-medium">Kamera</span>
-                  </button>
-
-                  <button
-                      type="button"
-                      onClick={() => galleryRef.current?.click()}
-                      className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border bg-background hover:bg-accent/50 transition-colors"
-                  >
-                    <Upload className="w-6 h-6 text-[hsl(var(--primary))]" strokeWidth={1.5} />
-                    <span className="font-sans text-xs font-medium">Galeria</span>
-                  </button>
+                <div>
+                    <label className="label-wedding">
+                        <MessageSquare className="w-3 h-3 inline mr-1"/>
+                        Mesazhi (opsionale)
+                    </label>
+                    <textarea
+                        {...register('message')}
+                        placeholder="Ndaj një urim ose kujtim…"
+                        className="input-wedding resize-none"
+                        rows={3}
+                        maxLength={500}
+                        disabled={isLoading}
+                    />
+                    {errors.message && (
+                        <p className="mt-1 text-xs text-destructive">{errors.message.message}</p>
+                    )}
                 </div>
-              </div>
 
-              {fileError && (
-                  <p className="text-sm text-destructive text-center">{fileError}</p>
-              )}
+                <div
+                    className="flex items-start gap-3 p-4 rounded-2xl bg-[hsl(var(--accent))] border border-[hsl(var(--gold))/20">
+                    <input
+                        {...register('isPublic')}
+                        type="checkbox"
+                        id="isPublic"
+                        className="mt-1 w-4 h-4 rounded border-[hsl(var(--gold))] text-[hsl(var(--primary))] focus:ring-[hsl(var(--primary))]"
+                        disabled={isLoading}
+                    />
+                    <label htmlFor="isPublic"
+                           className="text-xs font-sans text-muted-foreground leading-relaxed cursor-pointer select-none">
+                        Fotot janë private dhe shihen vetëm nga çifti. Nëse e shënoni këtë kutizë, fotoja mund të
+                        shfaqet edhe në galerinë publike.
+                    </label>
+                </div>
             </div>
-        ) : (
-            <>
-              <div className="relative rounded-2xl overflow-hidden bg-muted aspect-square">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    src={preview!}
-                    alt="Preview"
-                    className="w-full h-full object-cover transition-all duration-300"
-                    style={{
-                      filter: selectedFilter,
-                      transform: isFlipped ? 'scaleX(-1)' : 'none',
-                    }}
-                />
 
-                {!isLoading && (
+            {/* Progress bar */}
+            {isLoading && (
+                <div className="space-y-2">
+                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-[hsl(var(--primary))] rounded-full transition-all duration-300"
+                            style={{width: `${progress}%`}}
+                        />
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center font-sans">
+                        {uploadState === 'compressing' ? 'Duke optimizuar foton tuaj…' : 'Duke u ngarkuar…'}
+                    </p>
+                </div>
+            )}
+
+            {/* Server error */}
+            {serverError && (
+                <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3">
+                    <p className="text-sm text-destructive font-sans">{serverError}</p>
+                </div>
+            )}
+
+            {/* Submit */}
+            <button
+                type="submit"
+                disabled={isLoading || !selectedFile}
+                className="btn-primary w-full justify-center"
+            >
+                {isLoading ? (
                     <>
-                      <button
-                          type="button"
-                          onClick={clearFile}
-                          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-
-                      <button
-                          type="button"
-                          onClick={toggleFlip}
-                          className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 hover:bg-black/80 text-white text-xs px-3 h-8 rounded-full font-sans transition-colors"
-                      >
-                        <ArrowLeftRight className="w-4 h-4" />
-                        {isFlipped ? 'Ktheje normal' : 'Rrotullo'}
-                      </button>
+                        <Loader2 className="w-4 h-4 animate-spin"/>
+                        {uploadState === 'compressing' ? 'Duke optimizuar…' : 'Duke u ngarkuar…'}
+                    </>
+                ) : (
+                    <>
+                        <Upload className="w-4 h-4"/>
+                        Dërgo foton
                     </>
                 )}
-
-                {selectedFile && (
-                    <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full font-sans">
-                      {formatBytes(selectedFile.size)}
-                    </div>
-                )}
-              </div>
-
-              {/* Filters */}
-              <div className="mt-5 space-y-5">
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2 font-sans">
-                    Filtrat
-                  </p>
-                  <div className="flex gap-2 overflow-x-auto pb-3 snap-x">
-                    {filterOptions.map((filter) => (
-                        <button
-                            key={filter.id}
-                            type="button"
-                            onClick={() => setSelectedFilter(filter.css)}
-                            className={cn(
-                                'flex-shrink-0 snap-start px-5 py-2 text-sm font-medium rounded-3xl border transition-all whitespace-nowrap',
-                                selectedFilter === filter.css
-                                    ? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary))] text-white shadow-inner'
-                                    : 'border-border hover:border-[hsl(var(--primary))]/30'
-                            )}
-                        >
-                          {filter.label}
-                        </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </>
-        )}
-
-        {/* Hidden file inputs */}
-        <input
-            ref={cameraRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0]
-              if (f) handleFileSelect(f)
-            }}
-        />
-        <input
-            ref={galleryRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0]
-              if (f) handleFileSelect(f)
-            }}
-        />
-
-        {/* Optional fields */}
-        <div className="space-y-4">
-          <div>
-            <label className="label-wedding">
-              <User className="w-3 h-3 inline mr-1" />
-              Emri juaj (opsionale)
-            </label>
-            <input
-                {...register('guestName')}
-                type="text"
-                placeholder="e.g. Emma & Tom"
-                className="input-wedding"
-                maxLength={100}
-                disabled={isLoading}
-            />
-            {errors.guestName && (
-                <p className="mt-1 text-xs text-destructive">{errors.guestName.message}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="label-wedding">
-              <MessageSquare className="w-3 h-3 inline mr-1" />
-              Mesazhi (opsionale)
-            </label>
-            <textarea
-                {...register('message')}
-                placeholder="Ndaj një urim ose kujtim…"
-                className="input-wedding resize-none"
-                rows={3}
-                maxLength={500}
-                disabled={isLoading}
-            />
-            {errors.message && (
-                <p className="mt-1 text-xs text-destructive">{errors.message.message}</p>
-            )}
-          </div>
-
-          <div className="flex items-start gap-3 p-4 rounded-2xl bg-[hsl(var(--accent))] border border-[hsl(var(--gold))/20">
-            <input
-                {...register('isPublic')}
-                type="checkbox"
-                id="isPublic"
-                className="mt-1 w-4 h-4 rounded border-[hsl(var(--gold))] text-[hsl(var(--primary))] focus:ring-[hsl(var(--primary))]"
-                disabled={isLoading}
-            />
-            <label htmlFor="isPublic" className="text-xs font-sans text-muted-foreground leading-relaxed cursor-pointer select-none">
-              Fotot janë private dhe shihen vetëm nga çifti. Nëse e shënoni këtë kutizë, fotoja mund të shfaqet edhe në galerinë publike.
-            </label>
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        {isLoading && (
-            <div className="space-y-2">
-              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                <div
-                    className="h-full bg-[hsl(var(--primary))] rounded-full transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground text-center font-sans">
-                {uploadState === 'compressing' ? 'Duke optimizuar foton tuaj…' : 'Duke u ngarkuar…'}
-              </p>
-            </div>
-        )}
-
-        {/* Server error */}
-        {serverError && (
-            <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3">
-              <p className="text-sm text-destructive font-sans">{serverError}</p>
-            </div>
-        )}
-
-        {/* Submit */}
-        <button
-            type="submit"
-            disabled={isLoading || !selectedFile}
-            className="btn-primary w-full justify-center"
-        >
-          {isLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                {uploadState === 'compressing' ? 'Duke optimizuar…' : 'Duke u ngarkuar…'}
-              </>
-          ) : (
-              <>
-                <Upload className="w-4 h-4" />
-                Dërgo foton
-              </>
-          )}
-        </button>
-      </form>
-  )
+            </button>
+        </form>
+    )
 }

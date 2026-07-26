@@ -2,7 +2,7 @@
 'use client'
 
 import * as React from 'react'
-import { ThemeProvider as NextThemesProvider } from 'next-themes'
+import {ThemeProvider as NextThemesProvider} from 'next-themes'
 
 // next-themes renders an inline <script> to prevent theme flicker on load.
 // React 19 warns about script tags rendered inside components — that warning

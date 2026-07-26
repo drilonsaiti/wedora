@@ -1,1 +1,2 @@
-alter table photos alter column approved set default false;
+alter table photos
+    alter column approved set default false;
