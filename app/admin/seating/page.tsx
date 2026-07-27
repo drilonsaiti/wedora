@@ -30,11 +30,7 @@ export default async function SeatingPage() {
         getVenueElements()
     ])
 
-    console.log('RESULT:', {
-        guests,
-        tables,
-        venueElements,
-    });
+
 
     return (
         <SeatingManagement

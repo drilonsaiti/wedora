@@ -71,7 +71,6 @@ export default async function GalleryPage({params}: GalleryPageProps) {
         )
     }
 
-    console.log('galleryToken', galleryToken)
 
     let photosQuery = supabase
         .from('photos')
@@ -82,7 +81,6 @@ export default async function GalleryPage({params}: GalleryPageProps) {
         .eq('hidden', false);
 
     if (galleryToken.photo_filter === 'favourites') {
-        console.log('Filtering favourites')
         photosQuery = photosQuery.eq('favourite', true)
     }
 
@@ -90,7 +88,6 @@ export default async function GalleryPage({params}: GalleryPageProps) {
         .order('created_at', {ascending: true})
         .range(0, GALLERY_PAGE_SIZE - 1)
 
-    console.log('photosResult', photosResult)
 
     const photos = photosResult.data as GalleryPhotoRow[] | null
     const total = photosResult.count ?? 0

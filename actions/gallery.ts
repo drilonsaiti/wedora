@@ -35,7 +35,6 @@ export async function getGalleryPhotosAction(token: string, offset: number) {
                 .eq('hidden', false)
 
             if (galleryToken.photo_filter === 'favourites') {
-                console.log('Filtering favourites')
                 query = query.eq('favourite', true)
             }
 

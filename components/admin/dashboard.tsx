@@ -261,7 +261,6 @@ export function AdminDashboard({
     const loadGalleryTokens = useCallback(async () => {
         setLoadingTokens(true)
         const result = await listGalleryTokensAction();
-        console.log('Gallery tokens:', result);
         setGalleryTokens(result.tokens)
         setLoadingTokens(false)
     }, [])

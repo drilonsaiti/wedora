@@ -8,9 +8,10 @@ import {DraggableGuest} from './draggable-guest';
 interface DraggableTableProps {
     table: Table;
     guests: Guest[];
+    showGuests: boolean;
 }
 
-export function DraggableTable({table, guests}: DraggableTableProps) {
+export function DraggableTable({table, guests,showGuests}: DraggableTableProps) {
     const {
         attributes,
         listeners,
@@ -79,7 +80,7 @@ export function DraggableTable({table, guests}: DraggableTableProps) {
             </div>
 
             {/* Guests around the table */}
-            {guests.map((guest, index) => {
+            {showGuests && guests.map((guest, index) => {
                 const angle = (index / table.seats) * 2 * Math.PI - Math.PI / 2;
                 const radius = 64; // Distance from center
                 const x = Math.cos(angle) * radius;

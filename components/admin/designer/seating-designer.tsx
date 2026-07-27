@@ -38,7 +38,7 @@ import {
 } from '@/actions/seating';
 import {cn} from "@/lib/utils";
 import {DraggableVenueElement} from "@/components/draggable-venue-element";
-
+import { ToggleSwitch } from '@/components/ui/toggle-switch';
 interface SeatingDesignerProps {
     guests: GuestWithTable[];
     tables: Table[];
@@ -67,6 +67,7 @@ export function SeatingDesigner({guests, tables, venueElements}: SeatingDesigner
     const containerRef = useRef<HTMLDivElement>(null);
     const innerContentRef = useRef<HTMLDivElement>(null);
     const [localVenueElements, setLocalVenueElements] = useState<VenueElement[]>(venueElements);
+    const [showGuests, setShowGuests] = useState(true);
 
     useEffect(() => {
         if (!isFullscreen) return;
@@ -299,6 +300,11 @@ export function SeatingDesigner({guests, tables, venueElements}: SeatingDesigner
                         </div>
                     </div>
                     <div className="flex gap-2 shrink-0">
+                        <ToggleSwitch
+                            checked={showGuests}
+                            onChange={setShowGuests}
+                            label="Shfaq të ftuarit"
+                        />
                         <button
                             onClick={exportAsImage}
                             className="btn-ghost text-xs py-2 px-3 border border-border rounded-xl"
@@ -337,6 +343,7 @@ export function SeatingDesigner({guests, tables, venueElements}: SeatingDesigner
                                 key={table.id}
                                 table={table}
                                 guests={localGuests.filter(g => g.table_id === table.id)}
+                                showGuests={showGuests}
                             />
                         ))}
 
