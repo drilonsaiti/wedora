@@ -43,7 +43,8 @@ export function VenueMap({tables, venueElements, highlightedTableId, maxHeight =
             // On mobile, we want it to be larger to be readable
             const minScale = containerWidth < 480 ? 0.7 : (containerWidth < 768 ? 0.6 : 0.5);
             const widthScale = containerWidth / bounds.width;
-            setScale(Math.max(widthScale, minScale));
+            const newScale = Math.max(widthScale, minScale);
+            setScale(prev => Math.abs(prev - newScale) > 0.01 ? newScale : prev);
         }
 
         updateScale();

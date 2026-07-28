@@ -33,7 +33,7 @@ export async function getGuests() {
             const supabase = createServiceClient()
             const {data, error} = await supabase
                 .from('guests')
-                .select('*, tables(*)')
+                .select('id, first_name, last_name, initials, table_id, tables(id, number)')
                 .order('created_at', {ascending: false})
 
             if (error) throw new Error(error.message)
@@ -129,7 +129,7 @@ export async function getTables() {
             const supabase = createServiceClient()
             const {data, error} = await supabase
                 .from('tables')
-                .select('*')
+                .select('id, number, seats, label, pos_x, pos_y')
                 .order('number', {ascending: true})
 
             if (error) throw new Error(error.message)
@@ -255,7 +255,7 @@ export async function getVenueElements() {
 
             const {data, error} = await supabase
                 .from('venue_elements')
-                .select('*')
+                .select('id, type, label, pos_x, pos_y, width, height')
                 .order('created_at', {ascending: true});
 
             if (error) {

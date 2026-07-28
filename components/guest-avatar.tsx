@@ -1,3 +1,4 @@
+import {memo} from 'react';
 import {cn} from '@/lib/utils';
 
 interface GuestAvatarProps {
@@ -35,7 +36,7 @@ const colorMap: Record<string, string> = {
     Z: 'bg-violet-100 text-violet-700',
 };
 
-export function GuestAvatar({initials, className, size = 'md'}: GuestAvatarProps) {
+export const GuestAvatar = memo(({initials, className, size = 'md'}: GuestAvatarProps) => {
     const firstLetter = initials.charAt(0).toUpperCase();
     const colors = colorMap[firstLetter] || 'bg-secondary text-secondary-foreground';
 
@@ -58,4 +59,4 @@ export function GuestAvatar({initials, className, size = 'md'}: GuestAvatarProps
             {initials}
         </div>
     );
-}
+});

@@ -1,7 +1,7 @@
 'use client'
 
-import {useMemo, useState, useTransition} from 'react'
-import {useRouter} from 'next/navigation'
+import {useMemo, useState, useTransition, Suspense, lazy} from 'react'
+import dynamic from 'next/dynamic'
 import {
     ChevronLeft,
     Edit2,
@@ -13,6 +13,7 @@ import {
     Search,
     Trash2,
     Users,
+    Loader2
 } from 'lucide-react'
 import {GuestWithTable, Table, VenueElement} from '@/types/seating'
 import {deleteGuest, deleteTable} from '@/actions/seating'
@@ -21,8 +22,19 @@ import {cn} from '@/lib/utils'
 import {GuestAvatar} from '@/components/guest-avatar'
 import {GuestForm} from '@/components/admin/guest-form'
 import {TableForm} from '@/components/admin/table-form'
-import {SeatingDesigner} from '@/components/admin/designer/seating-designer'
+const SeatingDesigner = dynamic(() => import('@/components/admin/designer/seating-designer').then(mod => mod.SeatingDesigner), {
+    loading: () => (
+        <div className="flex-1 flex items-center justify-center bg-muted/20 rounded-2xl border border-dashed border-border min-h-[600px]">
+            <div className="flex flex-col items-center gap-2">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                <p className="text-sm text-muted-foreground font-sans">Duke ngarkuar planin e uljes...</p>
+            </div>
+        </div>
+    ),
+    ssr: false
+})
 import Link from 'next/link'
+import {useRouter} from "next/navigation";
 
 interface SeatingManagementProps {
     initialGuests: GuestWithTable[]
@@ -66,8 +78,10 @@ export function SeatingManagement({
     const handleDeleteGuest = async (id: string) => {
         if (!confirm('A jeni të sigurt që dëshironi të fshini këtë të ftuar?')) return
         try {
-            await deleteGuest(id)
-            startTransition(() => router.refresh())
+            startTransition(async () => {
+                await deleteGuest(id)
+                router.refresh()
+            })
         } catch (err) {
             alert('Dështoi fshirja e të ftuarit')
         }
@@ -76,8 +90,10 @@ export function SeatingManagement({
     const handleDeleteTable = async (id: string) => {
         if (!confirm('A jeni të sigurt që dëshironi të fshini këtë tavolinë? Të gjithë të ftuarit e caktuar do të mbeten pa tavolinë.')) return
         try {
-            await deleteTable(id)
-            startTransition(() => router.refresh())
+            startTransition(async () => {
+                await deleteTable(id)
+                router.refresh()
+            })
         } catch (err) {
             alert('Dështoi fshirja e tavolinës')
         }

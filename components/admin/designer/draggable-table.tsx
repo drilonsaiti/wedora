@@ -1,5 +1,6 @@
 'use client';
 
+import {memo} from 'react';
 import {useDraggable, useDroppable} from '@dnd-kit/core';
 import {cn} from '@/lib/utils';
 import {Guest, Table} from '@/types/seating';
@@ -11,7 +12,7 @@ interface DraggableTableProps {
     showGuests: boolean;
 }
 
-export function DraggableTable({table, guests,showGuests}: DraggableTableProps) {
+export const DraggableTable = memo(({table, guests, showGuests}: DraggableTableProps) => {
     const {
         attributes,
         listeners,
@@ -100,4 +101,4 @@ export function DraggableTable({table, guests,showGuests}: DraggableTableProps) 
             })}
         </div>
     );
-}
+});

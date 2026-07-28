@@ -177,7 +177,7 @@ export async function getPhotosAction(filters?: {
 
         let query = supabase
             .from('photos')
-            .select('*', {count: 'exact'})
+            .select('id, event_id, guest_name, message, thumbnail_path, approved, hidden, favourite, created_at', {count: 'exact'})
             .order('created_at', {ascending: false})
 
         if (filters?.favourite !== undefined) {

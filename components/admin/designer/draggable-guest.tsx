@@ -1,5 +1,6 @@
 'use client';
 
+import {memo} from 'react';
 import {useDraggable} from '@dnd-kit/core';
 import {cn} from '@/lib/utils';
 import {GuestAvatar} from '@/components/guest-avatar';
@@ -13,7 +14,7 @@ interface DraggableGuestProps {
     };
 }
 
-export function DraggableGuest({guest}: DraggableGuestProps) {
+export const DraggableGuest = memo(({guest}: DraggableGuestProps) => {
     const {attributes, listeners, setNodeRef, transform, isDragging} = useDraggable({
         id: `guest-${guest.id}`,
         data: {
@@ -51,4 +52,4 @@ export function DraggableGuest({guest}: DraggableGuestProps) {
             </div>
         </div>
     );
-}
+});
