@@ -47,6 +47,8 @@ interface SeatingDesignerProps {
 
 
 const GRID_SIZE = 30;
+const MIN_POS_Y = 60;
+const MIN_POS_X = 60;
 
 const ELEMENT_TYPES: { type: VenueElementType; label: string; Icon: any }[] = [
     {type: 'entrance', label: 'Hyrja', Icon: DoorOpen},
@@ -110,8 +112,10 @@ export function SeatingDesigner({guests, tables, venueElements}: SeatingDesigner
 
             const rawX = table.pos_x + event.delta.x;
             const rawY = table.pos_y + event.delta.y;
-            const newPosX = Math.round(rawX / GRID_SIZE) * GRID_SIZE;
-            const newPosY = Math.round(rawY / GRID_SIZE) * GRID_SIZE;
+            const snappedX = Math.round(rawX / GRID_SIZE) * GRID_SIZE;
+            const snappedY = Math.round(rawY / GRID_SIZE) * GRID_SIZE;
+            const newPosX = Math.max(MIN_POS_X, snappedX);
+            const newPosY = Math.max(MIN_POS_Y, snappedY);
 
             // Update local state IMMEDIATELY and OPTIMISTICALLY
             setLocalTables(prev => prev.map(t => t.id === table.id ? {...t, pos_x: newPosX, pos_y: newPosY} : t));
@@ -135,8 +139,10 @@ export function SeatingDesigner({guests, tables, venueElements}: SeatingDesigner
 
             const rawX = element.pos_x + event.delta.x;
             const rawY = element.pos_y + event.delta.y;
-            const newPosX = Math.round(rawX / GRID_SIZE) * GRID_SIZE;
-            const newPosY = Math.round(rawY / GRID_SIZE) * GRID_SIZE;
+            const snappedX = Math.round(rawX / GRID_SIZE) * GRID_SIZE;
+            const snappedY = Math.round(rawY / GRID_SIZE) * GRID_SIZE;
+            const newPosX = Math.max(MIN_POS_X, snappedX);
+            const newPosY = Math.max(MIN_POS_Y, snappedY);
 
             setLocalVenueElements(prev => prev.map(el => el.id === element.id ? {
                 ...el,
@@ -215,7 +221,7 @@ export function SeatingDesigner({guests, tables, venueElements}: SeatingDesigner
             cacheBust: true,
             backgroundColor: '#ffffff',
             width: node.scrollWidth,
-            height: node.scrollHeight,
+            height: node.scrollHeight + 40,
         })
             .then((dataUrl) => {
                 const link = document.createElement('a')
@@ -336,7 +342,7 @@ export function SeatingDesigner({guests, tables, venueElements}: SeatingDesigner
                     <div
                         ref={innerContentRef}
                         className="relative w-full h-full"
-                        style={{minHeight: '800px', minWidth: '1000px'}}
+                        style={{minHeight: '870px', minWidth: '1000px'}}
                     >
                         {localTables.map(table => (
                             <DraggableTable
