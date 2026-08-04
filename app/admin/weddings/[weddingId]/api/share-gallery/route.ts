@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export async function POST(
-  _req: Request,
-  { params }: { params: { weddingId: string } }
+    _req: Request,
+    { params }: { params: Promise<{ weddingId: string }> }
 ) {
+  const { weddingId } = await params
   try {
     const supabaseClient = await createClient()
     const {
@@ -31,7 +32,7 @@ export async function POST(
     const { data: wedding } = await supabaseClient
       .from('weddings')
       .select('id')
-      .eq('id', params.weddingId)
+      .eq('id', weddingId)
       .maybeSingle()
 
     if (!wedding) {
@@ -42,6 +43,7 @@ export async function POST(
 
     const insert = await supabase
       .from('gallery_tokens')
+        // @ts-ignore
       .insert({
         wedding_id: wedding.id,
         show_messages: true,

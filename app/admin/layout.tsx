@@ -1,14 +1,20 @@
-import type {Metadata} from 'next'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import {AdminNavBar} from "@/components/admin/admin-nav-bar";
 
-export const metadata: Metadata = {
-    title: 'Admin — Wedding Photos',
-    robots: 'noindex, nofollow',
-}
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-export default async function AdminLayout({
-                                              children,
-                                          }: {
-    children: React.ReactNode
-}) {
-    return <>{children}</>
+    if (!user) redirect('/admin/login')
+
+    const { data: admin } = await supabase.from('admins').select('id').eq('id', user.id).single()
+    if (!admin) redirect('/admin/login')
+
+    return (
+        <div className="min-h-screen bg-background">
+            <AdminNavBar adminEmail={user.email ?? ''} />
+            {children}
+        </div>
+    )
 }

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
+// GET will attempt a streamed ZIP for small albums; for large ones it should queue a job.
+// For now, we return 202 for large sets and 501 for unimplemented streaming to keep the route stable.
 export async function GET(
     _req: Request,
     { params }: { params: Promise<{ weddingId: string }> }
@@ -19,10 +21,11 @@ export async function GET(
 
   if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  // Platform admins are allowed across tenants; just ensure the wedding exists
   const { data: wedding } = await supabaseClient
       .from('weddings')
       .select('id')
-      .eq('id', weddingId)                                     // ← use unwrapped value
+      .eq('id', weddingId)
       .maybeSingle()
 
   if (!wedding) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -35,6 +38,7 @@ export async function GET(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
+  // Heuristic threshold: if > 120 photos, likely to exceed Hobby 10s — queue instead
   if ((count ?? 0) > 120) {
     return NextResponse.json({
       status: 'queued-required',
@@ -42,6 +46,7 @@ export async function GET(
     }, { status: 202 })
   }
 
+  // Placeholder until streaming archiver is implemented
   return NextResponse.json({
     status: 'not-implemented',
     message: 'Streaming ZIP not implemented yet in this branch.',

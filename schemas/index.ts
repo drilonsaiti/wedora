@@ -107,6 +107,8 @@ export type TableFormValues = z.infer<typeof tableSchema>
 export const createWeddingSchema = z.object({
     groom_name: z.string().trim().min(2, 'Emri duhet të ketë të paktën 2 shkronja').max(50, 'Emri është shumë i gjatë'),
     bride_name: z.string().trim().min(2, 'Emri duhet të ketë të paktën 2 shkronja').max(50, 'Emri është shumë i gjatë'),
+    groom_email: z.string().trim().email('Email i pavlefshëm'),
+    bride_email: z.string().trim().email('Email i pavlefshëm').optional().or(z.literal('')),
     slug: z.string().trim().min(3, 'URL-ja duhet të ketë të paktën 3 karaktere').max(60, 'URL-ja është shumë e gjatë').regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'Vetëm shkronja të vogla, numra dhe vizë (-) lejohen'),
     theme_hue: z.number().min(0).max(360).default(355),
 });

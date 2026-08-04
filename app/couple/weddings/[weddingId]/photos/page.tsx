@@ -57,7 +57,7 @@ export default async function AdminWeddingPhotosPage({ params, searchParams }: P
       weddingId={wedding.id}
       error={photoResult.error}
       activeFilter={filter}
-      role="admin"
+      role="couple"
     />
   )
 }

@@ -6,9 +6,10 @@ export default async function WeddingLayout({
                                                 params,
                                             }: {
     children: React.ReactNode;
-    params: { slug: string };
+    params: Promise<{ slug: string }>;
 }) {
-    const wedding = await getWeddingBySlug(params.slug);
+    const { slug } = await params
+    const wedding = await getWeddingBySlug(slug);
 
     if (!wedding || !wedding.wedding_settings) {
         throw new Error('No wedding found for this admin')

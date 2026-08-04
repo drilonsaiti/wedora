@@ -51,7 +51,7 @@ export function AdminLoginForm() {
                 return
             }
 
-            router.push('/admin/photos')
+            router.push('/admin/dashboard')
             router.refresh()
         } catch {
             setError('An unexpected error occurred')

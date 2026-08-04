@@ -277,7 +277,7 @@ export async function getPhotosAction(
 // ============================================================
 
 export interface GalleryTokenOptions {
-    eventId: string
+    eventId?: string
     label?: string
     showMessages?: boolean
     expiresInDays?: number
@@ -289,13 +289,30 @@ export async function createGalleryTokenAction(
 ): Promise<{ token?: string; url?: string; error?: string }> {
     try {
         const {user, supabase, weddingId} = await requireAdmin()
+        if (!weddingId) return {error: 'Unexpected error'}
+
+        let eventId = opts.eventId
+
+        if (!eventId) {
+            const {data: event, error: eventError} = await supabase
+                .from('events')
+                .select('id')
+                .eq('wedding_id', weddingId)
+                .maybeSingle()
+
+            if (eventError || !event) {
+                return {error: 'No event found for this wedding'}
+            }
+
+            eventId = event.id
+        }
 
         const expiresAt = opts.expiresInDays
             ? new Date(Date.now() + opts.expiresInDays * 86_400_000).toISOString()
             : null
 
         const payload = {
-            event_id: opts.eventId,
+            event_id: eventId,
             label: opts.label ?? null,
             show_messages: opts.showMessages ?? true,
             expires_at: expiresAt,
@@ -340,6 +357,7 @@ export async function listGalleryTokensAction(): Promise<{
 }> {
     try {
         const {supabase, weddingId} = await requireAdmin()
+        if (!weddingId) return {tokens: [], error: 'Unexpected error'}
         const {data, error} = await supabase
             .from('gallery_tokens')
             .select('id, token, label, expires_at, created_at, photo_filter')
@@ -359,6 +377,7 @@ export async function deleteGalleryTokenAction(
 ): Promise<{ success: boolean; error?: string }> {
     try {
         const {supabase, weddingId} = await requireAdmin()
+        if (!weddingId) return {success: false, error: 'Unexpected error'};
         const {error} = await supabase
             .from('gallery_tokens')
             .delete()
@@ -377,4 +396,35 @@ export async function signOutAction() {
     const supabase = await createClient()
     await supabase.auth.signOut()
     redirect('/admin/login')
+}
+
+export async function getAdminDashboardStats() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    // Nëse admin platforme (te tabela admins), sheh të gjitha dasmat; përndryshe vetëm të vetat.
+    // is_admin() te RLS tashmë e trajton këtë — thjesht bëjmë select() normal.
+    const { data: weddings } = await supabase
+        .from('weddings')
+        .select('id, groom_name, bride_name, slug, created_at')
+
+    if (!weddings || weddings.length === 0) {
+        return { weddings: [], totalGuests: 0, totalPhotos: 0, pendingPhotos: 0 }
+    }
+
+    const weddingIds = weddings.map((w) => w.id)
+
+    const [{ count: totalGuests }, { count: totalPhotos }, { count: pendingPhotos }] = await Promise.all([
+        supabase.from('guests').select('id', { count: 'exact', head: true }).in('wedding_id', weddingIds),
+        supabase.from('photos').select('id', { count: 'exact', head: true }).in('wedding_id', weddingIds),
+        supabase.from('photos').select('id', { count: 'exact', head: true }).in('wedding_id', weddingIds).eq('approved', false),
+    ])
+
+    return {
+        weddings,
+        totalGuests: totalGuests ?? 0,
+        totalPhotos: totalPhotos ?? 0,
+        pendingPhotos: pendingPhotos ?? 0,
+    }
 }

@@ -7,6 +7,7 @@ type Props = { params: { weddingId: string } }
 
 export default async function WeddingDashboardPage({ params }: Props) {
   const supabase = await createClient()
+  const { weddingId } = await params
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
@@ -26,7 +27,7 @@ export default async function WeddingDashboardPage({ params }: Props) {
   const { data: wedding } = await supabase
     .from('weddings')
     .select('id')
-    .eq('id', params.weddingId)
+    .eq('id', weddingId)
     .single()
 
   if (!wedding) redirect('/admin/weddings')

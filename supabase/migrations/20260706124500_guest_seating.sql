@@ -90,15 +90,3 @@ update of first_name, last_name
 on public.guests
     for each row
     execute function public.handle_guest_initials();
-
-CREATE OR REPLACE FUNCTION public.is_platform_admin()
-RETURNS boolean
-LANGUAGE sql
-SECURITY DEFINER
-STABLE
-SET search_path = public
-AS $$
-SELECT EXISTS (
-    SELECT 1 FROM public.admins WHERE user_id = auth.uid()
-);
-$$;

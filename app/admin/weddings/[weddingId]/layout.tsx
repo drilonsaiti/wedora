@@ -32,6 +32,9 @@ export default async function WeddingAdminLayout({ children, params }: Props) {
       .eq('id', weddingId)
       .single()
 
+  if (error) {
+    console.error('WEDDING FETCH ERROR:', error.message, error.code, error.details)
+  }
   if (error || !wedding) redirect('/admin/weddings')
 
   return (

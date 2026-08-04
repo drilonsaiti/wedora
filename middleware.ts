@@ -59,13 +59,29 @@ export async function middleware(request: NextRequest) {
 
     if (pathname === '/admin/login' && user) {
         const url = request.nextUrl.clone()
-        url.pathname = '/admin/photos'
+        url.pathname = '/admin/dashboard'
         return NextResponse.redirect(url)
+    }
+
+    if (pathname.startsWith('/admin/weddings')) {
+        if (!user) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/admin/login'
+            return NextResponse.redirect(url)
+        }
+    }
+
+    if (pathname.startsWith('/couple/weddings')) {
+        if (!user) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/couple/login'
+            return NextResponse.redirect(url)
+        }
     }
 
     return supabaseResponse
 }
 
 export const config = {
-    matcher: ['/admin/:path*'],
+    matcher: ['/admin/:path*', '/couple/:path*'],
 }

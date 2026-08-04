@@ -65,6 +65,9 @@ ALTER TABLE public.venue_elements ALTER COLUMN wedding_id SET NOT NULL;
 ALTER TABLE public.photos ALTER COLUMN wedding_id SET NOT NULL;
 ALTER TABLE public.gallery_tokens ALTER COLUMN wedding_id SET NOT NULL;
 ALTER TABLE public.events ALTER COLUMN wedding_id SET NOT NULL;
+ALTER TABLE public.weddings
+    ADD COLUMN IF NOT EXISTS groom_email text,
+    ADD COLUMN IF NOT EXISTS bride_email text;
 
 -- 6. Performance Indexes
 CREATE INDEX guests_wedding_id_idx ON public.guests (wedding_id);

@@ -45,7 +45,8 @@ interface AdminDashboardProps {
     initialPhotos: Photo[]
     initialTotal: number
     adminEmail: string
-    weddingId: string | null
+    weddingId: string
+    role: 'admin' | 'couple'
     error?: string
     activeFilter?: string
 }
@@ -64,6 +65,7 @@ export function AdminDashboard({
                                    initialTotal,
                                    adminEmail,
                                    weddingId,
+                                   role,
                                    error: initialError,
                                    activeFilter,
                                }: AdminDashboardProps) {
@@ -189,7 +191,7 @@ export function AdminDashboard({
     const handleZipDownload = async (filter: 'all' | 'favourites') => {
         setZipLoading(filter)
         try {
-            const url = `/api/admin/zip${filter === 'favourites' ? '?filter=favourites' : ''}`
+            const url = `/api/admin/zip?weddingId=${weddingId}${filter === 'favourites' ? '&filter=favourites' : ''}`
             const res = await fetch(url)
             if (!res.ok) {
                 alert('Failed to generate ZIP. Please try again.')
@@ -236,9 +238,7 @@ export function AdminDashboard({
     // ── GALLERY SHARE ──
     const handleCreateGalleryLink = async () => {
         setShareLoading(true)
-        const eventId = process.env.NEXT_PUBLIC_EVENT_ID ?? ''
         const result = await createGalleryTokenAction({
-            eventId,
             showMessages,
             expiresInDays: expiresInDays ? parseInt(expiresInDays, 10) : undefined,
             label: galleryLabel || 'Wedding Gallery',
@@ -280,7 +280,10 @@ export function AdminDashboard({
     }
 
     const handleFilterChange = (filter?: string) => {
-        const url = filter ? `/admin/photos?filter=${filter}` : '/admin/photos'
+        const base = role === 'admin'
+            ? `/admin/weddings/${weddingId}/photos`
+            : `/couple/weddings/${weddingId}/photos`
+        const url = filter ? `${base}?filter=${filter}` : base
         router.push(url)
     }
 
@@ -309,13 +312,15 @@ export function AdminDashboard({
                         <ThemeToggle/>
 
                         {/* Seating button */}
-                        <Link
-                            href="/admin/seating"
-                            className="btn-ghost text-xs py-2 px-3 sm:px-4"
-                        >
-                            <Armchair className="w-3.5 h-3.5"/>
-                            <span className="hidden sm:inline">Sistemimi</span>
-                        </Link>
+                        {role === 'admin' && (
+                            <Link
+                                href={`/admin/weddings/${weddingId}`}
+                                className="btn-ghost text-xs py-2 px-3 sm:px-4"
+                            >
+                                <Armchair className="w-3.5 h-3.5"/>
+                                <span className="hidden sm:inline">Sistemimi</span>
+                            </Link>
+                        )}
 
                         {/* Share Gallery button */}
                         <button
