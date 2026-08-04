@@ -23,7 +23,37 @@ async function requireAdmin() {
 
     if (!admin) redirect('/admin/login')
 
-    return {user, supabase: createServiceClient()}
+    // Try to find an owned wedding; platform admins may not own any.
+    const {data: wedding} = await supabase
+        .from('weddings')
+        .select('id')
+        .eq('owner_user_id', user.id)
+        .maybeSingle()
+
+    return {user, supabase: createServiceClient(), weddingId: wedding?.id ?? null}
+}
+
+async function requireWeddingAdmin() {
+    const context = await requireAdmin()
+
+    const {data: wedding, error} = await context.supabase
+        .from('weddings')
+        .select('id')
+        .eq('owner_user_id', context.user.id)
+        .maybeSingle()
+
+    if (error) {
+        throw new Error(error.message)
+    }
+
+    if (!wedding) {
+        throw new Error('No wedding configured')
+    }
+
+    return {
+        ...context,
+        weddingId: wedding.id,
+    }
 }
 
 export async function updatePhotoAction(
@@ -36,7 +66,7 @@ export async function updatePhotoAction(
             return {success: false, error: 'Invalid input'}
         }
 
-        const {supabase} = await requireAdmin()
+        const {supabase, weddingId} = await requireAdmin()
 
         const {approved, hidden, favourite} = parsed.data
         const payload: PhotoUpdate = {}
@@ -48,13 +78,15 @@ export async function updatePhotoAction(
 
         const {error} = await supabase
             .from('photos')
-            // @ts-ignore
             .update(payload)
             .eq('id', id)
+            // Rely on RLS: platform admins can update any; owners only their own wedding photos
 
         if (error) return {success: false, error: error.message}
 
-        revalidateTag('gallery-photos', 'max')
+        if (weddingId) {
+            revalidateTag(`gallery-photos-${weddingId}`, 'max')
+        }
         revalidatePath('/admin/photos')
         return {success: true}
     } catch {
@@ -66,7 +98,7 @@ export async function deletePhotoAction(
     id: string
 ): Promise<{ success: boolean; error?: string }> {
     try {
-        const {supabase} = await requireAdmin()
+        const {supabase, weddingId} = await requireAdmin()
 
         const result = await supabase
             .from('photos')
@@ -93,7 +125,9 @@ export async function deletePhotoAction(
 
         if (dbError) return {success: false, error: dbError.message}
 
-        revalidateTag('gallery-photos', 'max')
+        if (weddingId) {
+            revalidateTag(`gallery-photos-${weddingId}`, 'max')
+        }
         revalidatePath('/admin/photos')
         return {success: true}
     } catch {
@@ -167,25 +201,41 @@ export async function getBatchSignedUrlsAction(
     }
 }
 
-export async function getPhotosAction(filters?: {
-    favourite?: boolean
-    hidden?: boolean
-    approved?: boolean
-}, limit?: number, offset?: number) {
+export async function getPhotosAction(
+    weddingId: string | null,
+    filters?: {
+        favourite?: boolean
+        hidden?: boolean
+        approved?: boolean
+    },
+    limit?: number,
+    offset?: number
+) {
     try {
-        const {supabase} = await requireAdmin()
+        const {supabase} = await requireWeddingAdmin()
+
+        if (!weddingId) {
+            return {
+                photos: [],
+                total: 0,
+                error: undefined,
+            }
+        }
 
         let query = supabase
             .from('photos')
-            .select('id, event_id, guest_name, message, thumbnail_path, approved, hidden, favourite, created_at', {count: 'exact'})
+            .select('*', {count: 'exact'})
+            .eq('wedding_id', weddingId)
             .order('created_at', {ascending: false})
 
         if (filters?.favourite !== undefined) {
             query = query.eq('favourite', filters.favourite)
         }
+
         if (filters?.hidden !== undefined) {
             query = query.eq('hidden', filters.hidden)
         }
+
         if (filters?.approved !== undefined) {
             query = query.eq('approved', filters.approved)
         }
@@ -193,15 +243,32 @@ export async function getPhotosAction(filters?: {
         if (limit !== undefined) {
             const from = offset ?? 0
             const to = from + limit - 1
+
             query = query.range(from, to)
         }
 
         const {data, error, count} = await query
 
-        if (error) return {photos: [], error: error.message}
-        return {photos: data ?? [], total: count ?? 0}
-    } catch {
-        return {photos: [], error: 'Unexpected error'}
+        if (error) {
+            return {
+                photos: [],
+                total: 0,
+                error: error.message,
+            }
+        }
+
+        return {
+            photos: data ?? [],
+            total: count ?? 0,
+        }
+    } catch (error) {
+        return {
+            photos: [],
+            total: 0,
+            error: error instanceof Error
+                ? error.message
+                : 'Unexpected error',
+        }
     }
 }
 
@@ -221,7 +288,7 @@ export async function createGalleryTokenAction(
     opts: GalleryTokenOptions
 ): Promise<{ token?: string; url?: string; error?: string }> {
     try {
-        const {user, supabase} = await requireAdmin()
+        const {user, supabase, weddingId} = await requireAdmin()
 
         const expiresAt = opts.expiresInDays
             ? new Date(Date.now() + opts.expiresInDays * 86_400_000).toISOString()
@@ -234,10 +301,10 @@ export async function createGalleryTokenAction(
             expires_at: expiresAt,
             created_by: user.id,
             photo_filter: opts.photoFilter ?? 'all',
+            wedding_id: weddingId
         }
 
         const result = await supabase.from('gallery_tokens')
-            // @ts-ignore
             .insert(payload)
             .select('token')
             .single()
@@ -272,10 +339,11 @@ export async function listGalleryTokensAction(): Promise<{
     error?: string
 }> {
     try {
-        const {supabase} = await requireAdmin()
+        const {supabase, weddingId} = await requireAdmin()
         const {data, error} = await supabase
             .from('gallery_tokens')
             .select('id, token, label, expires_at, created_at, photo_filter')
+            .eq('wedding_id', weddingId)
             .order('created_at', {ascending: false})
 
 
@@ -290,11 +358,12 @@ export async function deleteGalleryTokenAction(
     id: string
 ): Promise<{ success: boolean; error?: string }> {
     try {
-        const {supabase} = await requireAdmin()
+        const {supabase, weddingId} = await requireAdmin()
         const {error} = await supabase
             .from('gallery_tokens')
             .delete()
             .eq('id', id)
+            .eq('wedding_id', weddingId)
 
         if (error) return {success: false, error: error.message}
         revalidatePath('/admin/photos')

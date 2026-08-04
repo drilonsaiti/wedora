@@ -22,30 +22,50 @@ async function requireAdmin() {
 
     if (!admin) redirect('/admin/login')
 
-    return {user, supabase: createServiceClient()}
+    const {data: wedding} = await supabase
+        .from('weddings')
+        .select('id')
+        .eq('owner_user_id', user.id)
+        .single()
+
+    if (!wedding) {
+        // Handle case where admin has no wedding yet (should not happen after migration)
+        throw new Error('No wedding found for this admin 3')
+    }
+
+    return {user, supabase: createServiceClient(), weddingId: wedding.id}
 }
 
 // --- Guests ---
 
-export async function getGuests() {
+export async function getGuests(weddingId: string) {
     return unstable_cache(
-        async () => {
+        async (wId: string) => {
             const supabase = createServiceClient()
             const {data, error} = await supabase
                 .from('guests')
-                .select('id, first_name, last_name, initials, table_id, tables(id, number)')
+                .select(`
+    id,
+    created_at,
+    wedding_id,
+    first_name,
+    last_name,
+    initials,
+    table_id,
+    tables(id, number)
+`).eq('wedding_id', wId)
                 .order('created_at', {ascending: false})
 
             if (error) throw new Error(error.message)
             return data
         },
-        ['guests'],
-        {tags: ['guests']}
-    )()
+        ['guests', weddingId],
+        {tags: [`guests-${weddingId}`]}
+    )(weddingId)
 }
 
 export async function addGuest(formData: { first_name: string; last_name: string; table_id?: string | null }) {
-    const {supabase} = await requireAdmin()
+    const {supabase, weddingId} = await requireAdmin()
 
     const parsed = guestSchema.safeParse(formData)
     if (!parsed.success) {
@@ -60,10 +80,11 @@ export async function addGuest(formData: { first_name: string; last_name: string
             first_name: parsed.data.first_name,
             last_name: parsed.data.last_name,
             table_id: parsed.data.table_id || null,
+            wedding_id: weddingId
         }])
 
     if (error) throw new Error(error.message)
-    revalidateTag('guests', 'max')
+    revalidateTag(`guests-${weddingId}`, 'max')
     revalidatePath('/admin/seating')
 }
 
@@ -72,7 +93,7 @@ export async function updateGuest(id: string, formData: {
     last_name: string;
     table_id?: string | null
 }) {
-    const {supabase} = await requireAdmin()
+    const {supabase, weddingId} = await requireAdmin()
 
     const parsed = guestSchema.safeParse(formData)
     if (!parsed.success) {
@@ -81,67 +102,69 @@ export async function updateGuest(id: string, formData: {
 
     const {error} = await supabase
         .from('guests')
-        // @ts-ignore
         .update({
             first_name: parsed.data.first_name,
             last_name: parsed.data.last_name,
             table_id: parsed.data.table_id || null
         })
         .eq('id', id)
+        .eq('wedding_id', weddingId)
 
     if (error) throw new Error(error.message)
-    revalidateTag('guests', 'max')
+    revalidateTag(`guests-${weddingId}`, 'max')
     revalidatePath('/admin/seating')
 }
 
 export async function deleteGuest(id: string) {
-    const {supabase} = await requireAdmin()
+    const {supabase, weddingId} = await requireAdmin()
 
     const {error} = await supabase
         .from('guests')
         .delete()
         .eq('id', id)
+        .eq('wedding_id', weddingId)
 
     if (error) throw new Error(error.message)
-    revalidateTag('guests', 'max')
+    revalidateTag(`guests-${weddingId}`, 'max')
     revalidatePath('/admin/seating')
 }
 
 export async function assignGuestToTable(guestId: string, tableId: string | null) {
-    const {supabase} = await requireAdmin()
+    const {supabase, weddingId} = await requireAdmin()
 
     const {error} = await supabase
         .from('guests')
-        // @ts-ignore
         .update({table_id: tableId})
         .eq('id', guestId)
+        .eq('wedding_id', weddingId)
 
     if (error) throw new Error(error.message)
-    revalidateTag('guests', 'max')
+    revalidateTag(`guests-${weddingId}`, 'max')
     revalidatePath('/admin/seating')
 }
 
 // --- Tables ---
 
-export async function getTables() {
+export async function getTables(weddingId: string) {
     return unstable_cache(
-        async () => {
+        async (wId: string) => {
             const supabase = createServiceClient()
             const {data, error} = await supabase
                 .from('tables')
                 .select('id, number, seats, label, pos_x, pos_y')
+                .eq('wedding_id', wId)
                 .order('number', {ascending: true})
 
             if (error) throw new Error(error.message)
             return data as Table[]
         },
-        ['tables'],
-        {tags: ['tables']}
-    )()
+        ['tables', weddingId],
+        {tags: [`tables-${weddingId}`]}
+    )(weddingId)
 }
 
 export async function addTable(formData: { number: number; seats: number; label?: string | null }) {
-    const {supabase} = await requireAdmin()
+    const {supabase, weddingId} = await requireAdmin()
 
     const parsed = tableSchema.safeParse(formData)
     if (!parsed.success) {
@@ -150,16 +173,15 @@ export async function addTable(formData: { number: number; seats: number; label?
 
     const {error} = await supabase
         .from('tables')
-        // @ts-ignore
-        .insert([parsed.data])
+        .insert([{...parsed.data, wedding_id: weddingId}])
 
     if (error) throw new Error(error.message)
-    revalidateTag('tables', 'max')
+    revalidateTag(`tables-${weddingId}`, 'max')
     revalidatePath('/admin/seating')
 }
 
 export async function updateTable(id: string, formData: { number: number; seats: number; label?: string | null }) {
-    const {supabase} = await requireAdmin()
+    const {supabase, weddingId} = await requireAdmin()
 
     const parsed = tableSchema.safeParse(formData)
     if (!parsed.success) {
@@ -168,94 +190,135 @@ export async function updateTable(id: string, formData: { number: number; seats:
 
     const {error} = await supabase
         .from('tables')
-        // @ts-ignore
         .update(parsed.data)
         .eq('id', id)
+        .eq('wedding_id', weddingId)
 
     if (error) throw new Error(error.message)
-    revalidateTag('tables', 'max')
+    revalidateTag(`tables-${weddingId}`, 'max')
     revalidatePath('/admin/seating')
 }
 
 export async function deleteTable(id: string) {
-    const {supabase} = await requireAdmin()
+    const {supabase, weddingId} = await requireAdmin()
 
     const {error} = await supabase
         .from('tables')
         .delete()
         .eq('id', id)
+        .eq('wedding_id', weddingId)
 
     if (error) throw new Error(error.message)
-    revalidateTag('tables', 'max')
+    revalidateTag(`tables-${weddingId}`, 'max')
     revalidatePath('/admin/seating')
 }
 
 export async function updateTablePosition(id: string, pos_x: number, pos_y: number) {
-    const {supabase} = await requireAdmin()
+    const {supabase, weddingId} = await requireAdmin()
 
     const {error} = await supabase
         .from('tables')
-        // @ts-ignore
         .update({pos_x, pos_y})
         .eq('id', id)
+        .eq('wedding_id', weddingId)
 
     if (error) throw new Error(error.message)
-    revalidateTag('tables', 'max')
+    revalidateTag(`tables-${weddingId}`, 'max')
 }
 
-export async function createVenueElement(type: VenueElementType, posX: number, posY: number) {
+export async function createVenueElement(
+    type: VenueElementType,
+    posX: number,
+    posY: number
+): Promise<VenueElement> {
     const defaults: Record<VenueElementType, { width: number; height: number; label: string }> = {
         pool: {
             width: 160,
             height: 100,
             label: 'Pishina'
         },
-        couple_table: {width: 140, height: 80, label: 'Vendi i Çiftit'},
-        music: {width: 90, height: 90, label: 'Muzika'},
-        bar: {width: 140, height: 70, label: 'Bar'},
-        toilet: {width: 70, height: 70, label: 'Tualeti'},
-        entrance: {width: 70, height: 70, label: 'Hyrja'},
+        couple_table: {
+            width: 140,
+            height: 80,
+            label: 'Vendi i Çiftit'
+        },
+        music: {
+            width: 90,
+            height: 90,
+            label: 'Muzika'
+        },
+        bar: {
+            width: 140,
+            height: 70,
+            label: 'Bar'
+        },
+        toilet: {
+            width: 70,
+            height: 70,
+            label: 'Tualeti'
+        },
+        entrance: {
+            width: 70,
+            height: 70,
+            label: 'Hyrja'
+        },
     };
+
     const d = defaults[type];
-    const {supabase} = await requireAdmin();
-    // @ts-ignore
-    const {data, error} = await supabase.from('venue_elements').insert({
-        type,
-        label: d.label,
-        pos_x: posX,
-        pos_y: posY,
-        width: d.width,
-        height: d.height,
-    }).select().single();
+
+    const {supabase, weddingId} = await requireAdmin();
+
+    const {data, error} = await supabase
+        .from('venue_elements')
+        .insert({
+            type,
+            label: d.label,
+            pos_x: posX,
+            pos_y: posY,
+            width: d.width,
+            height: d.height,
+            wedding_id: weddingId
+        })
+        .select()
+        .single();
+
     if (error) throw error;
-    revalidateTag('venue-elements', 'max')
-    return data;
+
+    revalidateTag(`venue-elements-${weddingId}`, 'max');
+
+    return {
+        ...data,
+        type: data.type as VenueElementType,
+    };
 }
 
 export async function updateVenueElementPosition(id: string, posX: number, posY: number) {
-    const {supabase} = await requireAdmin();
-    // @ts-ignore
-    const {error} = await supabase.from('venue_elements').update({pos_x: posX, pos_y: posY,}).eq('id', id);
+    const {supabase, weddingId} = await requireAdmin();
+    const {error} = await supabase.from('venue_elements').update({
+        pos_x: posX,
+        pos_y: posY,
+    }).eq('id', id).eq('wedding_id', weddingId);
     if (error) throw error;
-    revalidateTag('venue-elements', 'max')
+    revalidateTag(`venue-elements-${weddingId}`, 'max')
 }
 
 export async function deleteVenueElement(id: string) {
-    const {supabase} = await requireAdmin();
+    const {supabase, weddingId} = await requireAdmin();
 
-    const {error} = await supabase.from('venue_elements').delete().eq('id', id);
+    const {error} = await supabase.from('venue_elements').delete().eq('id', id).eq('wedding_id', weddingId);
     if (error) throw error;
-    revalidateTag('venue-elements', 'max')
+    revalidateTag(`venue-elements-${weddingId}`, 'max')
 }
 
-export async function getVenueElements() {
+export async function getVenueElements(weddingId: string) {
     return unstable_cache(
-        async () => {
+        async (wId: string) => {
             const supabase = createServiceClient();
 
             const {data, error} = await supabase
                 .from('venue_elements')
                 .select('id, type, label, pos_x, pos_y, width, height')
+                .eq('wedding_id', wId)
                 .order('created_at', {ascending: true});
 
             if (error) {
@@ -264,7 +327,7 @@ export async function getVenueElements() {
 
             return data as VenueElement[];
         },
-        ['venue-elements'],
-        {tags: ['venue-elements']}
-    )()
+        ['venue-elements', weddingId],
+        {tags: [`venue-elements-${weddingId}`]}
+    )(weddingId)
 }

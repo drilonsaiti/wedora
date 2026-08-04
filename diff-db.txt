@@ -1,0 +1,3 @@
+﻿diff --git a/types/database.ts b/types/database.ts
+index 25dd063..05fe4f6 100644
+Binary files a/types/database.ts and b/types/database.ts differ

@@ -1,19 +1,19 @@
-'use server'
-
 import {createClient} from '@/lib/supabase/server'
-import {getGuests, getTables, getVenueElements} from '@/actions/seating'
-import {SeatingManagement} from '@/components/admin/seating-management'
 import {redirect} from 'next/navigation'
 
 export default async function SeatingPage() {
     const supabase = await createClient()
-    const {data: {user}} = await supabase.auth.getUser()
+
+    const {
+        data: {user},
+    } = await supabase.auth.getUser()
+
 
     if (!user) {
+        console.log('no user no no no')
         redirect('/admin/login')
     }
 
-    // Check if admin
     const {data: admin} = await supabase
         .from('admins')
         .select('id')
@@ -24,20 +24,18 @@ export default async function SeatingPage() {
         redirect('/')
     }
 
-    const [guests, tables, venueElements] = await Promise.all([
-        getGuests(),
-        getTables(),
-        getVenueElements()
-    ])
+    const {data: weddings, error: weddingError} = await supabase
+        .from('weddings')
+        .select('id')
+        .eq('owner_user_id', user.id)
 
+    if (weddingError) {
+        throw new Error(weddingError.message)
+    }
 
+    if (weddings && weddings.length === 1) {
+        redirect(`/admin/weddings/${weddings[0].id}`)
+    }
 
-    return (
-        <SeatingManagement
-            initialGuests={guests || []}
-            initialTables={tables || []}
-            initialVenueElements={venueElements || []}
-            adminEmail={user.email || ''}
-        />
-    )
+    redirect('/admin/weddings')
 }

@@ -3,12 +3,16 @@ import {Camera, Heart, Image as ImageIcon} from 'lucide-react'
 import {BottomNav} from "@/components/bottom-nav";
 import {getGuests, getTables, getVenueElements} from '@/actions/seating';
 import {HomeSearch} from '@/components/home-search';
+import {getWeddingBySlug} from '@/actions/wedding';
 
 export default async function HomePage() {
+    const wedding = await getWeddingBySlug('sara-drilon');
+    const weddingId = wedding?.id || '';
+
     const [guests, tables, venueElements] = await Promise.all([
-        getGuests(),
-        getTables(),
-        getVenueElements()
+        getGuests(weddingId),
+        getTables(weddingId),
+        getVenueElements(weddingId)
     ])
 
     return (
@@ -33,11 +37,11 @@ export default async function HomePage() {
                     Jeni të ftuar të festoni me ne
                 </p>
                 <h1 className="font-serif text-5xl font-light text-[hsl(var(--dark))] leading-tight mb-2">
-                    Sara
+                    {wedding?.bride_name || 'Sara'}
                     <span className="block font-serif italic text-[hsl(var(--primary))] text-3xl my-1">
             &amp;
           </span>
-                    Drilon
+                    {wedding?.groom_name || 'Drilon'}
                 </h1>
                 <p className="font-serif italic text-lg text-muted-foreground mb-8">
                     31 Korrik, 2026

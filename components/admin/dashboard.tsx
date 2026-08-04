@@ -45,6 +45,7 @@ interface AdminDashboardProps {
     initialPhotos: Photo[]
     initialTotal: number
     adminEmail: string
+    weddingId: string | null
     error?: string
     activeFilter?: string
 }
@@ -62,6 +63,7 @@ export function AdminDashboard({
                                    initialPhotos,
                                    initialTotal,
                                    adminEmail,
+                                   weddingId,
                                    error: initialError,
                                    activeFilter,
                                }: AdminDashboardProps) {
@@ -219,7 +221,7 @@ export function AdminDashboard({
                             ? {approved: false}
                             : undefined
 
-            const result = await getPhotosAction(filters, PAGE_SIZE, photos.length)
+            const result = await getPhotosAction(weddingId, filters, PAGE_SIZE, photos.length)
             if (result.photos) {
                 setPhotos((prev) => [...prev, ...result.photos])
                 if (result.total !== undefined) setTotal(result.total)

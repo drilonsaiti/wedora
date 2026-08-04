@@ -42,10 +42,24 @@ export async function uploadPhotoAction(
 
         const supabase = createServiceClient()
 
+        // Get wedding_id from event_id
+        const {data: eventData} = await supabase
+            .from('events')
+            .select('wedding_id')
+            .eq('id', eventId)
+            .single()
+
+        if (!eventData?.wedding_id) {
+            return {success: false, error: 'Invalid event'}
+        }
+
+        const weddingId = eventData.wedding_id
+
         const {count} = await supabase
             .from('photos')
             .select('*', {count: 'exact', head: true})
             .eq('uploaded_by_session', sessionId)
+            .eq('wedding_id', weddingId)
 
         if ((count ?? 0) >= 20) {
             return {success: false, error: 'Upload limit reached for this session'}
@@ -89,6 +103,7 @@ export async function uploadPhotoAction(
         const payload = {
             id: photoId,
             event_id: eventId,
+            wedding_id: weddingId,
             uploaded_by_session: sessionId,
             guest_name: guestName ?? null,
             message: message ?? null,
@@ -106,7 +121,6 @@ export async function uploadPhotoAction(
 
         const {error: dbError} = await supabase
             .from('photos')
-            // @ts-ignore
             .insert(payload)
 
         if (dbError) {
@@ -116,7 +130,7 @@ export async function uploadPhotoAction(
             return {success: false, error: 'Failed to save photo'}
         }
 
-        revalidateTag('gallery-photos', 'max')
+        revalidateTag(`gallery-photos-${weddingId}`, 'max')
         return {success: true, photoId}
     } catch (error) {
         console.error('Upload action error:', error)

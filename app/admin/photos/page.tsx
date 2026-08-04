@@ -1,55 +1,31 @@
-import {redirect} from 'next/navigation'
-import {createClient} from '@/lib/supabase/server'
-import {getPhotosAction} from '@/actions/admin'
-import {AdminDashboard} from '@/components/admin/dashboard'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
-type Props = {
-    searchParams: Promise<{
-        filter?: string
-    }>
-}
-
-export default async function AdminPhotosPage({searchParams}: Props) {
+export default async function AdminPhotosPage() {
     const supabase = await createClient()
 
-    const {
-        data: {user},
-    } = await supabase.auth.getUser()
-
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/admin/login')
 
-    const result = await supabase
+    const { data: admin } = await supabase
         .from('admins')
-        .select('id, email')
+        .select('id')
         .eq('id', user.id)
         .single()
 
-    const admin = result.data as { id: string; email: string } | null
-
     if (!admin) redirect('/admin/login')
 
-    const {filter} = await searchParams
+    // Redirect legacy route to the new paths
+    const { data: weddings } = await supabase
+        .from('weddings')
+        .select('id')
+        .eq('owner_user_id', user.id)
 
-    const filters =
-        filter === 'favourites'
-            ? {favourite: true}
-            : filter === 'hidden'
-                ? {hidden: true}
-                : filter === 'unapproved'
-                    ? {approved: false}
-                    : undefined
+    if (weddings && weddings.length === 1) {
+        redirect(`/admin/weddings/${weddings[0].id}/photos`)
+    }
 
-    const {photos, error, total} = await getPhotosAction(filters, 50, 0)
-
-    return (
-        <AdminDashboard
-            initialPhotos={photos}
-            initialTotal={total || 0}
-            adminEmail={admin.email}
-            error={error}
-            activeFilter={filter}
-        />
-    )
+    redirect('/admin/weddings')
 }

@@ -18,7 +18,7 @@ export interface Guest {
 }
 
 export interface GuestWithTable extends Guest {
-    tables: Table | null;
+    tables: Pick<Table, 'id' | 'number'> | null;
 }
 
 export const GALLERY_PAGE_SIZE = 30
@@ -35,3 +35,5 @@ export interface VenueElement {
     width: number;
     height: number;
 }
+
+
