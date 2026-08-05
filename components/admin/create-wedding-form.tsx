@@ -12,6 +12,7 @@ import { generateWeddingTheme } from '@/lib/theme';
 
 interface CreateWeddingFormProps {
     adminEmail: string;
+    onSuccess?: (weddingId: string) => void;
 }
 
 interface Credential {
@@ -20,7 +21,8 @@ interface Credential {
     role: 'groom' | 'bride';
 }
 
-export function CreateWeddingForm({ adminEmail }: CreateWeddingFormProps) {
+
+export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormProps) {
     const router = useRouter();
     const [serverError, setServerError] = useState<string | null>(null);
     const [slugTouched, setSlugTouched] = useState(false);
@@ -36,7 +38,11 @@ export function CreateWeddingForm({ adminEmail }: CreateWeddingFormProps) {
         formState: { errors, isSubmitting },
     } = useForm<CreateWeddingInput>({
         resolver: zodResolver(createWeddingSchema),
-        defaultValues: { groom_name: '', bride_name: '', groom_email: '', bride_email: '', slug: '', theme_hue: 355 },
+        defaultValues: {
+            groom_name: '', bride_name: '', groom_email: '', bride_email: '',
+            slug: '', theme_hue: 355, wedding_date: '',
+            enable_find_seat: true, enable_photo_upload: true,
+        },
     });
 
     const themeHue = watch('theme_hue');
@@ -68,7 +74,6 @@ export function CreateWeddingForm({ adminEmail }: CreateWeddingFormProps) {
         setCredentials(result.credentials);
     };
 
-    // Ekrani i kredencialeve — shfaqet vetëm një herë, pas krijimit me sukses
     if (credentials) {
         return (
             <div className="space-y-6 w-full max-w-md">
@@ -109,7 +114,7 @@ export function CreateWeddingForm({ adminEmail }: CreateWeddingFormProps) {
                 </div>
 
                 <button
-                    onClick={() => router.push(`/admin/weddings/${createdWeddingId}`)}
+                    onClick={() => onSuccess ? onSuccess(createdWeddingId!) : router.push(`/admin/weddings/${createdWeddingId}`)}
                     className="btn-primary w-full py-4 rounded-2xl flex items-center justify-center gap-2"
                 >
                     Vazhdo te Dashboard-i
@@ -190,6 +195,14 @@ export function CreateWeddingForm({ adminEmail }: CreateWeddingFormProps) {
 
             <div>
                 <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
+                    Data e Dasmës
+                </label>
+                <input {...register('wedding_date')} type="date" className="input-wedding py-3 w-full" />
+                {errors.wedding_date && <p className="text-xs text-destructive mt-1">{errors.wedding_date.message}</p>}
+            </div>
+
+            <div>
+                <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
                     URL Publike
                 </label>
                 <div className="flex items-center gap-1 input-wedding py-3 px-4">
@@ -223,6 +236,29 @@ export function CreateWeddingForm({ adminEmail }: CreateWeddingFormProps) {
                 >
                     Shiko vendin
                 </button>
+            </div>
+
+            <div>
+                <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-3">
+                    Funksionet Aktive
+                </label>
+                <div className="space-y-2">
+                    <label className="flex items-center justify-between p-3 rounded-xl border border-border cursor-pointer hover:bg-muted transition-colors">
+                        <div>
+                            <p className="font-sans text-sm font-medium">Gjej Vendin</p>
+                            <p className="text-xs text-muted-foreground">Të ftuarit kërkojnë emrin dhe shohin tavolinën</p>
+                        </div>
+                        <input type="checkbox" {...register('enable_find_seat')} className="w-4 h-4 accent-[hsl(var(--primary))]" />
+                    </label>
+                    <label className="flex items-center justify-between p-3 rounded-xl border border-border cursor-pointer hover:bg-muted transition-colors">
+                        <div>
+                            <p className="font-sans text-sm font-medium">Ngarko Foto</p>
+                            <p className="text-xs text-muted-foreground">Të ftuarit ngarkojnë foto nga dasma</p>
+                        </div>
+                        <input type="checkbox" {...register('enable_photo_upload')} className="w-4 h-4 accent-[hsl(var(--primary))]" />
+                    </label>
+                </div>
+                {errors.enable_find_seat && <p className="text-xs text-destructive mt-2">{errors.enable_find_seat.message}</p>}
             </div>
 
             {serverError && (

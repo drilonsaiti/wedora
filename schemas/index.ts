@@ -105,12 +105,35 @@ export const tableSchema = z.object({
 export type TableFormValues = z.infer<typeof tableSchema>
 
 export const createWeddingSchema = z.object({
-    groom_name: z.string().trim().min(2, 'Emri duhet të ketë të paktën 2 shkronja').max(50, 'Emri është shumë i gjatë'),
-    bride_name: z.string().trim().min(2, 'Emri duhet të ketë të paktën 2 shkronja').max(50, 'Emri është shumë i gjatë'),
+    groom_name: z.string().trim().min(2, 'Emri duhet të ketë të paktën 2 shkronja').max(50),
+    bride_name: z.string().trim().min(2, 'Emri duhet të ketë të paktën 2 shkronja').max(50),
     groom_email: z.string().trim().email('Email i pavlefshëm'),
     bride_email: z.string().trim().email('Email i pavlefshëm').optional().or(z.literal('')),
-    slug: z.string().trim().min(3, 'URL-ja duhet të ketë të paktën 3 karaktere').max(60, 'URL-ja është shumë e gjatë').regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'Vetëm shkronja të vogla, numra dhe vizë (-) lejohen'),
+    slug: z.string().trim().min(3).max(60).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'Vetëm shkronja të vogla, numra dhe vizë (-)'),
+    wedding_date: z.string().min(1, 'Data e dasmës kërkohet'),
     theme_hue: z.number().min(0).max(360).default(355),
+    enable_find_seat: z.boolean().default(true),
+    enable_photo_upload: z.boolean().default(true),
+}).refine((data) => data.enable_find_seat || data.enable_photo_upload, {
+    message: 'Zgjidhni të paktën një funksion (Gjej Vendin ose Ngarko Foto)',
+    path: ['enable_find_seat'],
 });
 
 export type CreateWeddingInput = z.infer<typeof createWeddingSchema>;
+
+
+export const editWeddingSchema = z.object({
+    groom_name: z.string().trim().min(2).max(50),
+    bride_name: z.string().trim().min(2).max(50),
+    groom_email: z.string().trim().email(),
+    bride_email: z.string().trim().email().optional().or(z.literal('')),
+    wedding_date: z.string().min(1),
+    theme_hue: z.number().min(0).max(360),
+    enable_find_seat: z.boolean(),
+    enable_photo_upload: z.boolean(),
+}).refine((d) => d.enable_find_seat || d.enable_photo_upload, {
+    message: 'Zgjidhni të paktën një funksion',
+    path: ['enable_find_seat'],
+});
+
+export type EditWeddingInput = z.infer<typeof editWeddingSchema>;

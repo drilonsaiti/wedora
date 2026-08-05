@@ -33,13 +33,10 @@ export function WeddingRowActions({ weddingId }: { weddingId: string }) {
                 <Images className="w-3.5 h-3.5 text-muted-foreground" />
                 Fotot e Dasmës
               </Link>
-              <Link
-                  href={`/admin/weddings/${weddingId}/settings`}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors"
-              >
-                <Settings className="w-3.5 h-3.5 text-muted-foreground" />
-                Cilësimet
-              </Link>
+                <Link href={`/admin/weddings/${weddingId}/settings`} className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-muted transition-colors">
+                    <Settings className="w-3.5 h-3.5 text-muted-foreground" />
+                    Cilësimet
+                </Link>
             </div>
         )}
       </div>

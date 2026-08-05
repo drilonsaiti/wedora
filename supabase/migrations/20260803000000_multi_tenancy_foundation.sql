@@ -152,3 +152,54 @@ CREATE POLICY "admin_owns_wedding_gallery_tokens" ON public.gallery_tokens
   FOR ALL TO authenticated
   USING (public.is_wedding_owner(wedding_id) OR public.is_platform_admin())
   WITH CHECK (public.is_wedding_owner(wedding_id) OR public.is_platform_admin());
+
+
+ALTER TABLE public.weddings
+    ADD COLUMN IF NOT EXISTS groom_email text,
+    ADD COLUMN IF NOT EXISTS bride_email text,
+    ADD COLUMN IF NOT EXISTS wedding_date date;
+
+-- Funksion për RLS të couple-it, bazuar në app_metadata të JWT-së — jo tabelë
+CREATE OR REPLACE FUNCTION public.is_couple_for_wedding(target_wedding_id uuid)
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+AS $$
+SELECT
+    (auth.jwt() -> 'app_metadata' ->> 'wedding_id')::uuid = target_wedding_id
+    AND (auth.jwt() -> 'app_metadata' ->> 'role') = 'couple';
+$$;
+
+DROP POLICY IF EXISTS "couple_read_guests" ON public.guests;
+CREATE POLICY "couple_read_guests" ON public.guests
+  FOR SELECT TO authenticated
+                      USING (
+                      is_couple_for_wedding(wedding_id)
+                      AND EXISTS (SELECT 1 FROM wedding_settings ws WHERE ws.wedding_id = guests.wedding_id AND ws.enable_couple_login = true)
+                      );
+
+DROP POLICY IF EXISTS "couple_read_tables" ON public.tables;
+CREATE POLICY "couple_read_tables" ON public.tables
+  FOR SELECT TO authenticated
+                      USING (
+                      is_couple_for_wedding(wedding_id)
+                      AND EXISTS (SELECT 1 FROM wedding_settings ws WHERE ws.wedding_id = tables.wedding_id AND ws.enable_couple_login = true)
+                      );
+
+DROP POLICY IF EXISTS "couple_read_photos" ON public.photos;
+CREATE POLICY "couple_read_photos" ON public.photos
+  FOR SELECT TO authenticated
+                      USING (
+                      is_couple_for_wedding(wedding_id)
+                      AND EXISTS (SELECT 1 FROM wedding_settings ws WHERE ws.wedding_id = photos.wedding_id AND ws.enable_couple_login = true)
+                      );
+
+DROP POLICY IF EXISTS "couple_delete_photos" ON public.photos;
+CREATE POLICY "couple_delete_photos" ON public.photos
+  FOR DELETE TO authenticated
+  USING (
+    is_couple_for_wedding(wedding_id)
+    AND EXISTS (SELECT 1 FROM wedding_settings ws WHERE ws.wedding_id = photos.wedding_id AND ws.enable_couple_login = true)
+  );
