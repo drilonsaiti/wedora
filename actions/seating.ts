@@ -3,7 +3,7 @@
 import {createClient, createServiceClient} from '@/lib/supabase/server'
 import {revalidatePath, revalidateTag, unstable_cache} from 'next/cache'
 import {Table, VenueElement} from '@/types/seating'
-import {guestSchema, tableSchema} from '@/schemas'
+import {guestSchema, SeatSides, tableSchema} from '@/schemas'
 import {redirect} from 'next/navigation'
 import {generateSeatPositions} from "@/lib/seat-generator";
 
@@ -123,11 +123,10 @@ export async function deleteGuest(id: string) {
 }
 
 export async function assignGuestToTable(guestId: string, tableId: string | null) {
-    const {supabase, weddingId} = await requireAdmin()
-
-    const {error} = await supabase
+    const { supabase, weddingId } = await requireAdmin()
+    const { error } = await supabase
         .from('guests')
-        .update({table_id: tableId})
+        .update({ table_id: tableId, seat_id: null })
         .eq('id', guestId)
         .eq('wedding_id', weddingId)
 
@@ -162,6 +161,7 @@ export async function addTable(input: {
     seats: number
     label?: string
     shape: 'round' | 'rectangle' | 'square'
+    seatSides?: SeatSides
 }) {
     const supabase = await createClient()
 
@@ -189,7 +189,13 @@ export async function addTable(input: {
     if (error || !table) throw error ?? new Error('Dështoi krijimi i tavolinës')
 
     if (input.shape !== 'round') {
-        const positions = generateSeatPositions(input.shape, input.seats, dimensions.width, dimensions.height)
+        const positions = generateSeatPositions(
+            input.shape,
+            input.seats,
+            dimensions.width,
+            dimensions.height,
+            input.seatSides
+        )
         const seatRows = positions.map((p) => ({
             table_id: table.id,
             seat_index: p.seat_index,
@@ -217,7 +223,7 @@ export async function assignGuestToSeat(guestId: string, seatId: string | null, 
 
 export async function updateTable(
     id: string,
-    formData: { number: number; seats: number; label?: string | null; shape: 'round' | 'rectangle' | 'square' }
+    formData: { number: number; seats: number; label?: string | null; shape: 'round' | 'rectangle' | 'square'; seatSides?: SeatSides }
 ) {
     const { supabase, weddingId } = await requireAdmin()
 
@@ -226,15 +232,43 @@ export async function updateTable(
         throw new Error('Invalid input: ' + parsed.error.errors[0].message)
     }
 
+    const { seatSides, ...tableData } = parsed.data
+
+    const dimensions = {
+        round: { width: 128, height: 128 },
+        square: { width: 140, height: 140 },
+        rectangle: { width: 240, height: 100 },
+    }[tableData.shape]
+
     const { data: table, error } = await supabase
         .from('tables')
-        .update(parsed.data)
+        .update({ ...tableData, ...dimensions })
         .eq('id', id)
         .eq('wedding_id', weddingId)
         .select()
         .single()
 
     if (error || !table) throw new Error(error?.message ?? 'Dështoi përditësimi i tavolinës')
+
+    // Rikrijo table_seats nëse forma s'është round
+    await supabase.from('table_seats').delete().eq('table_id', id)
+
+    if (tableData.shape !== 'round') {
+        const positions = generateSeatPositions(
+            tableData.shape,
+            tableData.seats,
+            dimensions.width,
+            dimensions.height,
+            seatSides
+        )
+        const seatRows = positions.map((p) => ({
+            table_id: id,
+            seat_index: p.seat_index,
+            relative_x: p.relative_x,
+            relative_y: p.relative_y,
+        }))
+        await supabase.from('table_seats').insert(seatRows)
+    }
 
     revalidateTag(`tables-${weddingId}`, 'max')
     revalidatePath('/admin/seating')

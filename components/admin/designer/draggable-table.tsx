@@ -109,8 +109,10 @@ function SeatSlot({ seat, guest }: { seat: TableSeat; guest?: Guest & { seat_id:
     return (
         <div
             ref={setNodeRef}
-            className="absolute top-0 left-0 z-10"
-            style={{ transform: `translate(${seat.relative_x}px, ${seat.relative_y}px)` }}
+            className="absolute top-0 left-0 z-10 w-12 h-12 flex items-center justify-center"
+            style={{
+                transform: `translate(${seat.relative_x}px, ${seat.relative_y}px) translate(-50%, -50%)`,
+            }}
         >
             {guest ? (
                 <DraggableGuest guest={guest} />
@@ -118,7 +120,7 @@ function SeatSlot({ seat, guest }: { seat: TableSeat; guest?: Guest & { seat_id:
                 <div
                     className={cn(
                         'w-8 h-8 rounded-full border-2 border-dashed flex items-center justify-center text-[9px] text-muted-foreground transition-colors',
-                        isOver ? 'border-[hsl(var(--primary))] bg-[hsl(var(--accent))]' : 'border-border'
+                        isOver ? 'border-[hsl(var(--primary))] bg-[hsl(var(--accent))] scale-110' : 'border-border'
                     )}
                 >
                     {seat.seat_index + 1}

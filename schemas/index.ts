@@ -103,14 +103,32 @@ export const guestSchema = z.object({
 
 export type GuestFormValues = z.infer<typeof guestSchema>
 
+const seatSidesSchema = z.object({
+    top: z.number().min(0),
+    right: z.number().min(0),
+    bottom: z.number().min(0),
+    left: z.number().min(0),
+})
+
+export type SeatSides = z.infer<typeof seatSidesSchema>
+
 export const tableSchema = z.object({
     number: z.number().min(1, 'Numri është i detyrueshëm'),
     seats: z.number().min(1, 'Të paktën 1 vend'),
     label: z.string().optional(),
     shape: z.enum(['round', 'rectangle', 'square']),
+    seatSides: seatSidesSchema.optional(),
+}).refine((data) => {
+    if (data.shape === 'round' || !data.seatSides) return true
+    const sum = data.seatSides.top + data.seatSides.right + data.seatSides.bottom + data.seatSides.left
+    return sum === data.seats
+}, {
+    message: 'Shuma e vendeve në çdo anë duhet të jetë e barabartë me numrin total të vendeve',
+    path: ['seatSides'],
 })
 
 export type TableFormValues = z.infer<typeof tableSchema>
+
 
 export const createWeddingSchema = z.object({
     groom_name: z.string().trim().min(2, 'Emri duhet të ketë të paktën 2 shkronja').max(50),

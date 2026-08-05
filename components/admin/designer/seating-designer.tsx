@@ -16,7 +16,6 @@ import {
     Wine
 } from 'lucide-react';
 import {
-    defaultDropAnimationSideEffects,
     DndContext,
     DragEndEvent,
     DragOverlay,
@@ -24,6 +23,10 @@ import {
     PointerSensor,
     useSensor,
     useSensors,
+    pointerWithin,
+    closestCenter,
+    CollisionDetection,
+    getFirstCollision, defaultDropAnimationSideEffects,
 } from '@dnd-kit/core';
 import {restrictToWindowEdges} from '@dnd-kit/modifiers';
 import {
@@ -179,12 +182,11 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
         }
 
         if (!over) {
-            // If dropped outside and it was a guest, unassign them
             const {type, guest} = active.data.current || {};
             if (type === 'guest') {
                 try {
                     await assignGuestToTable(guest.id, null);
-                    setLocalGuests(prev => prev.map(g => g.id === guest.id ? {...g, table_id: null, tables: null} : g));
+                    setLocalGuests(prev => prev.map(g => g.id === guest.id ? {...g, table_id: null, tables: null, seat_id: null} : g));
                 } catch (err) {
                     console.error(err);
                 }
@@ -218,7 +220,7 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
         // Case 2: Dragging a guest onto a table
         if (activeData?.type === 'guest' && overData?.type === 'table') {
             const guest = activeData.guest;
-            const table = overData.table;
+            const table: Table = overData.table;
 
             const guestsAtTable = localGuests.filter(g => g.table_id === table.id);
 
@@ -227,6 +229,29 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
                 return;
             }
 
+            // Për tavolina jo-round: duhet caktuar edhe seat_id specifik,
+            // ndryshe guest-i mbetet i padukshëm vizualisht
+            if (table.shape !== 'round') {
+                const occupiedSeatIds = new Set(guestsAtTable.map(g => g.seat_id).filter(Boolean));
+                const freeSeat = table.table_seats.find(s => !occupiedSeatIds.has(s.id));
+
+                if (!freeSeat) {
+                    alert(`Tavolina ${table.number} është plot!`);
+                    return;
+                }
+
+                try {
+                    await assignGuestToSeat(guest.id, freeSeat.id, table.id);
+                    setLocalGuests(prev => prev.map(g =>
+                        g.id === guest.id ? { ...g, table_id: table.id, tables: table, seat_id: freeSeat.id } : g
+                    ));
+                } catch (err) {
+                    alert('Dështoi caktimi i të ftuarit në tavolinë');
+                }
+                return;
+            }
+
+            // Round: siç ishte më parë
             try {
                 await assignGuestToTable(guest.id, table.id);
                 setLocalGuests(prev => prev.map(g => g.id === guest.id ? {
@@ -297,9 +322,36 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
         }
     };
 
+    const seatPriorityCollisionDetection: CollisionDetection = (args) => {
+        // 1. Provo pointerWithin fillimisht (i saktë kur pointer-i është ekzaktësisht brenda)
+        const pointerCollisions = pointerWithin(args);
+        const seatPointerHit = pointerCollisions.filter(c => String(c.id).startsWith('seat-'));
+        if (seatPointerHit.length > 0) return seatPointerHit;
+
+        // 2. Nëse pointer-i është afër një tavolinë, gjej seat-in më të afërt me pointer-in
+        //    (edhe nëse s'është saktësisht brenda 48px-it)
+        const tableHit = pointerCollisions.find(c => String(c.id).startsWith('table-drop-'));
+        if (tableHit) {
+            const seatContainers = args.droppableContainers.filter(c => String(c.id).startsWith('seat-'));
+            if (seatContainers.length > 0) {
+                const closest = closestCenter({
+                    ...args,
+                    droppableContainers: seatContainers,
+                });
+                if (closest.length > 0) return closest;
+            }
+            return [tableHit];
+        }
+
+        if (pointerCollisions.length > 0) return pointerCollisions;
+
+        return closestCenter(args);
+    };
+
     return (
         <DndContext
             sensors={sensors}
+            collisionDetection={seatPriorityCollisionDetection}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             modifiers={[restrictToWindowEdges]}
@@ -415,9 +467,13 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
                     <GuestAvatar initials={activeGuest.initials} size="md" className="scale-110 shadow-xl"/>}
                 {activeTable && (
                     <div
-                        className="w-32 h-32 rounded-full border-2 border-[hsl(var(--gold))] bg-card flex flex-col items-center justify-center shadow-2xl opacity-80 scale-105">
-                        <span
-                            className="text-[10px] uppercase tracking-widest text-muted-foreground block">Tavolina</span>
+                        className={cn(
+                            "border-2 border-[hsl(var(--gold))] bg-card flex flex-col items-center justify-center shadow-2xl opacity-80 scale-105",
+                            activeTable.shape === 'round' ? 'rounded-full' : 'rounded-2xl'
+                        )}
+                        style={{ width: activeTable.width, height: activeTable.height }}
+                    >
+                        <span className="text-[10px] uppercase tracking-widest text-muted-foreground block">Tavolina</span>
                         <span className="text-2xl font-serif text-[hsl(var(--primary))]">{activeTable.number}</span>
                     </div>
                 )}
