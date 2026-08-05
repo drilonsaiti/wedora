@@ -44,6 +44,7 @@ export default async function WeddingDashboardPage({ params }: Props) {
       initialTables={tables ?? []}
       initialVenueElements={venueElements ?? []}
       adminEmail={user.email ?? ''}
+      weddingId={weddingId}
     />
   )
 }

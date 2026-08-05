@@ -96,10 +96,9 @@ export async function createWedding(input: CreateWeddingInput){
         return { success: false as const, error: 'Dështoi krijimi i dasmës' }
     }
 
-    // Krijo llogaritë e çiftit — app_metadata (jo user_metadata) mban wedding_id + role.
-    // Vetëm service role mund ta ndryshojë app_metadata, kështu useri s'mund ta manipulojë vetë.
     const serviceSupabase = createServiceClient()
     const credentials: CoupleCredential[] = []
+    const failedEmails: string[] = []
     const emailsToCreate: { email: string; role: 'groom' | 'bride' }[] = [
         { email: parsed.data.groom_email, role: 'groom' },
     ]
@@ -107,13 +106,37 @@ export async function createWedding(input: CreateWeddingInput){
 
     for (const { email, role } of emailsToCreate) {
         const password = generateRandomPassword()
+
         const { data: authUser, error: authError } = await serviceSupabase.auth.admin.createUser({
             email,
             password,
             email_confirm: true,
             app_metadata: { wedding_id: wedding.id, role: 'couple', couple_role: role },
         })
-        if (authError || !authUser.user) continue
+
+        if (!authError && authUser.user) {
+            credentials.push({ email, password, role })
+            continue
+        }
+
+        const { data: existingUsers } = await serviceSupabase.auth.admin.listUsers()
+        const existingUser = existingUsers?.users.find((u) => u.email === email)
+
+        if (!existingUser) {
+            failedEmails.push(email)
+            continue
+        }
+
+        const { error: updateError } = await serviceSupabase.auth.admin.updateUserById(existingUser.id, {
+            password,
+            app_metadata: { wedding_id: wedding.id, role: 'couple', couple_role: role },
+        })
+
+        if (updateError) {
+            failedEmails.push(email)
+            continue
+        }
+
         credentials.push({ email, password, role })
     }
 
@@ -122,13 +145,29 @@ export async function createWedding(input: CreateWeddingInput){
     }
 
     revalidatePath('/admin/weddings')
-    return { success: true as const, weddingId: wedding.id as string, credentials }
+    return {
+        success: true as const,
+        weddingId: wedding.id as string,
+        credentials,
+        failedEmails: failedEmails.length > 0 ? failedEmails : undefined,
+    }
 }
 
 export async function updateWedding(weddingId: string, input: Partial<CreateWeddingInput>) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false as const, error: 'Duhet të jeni të kyçur' }
+
+    // Merr wedding-in AKTUAL para se të përditësojmë, që të krahasojmë email-et e vjetra me të rejat
+    const { data: currentWedding, error: fetchError } = await supabase
+        .from('weddings')
+        .select('groom_email, bride_email')
+        .eq('id', weddingId)
+        .single()
+
+    if (fetchError || !currentWedding) {
+        return { success: false as const, error: 'Dasma nuk u gjet' }
+    }
 
     const updates: WeddingUpdate = {}
     if (input.groom_name) updates.groom_name = input.groom_name
@@ -152,7 +191,65 @@ export async function updateWedding(weddingId: string, input: Partial<CreateWedd
         if (error) return { success: false as const, error: 'Dështoi ruajtja e cilësimeve' }
     }
 
+    const serviceSupabase = createServiceClient()
+    const credentials: CoupleCredential[] = []
+    const failedEmails: string[] = []
+
+    const emailChecks: { email: string | undefined; oldEmail: string | null | undefined; role: 'groom' | 'bride' }[] = [
+        { email: input.groom_email, oldEmail: currentWedding.groom_email, role: 'groom' },
+        { email: input.bride_email, oldEmail: currentWedding.bride_email, role: 'bride' },
+    ]
+
+    for (const { email, oldEmail, role } of emailChecks) {
+        if (!email) continue
+        if (!email || email.trim() === '') continue
+        if (email === oldEmail) continue
+
+        const password = generateRandomPassword()
+
+        const { data: authUser, error: authError } = await serviceSupabase.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+            app_metadata: { wedding_id: weddingId, role: 'couple', couple_role: role },
+        })
+
+        if (!authError && authUser.user) {
+            credentials.push({ email, password, role })
+            continue
+        }
+
+        const { data: existingUsers } = await serviceSupabase.auth.admin.listUsers()
+        const existingUser = existingUsers?.users.find((u) => u.email === email)
+
+        if (!existingUser) {
+            failedEmails.push(email)
+            continue
+        }
+
+        const { error: updateError } = await serviceSupabase.auth.admin.updateUserById(existingUser.id, {
+            password,
+            app_metadata: { wedding_id: weddingId, role: 'couple', couple_role: role },
+        })
+
+        if (updateError) {
+            failedEmails.push(email)
+            continue
+        }
+
+        credentials.push({ email, password, role })
+    }
+
+    if (credentials.length > 0) {
+        await serviceSupabase.from('wedding_settings').update({ enable_couple_login: true }).eq('wedding_id', weddingId)
+    }
+
     revalidatePath(`/admin/weddings/${weddingId}`)
     revalidatePath(`/admin/weddings/${weddingId}/settings`)
-    return { success: true as const }
+
+    return {
+        success: true as const,
+        credentials: credentials.length > 0 ? credentials : undefined,
+        failedEmails: failedEmails.length > 0 ? failedEmails : undefined,
+    }
 }

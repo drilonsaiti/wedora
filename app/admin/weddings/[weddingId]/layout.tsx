@@ -4,11 +4,11 @@ import { createClient } from '@/lib/supabase/server'
 
 type Props = {
   children: ReactNode
-  params: Promise<{ weddingId: string }>   // ← now a Promise
+  params: Promise<{ weddingId: string }>
 }
 
 export default async function WeddingAdminLayout({ children, params }: Props) {
-  const { weddingId } = await params        // ← unwrap it
+  const { weddingId } = await params
 
   const supabase = await createClient()
 

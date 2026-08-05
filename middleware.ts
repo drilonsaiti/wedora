@@ -44,18 +44,13 @@ export async function middleware(request: NextRequest) {
     if (
         pathname === '/admin/forgot-password' ||
         pathname === '/admin/reset-password' ||
+        pathname === '/couple/forgot-password' ||
+        pathname === '/couple/reset-password' ||
         pathname.startsWith('/api/auth')
     ) {
         return supabaseResponse
     }
 
-    if (pathname.startsWith('/admin/photos')) {
-        if (!user) {
-            const url = request.nextUrl.clone()
-            url.pathname = '/admin/login'
-            return NextResponse.redirect(url)
-        }
-    }
 
     if (pathname === '/admin/login' && user) {
         const url = request.nextUrl.clone()
@@ -75,6 +70,22 @@ export async function middleware(request: NextRequest) {
         if (!user) {
             const url = request.nextUrl.clone()
             url.pathname = '/couple/login'
+            return NextResponse.redirect(url)
+        }
+
+        const appMetadata = user.app_metadata as { role?: string; wedding_id?: string }
+        if (appMetadata.role !== 'couple') {
+            const url = request.nextUrl.clone()
+            url.pathname = '/couple/login'
+            return NextResponse.redirect(url)
+        }
+    }
+
+    if (pathname === '/couple/login' && user) {
+        const appMetadata = user.app_metadata as { role?: string; wedding_id?: string }
+        if (appMetadata.role === 'couple' && appMetadata.wedding_id) {
+            const url = request.nextUrl.clone()
+            url.pathname = `/couple/weddings/${appMetadata.wedding_id}`
             return NextResponse.redirect(url)
         }
     }

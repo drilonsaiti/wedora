@@ -6,14 +6,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { updateWedding } from '@/actions/wedding';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { generateWeddingTheme } from '@/lib/theme';
-import { Loader2, Check } from 'lucide-react';
-import { z } from 'zod';
+import { Loader2, Check,Copy, } from 'lucide-react';
 import {EditWeddingInput, editWeddingSchema} from "@/schemas";
 
 
 
 export function EditWeddingForm({ wedding }: { wedding: any }) {
     const [saved, setSaved] = useState(false);
+    const [newCredentials, setNewCredentials] = useState<{ email: string; password: string; role: 'groom' | 'bride' }[] | undefined>(undefined);
+    const [failedEmails, setFailedEmails] = useState<string[] | undefined>(undefined);
+    const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
     const settings = wedding.wedding_settings?.[0] ?? wedding.wedding_settings ?? {};
     let hue = 355;
     try {
@@ -44,11 +47,21 @@ export function EditWeddingForm({ wedding }: { wedding: any }) {
 
     const onSubmit = async (data: EditWeddingInput) => {
         setSaved(false);
+        setNewCredentials(undefined);
+        setFailedEmails(undefined);
         const result = await updateWedding(wedding.id, data);
         if (result.success) {
             setSaved(true);
+            setNewCredentials(result.credentials);
+            setFailedEmails(result.failedEmails);
             setTimeout(() => setSaved(false), 2500);
         }
+    };
+
+    const handleCopy = (text: string, index: number) => {
+        navigator.clipboard.writeText(text);
+        setCopiedIndex(index);
+        setTimeout(() => setCopiedIndex(null), 2000);
     };
 
     return (
@@ -111,6 +124,40 @@ export function EditWeddingForm({ wedding }: { wedding: any }) {
                 </label>
                 {errors.enable_find_seat && <p className="text-xs text-destructive">{errors.enable_find_seat.message}</p>}
             </div>
+
+            {newCredentials && newCredentials.length > 0 && (
+                <div className="space-y-3 bg-[hsl(var(--accent))]/40 border border-[hsl(var(--primary))]/20 rounded-2xl p-4">
+                    <p className="text-xs font-medium text-[hsl(var(--dark))]">
+                        U krijuan/rivendosën llogari të reja — ruajini këto tani, s&apos;do shfaqen përsëri:
+                    </p>
+                    {newCredentials.map((cred, i) => (
+                        <div key={cred.email} className="bg-card rounded-xl p-3">
+                            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+                                {cred.role === 'groom' ? 'Dhëndri' : 'Nusja'}
+                            </p>
+                            <p className="font-sans text-sm mb-2">{cred.email}</p>
+                            <div className="flex items-center gap-2">
+                                <code className="text-sm bg-muted px-3 py-1.5 rounded-lg flex-1 font-mono">{cred.password}</code>
+                                <button
+                                    type="button"
+                                    onClick={() => handleCopy(cred.password, i)}
+                                    className="p-2 hover:bg-muted rounded-lg transition-colors"
+                                >
+                                    {copiedIndex === i ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {failedEmails && failedEmails.length > 0 && (
+                <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3">
+                    <p className="text-xs text-destructive">
+                        Dështoi krijimi/rivendosja e llogarisë për: {failedEmails.join(', ')}
+                    </p>
+                </div>
+            )}
 
             <button type="submit" disabled={isSubmitting} className="btn-primary w-full py-4 rounded-2xl flex items-center justify-center gap-2 disabled:opacity-60">
                 {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : null}

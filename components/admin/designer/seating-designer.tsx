@@ -12,7 +12,8 @@ import {
   Music,
   Search,
   Waves,
-  Wine
+  Wine,
+    Plus
 } from 'lucide-react';
 import {
   defaultDropAnimationSideEffects,
@@ -37,12 +38,17 @@ import {
   updateVenueElementPosition
 } from '@/actions/seating';
 import {cn} from "@/lib/utils";
-import {DraggableVenueElement} from "@/components/draggable-venue-element";
+import {DraggableVenueElement} from "@/components/admin/designer/draggable-venue-element";
 import { ToggleSwitch } from '@/components/ui/toggle-switch';
+import { VenueElementModal } from '@/components/ui/venue-element-modal'
+import { VenueIconKey, VenueColorKey } from '@/lib/venue-icons'
+import { VenueElementShape } from '@/types/seating'
+
 interface SeatingDesignerProps {
     guests: GuestWithTable[];
     tables: Table[];
     venueElements: VenueElement[];
+    weddingId: string;
 }
 
 
@@ -59,7 +65,7 @@ const ELEMENT_TYPES: { type: VenueElementType; label: string; Icon: any }[] = [
     {type: 'toilet', label: 'Tualeti', Icon: Bath},
 ];
 
-export function SeatingDesigner({guests, tables, venueElements}: SeatingDesignerProps) {
+export function SeatingDesigner({guests, tables, venueElements,weddingId}: SeatingDesignerProps) {
     const [localTables, setLocalTables] = useState<Table[]>(tables);
     const [localGuests, setLocalGuests] = useState<GuestWithTable[]>(guests);
     const [activeGuest, setActiveGuest] = useState<Guest | null>(null);
@@ -70,6 +76,7 @@ export function SeatingDesigner({guests, tables, venueElements}: SeatingDesigner
     const innerContentRef = useRef<HTMLDivElement>(null);
     const [localVenueElements, setLocalVenueElements] = useState<VenueElement[]>(venueElements);
     const [showGuests, setShowGuests] = useState(true);
+    const [venueModalOpen, setVenueModalOpen] = useState(false)
 
     useEffect(() => {
         if (!isFullscreen) return;
@@ -234,14 +241,23 @@ export function SeatingDesigner({guests, tables, venueElements}: SeatingDesigner
             })
     }, [])
 
-    const handleAddElement = async (type: VenueElementType) => {
+    const handleAddElement = async (data: {
+        type: string
+        label: string
+        icon: VenueIconKey
+        shape: VenueElementShape
+        color: VenueColorKey
+    }) => {
         try {
-            const newElement = await createVenueElement(type, 200, 200);
-            setLocalVenueElements(prev => [...prev, newElement]);
+            const newElement = await createVenueElement({
+                weddingId,
+                ...data,
+            })
+            setLocalVenueElements(prev => [...prev, newElement])
         } catch (err) {
-            alert('Dështoi shtimi i elementit');
+            alert('Dështoi shtimi i elementit')
         }
-    };
+    }
 
     const handleDeleteElement = async (id: string) => {
         try {
@@ -282,17 +298,13 @@ export function SeatingDesigner({guests, tables, venueElements}: SeatingDesigner
                             />
                         </div>
                         <div className="flex flex-wrap gap-2 mb-3">
-                            {ELEMENT_TYPES.map(({type, label, Icon}) => (
-                                <button
-                                    key={type}
-                                    onClick={() => handleAddElement(type)}
-                                    className="btn-ghost text-[10px] py-1.5 px-2 border border-border rounded-lg flex items-center gap-1"
-                                    title={`Shto ${label}`}
-                                >
-                                    <Icon className="w-3 h-3"/>
-                                    {label}
-                                </button>
-                            ))}
+                            <button
+                                onClick={() => setVenueModalOpen(true)}
+                                className="btn-ghost text-[10px] py-1.5 px-3 border border-dashed border-border rounded-lg flex items-center gap-1"
+                            >
+                                <Plus className="w-3 h-3" />
+                                Shto Element
+                            </button>
                         </div>
                         <div className="flex flex-wrap gap-3 max-h-32 overflow-y-auto p-1">
                             {unassignedGuests.map(guest => (
@@ -380,6 +392,12 @@ export function SeatingDesigner({guests, tables, venueElements}: SeatingDesigner
                     </div>
                 )}
             </DragOverlay>
+
+            <VenueElementModal
+                open={venueModalOpen}
+                onClose={() => setVenueModalOpen(false)}
+                onCreate={handleAddElement}
+            />
         </DndContext>
     );
 }

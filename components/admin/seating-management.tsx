@@ -41,6 +41,7 @@ interface SeatingManagementProps {
     initialTables: Table[]
     initialVenueElements: VenueElement[]
     adminEmail: string
+    weddingId: string
 }
 
 type Tab = 'guests' | 'tables' | 'designer'
@@ -50,6 +51,7 @@ export function SeatingManagement({
                                       initialTables,
                                       initialVenueElements,
                                       adminEmail,
+    weddingId
                                   }: SeatingManagementProps) {
     const router = useRouter()
     const [, startTransition] = useTransition()
@@ -109,9 +111,7 @@ export function SeatingManagement({
             <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link href="/admin/photos" className="p-2 hover:bg-muted rounded-full transition-colors">
-                            <ChevronLeft className="w-5 h-5"/>
-                        </Link>
+
                         <div>
                             <h1 className="font-serif text-xl font-light text-[hsl(var(--dark))]">Sistemimi i të
                                 ftuarve</h1>
@@ -341,7 +341,7 @@ export function SeatingManagement({
                 {activeTab === 'designer' && (
                     <div className="h-[calc(100vh-250px)]">
                         <SeatingDesigner guests={initialGuests} tables={initialTables}
-                                         venueElements={initialVenueElements}/>
+                                         venueElements={initialVenueElements} weddingId={weddingId}/>
                     </div>
                 )}
             </main>

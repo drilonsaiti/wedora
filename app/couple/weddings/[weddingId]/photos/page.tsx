@@ -6,58 +6,57 @@ import { AdminDashboard } from '@/components/admin/dashboard'
 export const dynamic = 'force-dynamic'
 
 type Props = {
-  params: { weddingId: string }
-  searchParams: Promise<{
-    filter?: string
-  }>
+  params: Promise<{ weddingId: string }>
+  searchParams: Promise<{ filter?: string }>
 }
 
-export default async function AdminWeddingPhotosPage({ params, searchParams }: Props) {
+export default async function CoupleWeddingPhotosPage({ params, searchParams }: Props) {
   const supabase = await createClient()
   const { weddingId } = await params
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/admin/login')
+  if (!user) {
+    console.log('LOOP DEBUG: no user, redirecting to /couple/login')
+    redirect('/couple/login')
+  }
 
-  const { data: admin } = await supabase
-    .from('admins')
-    .select('id, email')
-    .eq('id', user.id)
-    .single()
+  const appMetadata = user.app_metadata as { role?: string; wedding_id?: string }
+  if (appMetadata.role !== 'couple' || appMetadata.wedding_id !== weddingId) {
+    console.log('LOOP DEBUG: role/wedding_id mismatch', appMetadata, weddingId)
+    redirect('/couple/login')
+  }
 
-  if (!admin) redirect('/admin/login')
+  const { data: settings } = await supabase
+      .from('wedding_settings')
+      .select('enable_couple_login')
+      .eq('wedding_id', weddingId)
+      .single()
 
-  // Platform admins can access any wedding; ensure the wedding exists
-  const { data: wedding } = await supabase
-    .from('weddings')
-    .select('id')
-    .eq('id', weddingId)
-    .single()
+  if (!settings?.enable_couple_login) {
+    console.log('LOOP DEBUG: enable_couple_login false or settings missing', settings)
+    redirect('/couple/login')
+  }
 
-  if (!wedding) redirect('/admin/weddings')
+
 
   const { filter } = await searchParams
-
   const filters =
-    filter === 'favourites'
-      ? { favourite: true }
-      : filter === 'hidden'
-        ? { hidden: true }
-        : filter === 'unapproved'
-          ? { approved: false }
-          : undefined
+      filter === 'favourites' ? { favourite: true }
+          : filter === 'hidden' ? { hidden: true }
+              : filter === 'unapproved' ? { approved: false }
+                  : undefined
 
-  const photoResult = await getPhotosAction(wedding.id, filters, 50, 0)
+  const photoResult = await getPhotosAction(weddingId, filters, 50, 0)
 
   return (
-    <AdminDashboard
-      initialPhotos={photoResult.photos}
-      initialTotal={photoResult.total ?? 0}
-      adminEmail={admin.email}
-      weddingId={wedding.id}
-      error={photoResult.error}
-      activeFilter={filter}
-      role="couple"
-    />
+      <AdminDashboard
+          initialPhotos={photoResult.photos}
+          initialTotal={photoResult.total ?? 0}
+          adminEmail={user.email ?? ''}
+          weddingId={weddingId}
+          error={photoResult.error}
+          activeFilter={filter}
+          role="couple"
+      />
   )
 }

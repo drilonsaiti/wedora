@@ -203,3 +203,8 @@ CREATE POLICY "couple_delete_photos" ON public.photos
     is_couple_for_wedding(wedding_id)
     AND EXISTS (SELECT 1 FROM wedding_settings ws WHERE ws.wedding_id = photos.wedding_id AND ws.enable_couple_login = true)
   );
+
+DROP POLICY IF EXISTS "couple_read_wedding_settings" ON public.wedding_settings;
+CREATE POLICY "couple_read_wedding_settings" ON public.wedding_settings
+  FOR SELECT TO authenticated
+                                               USING (is_couple_for_wedding(wedding_id));

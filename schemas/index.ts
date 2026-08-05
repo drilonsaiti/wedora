@@ -54,6 +54,13 @@ export const adminLoginSchema = z.object({
 
 export type AdminLoginValues = z.infer<typeof adminLoginSchema>
 
+export const coupleLoginSchema = z.object({
+    email: z.string().email('Invalid email address'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+})
+
+export type CoupleLoginValues = z.infer<typeof coupleLoginSchema>
+
 export const forgotPasswordSchema = z.object({
     email: z.string().email('Invalid email address'),
 })

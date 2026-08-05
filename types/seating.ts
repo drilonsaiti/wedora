@@ -23,17 +23,19 @@ export interface GuestWithTable extends Guest {
 
 export const GALLERY_PAGE_SIZE = 30
 
-
+export type VenueElementShape = 'circle' | 'square' | 'rectangle';
 export type VenueElementType = 'pool' | 'couple_table' | 'music' | 'bar' | 'toilet' | 'entrance';
 
 export interface VenueElement {
     id: string;
-    type: VenueElementType;
-    label: string | null;
+    type: string;
+    label: string;
+    icon: string;
+    shape: VenueElementShape;
+    color: string;
     pos_x: number;
     pos_y: number;
     width: number;
     height: number;
 }
-
 

@@ -95,15 +95,17 @@ export async function updatePhotoAction(
 }
 
 export async function deletePhotoAction(
-    id: string
+    id: string,
+    weddingId: string
 ): Promise<{ success: boolean; error?: string }> {
     try {
-        const {supabase, weddingId} = await requireAdmin()
+        const supabase = await createClient()
 
         const result = await supabase
             .from('photos')
             .select('original_path, thumbnail_path')
             .eq('id', id)
+            .eq('wedding_id', weddingId)
             .single()
 
         const photo = result.data as {
@@ -115,8 +117,9 @@ export async function deletePhotoAction(
             return {success: false, error: 'Photo not found'}
         }
 
-        await supabase.storage.from('photos').remove([photo.original_path])
-        await supabase.storage.from('thumbnails').remove([photo.thumbnail_path])
+        const serviceSupabase = createServiceClient()
+        await serviceSupabase.storage.from('photos').remove([photo.original_path])
+        await serviceSupabase.storage.from('thumbnails').remove([photo.thumbnail_path])
 
         const {error: dbError} = await supabase
             .from('photos')
@@ -125,10 +128,9 @@ export async function deletePhotoAction(
 
         if (dbError) return {success: false, error: dbError.message}
 
-        if (weddingId) {
-            revalidateTag(`gallery-photos-${weddingId}`, 'max')
-        }
-        revalidatePath('/admin/photos')
+        revalidateTag(`gallery-photos-${weddingId}`, 'max')
+        revalidatePath(`/admin/weddings/${weddingId}/photos`)
+        revalidatePath(`/couple/weddings/${weddingId}/photos`)
         return {success: true}
     } catch {
         return {success: false, error: 'Unexpected error'}
@@ -212,62 +214,40 @@ export async function getPhotosAction(
     offset?: number
 ) {
     try {
-        const {supabase} = await requireWeddingAdmin()
+        const supabase = await createClient() // jo requireWeddingAdmin() — page-t tashmë verifikuan identitetin
 
         if (!weddingId) {
-            return {
-                photos: [],
-                total: 0,
-                error: undefined,
-            }
+            return { photos: [], total: 0, error: undefined }
         }
 
         let query = supabase
             .from('photos')
-            .select('*', {count: 'exact'})
+            .select('*', { count: 'exact' })
             .eq('wedding_id', weddingId)
-            .order('created_at', {ascending: false})
+            .order('created_at', { ascending: false })
 
-        if (filters?.favourite !== undefined) {
-            query = query.eq('favourite', filters.favourite)
-        }
-
-        if (filters?.hidden !== undefined) {
-            query = query.eq('hidden', filters.hidden)
-        }
-
-        if (filters?.approved !== undefined) {
-            query = query.eq('approved', filters.approved)
-        }
+        if (filters?.favourite !== undefined) query = query.eq('favourite', filters.favourite)
+        if (filters?.hidden !== undefined) query = query.eq('hidden', filters.hidden)
+        if (filters?.approved !== undefined) query = query.eq('approved', filters.approved)
 
         if (limit !== undefined) {
             const from = offset ?? 0
             const to = from + limit - 1
-
             query = query.range(from, to)
         }
 
-        const {data, error, count} = await query
+        const { data, error, count } = await query
 
         if (error) {
-            return {
-                photos: [],
-                total: 0,
-                error: error.message,
-            }
+            return { photos: [], total: 0, error: error.message }
         }
 
-        return {
-            photos: data ?? [],
-            total: count ?? 0,
-        }
+        return { photos: data ?? [], total: count ?? 0 }
     } catch (error) {
         return {
             photos: [],
             total: 0,
-            error: error instanceof Error
-                ? error.message
-                : 'Unexpected error',
+            error: error instanceof Error ? error.message : 'Unexpected error',
         }
     }
 }

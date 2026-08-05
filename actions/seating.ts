@@ -226,78 +226,67 @@ export async function updateTablePosition(id: string, pos_x: number, pos_y: numb
     revalidateTag(`tables-${weddingId}`, 'max')
 }
 
-export async function createVenueElement(
-    type: VenueElementType,
-    posX: number,
-    posY: number
-): Promise<VenueElement> {
-    const defaults: Record<VenueElementType, { width: number; height: number; label: string }> = {
-        pool: {
-            width: 160,
-            height: 100,
-            label: 'Pishina'
-        },
-        couple_table: {
-            width: 140,
-            height: 80,
-            label: 'Vendi i Çiftit'
-        },
-        music: {
-            width: 90,
-            height: 90,
-            label: 'Muzika'
-        },
-        bar: {
-            width: 140,
-            height: 70,
-            label: 'Bar'
-        },
-        toilet: {
-            width: 70,
-            height: 70,
-            label: 'Tualeti'
-        },
-        entrance: {
-            width: 70,
-            height: 70,
-            label: 'Hyrja'
-        },
-    };
+export async function createVenueElement(input: {
+    weddingId: string
+    type: string
+    label: string
+    icon: string
+    shape: 'circle' | 'square' | 'rectangle'
+    color: string
+    posX?: number
+    posY?: number
+}) {
+    const supabase = await createClient()
 
-    const d = defaults[type];
+    const dimensions: Record<string, { width: number; height: number }> = {
+        circle: { width: 90, height: 90 },
+        square: { width: 100, height: 100 },
+        rectangle: { width: 160, height: 90 },
+    }
+    const { width, height } = dimensions[input.shape]
 
-    const {supabase, weddingId} = await requireAdmin();
-
-    const {data, error} = await supabase
+    const { data, error } = await supabase
         .from('venue_elements')
         .insert({
-            type,
-            label: d.label,
-            pos_x: posX,
-            pos_y: posY,
-            width: d.width,
-            height: d.height,
-            wedding_id: weddingId
+            wedding_id: input.weddingId,
+            type: input.type,
+            label: input.label,
+            icon: input.icon,
+            shape: input.shape,
+            color: input.color,
+            pos_x: input.posX ?? 200,
+            pos_y: input.posY ?? 200,
+            width,
+            height,
         })
         .select()
-        .single();
+        .single()
 
-    if (error) throw error;
-
-    revalidateTag(`venue-elements-${weddingId}`, 'max');
-
-    return {
-        ...data,
-        type: data.type as VenueElementType,
-    };
+    if (error) throw error
+    revalidateTag(`venue-elements-${input.weddingId}`,'max')
+    return data
 }
 
 export async function updateVenueElementPosition(id: string, posX: number, posY: number) {
     const {supabase, weddingId} = await requireAdmin();
-    const {error} = await supabase.from('venue_elements').update({
-        pos_x: posX,
-        pos_y: posY,
-    }).eq('id', id).eq('wedding_id', weddingId);
+    const {error} = await supabase
+        .from('venue_elements')
+        .update({
+            pos_x: posX,
+            pos_y: posY,
+        } satisfies Partial<{
+            pos_x: number
+            pos_y: number
+            icon: string
+            shape: string
+            color: string
+            label: string
+            type: string
+            width: number
+            height: number
+        }>)
+        .eq('id', id)
+        .eq('wedding_id', weddingId);
     if (error) throw error;
     revalidateTag(`venue-elements-${weddingId}`, 'max')
 }
@@ -331,3 +320,4 @@ export async function getVenueElements(weddingId: string) {
         {tags: [`venue-elements-${weddingId}`]}
     )(weddingId)
 }
+

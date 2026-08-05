@@ -165,7 +165,7 @@ export function AdminDashboard({
         if (!confirm('Delete this photo permanently?')) return
         setActionLoading((prev) => ({...prev, [id]: true}))
         try {
-            const result = await deletePhotoAction(id)
+            const result = await deletePhotoAction(id, weddingId)
             if (result.success) {
                 setPhotos((prev) => prev.filter((p) => p.id !== id))
                 setTotal((prev) => prev - 1)
@@ -315,6 +315,16 @@ export function AdminDashboard({
                         {role === 'admin' && (
                             <Link
                                 href={`/admin/weddings/${weddingId}`}
+                                className="btn-ghost text-xs py-2 px-3 sm:px-4"
+                            >
+                                <Armchair className="w-3.5 h-3.5"/>
+                                <span className="hidden sm:inline">Sistemimi</span>
+                            </Link>
+                        )}
+
+                        {role === 'couple' && (
+                            <Link
+                                href={`/couple/weddings/${weddingId}/seating`}
                                 className="btn-ghost text-xs py-2 px-3 sm:px-4"
                             >
                                 <Armchair className="w-3.5 h-3.5"/>

@@ -29,6 +29,7 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
     const [credentials, setCredentials] = useState<Credential[] | null>(null);
     const [createdWeddingId, setCreatedWeddingId] = useState<string | null>(null);
     const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+    const [failedEmails, setFailedEmails] = useState<string[] | undefined>(undefined);
 
     const {
         register,
@@ -72,6 +73,7 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
         }
         setCreatedWeddingId(result.weddingId);
         setCredentials(result.credentials);
+        setFailedEmails(result.failedEmails);
     };
 
     if (credentials) {
@@ -112,6 +114,14 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
                         </p>
                     )}
                 </div>
+
+                {failedEmails && failedEmails.length > 0 && (
+                    <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3">
+                        <p className="text-xs text-destructive">
+                            Dështoi krijimi/rivendosja e llogarisë për: {failedEmails.join(', ')}
+                        </p>
+                    </div>
+                )}
 
                 <button
                     onClick={() => onSuccess ? onSuccess(createdWeddingId!) : router.push(`/admin/weddings/${createdWeddingId}`)}
