@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { Modal } from '@/components/ui/modal'
-import { VENUE_ICONS, VENUE_COLORS, VENUE_PRESETS, VenueIconKey, VenueColorKey } from '@/lib/venue-icons'
-import { VenueElementShape } from '@/types/seating'
-import { cn } from '@/lib/utils'
+import {useState} from 'react'
+import {Modal} from '@/components/ui/modal'
+import {VENUE_COLORS, VENUE_ICONS, VENUE_PRESETS, VenueColorKey, VenueIconKey} from '@/lib/venue-icons'
+import {VenueElementShape} from '@/types/seating'
+import {cn} from '@/lib/utils'
 
 interface VenueElementModalProps {
     open: boolean
@@ -18,20 +18,20 @@ interface VenueElementModalProps {
     }) => void
 }
 
-export function VenueElementModal({ open, onClose, onCreate }: VenueElementModalProps) {
+export function VenueElementModal({open, onClose, onCreate}: VenueElementModalProps) {
     const [label, setLabel] = useState('')
     const [icon, setIcon] = useState<VenueIconKey>('MapPin')
     const [shape, setShape] = useState<VenueElementShape>('square')
     const [color, setColor] = useState<VenueColorKey>('gray')
 
     const handlePresetClick = (preset: typeof VENUE_PRESETS[number]) => {
-        onCreate({ type: preset.type, label: preset.label, icon: preset.icon, shape: preset.shape, color: preset.color })
+        onCreate({type: preset.type, label: preset.label, icon: preset.icon, shape: preset.shape, color: preset.color})
         onClose()
     }
 
     const handleCustomCreate = () => {
         if (!label.trim()) return
-        onCreate({ type: 'custom', label: label.trim(), icon, shape, color })
+        onCreate({type: 'custom', label: label.trim(), icon, shape, color})
         setLabel('')
         onClose()
     }
@@ -57,7 +57,7 @@ export function VenueElementModal({ open, onClose, onCreate }: VenueElementModal
                                         VENUE_COLORS[preset.color]
                                     )}
                                 >
-                                    <Icon className="w-3.5 h-3.5" />
+                                    <Icon className="w-3.5 h-3.5"/>
                                     {preset.label}
                                 </button>
                             )
@@ -65,7 +65,7 @@ export function VenueElementModal({ open, onClose, onCreate }: VenueElementModal
                     </div>
                 </div>
 
-                <div className="h-px bg-border" />
+                <div className="h-px bg-border"/>
 
                 <div className="space-y-4">
                     <label className="text-[10px] uppercase tracking-widest text-muted-foreground block">
@@ -98,7 +98,7 @@ export function VenueElementModal({ open, onClose, onCreate }: VenueElementModal
                                             icon === key ? 'border-[hsl(var(--primary))] bg-[hsl(var(--accent))]' : 'border-border hover:bg-muted'
                                         )}
                                     >
-                                        <Icon className="w-4 h-4" />
+                                        <Icon className="w-4 h-4"/>
                                     </button>
                                 )
                             })}

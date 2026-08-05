@@ -1,7 +1,7 @@
 'use client'
 
-import { X } from 'lucide-react'
-import { useEffect } from 'react'
+import {X} from 'lucide-react'
+import {useEffect} from 'react'
 
 interface ModalProps {
     open: boolean
@@ -10,10 +10,12 @@ interface ModalProps {
     maxWidth?: string
 }
 
-export function Modal({ open, onClose, children, maxWidth = 'max-w-lg' }: ModalProps) {
+export function Modal({open, onClose, children, maxWidth = 'max-w-lg'}: ModalProps) {
     useEffect(() => {
         if (!open) return
-        const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose()
+        }
         window.addEventListener('keydown', handleKey)
         document.body.style.overflow = 'hidden'
         return () => {
@@ -38,7 +40,7 @@ export function Modal({ open, onClose, children, maxWidth = 'max-w-lg' }: ModalP
                         onClick={onClose}
                         className="absolute top-4 right-4 w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/70 transition-colors z-10"
                     >
-                        <X className="w-4 h-4" />
+                        <X className="w-4 h-4"/>
                     </button>
                     {children}
                 </div>

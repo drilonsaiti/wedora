@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import {cn} from '@/lib/utils';
 
 interface ToggleSwitchProps {
     checked: boolean;
@@ -8,7 +8,7 @@ interface ToggleSwitchProps {
     label: string;
 }
 
-export function ToggleSwitch({ checked, onChange, label }: ToggleSwitchProps) {
+export function ToggleSwitch({checked, onChange, label}: ToggleSwitchProps) {
     return (
         <button
             type="button"

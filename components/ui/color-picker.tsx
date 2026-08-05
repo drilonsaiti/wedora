@@ -1,15 +1,14 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import { WEDDING_COLOR_PRESETS } from '@/lib/theme';
-import { Check } from 'lucide-react';
+import {WEDDING_COLOR_PRESETS} from '@/lib/theme';
+import {Check} from 'lucide-react';
 
 interface ColorPickerProps {
     value: number;
     onChange: (hue: number) => void;
 }
 
-export function ColorPicker({ value, onChange }: ColorPickerProps) {
+export function ColorPicker({value, onChange}: ColorPickerProps) {
     return (
         <div className="space-y-3">
             <div className="flex flex-wrap gap-3">
@@ -20,11 +19,11 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
                         onClick={() => onChange(preset.hue)}
                         title={preset.name}
                         className="relative w-10 h-10 rounded-full border-2 border-white shadow-md transition-transform hover:scale-110"
-                        style={{ backgroundColor: `hsl(${preset.hue}, 45%, 55%)` }}
+                        style={{backgroundColor: `hsl(${preset.hue}, 45%, 55%)`}}
                     >
                         {value === preset.hue && (
                             <span className="absolute inset-0 flex items-center justify-center">
-                <Check className="w-4 h-4 text-white drop-shadow" />
+                <Check className="w-4 h-4 text-white drop-shadow"/>
               </span>
                         )}
                     </button>

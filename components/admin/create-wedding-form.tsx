@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
-import { createWedding } from '@/actions/wedding';
-import { Heart, Loader2, Copy, Check, ArrowRight } from 'lucide-react';
-import { CreateWeddingInput, createWeddingSchema } from '@/schemas';
-import { ColorPicker } from '@/components/ui/color-picker';
-import { generateWeddingTheme } from '@/lib/theme';
+import {useState} from 'react';
+import {useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {useRouter} from 'next/navigation';
+import {createWedding} from '@/actions/wedding';
+import {ArrowRight, Check, Copy, Heart, Loader2} from 'lucide-react';
+import {CreateWeddingInput, createWeddingSchema} from '@/schemas';
+import {ColorPicker} from '@/components/ui/color-picker';
+import {generateWeddingTheme} from '@/lib/theme';
 
 interface CreateWeddingFormProps {
     adminEmail: string;
@@ -22,7 +22,7 @@ interface Credential {
 }
 
 
-export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormProps) {
+export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProps) {
     const router = useRouter();
     const [serverError, setServerError] = useState<string | null>(null);
     const [slugTouched, setSlugTouched] = useState(false);
@@ -36,7 +36,7 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
         handleSubmit,
         watch,
         setValue,
-        formState: { errors, isSubmitting },
+        formState: {errors, isSubmitting},
     } = useForm<CreateWeddingInput>({
         resolver: zodResolver(createWeddingSchema),
         defaultValues: {
@@ -80,8 +80,9 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
         return (
             <div className="space-y-6 w-full max-w-md">
                 <div className="text-center">
-                    <div className="w-14 h-14 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center mx-auto mb-4">
-                        <Check className="w-7 h-7 text-[hsl(var(--primary))]" />
+                    <div
+                        className="w-14 h-14 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center mx-auto mb-4">
+                        <Check className="w-7 h-7 text-[hsl(var(--primary))]"/>
                     </div>
                     <h2 className="font-serif text-2xl font-light text-[hsl(var(--dark))]">Dasma u krijua!</h2>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -97,13 +98,15 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
                             </p>
                             <p className="font-sans text-sm mb-2">{cred.email}</p>
                             <div className="flex items-center gap-2">
-                                <code className="text-sm bg-muted px-3 py-1.5 rounded-lg flex-1 font-mono">{cred.password}</code>
+                                <code
+                                    className="text-sm bg-muted px-3 py-1.5 rounded-lg flex-1 font-mono">{cred.password}</code>
                                 <button
                                     type="button"
                                     onClick={() => handleCopy(cred.password, i)}
                                     className="p-2 hover:bg-muted rounded-lg transition-colors"
                                 >
-                                    {copiedIndex === i ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                                    {copiedIndex === i ? <Check className="w-4 h-4 text-green-600"/> :
+                                        <Copy className="w-4 h-4"/>}
                                 </button>
                             </div>
                         </div>
@@ -128,7 +131,7 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
                     className="btn-primary w-full py-4 rounded-2xl flex items-center justify-center gap-2"
                 >
                     Vazhdo te Dashboard-i
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4"/>
                 </button>
             </div>
         );
@@ -138,9 +141,9 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 w-full max-w-md">
             <div className="text-center mb-8">
                 <div className="flex items-center justify-center gap-2 mb-4">
-                    <div className="h-px w-8 bg-[hsl(var(--gold))] opacity-60" />
-                    <Heart className="w-3 h-3 text-[hsl(var(--primary))] fill-current" />
-                    <div className="h-px w-8 bg-[hsl(var(--gold))] opacity-60" />
+                    <div className="h-px w-8 bg-[hsl(var(--gold))] opacity-60"/>
+                    <Heart className="w-3 h-3 text-[hsl(var(--primary))] fill-current"/>
+                    <div className="h-px w-8 bg-[hsl(var(--gold))] opacity-60"/>
                 </div>
                 <h1 className="font-serif text-3xl font-light text-[hsl(var(--dark))]">Krijoni dasmën tuaj</h1>
                 <p className="text-xs text-muted-foreground mt-2">{adminEmail}</p>
@@ -152,7 +155,7 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
                         Emri i Dhëndrit
                     </label>
                     <input
-                        {...register('groom_name', { onBlur: handleNameBlur })}
+                        {...register('groom_name', {onBlur: handleNameBlur})}
                         type="text"
                         placeholder="p.sh. Drilon"
                         className="input-wedding py-3 w-full"
@@ -164,7 +167,7 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
                         Emri i Nuses
                     </label>
                     <input
-                        {...register('bride_name', { onBlur: handleNameBlur })}
+                        {...register('bride_name', {onBlur: handleNameBlur})}
                         type="text"
                         placeholder="p.sh. Sara"
                         className="input-wedding py-3 w-full"
@@ -184,7 +187,8 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
                         placeholder="drilon@example.com"
                         className="input-wedding py-3 w-full"
                     />
-                    {errors.groom_email && <p className="text-xs text-destructive mt-1">{errors.groom_email.message}</p>}
+                    {errors.groom_email &&
+                        <p className="text-xs text-destructive mt-1">{errors.groom_email.message}</p>}
                 </div>
                 <div>
                     <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
@@ -196,7 +200,8 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
                         placeholder="sara@example.com"
                         className="input-wedding py-3 w-full"
                     />
-                    {errors.bride_email && <p className="text-xs text-destructive mt-1">{errors.bride_email.message}</p>}
+                    {errors.bride_email &&
+                        <p className="text-xs text-destructive mt-1">{errors.bride_email.message}</p>}
                 </div>
             </div>
             <p className="text-[10px] text-muted-foreground -mt-3 italic">
@@ -207,7 +212,7 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
                 <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
                     Data e Dasmës
                 </label>
-                <input {...register('wedding_date')} type="date" className="input-wedding py-3 w-full" />
+                <input {...register('wedding_date')} type="date" className="input-wedding py-3 w-full"/>
                 {errors.wedding_date && <p className="text-xs text-destructive mt-1">{errors.wedding_date.message}</p>}
             </div>
 
@@ -218,7 +223,7 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
                 <div className="flex items-center gap-1 input-wedding py-3 px-4">
                     <span className="text-xs text-muted-foreground whitespace-nowrap">app.com/</span>
                     <input
-                        {...register('slug', { onChange: () => setSlugTouched(true) })}
+                        {...register('slug', {onChange: () => setSlugTouched(true)})}
                         type="text"
                         placeholder="sara-drilon"
                         className="bg-transparent outline-none flex-1 min-w-0 text-sm"
@@ -231,7 +236,7 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
                 <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-3">
                     Ngjyra e Temës
                 </label>
-                <ColorPicker value={themeHue} onChange={(hue) => setValue('theme_hue', hue)} />
+                <ColorPicker value={themeHue} onChange={(hue) => setValue('theme_hue', hue)}/>
             </div>
 
             <div
@@ -242,7 +247,7 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
                 <button
                     type="button"
                     className="rounded-full px-6 py-2.5 text-xs font-sans font-medium tracking-widest uppercase text-white"
-                    style={{ backgroundColor: `hsl(${previewTheme['--primary']})` }}
+                    style={{backgroundColor: `hsl(${previewTheme['--primary']})`}}
                 >
                     Shiko vendin
                 </button>
@@ -253,22 +258,28 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
                     Funksionet Aktive
                 </label>
                 <div className="space-y-2">
-                    <label className="flex items-center justify-between p-3 rounded-xl border border-border cursor-pointer hover:bg-muted transition-colors">
+                    <label
+                        className="flex items-center justify-between p-3 rounded-xl border border-border cursor-pointer hover:bg-muted transition-colors">
                         <div>
                             <p className="font-sans text-sm font-medium">Gjej Vendin</p>
-                            <p className="text-xs text-muted-foreground">Të ftuarit kërkojnë emrin dhe shohin tavolinën</p>
+                            <p className="text-xs text-muted-foreground">Të ftuarit kërkojnë emrin dhe shohin
+                                tavolinën</p>
                         </div>
-                        <input type="checkbox" {...register('enable_find_seat')} className="w-4 h-4 accent-[hsl(var(--primary))]" />
+                        <input type="checkbox" {...register('enable_find_seat')}
+                               className="w-4 h-4 accent-[hsl(var(--primary))]"/>
                     </label>
-                    <label className="flex items-center justify-between p-3 rounded-xl border border-border cursor-pointer hover:bg-muted transition-colors">
+                    <label
+                        className="flex items-center justify-between p-3 rounded-xl border border-border cursor-pointer hover:bg-muted transition-colors">
                         <div>
                             <p className="font-sans text-sm font-medium">Ngarko Foto</p>
                             <p className="text-xs text-muted-foreground">Të ftuarit ngarkojnë foto nga dasma</p>
                         </div>
-                        <input type="checkbox" {...register('enable_photo_upload')} className="w-4 h-4 accent-[hsl(var(--primary))]" />
+                        <input type="checkbox" {...register('enable_photo_upload')}
+                               className="w-4 h-4 accent-[hsl(var(--primary))]"/>
                     </label>
                 </div>
-                {errors.enable_find_seat && <p className="text-xs text-destructive mt-2">{errors.enable_find_seat.message}</p>}
+                {errors.enable_find_seat &&
+                    <p className="text-xs text-destructive mt-2">{errors.enable_find_seat.message}</p>}
             </div>
 
             {serverError && (
@@ -284,7 +295,7 @@ export function CreateWeddingForm({ adminEmail, onSuccess }: CreateWeddingFormPr
             >
                 {isSubmitting ? (
                     <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin"/>
                         Duke krijuar...
                     </>
                 ) : (

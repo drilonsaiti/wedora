@@ -1,15 +1,15 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import {redirect} from 'next/navigation'
+import {createClient} from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminPhotosPage() {
     const supabase = await createClient()
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const {data: {user}} = await supabase.auth.getUser()
     if (!user) redirect('/admin/login')
 
-    const { data: admin } = await supabase
+    const {data: admin} = await supabase
         .from('admins')
         .select('id')
         .eq('id', user.id)
@@ -18,7 +18,7 @@ export default async function AdminPhotosPage() {
     if (!admin) redirect('/admin/login')
 
     // Redirect legacy route to the new paths
-    const { data: weddings } = await supabase
+    const {data: weddings} = await supabase
         .from('weddings')
         .select('id')
         .eq('owner_user_id', user.id)

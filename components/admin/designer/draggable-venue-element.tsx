@@ -1,9 +1,9 @@
 'use client';
 
-import { useDraggable } from '@dnd-kit/core';
-import { cn } from '@/lib/utils';
-import { VenueElement } from '@/types/seating';
-import { VENUE_ICONS, VENUE_COLORS, VenueIconKey, VenueColorKey } from '@/lib/venue-icons';
+import {useDraggable} from '@dnd-kit/core';
+import {cn} from '@/lib/utils';
+import {VenueElement} from '@/types/seating';
+import {VENUE_COLORS, VENUE_ICONS, VenueColorKey, VenueIconKey} from '@/lib/venue-icons';
 
 interface DraggableVenueElementProps {
     element: VenueElement;
@@ -16,10 +16,10 @@ const SHAPE_CLASSES = {
     rectangle: 'rounded-xl',
 };
 
-export function DraggableVenueElement({ element, onDelete }: DraggableVenueElementProps) {
-    const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+export function DraggableVenueElement({element, onDelete}: DraggableVenueElementProps) {
+    const {attributes, listeners, setNodeRef, transform, isDragging} = useDraggable({
         id: `venue-${element.id}`,
-        data: { type: 'venue_element', element },
+        data: {type: 'venue_element', element},
     });
 
     const Icon = VENUE_ICONS[element.icon as VenueIconKey] ?? VENUE_ICONS.MapPin;
@@ -47,12 +47,15 @@ export function DraggableVenueElement({ element, onDelete }: DraggableVenueEleme
             {...listeners}
             {...attributes}
         >
-            <Icon className="w-5 h-5 mb-1" />
+            <Icon className="w-5 h-5 mb-1"/>
             <span className="text-[10px] font-medium text-center px-1 truncate max-w-full">
         {element.label}
       </span>
             <button
-                onClick={(e) => { e.stopPropagation(); onDelete(element.id); }}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(element.id);
+                }}
                 className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-destructive text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
             >
                 ×

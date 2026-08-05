@@ -80,7 +80,7 @@ export async function updatePhotoAction(
             .from('photos')
             .update(payload)
             .eq('id', id)
-            // Rely on RLS: platform admins can update any; owners only their own wedding photos
+        // Rely on RLS: platform admins can update any; owners only their own wedding photos
 
         if (error) return {success: false, error: error.message}
 
@@ -217,14 +217,14 @@ export async function getPhotosAction(
         const supabase = await createClient() // jo requireWeddingAdmin() — page-t tashmë verifikuan identitetin
 
         if (!weddingId) {
-            return { photos: [], total: 0, error: undefined }
+            return {photos: [], total: 0, error: undefined}
         }
 
         let query = supabase
             .from('photos')
-            .select('*', { count: 'exact' })
+            .select('*', {count: 'exact'})
             .eq('wedding_id', weddingId)
-            .order('created_at', { ascending: false })
+            .order('created_at', {ascending: false})
 
         if (filters?.favourite !== undefined) query = query.eq('favourite', filters.favourite)
         if (filters?.hidden !== undefined) query = query.eq('hidden', filters.hidden)
@@ -236,13 +236,13 @@ export async function getPhotosAction(
             query = query.range(from, to)
         }
 
-        const { data, error, count } = await query
+        const {data, error, count} = await query
 
         if (error) {
-            return { photos: [], total: 0, error: error.message }
+            return {photos: [], total: 0, error: error.message}
         }
 
-        return { photos: data ?? [], total: count ?? 0 }
+        return {photos: data ?? [], total: count ?? 0}
     } catch (error) {
         return {
             photos: [],
@@ -380,25 +380,26 @@ export async function signOutAction() {
 
 export async function getAdminDashboardStats() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const {data: {user}} = await supabase.auth.getUser()
     if (!user) return null
 
-    // Nëse admin platforme (te tabela admins), sheh të gjitha dasmat; përndryshe vetëm të vetat.
-    // is_admin() te RLS tashmë e trajton këtë — thjesht bëjmë select() normal.
-    const { data: weddings } = await supabase
+    const {data: weddings} = await supabase
         .from('weddings')
         .select('id, groom_name, bride_name, slug, created_at')
 
     if (!weddings || weddings.length === 0) {
-        return { weddings: [], totalGuests: 0, totalPhotos: 0, pendingPhotos: 0 }
+        return {weddings: [], totalGuests: 0, totalPhotos: 0, pendingPhotos: 0}
     }
 
     const weddingIds = weddings.map((w) => w.id)
 
-    const [{ count: totalGuests }, { count: totalPhotos }, { count: pendingPhotos }] = await Promise.all([
-        supabase.from('guests').select('id', { count: 'exact', head: true }).in('wedding_id', weddingIds),
-        supabase.from('photos').select('id', { count: 'exact', head: true }).in('wedding_id', weddingIds),
-        supabase.from('photos').select('id', { count: 'exact', head: true }).in('wedding_id', weddingIds).eq('approved', false),
+    const [{count: totalGuests}, {count: totalPhotos}, {count: pendingPhotos}] = await Promise.all([
+        supabase.from('guests').select('id', {count: 'exact', head: true}).in('wedding_id', weddingIds),
+        supabase.from('photos').select('id', {count: 'exact', head: true}).in('wedding_id', weddingIds),
+        supabase.from('photos').select('id', {
+            count: 'exact',
+            head: true
+        }).in('wedding_id', weddingIds).eq('approved', false),
     ])
 
     return {

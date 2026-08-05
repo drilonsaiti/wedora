@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { AlertCircle, ArrowLeft, CheckCircle2, Loader2, Mail } from 'lucide-react'
+import {useState} from 'react'
+import {useForm} from 'react-hook-form'
+import {zodResolver} from '@hookform/resolvers/zod'
+import {AlertCircle, ArrowLeft, CheckCircle2, Loader2, Mail} from 'lucide-react'
 import Link from 'next/link'
-import { forgotPasswordSchema, type ForgotPasswordValues } from '@/schemas'
-import { createClient } from '@/lib/supabase/client'
+import {forgotPasswordSchema, type ForgotPasswordValues} from '@/schemas'
+import {createClient} from '@/lib/supabase/client'
 
 export function CoupleForgotPasswordForm() {
     const [error, setError] = useState<string | null>(null)
@@ -16,7 +16,7 @@ export function CoupleForgotPasswordForm() {
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: {errors},
     } = useForm<ForgotPasswordValues>({
         resolver: zodResolver(forgotPasswordSchema),
     })
@@ -27,7 +27,7 @@ export function CoupleForgotPasswordForm() {
 
         try {
             const supabase = await createClient()
-            const { error: resetError } = await supabase.auth.resetPasswordForEmail(values.email, {
+            const {error: resetError} = await supabase.auth.resetPasswordForEmail(values.email, {
                 redirectTo: `${window.location.origin}/api/auth/callback?next=/couple/reset-password`,
             })
 
@@ -49,7 +49,7 @@ export function CoupleForgotPasswordForm() {
             <div className="text-center space-y-4">
                 <div className="flex justify-center">
                     <div className="rounded-full bg-green-100 p-3">
-                        <CheckCircle2 className="w-8 h-8 text-green-600" />
+                        <CheckCircle2 className="w-8 h-8 text-green-600"/>
                     </div>
                 </div>
                 <h2 className="text-xl font-serif font-light text-[hsl(var(--dark))]">Kontrolloni email-in</h2>
@@ -75,7 +75,7 @@ export function CoupleForgotPasswordForm() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div>
                     <label className="label-wedding">
-                        <Mail className="w-3 h-3 inline mr-1" />
+                        <Mail className="w-3 h-3 inline mr-1"/>
                         Email
                     </label>
                     <input
@@ -90,8 +90,9 @@ export function CoupleForgotPasswordForm() {
                 </div>
 
                 {error && (
-                    <div className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3">
-                        <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                    <div
+                        className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3">
+                        <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5"/>
                         <p className="text-sm text-destructive font-sans">{error}</p>
                     </div>
                 )}
@@ -99,7 +100,7 @@ export function CoupleForgotPasswordForm() {
                 <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
                     {loading ? (
                         <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <Loader2 className="w-4 h-4 animate-spin"/>
                             Duke dërguar…
                         </>
                     ) : (
@@ -111,7 +112,7 @@ export function CoupleForgotPasswordForm() {
                     href="/couple/login"
                     className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                    <ArrowLeft className="w-4 h-4" />
+                    <ArrowLeft className="w-4 h-4"/>
                     Kthehu te Hyrja
                 </Link>
             </form>

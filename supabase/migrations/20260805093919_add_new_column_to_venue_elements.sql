@@ -6,4 +6,5 @@ ALTER TABLE public.venue_elements
     CHECK (shape IN ('circle', 'square', 'rectangle')),
     ADD COLUMN IF NOT EXISTS color text NOT NULL DEFAULT 'gray';
 
-ALTER TABLE public.venue_elements ALTER COLUMN label SET NOT NULL;
+ALTER TABLE public.venue_elements
+    ALTER COLUMN label SET NOT NULL;

@@ -1,5 +1,5 @@
-import { Heart } from 'lucide-react'
-import { CoupleLoginForm } from '@/components/couple/couple-login-form'
+import {Heart} from 'lucide-react'
+import {CoupleLoginForm} from '@/components/couple/couple-login-form'
 
 export default function CoupleLoginPage() {
     return (
@@ -7,9 +7,9 @@ export default function CoupleLoginPage() {
             <div className="w-full max-w-sm">
                 <div className="text-center mb-8">
                     <div className="flex items-center justify-center gap-2 mb-4">
-                        <div className="h-px w-8 bg-[hsl(var(--gold))] opacity-60" />
-                        <Heart className="w-3 h-3 text-[hsl(var(--primary))] fill-current" />
-                        <div className="h-px w-8 bg-[hsl(var(--gold))] opacity-60" />
+                        <div className="h-px w-8 bg-[hsl(var(--gold))] opacity-60"/>
+                        <Heart className="w-3 h-3 text-[hsl(var(--primary))] fill-current"/>
+                        <div className="h-px w-8 bg-[hsl(var(--gold))] opacity-60"/>
                     </div>
                     <h1 className="font-serif text-2xl font-light text-[hsl(var(--dark))]">
                         Mirë se erdhët
@@ -18,7 +18,7 @@ export default function CoupleLoginPage() {
                         Hyni për të parë dasmën tuaj
                     </p>
                 </div>
-                <CoupleLoginForm />
+                <CoupleLoginForm/>
             </div>
         </div>
     )

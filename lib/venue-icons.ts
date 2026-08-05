@@ -1,7 +1,23 @@
 import {
-    Waves, Music, Wine, DoorOpen, Bath, Heart, Camera, Cake,
-    Gift, Car, Utensils, Mic2, Flower2, Star, Sparkles, Flame,
-    Umbrella, TreePine, MapPin,
+    Bath,
+    Cake,
+    Camera,
+    Car,
+    DoorOpen,
+    Flame,
+    Flower2,
+    Gift,
+    Heart,
+    MapPin,
+    Mic2,
+    Music,
+    Sparkles,
+    Star,
+    TreePine,
+    Umbrella,
+    Utensils,
+    Waves,
+    Wine,
 } from 'lucide-react';
 
 export const VENUE_ICONS = {
@@ -28,10 +44,10 @@ export type VenueColorKey = keyof typeof VENUE_COLORS;
 export const VENUE_PRESETS: {
     type: string; label: string; icon: VenueIconKey; shape: 'circle' | 'square' | 'rectangle'; color: VenueColorKey;
 }[] = [
-    { type: 'entrance', label: 'Hyrja', icon: 'DoorOpen', shape: 'square', color: 'green' },
-    { type: 'pool', label: 'Pishina', icon: 'Waves', shape: 'rectangle', color: 'blue' },
-    { type: 'couple_table', label: 'Çifti', icon: 'Heart', shape: 'square', color: 'rose' },
-    { type: 'music', label: 'Muzika', icon: 'Music', shape: 'square', color: 'purple' },
-    { type: 'bar', label: 'Bar', icon: 'Wine', shape: 'rectangle', color: 'amber' },
-    { type: 'toilet', label: 'Tualeti', icon: 'Bath', shape: 'square', color: 'gray' },
+    {type: 'entrance', label: 'Hyrja', icon: 'DoorOpen', shape: 'square', color: 'green'},
+    {type: 'pool', label: 'Pishina', icon: 'Waves', shape: 'rectangle', color: 'blue'},
+    {type: 'couple_table', label: 'Çifti', icon: 'Heart', shape: 'square', color: 'rose'},
+    {type: 'music', label: 'Muzika', icon: 'Music', shape: 'square', color: 'purple'},
+    {type: 'bar', label: 'Bar', icon: 'Wine', shape: 'rectangle', color: 'amber'},
+    {type: 'toilet', label: 'Tualeti', icon: 'Bath', shape: 'square', color: 'gray'},
 ];

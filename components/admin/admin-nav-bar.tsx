@@ -1,21 +1,21 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Heart, LogOut } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { signOutAction } from '@/actions/admin'
+import {usePathname} from 'next/navigation'
+import {Heart, LayoutDashboard, LogOut} from 'lucide-react'
+import {cn} from '@/lib/utils'
+import {signOutAction} from '@/actions/admin'
 
 interface AdminNavBarProps {
     adminEmail: string
 }
 
 const NAV_ITEMS = [
-    { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/weddings', label: 'Dasmat', icon: Heart },
+    {href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard},
+    {href: '/admin/weddings', label: 'Dasmat', icon: Heart},
 ]
 
-export function AdminNavBar({ adminEmail }: AdminNavBarProps) {
+export function AdminNavBar({adminEmail}: AdminNavBarProps) {
     const pathname = usePathname()
 
     return (
@@ -24,7 +24,7 @@ export function AdminNavBar({ adminEmail }: AdminNavBarProps) {
                 <div className="flex items-center gap-8">
                     <span className="font-serif text-lg text-[hsl(var(--dark))]">Wedora</span>
                     <nav className="flex items-center gap-1">
-                        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+                        {NAV_ITEMS.map(({href, label, icon: Icon}) => {
                             const isActive = pathname === href || pathname.startsWith(href + '/')
                             return (
                                 <Link
@@ -37,7 +37,7 @@ export function AdminNavBar({ adminEmail }: AdminNavBarProps) {
                                             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                                     )}
                                 >
-                                    <Icon className="w-4 h-4" />
+                                    <Icon className="w-4 h-4"/>
                                     {label}
                                 </Link>
                             )
@@ -51,7 +51,7 @@ export function AdminNavBar({ adminEmail }: AdminNavBarProps) {
                         onClick={async () => await signOutAction()}
                         className="btn-ghost text-xs py-2 px-3"
                     >
-                        <LogOut className="w-3.5 h-3.5" />
+                        <LogOut className="w-3.5 h-3.5"/>
                         <span className="hidden sm:inline">Çkyçu</span>
                     </button>
                 </div>

@@ -2,7 +2,7 @@
 
 import {createClient, createServiceClient} from '@/lib/supabase/server'
 import {revalidatePath, revalidateTag, unstable_cache} from 'next/cache'
-import {Table, VenueElement, VenueElementType} from '@/types/seating'
+import {Table, VenueElement} from '@/types/seating'
 import {guestSchema, tableSchema} from '@/schemas'
 import {redirect} from 'next/navigation'
 
@@ -239,13 +239,13 @@ export async function createVenueElement(input: {
     const supabase = await createClient()
 
     const dimensions: Record<string, { width: number; height: number }> = {
-        circle: { width: 90, height: 90 },
-        square: { width: 100, height: 100 },
-        rectangle: { width: 160, height: 90 },
+        circle: {width: 90, height: 90},
+        square: {width: 100, height: 100},
+        rectangle: {width: 160, height: 90},
     }
-    const { width, height } = dimensions[input.shape]
+    const {width, height} = dimensions[input.shape]
 
-    const { data, error } = await supabase
+    const {data, error} = await supabase
         .from('venue_elements')
         .insert({
             wedding_id: input.weddingId,
@@ -263,7 +263,7 @@ export async function createVenueElement(input: {
         .single()
 
     if (error) throw error
-    revalidateTag(`venue-elements-${input.weddingId}`,'max')
+    revalidateTag(`venue-elements-${input.weddingId}`, 'max')
     return data
 }
 

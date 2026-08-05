@@ -3,46 +3,45 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {toPng} from 'html-to-image';
 import {
-  Bath,
-  DoorOpen,
-  Heart,
-  Image as ImageIcon,
-  Maximize2,
-  Minimize2,
-  Music,
-  Search,
-  Waves,
-  Wine,
-    Plus
+    Bath,
+    DoorOpen,
+    Heart,
+    Image as ImageIcon,
+    Maximize2,
+    Minimize2,
+    Music,
+    Plus,
+    Search,
+    Waves,
+    Wine
 } from 'lucide-react';
 import {
-  defaultDropAnimationSideEffects,
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
-  PointerSensor,
-  useSensor,
-  useSensors,
+    defaultDropAnimationSideEffects,
+    DndContext,
+    DragEndEvent,
+    DragOverlay,
+    DragStartEvent,
+    PointerSensor,
+    useSensor,
+    useSensors,
 } from '@dnd-kit/core';
 import {restrictToWindowEdges} from '@dnd-kit/modifiers';
-import {Guest, GuestWithTable, Table, VenueElement, VenueElementType} from '@/types/seating';
+import {Guest, GuestWithTable, Table, VenueElement, VenueElementShape, VenueElementType} from '@/types/seating';
 import {DraggableTable} from './draggable-table';
 import {DraggableGuest} from './draggable-guest';
 import {GuestAvatar} from '@/components/guest-avatar';
 import {
-  assignGuestToTable,
-  createVenueElement,
-  deleteVenueElement,
-  updateTablePosition,
-  updateVenueElementPosition
+    assignGuestToTable,
+    createVenueElement,
+    deleteVenueElement,
+    updateTablePosition,
+    updateVenueElementPosition
 } from '@/actions/seating';
 import {cn} from "@/lib/utils";
 import {DraggableVenueElement} from "@/components/admin/designer/draggable-venue-element";
-import { ToggleSwitch } from '@/components/ui/toggle-switch';
-import { VenueElementModal } from '@/components/ui/venue-element-modal'
-import { VenueIconKey, VenueColorKey } from '@/lib/venue-icons'
-import { VenueElementShape } from '@/types/seating'
+import {ToggleSwitch} from '@/components/ui/toggle-switch';
+import {VenueElementModal} from '@/components/ui/venue-element-modal'
+import {VenueColorKey, VenueIconKey} from '@/lib/venue-icons'
 
 interface SeatingDesignerProps {
     guests: GuestWithTable[];
@@ -65,7 +64,7 @@ const ELEMENT_TYPES: { type: VenueElementType; label: string; Icon: any }[] = [
     {type: 'toilet', label: 'Tualeti', Icon: Bath},
 ];
 
-export function SeatingDesigner({guests, tables, venueElements,weddingId}: SeatingDesignerProps) {
+export function SeatingDesigner({guests, tables, venueElements, weddingId}: SeatingDesignerProps) {
     const [localTables, setLocalTables] = useState<Table[]>(tables);
     const [localGuests, setLocalGuests] = useState<GuestWithTable[]>(guests);
     const [activeGuest, setActiveGuest] = useState<Guest | null>(null);
@@ -302,7 +301,7 @@ export function SeatingDesigner({guests, tables, venueElements,weddingId}: Seati
                                 onClick={() => setVenueModalOpen(true)}
                                 className="btn-ghost text-[10px] py-1.5 px-3 border border-dashed border-border rounded-lg flex items-center gap-1"
                             >
-                                <Plus className="w-3 h-3" />
+                                <Plus className="w-3 h-3"/>
                                 Shto Element
                             </button>
                         </div>

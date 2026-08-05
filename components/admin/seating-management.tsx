@@ -1,20 +1,8 @@
 'use client'
 
-import {useMemo, useState, useTransition, Suspense, lazy} from 'react'
+import {useMemo, useState, useTransition} from 'react'
 import dynamic from 'next/dynamic'
-import {
-    ChevronLeft,
-    Edit2,
-    LayoutGrid,
-    LogOut,
-    Map as MapIcon,
-    Plus,
-    Printer,
-    Search,
-    Trash2,
-    Users,
-    Loader2
-} from 'lucide-react'
+import {Edit2, LayoutGrid, Loader2, LogOut, Map as MapIcon, Plus, Printer, Search, Trash2, Users} from 'lucide-react'
 import {GuestWithTable, Table, VenueElement} from '@/types/seating'
 import {deleteGuest, deleteTable} from '@/actions/seating'
 import {signOutAction} from '@/actions/admin'
@@ -22,19 +10,20 @@ import {cn} from '@/lib/utils'
 import {GuestAvatar} from '@/components/guest-avatar'
 import {GuestForm} from '@/components/admin/guest-form'
 import {TableForm} from '@/components/admin/table-form'
+import {useRouter} from "next/navigation";
+
 const SeatingDesigner = dynamic(() => import('@/components/admin/designer/seating-designer').then(mod => mod.SeatingDesigner), {
     loading: () => (
-        <div className="flex-1 flex items-center justify-center bg-muted/20 rounded-2xl border border-dashed border-border min-h-[600px]">
+        <div
+            className="flex-1 flex items-center justify-center bg-muted/20 rounded-2xl border border-dashed border-border min-h-[600px]">
             <div className="flex flex-col items-center gap-2">
-                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground"/>
                 <p className="text-sm text-muted-foreground font-sans">Duke ngarkuar planin e uljes...</p>
             </div>
         </div>
     ),
     ssr: false
 })
-import Link from 'next/link'
-import {useRouter} from "next/navigation";
 
 interface SeatingManagementProps {
     initialGuests: GuestWithTable[]
@@ -51,7 +40,7 @@ export function SeatingManagement({
                                       initialTables,
                                       initialVenueElements,
                                       adminEmail,
-    weddingId
+                                      weddingId
                                   }: SeatingManagementProps) {
     const router = useRouter()
     const [, startTransition] = useTransition()

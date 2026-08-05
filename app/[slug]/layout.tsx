@@ -1,5 +1,5 @@
-import { generateWeddingTheme } from '@/lib/theme';
-import { getWeddingBySlug } from '@/actions/wedding';
+import {generateWeddingTheme} from '@/lib/theme';
+import {getWeddingBySlug} from '@/actions/wedding';
 
 export default async function WeddingLayout({
                                                 children,
@@ -8,7 +8,7 @@ export default async function WeddingLayout({
     children: React.ReactNode;
     params: Promise<{ slug: string }>;
 }) {
-    const { slug } = await params
+    const {slug} = await params
     const wedding = await getWeddingBySlug(slug);
 
     if (!wedding || !wedding.wedding_settings) {
@@ -27,8 +27,8 @@ export default async function WeddingLayout({
         .join(' ');
 
     return (
-        <div style={{ ['--theme-override' as string]: '1' }}>
-            <style dangerouslySetInnerHTML={{ __html: `:root { ${cssVars} }` }} />
+        <div style={{['--theme-override' as string]: '1'}}>
+            <style dangerouslySetInnerHTML={{__html: `:root { ${cssVars} }`}}/>
             {children}
         </div>
     );

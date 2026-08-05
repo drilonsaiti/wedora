@@ -1,7 +1,7 @@
-import { redirect } from 'next/navigation'
+import {redirect} from 'next/navigation'
 
 type Props = { params: { token: string } }
 
-export default function LegacyGalleryRedirect({ params }: Props) {
-  redirect(`/g/${params.token}`)
+export default function LegacyGalleryRedirect({params}: Props) {
+    redirect(`/g/${params.token}`)
 }

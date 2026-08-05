@@ -7,8 +7,8 @@ A production-ready wedding guest photo sharing web app built with Next.js 15, Su
 ## Architecture
 
 - **Next.js 15 App Router** — server components by default, client components only where interactivity is needed
-- **Supabase** — Postgres (photos/events/admins tables), Auth (admin login), Storage (photos + thumbnails buckets),
-  RLS (all enforced server-side)
+- **Supabase** — Postgres (photos/events/admins tables), Auth (admin login), Storage (photos + thumbnails buckets), RLS
+  (all enforced server-side)
 - **Server Actions** — upload processing, admin CRUD, sign-out
 - **Sharp** — server-side image optimisation + thumbnail generation
 - **browser-image-compression** — client-side pre-compression before upload

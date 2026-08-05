@@ -1,10 +1,8 @@
 'use server'
 
-import {createServiceClient} from '@/lib/supabase/server'
+import {createClient, createServiceClient} from '@/lib/supabase/server'
 import {revalidatePath, unstable_cache} from 'next/cache'
-import {redirect} from "next/navigation";
 import {CreateWeddingInput, createWeddingSchema} from "@/schemas";
-import { createClient } from '@/lib/supabase/server'
 import {generateWeddingTheme} from "@/lib/theme";
 import {generateRandomPassword} from "@/lib/generate-password";
 import {WeddingSettingsUpdate, WeddingUpdate} from "@/types/database";
@@ -52,23 +50,23 @@ interface CoupleCredential {
     role: 'groom' | 'bride'
 }
 
-export async function createWedding(input: CreateWeddingInput){
+export async function createWedding(input: CreateWeddingInput) {
     const parsed = createWeddingSchema.safeParse(input)
     if (!parsed.success) {
-        return { success: false as const, error: parsed.error.issues[0]?.message ?? 'Të dhëna të pavlefshme' }
+        return {success: false as const, error: parsed.error.issues[0]?.message ?? 'Të dhëna të pavlefshme'}
     }
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { success: false as const, error: 'Duhet të jeni të kyçur' }
+    const {data: {user}} = await supabase.auth.getUser()
+    if (!user) return {success: false as const, error: 'Duhet të jeni të kyçur'}
 
-    const { data: slugTaken } = await supabase
+    const {data: slugTaken} = await supabase
         .from('weddings').select('id').eq('slug', parsed.data.slug).maybeSingle()
-    if (slugTaken) return { success: false as const, error: 'Kjo URL është e zënë, provoni një tjetër' }
+    if (slugTaken) return {success: false as const, error: 'Kjo URL është e zënë, provoni një tjetër'}
 
     const theme = generateWeddingTheme(parsed.data.theme_hue)
 
-    const { data: wedding, error } = await supabase
+    const {data: wedding, error} = await supabase
         .from('weddings')
         .insert({
             owner_user_id: user.id,
@@ -82,9 +80,9 @@ export async function createWedding(input: CreateWeddingInput){
         .select()
         .single()
 
-    if (error || !wedding) return { success: false as const, error: 'Dështoi krijimi i dasmës' }
+    if (error || !wedding) return {success: false as const, error: 'Dështoi krijimi i dasmës'}
 
-    const { error: settingsError } = await supabase.from('wedding_settings').insert({
+    const {error: settingsError} = await supabase.from('wedding_settings').insert({
         wedding_id: wedding.id,
         theme_color: JSON.stringify(theme),
         enable_find_seat: parsed.data.enable_find_seat,
@@ -93,33 +91,33 @@ export async function createWedding(input: CreateWeddingInput){
 
     if (settingsError) {
         await supabase.from('weddings').delete().eq('id', wedding.id)
-        return { success: false as const, error: 'Dështoi krijimi i dasmës' }
+        return {success: false as const, error: 'Dështoi krijimi i dasmës'}
     }
 
     const serviceSupabase = createServiceClient()
     const credentials: CoupleCredential[] = []
     const failedEmails: string[] = []
     const emailsToCreate: { email: string; role: 'groom' | 'bride' }[] = [
-        { email: parsed.data.groom_email, role: 'groom' },
+        {email: parsed.data.groom_email, role: 'groom'},
     ]
-    if (parsed.data.bride_email) emailsToCreate.push({ email: parsed.data.bride_email, role: 'bride' })
+    if (parsed.data.bride_email) emailsToCreate.push({email: parsed.data.bride_email, role: 'bride'})
 
-    for (const { email, role } of emailsToCreate) {
+    for (const {email, role} of emailsToCreate) {
         const password = generateRandomPassword()
 
-        const { data: authUser, error: authError } = await serviceSupabase.auth.admin.createUser({
+        const {data: authUser, error: authError} = await serviceSupabase.auth.admin.createUser({
             email,
             password,
             email_confirm: true,
-            app_metadata: { wedding_id: wedding.id, role: 'couple', couple_role: role },
+            app_metadata: {wedding_id: wedding.id, role: 'couple', couple_role: role},
         })
 
         if (!authError && authUser.user) {
-            credentials.push({ email, password, role })
+            credentials.push({email, password, role})
             continue
         }
 
-        const { data: existingUsers } = await serviceSupabase.auth.admin.listUsers()
+        const {data: existingUsers} = await serviceSupabase.auth.admin.listUsers()
         const existingUser = existingUsers?.users.find((u) => u.email === email)
 
         if (!existingUser) {
@@ -127,9 +125,9 @@ export async function createWedding(input: CreateWeddingInput){
             continue
         }
 
-        const { error: updateError } = await serviceSupabase.auth.admin.updateUserById(existingUser.id, {
+        const {error: updateError} = await serviceSupabase.auth.admin.updateUserById(existingUser.id, {
             password,
-            app_metadata: { wedding_id: wedding.id, role: 'couple', couple_role: role },
+            app_metadata: {wedding_id: wedding.id, role: 'couple', couple_role: role},
         })
 
         if (updateError) {
@@ -137,11 +135,11 @@ export async function createWedding(input: CreateWeddingInput){
             continue
         }
 
-        credentials.push({ email, password, role })
+        credentials.push({email, password, role})
     }
 
     if (credentials.length > 0) {
-        await serviceSupabase.from('wedding_settings').update({ enable_couple_login: true }).eq('wedding_id', wedding.id)
+        await serviceSupabase.from('wedding_settings').update({enable_couple_login: true}).eq('wedding_id', wedding.id)
     }
 
     revalidatePath('/admin/weddings')
@@ -155,18 +153,18 @@ export async function createWedding(input: CreateWeddingInput){
 
 export async function updateWedding(weddingId: string, input: Partial<CreateWeddingInput>) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { success: false as const, error: 'Duhet të jeni të kyçur' }
+    const {data: {user}} = await supabase.auth.getUser()
+    if (!user) return {success: false as const, error: 'Duhet të jeni të kyçur'}
 
     // Merr wedding-in AKTUAL para se të përditësojmë, që të krahasojmë email-et e vjetra me të rejat
-    const { data: currentWedding, error: fetchError } = await supabase
+    const {data: currentWedding, error: fetchError} = await supabase
         .from('weddings')
         .select('groom_email, bride_email')
         .eq('id', weddingId)
         .single()
 
     if (fetchError || !currentWedding) {
-        return { success: false as const, error: 'Dasma nuk u gjet' }
+        return {success: false as const, error: 'Dasma nuk u gjet'}
     }
 
     const updates: WeddingUpdate = {}
@@ -177,8 +175,8 @@ export async function updateWedding(weddingId: string, input: Partial<CreateWedd
     if (input.wedding_date) updates.wedding_date = input.wedding_date
 
     if (Object.keys(updates).length > 0) {
-        const { error } = await supabase.from('weddings').update(updates).eq('id', weddingId)
-        if (error) return { success: false as const, error: 'Dështoi ruajtja e ndryshimeve' }
+        const {error} = await supabase.from('weddings').update(updates).eq('id', weddingId)
+        if (error) return {success: false as const, error: 'Dështoi ruajtja e ndryshimeve'}
     }
 
     if (input.theme_hue !== undefined || input.enable_find_seat !== undefined || input.enable_photo_upload !== undefined) {
@@ -187,8 +185,8 @@ export async function updateWedding(weddingId: string, input: Partial<CreateWedd
         if (input.enable_find_seat !== undefined) settingsUpdates.enable_find_seat = input.enable_find_seat
         if (input.enable_photo_upload !== undefined) settingsUpdates.enable_photo_upload = input.enable_photo_upload
 
-        const { error } = await supabase.from('wedding_settings').update(settingsUpdates).eq('wedding_id', weddingId)
-        if (error) return { success: false as const, error: 'Dështoi ruajtja e cilësimeve' }
+        const {error} = await supabase.from('wedding_settings').update(settingsUpdates).eq('wedding_id', weddingId)
+        if (error) return {success: false as const, error: 'Dështoi ruajtja e cilësimeve'}
     }
 
     const serviceSupabase = createServiceClient()
@@ -196,30 +194,30 @@ export async function updateWedding(weddingId: string, input: Partial<CreateWedd
     const failedEmails: string[] = []
 
     const emailChecks: { email: string | undefined; oldEmail: string | null | undefined; role: 'groom' | 'bride' }[] = [
-        { email: input.groom_email, oldEmail: currentWedding.groom_email, role: 'groom' },
-        { email: input.bride_email, oldEmail: currentWedding.bride_email, role: 'bride' },
+        {email: input.groom_email, oldEmail: currentWedding.groom_email, role: 'groom'},
+        {email: input.bride_email, oldEmail: currentWedding.bride_email, role: 'bride'},
     ]
 
-    for (const { email, oldEmail, role } of emailChecks) {
+    for (const {email, oldEmail, role} of emailChecks) {
         if (!email) continue
         if (!email || email.trim() === '') continue
         if (email === oldEmail) continue
 
         const password = generateRandomPassword()
 
-        const { data: authUser, error: authError } = await serviceSupabase.auth.admin.createUser({
+        const {data: authUser, error: authError} = await serviceSupabase.auth.admin.createUser({
             email,
             password,
             email_confirm: true,
-            app_metadata: { wedding_id: weddingId, role: 'couple', couple_role: role },
+            app_metadata: {wedding_id: weddingId, role: 'couple', couple_role: role},
         })
 
         if (!authError && authUser.user) {
-            credentials.push({ email, password, role })
+            credentials.push({email, password, role})
             continue
         }
 
-        const { data: existingUsers } = await serviceSupabase.auth.admin.listUsers()
+        const {data: existingUsers} = await serviceSupabase.auth.admin.listUsers()
         const existingUser = existingUsers?.users.find((u) => u.email === email)
 
         if (!existingUser) {
@@ -227,9 +225,9 @@ export async function updateWedding(weddingId: string, input: Partial<CreateWedd
             continue
         }
 
-        const { error: updateError } = await serviceSupabase.auth.admin.updateUserById(existingUser.id, {
+        const {error: updateError} = await serviceSupabase.auth.admin.updateUserById(existingUser.id, {
             password,
-            app_metadata: { wedding_id: weddingId, role: 'couple', couple_role: role },
+            app_metadata: {wedding_id: weddingId, role: 'couple', couple_role: role},
         })
 
         if (updateError) {
@@ -237,11 +235,11 @@ export async function updateWedding(weddingId: string, input: Partial<CreateWedd
             continue
         }
 
-        credentials.push({ email, password, role })
+        credentials.push({email, password, role})
     }
 
     if (credentials.length > 0) {
-        await serviceSupabase.from('wedding_settings').update({ enable_couple_login: true }).eq('wedding_id', weddingId)
+        await serviceSupabase.from('wedding_settings').update({enable_couple_login: true}).eq('wedding_id', weddingId)
     }
 
     revalidatePath(`/admin/weddings/${weddingId}`)

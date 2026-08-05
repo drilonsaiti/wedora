@@ -22,10 +22,10 @@ export function generateWeddingTheme(hue: number): WeddingThemeVars {
 }
 
 export const WEDDING_COLOR_PRESETS = [
-    { name: 'Trëndafil', hue: 355 },
-    { name: 'Blu Detit', hue: 205 },
-    { name: 'Jeshile Gjelbër', hue: 150 },
-    { name: 'Vjollcë', hue: 265 },
-    { name: 'Portokalli i Ngrohtë', hue: 25 },
-    { name: 'Bordo', hue: 340 },
+    {name: 'Trëndafil', hue: 355},
+    {name: 'Blu Detit', hue: 205},
+    {name: 'Jeshile Gjelbër', hue: 150},
+    {name: 'Vjollcë', hue: 265},
+    {name: 'Portokalli i Ngrohtë', hue: 25},
+    {name: 'Bordo', hue: 340},
 ] as const;

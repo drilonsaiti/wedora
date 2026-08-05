@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouter } from 'next/navigation'
-import { AlertCircle, Loader2, Lock, Mail } from 'lucide-react'
-import { coupleLoginSchema, type CoupleLoginValues } from '@/schemas'
-import { createClient } from '@/lib/supabase/client'
+import {useState} from 'react'
+import {useForm} from 'react-hook-form'
+import {zodResolver} from '@hookform/resolvers/zod'
+import {useRouter} from 'next/navigation'
+import {AlertCircle, Loader2, Lock, Mail} from 'lucide-react'
+import {coupleLoginSchema, type CoupleLoginValues} from '@/schemas'
+import {createClient} from '@/lib/supabase/client'
 import Link from "next/link";
 
 export function CoupleLoginForm() {
@@ -17,7 +17,7 @@ export function CoupleLoginForm() {
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: {errors},
     } = useForm<CoupleLoginValues>({
         resolver: zodResolver(coupleLoginSchema),
     })
@@ -28,7 +28,7 @@ export function CoupleLoginForm() {
 
         try {
             const supabase = await createClient()
-            const { data, error: authError } = await supabase.auth.signInWithPassword({
+            const {data, error: authError} = await supabase.auth.signInWithPassword({
                 email: values.email,
                 password: values.password,
             })
@@ -59,7 +59,7 @@ export function CoupleLoginForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
                 <label className="label-wedding">
-                    <Mail className="w-3 h-3 inline mr-1" />
+                    <Mail className="w-3 h-3 inline mr-1"/>
                     Email
                 </label>
                 <input
@@ -75,7 +75,7 @@ export function CoupleLoginForm() {
 
             <div>
                 <label className="label-wedding">
-                    <Lock className="w-3 h-3 inline mr-1" />
+                    <Lock className="w-3 h-3 inline mr-1"/>
                     Fjalëkalimi
                 </label>
                 <input
@@ -98,8 +98,9 @@ export function CoupleLoginForm() {
             </div>
 
             {error && (
-                <div className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3">
-                    <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                <div
+                    className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3">
+                    <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5"/>
                     <p className="text-sm text-destructive font-sans">{error}</p>
                 </div>
             )}
@@ -107,7 +108,7 @@ export function CoupleLoginForm() {
             <button type="submit" disabled={loading} className="btn-primary w-full justify-center mt-2">
                 {loading ? (
                     <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin"/>
                         Duke u kyçur…
                     </>
                 ) : (

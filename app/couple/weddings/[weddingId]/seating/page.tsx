@@ -1,17 +1,17 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { getGuests, getTables, getVenueElements } from '@/actions/seating'
-import { CoupleSeatingView } from '@/components/couple/couple-seating-view'
+import {redirect} from 'next/navigation'
+import {createClient} from '@/lib/supabase/server'
+import {getGuests, getTables, getVenueElements} from '@/actions/seating'
+import {CoupleSeatingView} from '@/components/couple/couple-seating-view'
 
 type Props = { params: Promise<{ weddingId: string }> }
 
 export const dynamic = 'force-dynamic'
 
-export default async function CoupleSeatingPage({ params }: Props) {
-    const { weddingId } = await params
+export default async function CoupleSeatingPage({params}: Props) {
+    const {weddingId} = await params
     const supabase = await createClient()
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const {data: {user}} = await supabase.auth.getUser()
     if (!user) redirect('/couple/login')
 
     const appMetadata = user.app_metadata as { role?: string; wedding_id?: string }
@@ -19,7 +19,7 @@ export default async function CoupleSeatingPage({ params }: Props) {
         redirect('/couple/login')
     }
 
-    const { data: settings } = await supabase
+    const {data: settings} = await supabase
         .from('wedding_settings')
         .select('enable_couple_login')
         .eq('wedding_id', weddingId)
