@@ -3,7 +3,7 @@
 import {useMemo, useState, useTransition} from 'react'
 import dynamic from 'next/dynamic'
 import {Edit2, LayoutGrid, Loader2, LogOut, Map as MapIcon, Plus, Printer, Search, Trash2, Users} from 'lucide-react'
-import {GuestWithTable, Table, VenueElement} from '@/types/seating'
+import {GuestWithTable, Table, TableWithSeats, VenueElement} from '@/types/seating'
 import {deleteGuest, deleteTable} from '@/actions/seating'
 import {signOutAction} from '@/actions/admin'
 import {cn} from '@/lib/utils'
@@ -27,7 +27,7 @@ const SeatingDesigner = dynamic(() => import('@/components/admin/designer/seatin
 
 interface SeatingManagementProps {
     initialGuests: GuestWithTable[]
-    initialTables: Table[]
+    initialTables: TableWithSeats[]
     initialVenueElements: VenueElement[]
     adminEmail: string
     weddingId: string
@@ -299,11 +299,14 @@ export function SeatingManagement({
                                     </div>
 
                                     <div
-                                        className="w-20 h-20 rounded-full border-2 border-dashed border-[hsl(var(--gold))] flex flex-col items-center justify-center mb-4">
-                                        <span
-                                            className="text-[10px] uppercase tracking-widest text-muted-foreground">Tavolina</span>
-                                        <span
-                                            className="text-2xl font-serif text-[hsl(var(--primary))]">{table.number}</span>
+                                        className={cn(
+                                            "border-2 border-dashed border-[hsl(var(--gold))] flex flex-col items-center justify-center mb-4",
+                                            table.shape === 'rectangle' ? 'w-28 h-16' : 'w-20 h-20',
+                                            table.shape === 'round' ? 'rounded-full' : 'rounded-2xl'
+                                        )}
+                                    >
+                                        <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Tavolina</span>
+                                        <span className="text-2xl font-serif text-[hsl(var(--primary))]">{table.number}</span>
                                     </div>
 
                                     <h3 className="font-sans font-medium text-sm">Tavolina {table.number}</h3>
@@ -362,7 +365,14 @@ export function SeatingManagement({
                             {editingTable ? 'Edit Table' : 'Add New Table'}
                         </h2>
                         <TableForm
-                            initialValues={editingTable || undefined}
+                            initialValues={editingTable ? {
+                                id: editingTable.id,
+                                number: editingTable.number,
+                                seats: editingTable.seats,
+                                shape: editingTable.shape,
+                                label: editingTable.label ?? undefined,
+                            } : undefined}
+                            weddingId={weddingId}
                             onSuccess={() => {
                                 setIsTableModalOpen(false)
                                 startTransition(() => router.refresh())

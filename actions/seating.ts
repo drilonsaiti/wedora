@@ -5,6 +5,7 @@ import {revalidatePath, revalidateTag, unstable_cache} from 'next/cache'
 import {Table, VenueElement} from '@/types/seating'
 import {guestSchema, tableSchema} from '@/schemas'
 import {redirect} from 'next/navigation'
+import {generateSeatPositions} from "@/lib/seat-generator";
 
 async function requireAdmin() {
     const supabase = await createClient()
@@ -44,16 +45,8 @@ export async function getGuests(weddingId: string) {
             const supabase = createServiceClient()
             const {data, error} = await supabase
                 .from('guests')
-                .select(`
-    id,
-    created_at,
-    wedding_id,
-    first_name,
-    last_name,
-    initials,
-    table_id,
-    tables(id, number)
-`).eq('wedding_id', wId)
+                .select('*, tables(id, number, shape), table_seats(seat_index)')
+                .eq('wedding_id', wId)
                 .order('created_at', {ascending: false})
 
             if (error) throw new Error(error.message)
@@ -151,7 +144,7 @@ export async function getTables(weddingId: string) {
             const supabase = createServiceClient()
             const {data, error} = await supabase
                 .from('tables')
-                .select('id, number, seats, label, pos_x, pos_y')
+                .select('*, table_seats(*)')
                 .eq('wedding_id', wId)
                 .order('number', {ascending: true})
 
@@ -163,40 +156,89 @@ export async function getTables(weddingId: string) {
     )(weddingId)
 }
 
-export async function addTable(formData: { number: number; seats: number; label?: string | null }) {
-    const {supabase, weddingId} = await requireAdmin()
+export async function addTable(input: {
+    weddingId: string
+    number: number
+    seats: number
+    label?: string
+    shape: 'round' | 'rectangle' | 'square'
+}) {
+    const supabase = await createClient()
 
-    const parsed = tableSchema.safeParse(formData)
-    if (!parsed.success) {
-        throw new Error('Invalid input: ' + parsed.error.errors[0].message)
+    const dimensions = {
+        round: { width: 128, height: 128 },
+        square: { width: 140, height: 140 },
+        rectangle: { width: 240, height: 100 },
+    }[input.shape]
+
+    const { data: table, error } = await supabase
+        .from('tables')
+        .insert({
+            wedding_id: input.weddingId,
+            number: input.number,
+            seats: input.seats,
+            label: input.label ?? null,
+            shape: input.shape,
+            pos_x: 200,
+            pos_y: 200,
+            ...dimensions,
+        })
+        .select()
+        .single()
+
+    if (error || !table) throw error ?? new Error('Dështoi krijimi i tavolinës')
+
+    if (input.shape !== 'round') {
+        const positions = generateSeatPositions(input.shape, input.seats, dimensions.width, dimensions.height)
+        const seatRows = positions.map((p) => ({
+            table_id: table.id,
+            seat_index: p.seat_index,
+            relative_x: p.relative_x,
+            relative_y: p.relative_y,
+        }))
+        await supabase.from('table_seats').insert(seatRows)
     }
 
-    const {error} = await supabase
-        .from('tables')
-        .insert([{...parsed.data, wedding_id: weddingId}])
-
-    if (error) throw new Error(error.message)
-    revalidateTag(`tables-${weddingId}`, 'max')
+    revalidateTag(`tables-${input.weddingId}`,'max')
     revalidatePath('/admin/seating')
+    return table
 }
 
-export async function updateTable(id: string, formData: { number: number; seats: number; label?: string | null }) {
-    const {supabase, weddingId} = await requireAdmin()
+export async function assignGuestToSeat(guestId: string, seatId: string | null, tableId: string | null) {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('guests')
+        .update({ table_id: tableId, seat_id: seatId })
+        .eq('id', guestId)
+
+    if (error) throw error
+}
+
+export async function updateTable(
+    id: string,
+    formData: { number: number; seats: number; label?: string | null; shape: 'round' | 'rectangle' | 'square' }
+) {
+    const { supabase, weddingId } = await requireAdmin()
 
     const parsed = tableSchema.safeParse(formData)
     if (!parsed.success) {
         throw new Error('Invalid input: ' + parsed.error.errors[0].message)
     }
 
-    const {error} = await supabase
+    const { data: table, error } = await supabase
         .from('tables')
         .update(parsed.data)
         .eq('id', id)
         .eq('wedding_id', weddingId)
+        .select()
+        .single()
 
-    if (error) throw new Error(error.message)
+    if (error || !table) throw new Error(error?.message ?? 'Dështoi përditësimi i tavolinës')
+
     revalidateTag(`tables-${weddingId}`, 'max')
     revalidatePath('/admin/seating')
+    return table
 }
 
 export async function deleteTable(id: string) {

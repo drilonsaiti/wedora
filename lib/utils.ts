@@ -1,6 +1,8 @@
 import {type ClassValue, clsx} from "clsx"
 import {twMerge} from "tailwind-merge"
 import {Photo} from "@/types/database";
+import {TableShape} from "@/types/seating";
+
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
@@ -51,3 +53,10 @@ export function invertUpdate(
     if ('favourite' in update) inverted.favourite = original.favourite
     return inverted
 }
+
+
+const SHAPE_ICON_CLASSES: Record<TableShape, string> = {
+    round: 'rounded-full',
+    square: 'rounded-2xl',
+    rectangle: 'rounded-2xl w-28 h-16',
+};

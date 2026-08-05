@@ -66,8 +66,14 @@ export function GuestResultModal({guest, onClose, tables, venueElements}: GuestR
                                                     className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Numri</span>
                                                 <span
                                                     className="text-6xl font-serif text-[hsl(var(--primary))] font-medium leading-none">
-                            {guest.tables.number}
-                          </span>
+        {guest.tables.number}
+    </span>
+                                                {guest.tables.shape !== 'round' && (
+                                                    <span
+                                                        className="text-[10px] uppercase tracking-widest text-[hsl(var(--gold))] mt-1">
+            Vendi {(guest.table_seats?.seat_index ?? 0) + 1}
+        </span>
+                                                )}
                                             </div>
                                             <div
                                                 className="absolute -inset-2 bg-[hsl(var(--gold))]/5 rounded-full blur-xl -z-0"/>

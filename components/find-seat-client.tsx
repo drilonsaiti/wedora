@@ -87,9 +87,11 @@ export function FindSeatClient({guests, tables, venueElements}: FindSeatClientPr
                                     <p className="font-sans text-xs uppercase tracking-widest text-muted-foreground mt-1">
                                         {guest.tables ? (
                                             <span className="flex items-center gap-1.5">
-            <Armchair className="w-3 h-3 text-[hsl(var(--gold))]"/>
-            Tavolina {guest.tables.number}
-          </span>
+            <Armchair className="w-3 h-3 text-[hsl(var(--gold))]" />
+                                                {guest.tables.shape === 'round'
+                                                    ? `Tavolina ${guest.tables.number}`
+                                                    : `Tavolina ${guest.tables.number} · Vendi ${(guest.table_seats?.seat_index ?? 0) + 1}`}
+        </span>
                                         ) : 'Ende pa tavolinë'}
                                     </p>
                                 </div>

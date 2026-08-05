@@ -104,9 +104,10 @@ export const guestSchema = z.object({
 export type GuestFormValues = z.infer<typeof guestSchema>
 
 export const tableSchema = z.object({
-    number: z.number().int().positive('Table number must be positive'),
-    seats: z.number().int().positive('Seats must be positive'),
-    label: z.string().max(50, 'Label must be under 50 characters').optional().nullable(),
+    number: z.number().min(1, 'Numri është i detyrueshëm'),
+    seats: z.number().min(1, 'Të paktën 1 vend'),
+    label: z.string().optional(),
+    shape: z.enum(['round', 'rectangle', 'square']),
 })
 
 export type TableFormValues = z.infer<typeof tableSchema>

@@ -26,11 +26,20 @@ import {
     useSensors,
 } from '@dnd-kit/core';
 import {restrictToWindowEdges} from '@dnd-kit/modifiers';
-import {Guest, GuestWithTable, Table, VenueElement, VenueElementShape, VenueElementType} from '@/types/seating';
+import {
+    Guest,
+    GuestWithTable,
+    Table,
+    TableWithSeats,
+    VenueElement,
+    VenueElementShape,
+    VenueElementType
+} from '@/types/seating';
 import {DraggableTable} from './draggable-table';
 import {DraggableGuest} from './draggable-guest';
 import {GuestAvatar} from '@/components/guest-avatar';
 import {
+    assignGuestToSeat,
     assignGuestToTable,
     createVenueElement,
     deleteVenueElement,
@@ -45,7 +54,7 @@ import {VenueColorKey, VenueIconKey} from '@/lib/venue-icons'
 
 interface SeatingDesignerProps {
     guests: GuestWithTable[];
-    tables: Table[];
+    tables: TableWithSeats[];
     venueElements: VenueElement[];
     weddingId: string;
 }
@@ -184,6 +193,27 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
         }
 
         const overData = over.data.current;
+
+        if (activeData?.type === 'guest' && overData?.type === 'seat') {
+            const guest = activeData.guest;
+            const seat = overData.seat;
+
+            const seatTaken = localGuests.some((g) => g.seat_id === seat.id);
+            if (seatTaken) {
+                alert('Ky vend është zënë tashmë!');
+                return;
+            }
+
+            try {
+                await assignGuestToSeat(guest.id, seat.id, seat.table_id);
+                setLocalGuests(prev => prev.map(g =>
+                    g.id === guest.id ? { ...g, table_id: seat.table_id, seat_id: seat.id } : g
+                ));
+            } catch (err) {
+                alert('Dështoi caktimi i vendit');
+            }
+            return;
+        }
 
         // Case 2: Dragging a guest onto a table
         if (activeData?.type === 'guest' && overData?.type === 'table') {
@@ -360,6 +390,7 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
                                 key={table.id}
                                 table={table}
                                 guests={localGuests.filter(g => g.table_id === table.id)}
+                                seats={table.table_seats}
                                 showGuests={showGuests}
                             />
                         ))}

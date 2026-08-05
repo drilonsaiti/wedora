@@ -71,7 +71,11 @@ export function HomeSearch({guests, tables, venueElements}: HomeSearchProps) {
                                                     {guest.first_name} {guest.last_name}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground uppercase tracking-widest mt-0.5">
-                                                    {guest.tables ? `Tavolina ${guest.tables.number}` : 'Ende pa tavolinë'}
+                                                    {guest.tables
+                                                        ? guest.tables.shape === 'round'
+                                                            ? `Tavolina ${guest.tables.number}`
+                                                            : `Tavolina ${guest.tables.number} · Vendi ${(guest.table_seats?.seat_index ?? 0) + 1}`
+                                                        : 'Ende pa tavolinë'}
                                                 </p>
                                             </div>
                                         </div>
