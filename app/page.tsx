@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import {ArrowRight, Camera, Heart, Mail, MapPin, Palette, Phone, Users} from 'lucide-react'
+import {PricingSection} from "@/components/pricing-section";
 
 const FEATURES = [
     {
@@ -78,9 +79,13 @@ export default function PortfolioLandingPage() {
                 ))}
             </div>
 
+            <div className="h-px w-full max-w-2xl bg-gradient-to-r from-transparent via-border to-transparent my-16" />
+
+            <PricingSection />
+
             <div className="h-px w-full max-w-2xl bg-gradient-to-r from-transparent via-border to-transparent my-16"/>
 
-            <div className="relative z-10 w-full max-w-md text-center">
+            <div id="contact" className="relative z-10 w-full max-w-md text-center">
                 <p className="font-sans text-xs tracking-[0.3em] uppercase text-muted-foreground mb-3">
                     Kontakt
                 </p>

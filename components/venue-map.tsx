@@ -10,12 +10,12 @@ interface VenueMapProps {
     tables: Table[];
     venueElements: VenueElement[];
     highlightedTableId: string | null;
+    highlightedSeatId?: string | null;
     maxHeight?: number;
 }
 
-const TABLE_SIZE = 128;
 
-export function VenueMap({tables, venueElements, highlightedTableId, maxHeight = 280}: VenueMapProps) {
+export function VenueMap({tables, venueElements, highlightedTableId, highlightedSeatId, maxHeight = 280}: VenueMapProps) {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
     const [hasInteracted, setHasInteracted] = useState(false);
@@ -23,11 +23,11 @@ export function VenueMap({tables, venueElements, highlightedTableId, maxHeight =
 
     const bounds = useMemo(() => {
         const allX = [
-            ...tables.map(t => t.pos_x + TABLE_SIZE),
+            ...tables.map(t => t.pos_x + t.width),
             ...venueElements.map(e => e.pos_x + e.width),
         ];
         const allY = [
-            ...tables.map(t => t.pos_y + TABLE_SIZE),
+            ...tables.map(t => t.pos_y + t.height),
             ...venueElements.map(e => e.pos_y + e.height),
         ];
         return {
@@ -59,8 +59,8 @@ export function VenueMap({tables, venueElements, highlightedTableId, maxHeight =
         return {
             startX: entrance.pos_x + entrance.width / 2,
             startY: entrance.pos_y + entrance.height / 2,
-            endX: targetTable.pos_x + TABLE_SIZE / 2,
-            endY: targetTable.pos_y + TABLE_SIZE / 2,
+            endX: targetTable.pos_x + targetTable.width / 2,
+            endY: targetTable.pos_y + targetTable.height / 2,
         };
     }, [venueElements, tables, highlightedTableId]);
 
@@ -80,8 +80,7 @@ export function VenueMap({tables, venueElements, highlightedTableId, maxHeight =
             if (!container) return;
 
             const target = currentStep === 0 ? entrance : targetTable;
-            const targetSize = currentStep === 0 ? (entrance.width) : TABLE_SIZE;
-
+            const targetSize = currentStep === 0 ? entrance.width : targetTable.width;
             const x = target.pos_x * scale;
             const y = target.pos_y * scale;
 
@@ -166,7 +165,12 @@ export function VenueMap({tables, venueElements, highlightedTableId, maxHeight =
                     ))}
 
                     {tables.map(table => (
-                        <StaticTable key={table.id} table={table} isHighlighted={table.id === highlightedTableId}/>
+                        <StaticTable
+                            key={table.id}
+                            table={table}
+                            isHighlighted={table.id === highlightedTableId}
+                            highlightedSeatId={table.id === highlightedTableId ? highlightedSeatId : null}
+                        />
                     ))}
                 </div>
             </div>

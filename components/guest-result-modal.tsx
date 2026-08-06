@@ -92,6 +92,7 @@ export function GuestResultModal({guest, onClose, tables, venueElements}: GuestR
                                                 tables={tables}
                                                 venueElements={venueElements}
                                                 highlightedTableId={guest.table_id}
+                                                highlightedSeatId={guest.seat_id}
                                                 maxHeight={400}
                                             />
                                         </div>

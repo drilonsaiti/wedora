@@ -222,7 +222,6 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
             return;
         }
 
-        // Case 2: Dragging a guest onto a table
         if (activeData?.type === 'guest' && overData?.type === 'table') {
             const guest = activeData.guest;
             const table: Table = overData.table;
@@ -234,11 +233,11 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
                 return;
             }
 
-            // Për tavolina jo-round: duhet caktuar edhe seat_id specifik,
-            // ndryshe guest-i mbetet i padukshëm vizualisht
             if (table.shape !== 'round') {
                 const occupiedSeatIds = new Set(guestsAtTable.map(g => g.seat_id).filter(Boolean));
-                const freeSeat = table.table_seats.find(s => !occupiedSeatIds.has(s.id));
+                const freeSeat = [...table.table_seats]
+                    .sort((a, b) => a.seat_index - b.seat_index)
+                    .find(s => !occupiedSeatIds.has(s.id));
 
                 if (!freeSeat) {
                     alert(`Tavolina ${table.number} është plot!`);
@@ -248,7 +247,7 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
                 try {
                     await assignGuestToSeat(guest.id, freeSeat.id, table.id);
                     setLocalGuests(prev => prev.map(g =>
-                        g.id === guest.id ? {...g, table_id: table.id, tables: table, seat_id: freeSeat.id} : g
+                        g.id === guest.id ? { ...g, table_id: table.id, tables: table, seat_id: freeSeat.id } : g
                     ));
                 } catch (err) {
                     alert('Dështoi caktimi i të ftuarit në tavolinë');
@@ -256,7 +255,6 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
                 return;
             }
 
-            // Round: siç ishte më parë
             try {
                 await assignGuestToTable(guest.id, table.id);
                 setLocalGuests(prev => prev.map(g => g.id === guest.id ? {
