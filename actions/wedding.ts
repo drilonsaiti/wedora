@@ -84,12 +84,27 @@ export async function createWedding(input: CreateWeddingInput) {
 
     const {error: settingsError} = await supabase.from('wedding_settings').insert({
         wedding_id: wedding.id,
-        theme_color: JSON.stringify(theme),
+        theme_hue: parsed.data.theme_hue,
         enable_find_seat: parsed.data.enable_find_seat,
         enable_photo_upload: parsed.data.enable_photo_upload,
+        max_photos_total: parsed.data.max_photos_total ?? null,
+        max_photos_per_guest: parsed.data.max_photos_per_guest ?? null,
     })
 
     if (settingsError) {
+        await supabase.from('weddings').delete().eq('id', wedding.id)
+        return {success: false as const, error: 'Dështoi krijimi i dasmës'}
+    }
+
+    const {error: eventError} = await supabase.from('events').insert({
+        wedding_id: wedding.id,
+        name: `${parsed.data.groom_name} & ${parsed.data.bride_name}`,
+        slug: parsed.data.slug,
+        date: parsed.data.wedding_date
+    })
+
+    if (eventError) {
+        await supabase.from('wedding_settings').delete().eq('wedding_id', wedding.id)
         await supabase.from('weddings').delete().eq('id', wedding.id)
         return {success: false as const, error: 'Dështoi krijimi i dasmës'}
     }
@@ -156,7 +171,6 @@ export async function updateWedding(weddingId: string, input: Partial<CreateWedd
     const {data: {user}} = await supabase.auth.getUser()
     if (!user) return {success: false as const, error: 'Duhet të jeni të kyçur'}
 
-    // Merr wedding-in AKTUAL para se të përditësojmë, që të krahasojmë email-et e vjetra me të rejat
     const {data: currentWedding, error: fetchError} = await supabase
         .from('weddings')
         .select('groom_email, bride_email')
@@ -181,9 +195,11 @@ export async function updateWedding(weddingId: string, input: Partial<CreateWedd
 
     if (input.theme_hue !== undefined || input.enable_find_seat !== undefined || input.enable_photo_upload !== undefined) {
         const settingsUpdates: WeddingSettingsUpdate = {}
-        if (input.theme_hue !== undefined) settingsUpdates.theme_color = JSON.stringify(generateWeddingTheme(input.theme_hue))
+        if (input.theme_hue !== undefined) settingsUpdates.theme_hue = input.theme_hue
         if (input.enable_find_seat !== undefined) settingsUpdates.enable_find_seat = input.enable_find_seat
         if (input.enable_photo_upload !== undefined) settingsUpdates.enable_photo_upload = input.enable_photo_upload
+        if (input.max_photos_total !== undefined) settingsUpdates.max_photos_total = input.max_photos_total || null
+        if (input.max_photos_per_guest !== undefined) settingsUpdates.max_photos_per_guest = input.max_photos_per_guest || null
 
         const {error} = await supabase.from('wedding_settings').update(settingsUpdates).eq('wedding_id', weddingId)
         if (error) return {success: false as const, error: 'Dështoi ruajtja e cilësimeve'}

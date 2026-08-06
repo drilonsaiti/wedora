@@ -282,6 +282,37 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
                     <p className="text-xs text-destructive mt-2">{errors.enable_find_seat.message}</p>}
             </div>
 
+            {watch('enable_photo_upload') && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
+                            Limit Total Fotosh
+                        </label>
+                        <input
+                            {...register('max_photos_total', {valueAsNumber: true})}
+                            type="number"
+                            placeholder="Pa limit"
+                            min={1}
+                            className="input-wedding py-3 w-full"
+                        />
+                        <p className="text-[10px] text-muted-foreground mt-1 italic">Lëreni bosh për pa limit</p>
+                    </div>
+                    <div>
+                        <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
+                            Limit për Të Ftuar
+                        </label>
+                        <input
+                            {...register('max_photos_per_guest', {valueAsNumber: true})}
+                            type="number"
+                            placeholder="Pa limit"
+                            min={1}
+                            className="input-wedding py-3 w-full"
+                        />
+                        <p className="text-[10px] text-muted-foreground mt-1 italic">Sa foto lejohen për person</p>
+                    </div>
+                </div>
+            )}
+
             {serverError && (
                 <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3">
                     <p className="text-xs text-destructive text-center">{serverError}</p>

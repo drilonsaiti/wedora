@@ -13,6 +13,7 @@ import {cn, formatBytes, getOrCreateSessionId} from '@/lib/utils'
 
 interface UploadFormProps {
     eventId: string
+    maxPhotosPerGuest?: number | null
 }
 
 type UploadState = 'idle' | 'compressing' | 'uploading' | 'done' | 'error'
@@ -170,7 +171,7 @@ async function bakeFinalImage(
     })
 }
 
-export function UploadForm({eventId}: UploadFormProps) {
+export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
     const router = useRouter()
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const [preview, setPreview] = useState<string | null>(null)
@@ -332,6 +333,12 @@ export function UploadForm({eventId}: UploadFormProps) {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {maxPhotosPerGuest && (
+                <p className="text-xs text-muted-foreground text-center italic mb-2">
+                    Mund të ngarkoni deri në {maxPhotosPerGuest} foto
+                </p>
+            )}
+
             {/* Photo Selection */}
             {!selectedFile ? (
                 <div className="space-y-4">

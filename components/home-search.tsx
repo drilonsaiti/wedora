@@ -67,7 +67,7 @@ export function HomeSearch({guests, tables, venueElements}: HomeSearchProps) {
                                             <GuestAvatar initials={guest.initials} size="sm"
                                                          className="shrink-0 self-start"/>
                                             <div className="min-w-0">
-                                                <p className="font-serif text-[hsl(var(--dark))] truncate">
+                                                <p className="font-serif text-foreground truncate">
                                                     {guest.first_name} {guest.last_name}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground uppercase tracking-widest mt-0.5">

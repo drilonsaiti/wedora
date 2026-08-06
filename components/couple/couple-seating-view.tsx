@@ -21,7 +21,7 @@ export function CoupleSeatingView({guests, tables, venueElements, weddingId}: Co
             <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
                     <div>
-                        <h1 className="font-serif text-xl font-light text-[hsl(var(--dark))]">Sistemimi i
+                        <h1 className="font-serif text-xl font-light text-foreground">Sistemimi i
                             Tavolinave</h1>
                         <p className="font-sans text-xs text-muted-foreground">
                             {seatedCount}/{guests.length} të ftuar të vendosur

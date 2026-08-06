@@ -5,6 +5,8 @@ export interface WeddingThemeVars {
     '--accent-foreground': string;
     '--gold': string;
     '--ring': string;
+    '--blush': string;
+    '--dark': string
 }
 
 
@@ -18,6 +20,8 @@ export function generateWeddingTheme(hue: number): WeddingThemeVars {
         '--accent-foreground': `${clampedHue} 30% 35%`,
         '--gold': `${(clampedHue + 30) % 360} 60% 55%`,
         '--ring': `${clampedHue} 30% 55%`,
+        '--blush': `${clampedHue} 40% 85%`,
+        '--dark': `${clampedHue} 20% 12%`,
     };
 }
 

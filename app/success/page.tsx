@@ -22,7 +22,7 @@ export default function SuccessPage() {
                     <div className="h-px w-12 bg-[hsl(var(--gold))] opacity-60"/>
                 </div>
 
-                <h1 className="font-serif text-4xl font-light text-[hsl(var(--dark))] mb-3">
+                <h1 className="font-serif text-4xl font-light text-foreground mb-3">
                     Faleminderit!
                 </h1>
                 <p className="font-serif italic text-xl text-[hsl(var(--primary))] mb-6">

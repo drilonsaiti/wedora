@@ -11,7 +11,7 @@ export default function CoupleLoginPage() {
                         <Heart className="w-3 h-3 text-[hsl(var(--primary))] fill-current"/>
                         <div className="h-px w-8 bg-[hsl(var(--gold))] opacity-60"/>
                     </div>
-                    <h1 className="font-serif text-2xl font-light text-[hsl(var(--dark))]">
+                    <h1 className="font-serif text-2xl font-light text-foreground">
                         Mirë se erdhët
                     </h1>
                     <p className="text-xs text-muted-foreground mt-1">

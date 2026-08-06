@@ -64,7 +64,7 @@ export function CoupleResetPasswordForm() {
                         <CheckCircle2 className="w-8 h-8 text-green-600"/>
                     </div>
                 </div>
-                <h2 className="text-xl font-serif font-light text-[hsl(var(--dark))]">Fjalëkalimi u ndryshua</h2>
+                <h2 className="text-xl font-serif font-light text-foreground">Fjalëkalimi u ndryshua</h2>
                 <p className="text-sm text-muted-foreground">Po ju çojmë te faqja e hyrjes...</p>
             </div>
         )
@@ -73,7 +73,7 @@ export function CoupleResetPasswordForm() {
     return (
         <div className="space-y-6">
             <div className="space-y-2">
-                <h2 className="text-xl font-serif font-light text-[hsl(var(--dark))]">Vendosni fjalëkalimin e ri</h2>
+                <h2 className="text-xl font-serif font-light text-foreground">Vendosni fjalëkalimin e ri</h2>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">

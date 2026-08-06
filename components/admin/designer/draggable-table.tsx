@@ -1,10 +1,10 @@
 'use client';
 
-import { memo } from 'react';
-import { useDraggable, useDroppable } from '@dnd-kit/core';
-import { cn } from '@/lib/utils';
-import { Table, Guest, TableSeat } from '@/types/seating';
-import { DraggableGuest } from './draggable-guest';
+import {memo} from 'react';
+import {useDraggable, useDroppable} from '@dnd-kit/core';
+import {cn} from '@/lib/utils';
+import {Guest, Table, TableSeat} from '@/types/seating';
+import {DraggableGuest} from './draggable-guest';
 
 interface DraggableTableProps {
     table: Table;
@@ -19,15 +19,15 @@ const SHAPE_CLASSES = {
     rectangle: 'rounded-2xl',
 };
 
-export const DraggableTable = memo(({ table, guests, seats, showGuests }: DraggableTableProps) => {
-    const { attributes, listeners, setNodeRef: setDraggableRef, transform, isDragging } = useDraggable({
+export const DraggableTable = memo(({table, guests, seats, showGuests}: DraggableTableProps) => {
+    const {attributes, listeners, setNodeRef: setDraggableRef, transform, isDragging} = useDraggable({
         id: `table-${table.id}`,
-        data: { type: 'table', table },
+        data: {type: 'table', table},
     });
 
-    const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+    const {setNodeRef: setDroppableRef, isOver} = useDroppable({
         id: `table-drop-${table.id}`,
-        data: { type: 'table', table },
+        data: {type: 'table', table},
     });
 
     const style = {
@@ -82,8 +82,9 @@ export const DraggableTable = memo(({ table, guests, seats, showGuests }: Dragga
                         const x = Math.cos(angle) * radius;
                         const y = Math.sin(angle) * radius;
                         return (
-                            <div key={guest.id} className="absolute z-10" style={{ transform: `translate(${x}px, ${y}px)` }}>
-                                <DraggableGuest guest={guest} />
+                            <div key={guest.id} className="absolute z-10"
+                                 style={{transform: `translate(${x}px, ${y}px)`}}>
+                                <DraggableGuest guest={guest}/>
                             </div>
                         );
                     })
@@ -100,10 +101,10 @@ export const DraggableTable = memo(({ table, guests, seats, showGuests }: Dragga
 
 DraggableTable.displayName = 'DraggableTable';
 
-function SeatSlot({ seat, guest }: { seat: TableSeat; guest?: Guest & { seat_id: string | null } }) {
-    const { setNodeRef, isOver } = useDroppable({
+function SeatSlot({seat, guest}: { seat: TableSeat; guest?: Guest & { seat_id: string | null } }) {
+    const {setNodeRef, isOver} = useDroppable({
         id: `seat-${seat.id}`,
-        data: { type: 'seat', seat },
+        data: {type: 'seat', seat},
     });
 
     return (
@@ -115,7 +116,7 @@ function SeatSlot({ seat, guest }: { seat: TableSeat; guest?: Guest & { seat_id:
             }}
         >
             {guest ? (
-                <DraggableGuest guest={guest} />
+                <DraggableGuest guest={guest}/>
             ) : (
                 <div
                     className={cn(

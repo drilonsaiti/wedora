@@ -6,14 +6,20 @@ import {Armchair, Camera, Home} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import {ThemeToggle} from '@/components/theme-toggle';
 
-export function BottomNav() {
+interface BottomNavProps {
+    slug: string;
+    enableFindSeat?: boolean;
+    enablePhotoUpload?: boolean;
+}
+
+export function BottomNav({slug, enableFindSeat = true, enablePhotoUpload = true}: BottomNavProps) {
     const pathname = usePathname();
 
     const navItems = [
-        {label: 'Ballina', href: '/', icon: Home},
-        {label: 'Vendi juaj', href: '/find-seat', icon: Armchair},
-        {label: 'Ngarko', href: '/upload', icon: Camera},
-    ];
+        {label: 'Ballina', href: `/${slug}`, icon: Home, show: true},
+        {label: 'Vendi juaj', href: `/${slug}/find-seat`, icon: Armchair, show: enableFindSeat},
+        {label: 'Ngarko', href: `/${slug}/upload`, icon: Camera, show: enablePhotoUpload},
+    ].filter((item) => item.show);
 
     return (
         <nav

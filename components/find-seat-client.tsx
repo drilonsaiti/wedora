@@ -11,9 +11,11 @@ interface FindSeatClientProps {
     guests: GuestWithTable[];
     tables: Table[];
     venueElements: VenueElement[];
+    groomName: string;
+    brideName: string;
 }
 
-export function FindSeatClient({guests, tables, venueElements}: FindSeatClientProps) {
+export function FindSeatClient({guests, tables, venueElements, groomName, brideName}: FindSeatClientProps) {
     const [query, setQuery] = useState('');
     const [selectedGuest, setSelectedGuest] = useState<GuestWithTable | null>(null);
 
@@ -35,9 +37,9 @@ export function FindSeatClient({guests, tables, venueElements}: FindSeatClientPr
                         <Heart className="w-3 h-3 text-[hsl(var(--primary))] fill-current"/>
                         <div className="h-px w-8 bg-[hsl(var(--gold))] opacity-60"/>
                     </div>
-                    <h1 className="font-serif text-4xl font-light text-[hsl(var(--dark))] mb-2">Gjeni vendin tuaj</h1>
+                    <h1 className="font-serif text-4xl font-light text-foreground mb-2">Gjeni vendin tuaj</h1>
                     <p className="font-sans text-xs tracking-widest uppercase text-muted-foreground">
-                        Dasma e Sara & Drilon
+                        Dasma e {brideName} & {groomName}
                     </p>
 
                     <p className="font-sans text-xs text-muted-foreground italic mt-3">
@@ -81,13 +83,13 @@ export function FindSeatClient({guests, tables, venueElements}: FindSeatClientPr
                                     className="border-2 border-[hsl(var(--accent))] shrink-0 self-start"
                                 />
                                 <div className="min-w-0">
-                                    <h3 className="font-serif text-xl text-[hsl(var(--dark))] truncate">
+                                    <h3 className="font-serif text-xl text-foreground truncate">
                                         {guest.first_name} {guest.last_name}
                                     </h3>
                                     <p className="font-sans text-xs uppercase tracking-widest text-muted-foreground mt-1">
                                         {guest.tables ? (
                                             <span className="flex items-center gap-1.5">
-            <Armchair className="w-3 h-3 text-[hsl(var(--gold))]" />
+            <Armchair className="w-3 h-3 text-[hsl(var(--gold))]"/>
                                                 {guest.tables.shape === 'round'
                                                     ? `Tavolina ${guest.tables.number}`
                                                     : `Tavolina ${guest.tables.number} · Vendi ${(guest.table_seats?.seat_index ?? 0) + 1}`}

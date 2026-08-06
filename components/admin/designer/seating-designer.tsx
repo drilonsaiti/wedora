@@ -16,17 +16,17 @@ import {
     Wine
 } from 'lucide-react';
 import {
+    closestCenter,
+    CollisionDetection,
+    defaultDropAnimationSideEffects,
     DndContext,
     DragEndEvent,
     DragOverlay,
     DragStartEvent,
     PointerSensor,
+    pointerWithin,
     useSensor,
     useSensors,
-    pointerWithin,
-    closestCenter,
-    CollisionDetection,
-    getFirstCollision, defaultDropAnimationSideEffects,
 } from '@dnd-kit/core';
 import {restrictToWindowEdges} from '@dnd-kit/modifiers';
 import {
@@ -186,7 +186,12 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
             if (type === 'guest') {
                 try {
                     await assignGuestToTable(guest.id, null);
-                    setLocalGuests(prev => prev.map(g => g.id === guest.id ? {...g, table_id: null, tables: null, seat_id: null} : g));
+                    setLocalGuests(prev => prev.map(g => g.id === guest.id ? {
+                        ...g,
+                        table_id: null,
+                        tables: null,
+                        seat_id: null
+                    } : g));
                 } catch (err) {
                     console.error(err);
                 }
@@ -209,7 +214,7 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
             try {
                 await assignGuestToSeat(guest.id, seat.id, seat.table_id);
                 setLocalGuests(prev => prev.map(g =>
-                    g.id === guest.id ? { ...g, table_id: seat.table_id, seat_id: seat.id } : g
+                    g.id === guest.id ? {...g, table_id: seat.table_id, seat_id: seat.id} : g
                 ));
             } catch (err) {
                 alert('Dështoi caktimi i vendit');
@@ -243,7 +248,7 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
                 try {
                     await assignGuestToSeat(guest.id, freeSeat.id, table.id);
                     setLocalGuests(prev => prev.map(g =>
-                        g.id === guest.id ? { ...g, table_id: table.id, tables: table, seat_id: freeSeat.id } : g
+                        g.id === guest.id ? {...g, table_id: table.id, tables: table, seat_id: freeSeat.id} : g
                     ));
                 } catch (err) {
                     alert('Dështoi caktimi i të ftuarit në tavolinë');
@@ -471,9 +476,10 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
                             "border-2 border-[hsl(var(--gold))] bg-card flex flex-col items-center justify-center shadow-2xl opacity-80 scale-105",
                             activeTable.shape === 'round' ? 'rounded-full' : 'rounded-2xl'
                         )}
-                        style={{ width: activeTable.width, height: activeTable.height }}
+                        style={{width: activeTable.width, height: activeTable.height}}
                     >
-                        <span className="text-[10px] uppercase tracking-widest text-muted-foreground block">Tavolina</span>
+                        <span
+                            className="text-[10px] uppercase tracking-widest text-muted-foreground block">Tavolina</span>
                         <span className="text-2xl font-serif text-[hsl(var(--primary))]">{activeTable.number}</span>
                     </div>
                 )}

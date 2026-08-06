@@ -37,10 +37,10 @@ export function GuestResultModal({guest, onClose, tables, venueElements}: GuestR
                                 className="absolute top-4 right-4 sm:top-6 sm:right-6 w-9 h-9 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center hover:bg-[hsl(var(--accent))]/70 transition-colors z-20"
                                 aria-label="Mbyll"
                             >
-                                <X className="w-4 h-4 text-[hsl(var(--dark))]"/>
+                                <X className="w-4 h-4 text-foreground"/>
                             </button>
 
-                            <h2 className="font-serif text-3xl text-[hsl(var(--dark))] mb-1 flex items-center justify-center gap-3 pr-8">
+                            <h2 className="font-serif text-3xl text-foreground mb-1 flex items-center justify-center gap-3 pr-8">
                                 {guest.first_name} {guest.last_name}
                             </h2>
 
@@ -102,7 +102,7 @@ export function GuestResultModal({guest, onClose, tables, venueElements}: GuestR
                                             className="w-20 h-20 rounded-full border-2 border-dashed border-[hsl(var(--gold))]/40 flex items-center justify-center mb-4">
                                             <span className="text-4xl">✨</span>
                                         </div>
-                                        <span className="text-lg font-serif text-[hsl(var(--dark))] italic">
+                                        <span className="text-lg font-serif text-foreground italic">
                       Ende pa tavolinë
                     </span>
                                         <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-2 px-4">

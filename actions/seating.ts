@@ -123,10 +123,10 @@ export async function deleteGuest(id: string) {
 }
 
 export async function assignGuestToTable(guestId: string, tableId: string | null) {
-    const { supabase, weddingId } = await requireAdmin()
-    const { error } = await supabase
+    const {supabase, weddingId} = await requireAdmin()
+    const {error} = await supabase
         .from('guests')
-        .update({ table_id: tableId, seat_id: null })
+        .update({table_id: tableId, seat_id: null})
         .eq('id', guestId)
         .eq('wedding_id', weddingId)
 
@@ -166,12 +166,12 @@ export async function addTable(input: {
     const supabase = await createClient()
 
     const dimensions = {
-        round: { width: 128, height: 128 },
-        square: { width: 140, height: 140 },
-        rectangle: { width: 240, height: 100 },
+        round: {width: 128, height: 128},
+        square: {width: 140, height: 140},
+        rectangle: {width: 240, height: 100},
     }[input.shape]
 
-    const { data: table, error } = await supabase
+    const {data: table, error} = await supabase
         .from('tables')
         .insert({
             wedding_id: input.weddingId,
@@ -205,7 +205,7 @@ export async function addTable(input: {
         await supabase.from('table_seats').insert(seatRows)
     }
 
-    revalidateTag(`tables-${input.weddingId}`,'max')
+    revalidateTag(`tables-${input.weddingId}`, 'max')
     revalidatePath('/admin/seating')
     return table
 }
@@ -213,9 +213,9 @@ export async function addTable(input: {
 export async function assignGuestToSeat(guestId: string, seatId: string | null, tableId: string | null) {
     const supabase = await createClient()
 
-    const { error } = await supabase
+    const {error} = await supabase
         .from('guests')
-        .update({ table_id: tableId, seat_id: seatId })
+        .update({table_id: tableId, seat_id: seatId})
         .eq('id', guestId)
 
     if (error) throw error
@@ -223,26 +223,32 @@ export async function assignGuestToSeat(guestId: string, seatId: string | null, 
 
 export async function updateTable(
     id: string,
-    formData: { number: number; seats: number; label?: string | null; shape: 'round' | 'rectangle' | 'square'; seatSides?: SeatSides }
+    formData: {
+        number: number;
+        seats: number;
+        label?: string | null;
+        shape: 'round' | 'rectangle' | 'square';
+        seatSides?: SeatSides
+    }
 ) {
-    const { supabase, weddingId } = await requireAdmin()
+    const {supabase, weddingId} = await requireAdmin()
 
     const parsed = tableSchema.safeParse(formData)
     if (!parsed.success) {
         throw new Error('Invalid input: ' + parsed.error.errors[0].message)
     }
 
-    const { seatSides, ...tableData } = parsed.data
+    const {seatSides, ...tableData} = parsed.data
 
     const dimensions = {
-        round: { width: 128, height: 128 },
-        square: { width: 140, height: 140 },
-        rectangle: { width: 240, height: 100 },
+        round: {width: 128, height: 128},
+        square: {width: 140, height: 140},
+        rectangle: {width: 240, height: 100},
     }[tableData.shape]
 
-    const { data: table, error } = await supabase
+    const {data: table, error} = await supabase
         .from('tables')
-        .update({ ...tableData, ...dimensions })
+        .update({...tableData, ...dimensions})
         .eq('id', id)
         .eq('wedding_id', weddingId)
         .select()

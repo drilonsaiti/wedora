@@ -55,14 +55,36 @@ export async function uploadPhotoAction(
 
         const weddingId = eventData.wedding_id
 
-        const {count} = await supabase
+        const {data: settings} = await supabase
+            .from('wedding_settings')
+            .select('enable_photo_upload, max_photos_total, max_photos_per_guest')
+            .eq('wedding_id', weddingId)
+            .single()
+
+        if (!settings?.enable_photo_upload) {
+            return {success: false, error: 'Ngarkimi i fotove s\'është aktiv për këtë dasmë'}
+        }
+
+        if (settings.max_photos_total) {
+            const {count: totalCount} = await supabase
+                .from('photos')
+                .select('*', {count: 'exact', head: true})
+                .eq('wedding_id', weddingId)
+
+            if ((totalCount ?? 0) >= settings.max_photos_total) {
+                return {success: false, error: 'U arrit limiti total i fotove për këtë dasmë'}
+            }
+        }
+
+        const perGuestLimit = settings.max_photos_per_guest ?? 20
+        const {count: sessionCount} = await supabase
             .from('photos')
             .select('*', {count: 'exact', head: true})
             .eq('uploaded_by_session', sessionId)
             .eq('wedding_id', weddingId)
 
-        if ((count ?? 0) >= 20) {
-            return {success: false, error: 'Upload limit reached for this session'}
+        if ((sessionCount ?? 0) >= perGuestLimit) {
+            return {success: false, error: `Keni arritur limitin prej ${perGuestLimit} fotosh`}
         }
 
         const arrayBuffer = await file.arrayBuffer()

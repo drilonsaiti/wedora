@@ -1,5 +1,6 @@
 import {generateWeddingTheme} from '@/lib/theme';
 import {getWeddingBySlug} from '@/actions/wedding';
+import {notFound} from 'next/navigation';
 
 export default async function WeddingLayout({
                                                 children,
@@ -12,14 +13,10 @@ export default async function WeddingLayout({
     const wedding = await getWeddingBySlug(slug);
 
     if (!wedding || !wedding.wedding_settings) {
-        throw new Error('No wedding found for this admin')
+        notFound()
     }
 
-    const theme_color = wedding.wedding_settings.theme_color;
-    const themeHue = theme_color && !Number.isNaN(Number(theme_color))
-        ? Number(theme_color)
-        : 355;
-
+    const themeHue = wedding.wedding_settings.theme_hue ?? 355;
     const theme = generateWeddingTheme(themeHue);
 
     const cssVars = Object.entries(theme)

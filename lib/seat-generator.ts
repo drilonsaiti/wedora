@@ -18,7 +18,7 @@ export function distributeSeatsEvenly(total: number, width: number, height: numb
     const remaining = Math.max(0, total - topCount - bottomCount)
     const leftCount = Math.floor(remaining / 2)
     const rightCount = remaining - leftCount
-    return { top: topCount, right: rightCount, bottom: bottomCount, left: leftCount }
+    return {top: topCount, right: rightCount, bottom: bottomCount, left: leftCount}
 }
 
 export function generateSeatPositions(
@@ -32,7 +32,7 @@ export function generateSeatPositions(
         const radius = Math.max(width, height) / 2 + 32
         const centerX = width / 2
         const centerY = height / 2
-        return Array.from({ length: seatCount }, (_, i) => {
+        return Array.from({length: seatCount}, (_, i) => {
             const angle = (i / seatCount) * 2 * Math.PI - Math.PI / 2
             return {
                 seat_index: i,
@@ -42,7 +42,7 @@ export function generateSeatPositions(
         })
     }
 
-    const { top: topCount, right: rightCount, bottom: bottomCount, left: leftCount } =
+    const {top: topCount, right: rightCount, bottom: bottomCount, left: leftCount} =
     sides ?? distributeSeatsEvenly(seatCount, width, height)
 
     const perimeter: SeatPosition[] = []

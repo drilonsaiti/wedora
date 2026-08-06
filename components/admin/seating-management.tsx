@@ -305,8 +305,10 @@ export function SeatingManagement({
                                             table.shape === 'round' ? 'rounded-full' : 'rounded-2xl'
                                         )}
                                     >
-                                        <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Tavolina</span>
-                                        <span className="text-2xl font-serif text-[hsl(var(--primary))]">{table.number}</span>
+                                        <span
+                                            className="text-[10px] uppercase tracking-widest text-muted-foreground">Tavolina</span>
+                                        <span
+                                            className="text-2xl font-serif text-[hsl(var(--primary))]">{table.number}</span>
                                     </div>
 
                                     <h3 className="font-sans font-medium text-sm">Tavolina {table.number}</h3>

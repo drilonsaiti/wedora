@@ -52,7 +52,7 @@ export function CoupleForgotPasswordForm() {
                         <CheckCircle2 className="w-8 h-8 text-green-600"/>
                     </div>
                 </div>
-                <h2 className="text-xl font-serif font-light text-[hsl(var(--dark))]">Kontrolloni email-in</h2>
+                <h2 className="text-xl font-serif font-light text-foreground">Kontrolloni email-in</h2>
                 <p className="text-sm text-muted-foreground">
                     Ju kemi dërguar një lidhje për rivendosjen e fjalëkalimit në adresën tuaj email.
                 </p>
@@ -66,7 +66,7 @@ export function CoupleForgotPasswordForm() {
     return (
         <div className="space-y-6">
             <div className="space-y-2">
-                <h2 className="text-xl font-serif font-light text-[hsl(var(--dark))]">Harruat fjalëkalimin?</h2>
+                <h2 className="text-xl font-serif font-light text-foreground">Harruat fjalëkalimin?</h2>
                 <p className="text-sm text-muted-foreground">
                     Shkruani email-in tuaj dhe do t&apos;ju dërgojmë një lidhje për ta rivendosur.
                 </p>

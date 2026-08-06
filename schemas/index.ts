@@ -140,6 +140,14 @@ export const createWeddingSchema = z.object({
     theme_hue: z.number().min(0).max(360).default(355),
     enable_find_seat: z.boolean().default(true),
     enable_photo_upload: z.boolean().default(true),
+    max_photos_total: z.preprocess(
+        (val) => (val === '' || val === undefined || Number.isNaN(val) ? undefined : val),
+        z.number().int().min(1).max(10000).optional()
+    ),
+    max_photos_per_guest: z.preprocess(
+        (val) => (val === '' || val === undefined || Number.isNaN(val) ? undefined : val),
+        z.number().int().min(1).max(100).optional()
+    ),
 }).refine((data) => data.enable_find_seat || data.enable_photo_upload, {
     message: 'Zgjidhni të paktën një funksion (Gjej Vendin ose Ngarko Foto)',
     path: ['enable_find_seat'],

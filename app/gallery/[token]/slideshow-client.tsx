@@ -136,7 +136,7 @@ export function GallerySlideshow({
                     <Heart className="w-3 h-3 text-[hsl(var(--primary))] fill-current"/>
                     <div className="h-px w-12 bg-[hsl(var(--gold))] opacity-60"/>
                 </div>
-                <h1 className="font-serif text-4xl font-light text-[hsl(var(--dark))]">
+                <h1 className="font-serif text-4xl font-light text-foreground">
                     {label ?? 'Our Wedding Gallery'}
                 </h1>
                 <p className="font-sans text-xs tracking-widest uppercase text-muted-foreground mt-2">
