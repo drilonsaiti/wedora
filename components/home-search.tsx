@@ -61,16 +61,15 @@ export function HomeSearch({guests, tables, venueElements}: HomeSearchProps) {
                                 {results.map((guest) => (
                                     <div
                                         key={guest.id}
-                                        className="p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 hover:bg-[hsl(var(--accent))] transition-colors"
+                                        className="group p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 hover:bg-[hsl(var(--accent))] transition-colors"
                                     >
                                         <div className="flex items-center gap-4 min-w-0">
-                                            <GuestAvatar initials={guest.initials} size="sm"
-                                                         className="shrink-0 self-start"/>
+                                            <GuestAvatar initials={guest.initials} size="sm" className="shrink-0 self-start"/>
                                             <div className="min-w-0">
-                                                <p className="font-serif text-foreground truncate">
+                                                <p className="font-serif text-foreground group-hover:text-[hsl(var(--accent-foreground))] truncate">
                                                     {guest.first_name} {guest.last_name}
                                                 </p>
-                                                <p className="text-xs text-muted-foreground uppercase tracking-widest mt-0.5">
+                                                <p className="text-xs text-muted-foreground group-hover:text-[hsl(var(--accent-foreground))] uppercase tracking-widest mt-0.5">
                                                     {guest.tables
                                                         ? guest.tables.shape === 'round'
                                                             ? `Tavolina ${guest.tables.number}`
