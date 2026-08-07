@@ -14,7 +14,7 @@ interface PricingPlan {
 const PLANS: PricingPlan[] = [
     {
         name: 'Bazë',
-        price: '€19',
+        price: '€39',
         period: 'për dasmë',
         description: 'Për dasma të vogla, vetëm gjetja e vendit',
         features: [
@@ -27,7 +27,7 @@ const PLANS: PricingPlan[] = [
     },
     {
         name: 'Standard',
-        price: '€39',
+        price: '€69',
         period: 'për dasmë',
         description: 'Kombinimi më i kërkuar — vend + foto',
         featured: true,
@@ -42,7 +42,7 @@ const PLANS: PricingPlan[] = [
     },
     {
         name: 'Premium',
-        price: '€69',
+        price: '€99',
         period: 'për dasmë',
         description: 'Pa limite, për dasma të mëdha',
         features: [
@@ -52,7 +52,6 @@ const PLANS: PricingPlan[] = [
             { label: 'Të ftuar pa limit', included: true },
             { label: 'Ruajtje 1 vit pas dasmës', included: true },
             { label: 'Galeri e ndashme (link publik)', included: true },
-            { label: 'Llogari për çiftin (couple login)', included: true },
         ],
     },
 ]

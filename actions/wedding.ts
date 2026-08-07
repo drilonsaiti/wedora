@@ -89,6 +89,7 @@ export async function createWedding(input: CreateWeddingInput) {
         enable_photo_upload: parsed.data.enable_photo_upload,
         max_photos_total: parsed.data.max_photos_total ?? null,
         max_photos_per_guest: parsed.data.max_photos_per_guest ?? null,
+        photo_retention_days: parsed.data.photo_retention_days,
     })
 
     if (settingsError) {
@@ -200,6 +201,7 @@ export async function updateWedding(weddingId: string, input: Partial<CreateWedd
         if (input.enable_photo_upload !== undefined) settingsUpdates.enable_photo_upload = input.enable_photo_upload
         if (input.max_photos_total !== undefined) settingsUpdates.max_photos_total = input.max_photos_total || null
         if (input.max_photos_per_guest !== undefined) settingsUpdates.max_photos_per_guest = input.max_photos_per_guest || null
+        if (input.photo_retention_days !== undefined) settingsUpdates.photo_retention_days = input.photo_retention_days // ← shtuar
 
         const {error} = await supabase.from('wedding_settings').update(settingsUpdates).eq('wedding_id', weddingId)
         if (error) return {success: false as const, error: 'Dështoi ruajtja e cilësimeve'}

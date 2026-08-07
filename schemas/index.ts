@@ -148,6 +148,7 @@ export const createWeddingSchema = z.object({
         (val) => (val === '' || val === undefined || Number.isNaN(val) ? undefined : val),
         z.number().int().min(1).max(100).optional()
     ),
+    photo_retention_days: z.number().int().min(1).max(3650).default(90),
 }).refine((data) => data.enable_find_seat || data.enable_photo_upload, {
     message: 'Zgjidhni të paktën një funksion (Gjej Vendin ose Ngarko Foto)',
     path: ['enable_find_seat'],
