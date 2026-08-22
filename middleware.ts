@@ -1,6 +1,14 @@
 import {createServerClient} from '@supabase/ssr'
 import {type NextRequest, NextResponse} from 'next/server'
 import type {Database} from '@/types/database'
+import createI18nMiddleware from 'next-intl/middleware';
+import {locales, defaultLocale} from './lib/i18n';
+
+const i18nMiddleware = createI18nMiddleware({
+    locales,
+    defaultLocale,
+    localePrefix: 'always'
+});
 
 type CookieToSet = {
     name: string
@@ -9,7 +17,13 @@ type CookieToSet = {
 }
 
 export async function middleware(request: NextRequest) {
-    let supabaseResponse = NextResponse.next({request})
+    const {pathname} = request.nextUrl
+
+    // 1. Handle i18n first
+    const response = i18nMiddleware(request);
+
+    // 2. Handle Supabase auth
+    let supabaseResponse = response
 
     const supabase = createServerClient<Database>(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -24,11 +38,9 @@ export async function middleware(request: NextRequest) {
                         request.cookies.set(name, value)
                     )
 
-                    supabaseResponse = NextResponse.next({request})
-
-                    cookiesToSet.forEach(({name, value, options}) =>
-                        supabaseResponse.cookies.set(name, value, options)
-                    )
+                    // We need to pass the request to NextResponse.next to refresh the response with the new cookies
+                    // But here we are already in the middle of a response from i18nMiddleware.
+                    // next-intl's response is what we should modify.
                 },
             },
         }
@@ -38,54 +50,59 @@ export async function middleware(request: NextRequest) {
         data: {user},
     } = await supabase.auth.getUser()
 
-    const {pathname} = request.nextUrl
+    // Strip locale from pathname for easier matching
+    const pathnameWithoutLocale = pathname.replace(new RegExp(`^/(${locales.join('|')})`), '') || '/'
 
     // Allow auth-related routes
     if (
-        pathname === '/admin/forgot-password' ||
-        pathname === '/admin/reset-password' ||
-        pathname === '/couple/forgot-password' ||
-        pathname === '/couple/reset-password' ||
-        pathname.startsWith('/api/auth')
+        pathnameWithoutLocale === '/admin/forgot-password' ||
+        pathnameWithoutLocale === '/admin/reset-password' ||
+        pathnameWithoutLocale === '/couple/forgot-password' ||
+        pathnameWithoutLocale === '/couple/reset-password' ||
+        pathnameWithoutLocale.startsWith('/api/auth')
     ) {
         return supabaseResponse
     }
 
-
-    if (pathname === '/admin/login' && user) {
+    if (pathnameWithoutLocale === '/admin/login' && user) {
         const url = request.nextUrl.clone()
-        url.pathname = '/admin/dashboard'
+        const locale = pathname.split('/')[1]
+        url.pathname = `/${locale}/admin/dashboard`
         return NextResponse.redirect(url)
     }
 
-    if (pathname.startsWith('/admin/weddings')) {
+    if (pathnameWithoutLocale.startsWith('/admin/weddings')) {
         if (!user) {
             const url = request.nextUrl.clone()
-            url.pathname = '/admin/login'
+            const locale = pathname.split('/')[1]
+            url.pathname = `/${locale}/admin/login`
             return NextResponse.redirect(url)
         }
     }
 
-    if (pathname.startsWith('/couple/weddings')) {
+    if (pathnameWithoutLocale.startsWith('/couple/weddings')) {
         if (!user) {
             const url = request.nextUrl.clone()
-            url.pathname = '/couple/login'
+            const locale = pathname.split('/')[1]
+            url.pathname = `/${locale}/couple/login`
             return NextResponse.redirect(url)
         }
 
         const appMetadata = user.app_metadata as { role?: string; wedding_id?: string }
         if (appMetadata.role !== 'couple') {
             const url = request.nextUrl.clone()
-            url.pathname = '/couple/login'
+            const locale = pathname.split('/')[1]
+            url.pathname = `/${locale}/couple/login`
             return NextResponse.redirect(url)
         }
     }
 
-    if (pathname === '/couple/login' && user) {
+    if (pathnameWithoutLocale === '/couple/login' && user) {
         const appMetadata = user.app_metadata as { role?: string; wedding_id?: string }
         if (appMetadata.role === 'couple' && appMetadata.wedding_id) {
             const url = request.nextUrl.clone()
-            url.pathname = `/couple/weddings/${appMetadata.wedding_id}`
+            const locale = pathname.split('/')[1]
+            url.pathname = `/${locale}/couple/weddings/${appMetadata.wedding_id}`
             return NextResponse.redirect(url)
         }
     }
@@ -94,5 +111,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/admin/:path*', '/couple/:path*'],
+    matcher: ['/', '/(en|de|fr|it|tr|sq|mk)/:path*', '/admin/:path*', '/couple/:path*'],
 }

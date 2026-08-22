@@ -1,0 +1,47 @@
+{
+  "common": {
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "loading": "Yükleniyor...",
+    "error": "Bir şeyler yanlış gitti",
+    "success": "Başarılı",
+    "actions": "İşlemler",
+    "edit": "Düzenle",
+    "back": "Geri",
+    "next": "İleri",
+    "confirm": "Onayla",
+    "search": "Ara...",
+    "noData": "Veri yok",
+    "noResults": "Sonuç bulunamadı"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "weddings": "Düğünler",
+    "logout": "Çıkış Yap",
+    "settings": "Ayarlar",
+    "profile": "Profil"
+  },
+  "auth": {
+    "login": "Giriş Yap",
+    "email": "E-posta",
+    "password": "Şifre",
+    "forgotPassword": "Şifremi unuttum",
+    "resetPassword": "Şifreyi Sıfırla",
+    "rememberMe": "Beni hatırla",
+    "signIn": "Giriş yap",
+    "createAccount": "Hesap oluştur"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "welcome": "Tekrar hoş geldiniz"
+  },
+  "weddings": {
+    "create": "Düğün Oluştur",
+    "groomName": "Damat Adı",
+    "brideName": "Gelin Adı",
+    "date": "Düğün Tarihi",
+    "location": "Konum",
+    "emri": "Ad"
+  }
+}

@@ -1,6 +1,7 @@
-import {redirect} from 'next/navigation'
+import {redirect} from '@/lib/navigation'
 import {createClient} from '@/lib/supabase/server'
 import {AdminLoginForm} from '@/components/admin/login-form'
+import {getTranslations} from 'next-intl/server'
 
 export default async function AdminLoginPage() {
     const supabase = await createClient()
@@ -15,8 +16,10 @@ export default async function AdminLoginPage() {
             .eq('id', user.id)
             .single()
 
-        if (admin) redirect('/admin/photos')
+        if (admin) redirect('/admin/dashboard')
     }
+
+    const t = await getTranslations('auth')
 
     return (
         <main className="min-h-screen flex items-center justify-center px-6 py-16">

@@ -1,0 +1,47 @@
+{
+  "common": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "loading": "Caricamento...",
+    "error": "Qualcosa è andato storto",
+    "success": "Successo",
+    "actions": "Azioni",
+    "edit": "Modifica",
+    "back": "Indietro",
+    "next": "Avanti",
+    "confirm": "Conferma",
+    "search": "Cerca...",
+    "noData": "Nessun dato disponibile",
+    "noResults": "Nessun risultato trovato"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "weddings": "Matrimoni",
+    "logout": "Disconnetti",
+    "settings": "Impostazioni",
+    "profile": "Profilo"
+  },
+  "auth": {
+    "login": "Accedi",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Password dimenticata?",
+    "resetPassword": "Reimposta Password",
+    "rememberMe": "Ricordami",
+    "signIn": "Accedi",
+    "createAccount": "Crea account"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Bentornato"
+  },
+  "weddings": {
+    "create": "Crea Matrimonio",
+    "groomName": "Nome dello Sposo",
+    "brideName": "Nome della Sposa",
+    "date": "Data del Matrimonio",
+    "location": "Luogo",
+    "emri": "Nome"
+  }
+}

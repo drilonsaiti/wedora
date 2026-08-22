@@ -13,12 +13,12 @@ const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024 // 10MB
 export const uploadFormSchema = z.object({
     guestName: z
         .string()
-        .max(100, 'Name must be under 100 characters')
+        .max(100, 'validation.nameLength')
         .optional()
         .transform((v) => v?.trim() || undefined),
     message: z
         .string()
-        .max(500, 'Message must be under 500 characters')
+        .max(500, 'validation.messageLength')
         .optional()
         .transform((v) => v?.trim() || undefined),
     isPublic: z.boolean().default(false),
@@ -28,14 +28,14 @@ export type UploadFormValues = z.infer<typeof uploadFormSchema>
 
 export const fileSchema = z
     .instanceof(File)
-    .refine((f) => f.size > 0, 'File is required')
+    .refine((f) => f.size > 0, 'validation.fileRequired')
     .refine(
         (f) => f.size <= MAX_FILE_SIZE_BYTES,
-        `File must be smaller than 10MB`
+        'validation.fileSize'
     )
     .refine(
         (f) => ACCEPTED_IMAGE_TYPES.includes(f.type),
-        'Only JPEG, PNG, WebP, and HEIC images are accepted'
+        'validation.fileType'
     )
 
 export const photoUpdateSchema = z.object({
@@ -48,37 +48,37 @@ export const photoUpdateSchema = z.object({
 export type PhotoUpdateValues = z.infer<typeof photoUpdateSchema>
 
 export const adminLoginSchema = z.object({
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
+    email: z.string().email('validation.email'),
+    password: z.string().min(8, 'validation.minLength'),
 })
 
 export type AdminLoginValues = z.infer<typeof adminLoginSchema>
 
 export const coupleLoginSchema = z.object({
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
+    email: z.string().email('validation.email'),
+    password: z.string().min(8, 'validation.minLength'),
 })
 
 export type CoupleLoginValues = z.infer<typeof coupleLoginSchema>
 
 export const forgotPasswordSchema = z.object({
-    email: z.string().email('Invalid email address'),
+    email: z.string().email('validation.email'),
 })
 
 export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>
 
 export const resetPasswordSchema = z.object({
-    password: z.string().min(8, 'Password must be at least 8 characters'),
-    confirmPassword: z.string().min(8, 'Password must be at least 8 characters'),
+    password: z.string().min(8, 'validation.minLength'),
+    confirmPassword: z.string().min(8, 'validation.minLength'),
 }).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: "validation.passwordMismatch",
     path: ["confirmPassword"],
 })
 
 export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>
 
 export const serverUploadSchema = z.object({
-    eventId: z.string().uuid('Invalid event ID'),
+    eventId: z.string().uuid('validation.invalidEventId'),
     guestName: z.string().max(100).optional().nullable(),
     message: z.string().max(500).optional().nullable(),
     isPublic: z.boolean().default(true),
@@ -96,8 +96,8 @@ export const serverUploadSchema = z.object({
 export type ServerUploadValues = z.infer<typeof serverUploadSchema>
 
 export const guestSchema = z.object({
-    first_name: z.string().min(1, 'First name is required').max(50),
-    last_name: z.string().min(1, 'Last name is required').max(50),
+    first_name: z.string().min(1, 'validation.required').max(50),
+    last_name: z.string().min(1, 'validation.required').max(50),
     table_id: z.string().uuid().nullable().optional(),
 })
 
@@ -113,8 +113,8 @@ const seatSidesSchema = z.object({
 export type SeatSides = z.infer<typeof seatSidesSchema>
 
 export const tableSchema = z.object({
-    number: z.number().min(1, 'Numri është i detyrueshëm'),
-    seats: z.number().min(1, 'Të paktën 1 vend'),
+    number: z.number().min(1, 'validation.required'),
+    seats: z.number().min(1, 'validation.required'),
     label: z.string().optional(),
     shape: z.enum(['round', 'rectangle', 'square']),
     seatSides: seatSidesSchema.optional(),
@@ -123,7 +123,7 @@ export const tableSchema = z.object({
     const sum = data.seatSides.top + data.seatSides.right + data.seatSides.bottom + data.seatSides.left
     return sum === data.seats
 }, {
-    message: 'Shuma e vendeve në çdo anë duhet të jetë e barabartë me numrin total të vendeve',
+    message: 'validation.seatsMismatch',
     path: ['seatSides'],
 })
 
@@ -131,12 +131,12 @@ export type TableFormValues = z.infer<typeof tableSchema>
 
 
 export const createWeddingSchema = z.object({
-    groom_name: z.string().trim().min(2, 'Emri duhet të ketë të paktën 2 shkronja').max(50),
-    bride_name: z.string().trim().min(2, 'Emri duhet të ketë të paktën 2 shkronja').max(50),
-    groom_email: z.string().trim().email('Email i pavlefshëm'),
-    bride_email: z.string().trim().email('Email i pavlefshëm').optional().or(z.literal('')),
-    slug: z.string().trim().min(3).max(60).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'Vetëm shkronja të vogla, numra dhe vizë (-)'),
-    wedding_date: z.string().min(1, 'Data e dasmës kërkohet'),
+    groom_name: z.string().trim().min(2, 'validation.minTwoChars').max(50),
+    bride_name: z.string().trim().min(2, 'validation.minTwoChars').max(50),
+    groom_email: z.string().trim().email('validation.email'),
+    bride_email: z.string().trim().email('validation.email').optional().or(z.literal('')),
+    slug: z.string().trim().min(3).max(60).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'validation.invalidSlug'),
+    wedding_date: z.string().min(1, 'validation.required'),
     theme_hue: z.number().min(0).max(360).default(355),
     enable_find_seat: z.boolean().default(true),
     enable_photo_upload: z.boolean().default(true),
@@ -150,7 +150,7 @@ export const createWeddingSchema = z.object({
     ),
     photo_retention_days: z.number().int().min(1).max(3650).default(90),
 }).refine((data) => data.enable_find_seat || data.enable_photo_upload, {
-    message: 'Zgjidhni të paktën një funksion (Gjej Vendin ose Ngarko Foto)',
+    message: 'validation.atLeastOneFunction',
     path: ['enable_find_seat'],
 });
 
@@ -167,7 +167,7 @@ export const editWeddingSchema = z.object({
     enable_find_seat: z.boolean(),
     enable_photo_upload: z.boolean(),
 }).refine((d) => d.enable_find_seat || d.enable_photo_upload, {
-    message: 'Zgjidhni të paktën një funksion',
+    message: 'validation.atLeastOneFunction',
     path: ['enable_find_seat'],
 });
 

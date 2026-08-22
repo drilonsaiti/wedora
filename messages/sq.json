@@ -1,0 +1,63 @@
+{
+  "common": {
+    "save": "Ruaj",
+    "cancel": "Anulo",
+    "delete": "Fshi",
+    "loading": "Duke u ngarkuar...",
+    "error": "Diçka shkoi keq",
+    "success": "Sukses",
+    "actions": "Veprimet",
+    "edit": "Edito",
+    "back": "Mbrapa",
+    "next": "Tjetra",
+    "confirm": "Konfirmo",
+    "search": "Kërko...",
+    "noData": "Nuk ka të dhëna",
+    "noResults": "Nuk u gjet asgjë"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "weddings": "Dasmat",
+    "logout": "Shkyçu",
+    "settings": "Cilësimet",
+    "profile": "Profili"
+  },
+  "auth": {
+    "login": "Identifikohu",
+    "email": "Email",
+    "password": "Fjalëkalimi",
+    "forgotPassword": "Keni harruar fjalëkalimin?",
+    "resetPassword": "Rivendos Fjalëkalimin",
+    "rememberMe": "Më mbaj mend",
+    "signIn": "Hyni",
+    "createAccount": "Krijo llogari"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Mirësevini përsëri"
+  },
+  "weddings": {
+    "create": "Krijo Dasmë",
+    "groomName": "Emri i Dhëndrit",
+    "brideName": "Emri i Nuses",
+    "date": "Data e Dasmës",
+    "location": "Lokacioni",
+    "emri": "Emri"
+  },
+  "validation": {
+    "required": "Kjo fushë është e detyrueshme",
+    "email": "Email i pavlefshëm",
+    "minLength": "Duhet të ketë të paktën {min} shkronja",
+    "maxLength": "Duhet të jetë nën {max} shkronja",
+    "nameLength": "Emri duhet të ketë nën 100 shkronja",
+    "messageLength": "Mesazhi duhet të ketë nën 500 shkronja",
+    "fileRequired": "Skedari është i detyrueshëm",
+    "fileSize": "Skedari duhet të jetë më i vogël se 10MB",
+    "fileType": "Pranohen vetëm imazhe JPEG, PNG, WebP dhe HEIC",
+    "passwordMismatch": "Fjalëkalimet nuk përputhen",
+    "invalidEventId": "ID e pavlefshme e ngjarjes",
+    "minTwoChars": "Duhet të ketë të paktën 2 shkronja",
+    "invalidSlug": "Vetëm shkronja të vogla, numra dhe vizë (-)",
+    "atLeastOneFunction": "Zgjidhni të paktën një funksion (Gjej Vendin ose Ngarko Foto)"
+  }
+}

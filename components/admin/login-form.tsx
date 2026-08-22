@@ -3,14 +3,16 @@
 import {useState} from 'react'
 import {useForm} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
-import {useRouter} from 'next/navigation'
-import Link from 'next/link'
+import {useRouter, Link} from '@/lib/navigation'
 import {AlertCircle, Loader2, Lock, Mail} from 'lucide-react'
 import {adminLoginSchema, type AdminLoginValues} from '@/schemas'
 import {createClient} from '@/lib/supabase/client'
+import {useTranslations} from 'next-intl'
 
 export function AdminLoginForm() {
     const router = useRouter()
+    const t = useTranslations('auth')
+    const tc = useTranslations('common')
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
 
@@ -34,7 +36,7 @@ export function AdminLoginForm() {
             })
 
             if (authError) {
-                setError('Invalid email or password')
+                setError(t('invalidCredentials') || 'Invalid email or password')
                 return
             }
 
@@ -47,14 +49,14 @@ export function AdminLoginForm() {
 
             if (!admin) {
                 await supabase.auth.signOut()
-                setError('Access denied. This account is not an admin.')
+                setError(t('accessDenied') || 'Access denied. This account is not an admin.')
                 return
             }
 
             router.push('/admin/dashboard')
             router.refresh()
         } catch {
-            setError('An unexpected error occurred')
+            setError(tc('error'))
         } finally {
             setLoading(false)
         }
@@ -65,7 +67,7 @@ export function AdminLoginForm() {
             <div>
                 <label className="label-wedding">
                     <Mail className="w-3 h-3 inline mr-1"/>
-                    Email
+                    {t('email')}
                 </label>
                 <input
                     {...register('email')}
@@ -76,14 +78,14 @@ export function AdminLoginForm() {
                     disabled={loading}
                 />
                 {errors.email && (
-                    <p className="mt-1 text-xs text-destructive">{errors.email.message}</p>
+                    <p className="mt-1 text-xs text-destructive">{t(errors.email.message)}</p>
                 )}
             </div>
 
             <div>
                 <label className="label-wedding">
                     <Lock className="w-3 h-3 inline mr-1"/>
-                    Password
+                    {t('password')}
                 </label>
                 <input
                     {...register('password')}
@@ -94,14 +96,14 @@ export function AdminLoginForm() {
                     disabled={loading}
                 />
                 {errors.password && (
-                    <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>
+                    <p className="mt-1 text-xs text-destructive">{t(errors.password.message)}</p>
                 )}
                 <div className="flex justify-end mt-1">
                     <Link
                         href="/admin/forgot-password"
                         className="text-xs text-wedding-600 hover:text-wedding-900 transition-colors"
                     >
-                        Forgot password?
+                        {t('forgotPassword')}
                     </Link>
                 </div>
             </div>
@@ -122,10 +124,10 @@ export function AdminLoginForm() {
                 {loading ? (
                     <>
                         <Loader2 className="w-4 h-4 animate-spin"/>
-                        Signing in…
+                        {tc('loading')}
                     </>
                 ) : (
-                    'Sign In'
+                    t('signIn')
                 )}
             </button>
         </form>

@@ -1,22 +1,25 @@
 'use client'
 
-import Link from 'next/link'
-import {usePathname} from 'next/navigation'
+import {Link, usePathname} from '@/lib/navigation'
 import {Heart, LayoutDashboard, LogOut} from 'lucide-react'
 import {cn} from '@/lib/utils'
 import {signOutAction} from '@/actions/admin'
+import {useTranslations} from 'next-intl'
+import {ThemeToggle} from '@/components/theme-toggle'
+import {LanguageSwitcher} from '@/components/language-switcher'
 
 interface AdminNavBarProps {
     adminEmail: string
 }
 
-const NAV_ITEMS = [
-    {href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard},
-    {href: '/admin/weddings', label: 'Dasmat', icon: Heart},
-]
-
 export function AdminNavBar({adminEmail}: AdminNavBarProps) {
     const pathname = usePathname()
+    const t = useTranslations('nav')
+
+    const NAV_ITEMS = [
+        {href: '/admin/dashboard', label: t('dashboard'), icon: LayoutDashboard},
+        {href: '/admin/weddings', label: t('weddings'), icon: Heart},
+    ]
 
     return (
         <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur-sm">
@@ -47,12 +50,14 @@ export function AdminNavBar({adminEmail}: AdminNavBarProps) {
 
                 <div className="flex items-center gap-3">
                     <span className="font-sans text-xs text-muted-foreground hidden sm:block">{adminEmail}</span>
+                    <LanguageSwitcher />
+                    <ThemeToggle />
                     <button
                         onClick={async () => await signOutAction()}
                         className="btn-ghost text-xs py-2 px-3"
                     >
                         <LogOut className="w-3.5 h-3.5"/>
-                        <span className="hidden sm:inline">Çkyçu</span>
+                        <span className="hidden sm:inline">{t('logout')}</span>
                     </button>
                 </div>
             </div>

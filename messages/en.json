@@ -1,0 +1,63 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "success": "Success",
+    "actions": "Actions",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "confirm": "Confirm",
+    "search": "Search...",
+    "noData": "No data available",
+    "noResults": "No results found"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "weddings": "Weddings",
+    "logout": "Logout",
+    "settings": "Settings",
+    "profile": "Profile"
+  },
+  "auth": {
+    "login": "Login",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "resetPassword": "Reset Password",
+    "rememberMe": "Remember me",
+    "signIn": "Sign in",
+    "createAccount": "Create account"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back"
+  },
+  "weddings": {
+    "create": "Create Wedding",
+    "groomName": "Groom's Name",
+    "brideName": "Bride's Name",
+    "date": "Wedding Date",
+    "location": "Location",
+    "emri": "Name"
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Invalid email address",
+    "minLength": "Must be at least {min} characters",
+    "maxLength": "Must be under {max} characters",
+    "nameLength": "Name must be under 100 characters",
+    "messageLength": "Message must be under 500 characters",
+    "fileRequired": "File is required",
+    "fileSize": "File must be smaller than 10MB",
+    "fileType": "Only JPEG, PNG, WebP, and HEIC images are accepted",
+    "passwordMismatch": "Passwords don't match",
+    "invalidEventId": "Invalid event ID",
+    "minTwoChars": "Must have at least 2 characters",
+    "invalidSlug": "Only lowercase letters, numbers and hyphens (-)",
+    "atLeastOneFunction": "Choose at least one function (Find Seat or Upload Photo)"
+  }
+}
