@@ -21,7 +21,12 @@ export async function GET(
 
     if (!admin) return NextResponse.json({error: 'Forbidden'}, {status: 403})
 
-    // Platform admins are allowed across tenants; just ensure the wedding exists
+    // Ensure the wedding belongs to the current couple user
+    const appMetadata = user.app_metadata as { role?: string; wedding_id?: string }
+    if (appMetadata.role === 'couple' && appMetadata.wedding_id !== weddingId) {
+        return NextResponse.json({error: 'Forbidden'}, {status: 403})
+    }
+
     const {data: wedding} = await supabaseClient
         .from('weddings')
         .select('id')

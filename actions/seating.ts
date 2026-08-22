@@ -31,10 +31,11 @@ async function requireAdmin() {
 
     if (!wedding) {
         // Handle case where admin has no wedding yet (should not happen after migration)
-        throw new Error('No wedding found for this admin 3')
+        throw new Error('No wedding found for this admin')
     }
 
-    return {user, supabase: createServiceClient(), weddingId: wedding.id}
+    // Return the regular supabase client to enforce RLS
+    return {user, supabase, weddingId: wedding.id}
 }
 
 // --- Guests ---

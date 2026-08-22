@@ -155,7 +155,8 @@ export async function createWedding(input: CreateWeddingInput) {
     }
 
     if (credentials.length > 0) {
-        await serviceSupabase.from('wedding_settings').update({enable_couple_login: true}).eq('wedding_id', wedding.id)
+        // Use regular client for RLS enforcement
+        await supabase.from('wedding_settings').update({enable_couple_login: true}).eq('wedding_id', wedding.id)
     }
 
     revalidatePath('/admin/weddings')
@@ -257,7 +258,8 @@ export async function updateWedding(weddingId: string, input: Partial<CreateWedd
     }
 
     if (credentials.length > 0) {
-        await serviceSupabase.from('wedding_settings').update({enable_couple_login: true}).eq('wedding_id', weddingId)
+        // Use regular client for RLS enforcement if possible, or serviceSupabase if RLS on settings is restrictive
+        await supabase.from('wedding_settings').update({enable_couple_login: true}).eq('wedding_id', weddingId)
     }
 
     revalidatePath(`/admin/weddings/${weddingId}`)

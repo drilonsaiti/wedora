@@ -31,17 +31,32 @@ export async function GET(request: NextRequest) {
     // Parse query params
     const {searchParams} = new URL(request.url)
     const filter = searchParams.get('filter') // 'all' | 'favourites'
-    const eventId = process.env.NEXT_PUBLIC_EVENT_ID ?? ''
+    const weddingId = searchParams.get('weddingId')
+
+    if (!weddingId) {
+        return NextResponse.json({error: 'Missing weddingId'}, {status: 400})
+    }
+
+    // Verify admin owns the wedding
+    const {data: wedding} = await supabase
+        .from('weddings')
+        .select('id')
+        .eq('id', weddingId)
+        .single()
+
+    if (!wedding) {
+        return NextResponse.json({error: 'Wedding not found or unauthorized'}, {status: 404})
+    }
 
     // Fetch photo paths from DB
     let query = service
         .from('photos')
         .select('id, original_path, guest_name, created_at')
+        .eq('wedding_id', wedding.id)
         .eq('hidden', false)
         .eq('approved', true)
         .order('created_at', {ascending: true})
 
-    if (eventId) query = query.eq('event_id', eventId)
     if (filter === 'favourites') query = query.eq('favourite', true)
 
     const result = await query

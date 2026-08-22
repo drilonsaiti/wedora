@@ -10,7 +10,15 @@ export async function GET(request: Request) {
         const supabase = await createClient()
         const {error} = await supabase.auth.exchangeCodeForSession(code)
         if (!error) {
-            return NextResponse.redirect(`${origin}${next}`)
+            // Validate 'next' parameter to prevent open redirect
+            let safeNext = '/admin/dashboard'
+            if (next && (next.startsWith('/') || next.startsWith(origin))) {
+                // Additional check: prevent double slashes or protocol-relative URLs
+                if (!next.startsWith('//')) {
+                    safeNext = next
+                }
+            }
+            return NextResponse.redirect(`${origin}${safeNext}`)
         }
     }
 
