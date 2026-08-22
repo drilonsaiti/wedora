@@ -3,12 +3,21 @@
 import {useState} from 'react'
 import {useForm} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
-import {AlertCircle, ArrowLeft, CheckCircle2, Loader2, Mail} from 'lucide-react'
+import {
+    AlertCircle,
+    ArrowLeft,
+    CheckCircle2,
+    Loader2,
+    Mail
+} from 'lucide-react'
 import Link from 'next/link'
+import {useTranslations} from 'next-intl'
 import {forgotPasswordSchema, type ForgotPasswordValues} from '@/schemas'
 import {createClient} from '@/lib/supabase/client'
 
 export function CoupleForgotPasswordForm() {
+    const t = useTranslations('auth.forgotPassword')
+
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -27,9 +36,11 @@ export function CoupleForgotPasswordForm() {
 
         try {
             const supabase = await createClient()
-            const {error: resetError} = await supabase.auth.resetPasswordForEmail(values.email, {
-                redirectTo: `${window.location.origin}/api/auth/callback?next=/couple/reset-password`,
-            })
+
+            const {error: resetError} =
+                await supabase.auth.resetPasswordForEmail(values.email, {
+                    redirectTo: `${window.location.origin}/api/auth/callback?next=/couple/reset-password`,
+                })
 
             if (resetError) {
                 setError(resetError.message)
@@ -38,7 +49,7 @@ export function CoupleForgotPasswordForm() {
 
             setSuccess(true)
         } catch {
-            setError('Ndodhi një gabim i papritur')
+            setError(t('unexpectedError'))
         } finally {
             setLoading(false)
         }
@@ -52,12 +63,20 @@ export function CoupleForgotPasswordForm() {
                         <CheckCircle2 className="w-8 h-8 text-green-600"/>
                     </div>
                 </div>
-                <h2 className="text-xl font-serif font-light text-foreground">Kontrolloni email-in</h2>
+
+                <h2 className="text-xl font-serif font-light text-foreground">
+                    {t('success.title')}
+                </h2>
+
                 <p className="text-sm text-muted-foreground">
-                    Ju kemi dërguar një lidhje për rivendosjen e fjalëkalimit në adresën tuaj email.
+                    {t('success.description')}
                 </p>
-                <Link href="/couple/login" className="btn-secondary w-full justify-center mt-4">
-                    Kthehu te Hyrja
+
+                <Link
+                    href="/couple/login"
+                    className="btn-secondary w-full justify-center mt-4"
+                >
+                    {t('backToLogin')}
                 </Link>
             </div>
         )
@@ -66,45 +85,65 @@ export function CoupleForgotPasswordForm() {
     return (
         <div className="space-y-6">
             <div className="space-y-2">
-                <h2 className="text-xl font-serif font-light text-foreground">Harruat fjalëkalimin?</h2>
+                <h2 className="text-xl font-serif font-light text-foreground">
+                    {t('title')}
+                </h2>
+
                 <p className="text-sm text-muted-foreground">
-                    Shkruani email-in tuaj dhe do t&apos;ju dërgojmë një lidhje për ta rivendosur.
+                    {t('description')}
                 </p>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="space-y-5"
+            >
                 <div>
                     <label className="label-wedding">
                         <Mail className="w-3 h-3 inline mr-1"/>
-                        Email
+                        {t('email')}
                     </label>
+
                     <input
                         {...register('email')}
                         type="email"
-                        placeholder="you@example.com"
+                        placeholder={t('emailPlaceholder')}
                         className="input-wedding"
                         autoComplete="email"
                         disabled={loading}
                     />
-                    {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email.message}</p>}
+
+                    {errors.email && (
+                        <p className="mt-1 text-xs text-destructive">
+                            {errors.email.message}
+                        </p>
+                    )}
                 </div>
 
                 {error && (
                     <div
-                        className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3">
+                        className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3"
+                    >
                         <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5"/>
-                        <p className="text-sm text-destructive font-sans">{error}</p>
+
+                        <p className="text-sm text-destructive font-sans">
+                            {error}
+                        </p>
                     </div>
                 )}
 
-                <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="btn-primary w-full justify-center"
+                >
                     {loading ? (
                         <>
                             <Loader2 className="w-4 h-4 animate-spin"/>
-                            Duke dërguar…
+                            {t('sending')}
                         </>
                     ) : (
-                        'Dërgo Lidhjen'
+                        t('sendLink')
                     )}
                 </button>
 
@@ -113,7 +152,7 @@ export function CoupleForgotPasswordForm() {
                     className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                     <ArrowLeft className="w-4 h-4"/>
-                    Kthehu te Hyrja
+                    {t('backToLogin')}
                 </Link>
             </form>
         </div>

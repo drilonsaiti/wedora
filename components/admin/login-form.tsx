@@ -12,7 +12,9 @@ import {useTranslations} from 'next-intl'
 export function AdminLoginForm() {
     const router = useRouter()
     const t = useTranslations('auth')
+    const tv = useTranslations('validation')
     const tc = useTranslations('common')
+
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
 
@@ -30,13 +32,15 @@ export function AdminLoginForm() {
 
         try {
             const supabase = await createClient()
-            const {data, error: authError} = await supabase.auth.signInWithPassword({
-                email: values.email,
-                password: values.password,
-            })
+
+            const {data, error: authError} =
+                await supabase.auth.signInWithPassword({
+                    email: values.email,
+                    password: values.password,
+                })
 
             if (authError) {
-                setError(t('invalidCredentials') || 'Invalid email or password')
+                setError(t('invalidCredentials'))
                 return
             }
 
@@ -49,7 +53,7 @@ export function AdminLoginForm() {
 
             if (!admin) {
                 await supabase.auth.signOut()
-                setError(t('accessDenied') || 'Access denied. This account is not an admin.')
+                setError(t('accessDenied'))
                 return
             }
 
@@ -64,40 +68,51 @@ export function AdminLoginForm() {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {/* Email */}
             <div>
                 <label className="label-wedding">
                     <Mail className="w-3 h-3 inline mr-1"/>
                     {t('email')}
                 </label>
+
                 <input
                     {...register('email')}
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder={t('emailPlaceholder')}
                     className="input-wedding"
                     autoComplete="email"
                     disabled={loading}
                 />
-                {errors.email && (
-                    <p className="mt-1 text-xs text-destructive">{t(errors.email.message)}</p>
+
+                {errors.email?.message && (
+                    <p className="mt-1 text-xs text-destructive">
+                        {tv(errors.email.message.replace('validation.', ''))}
+                    </p>
                 )}
             </div>
 
+            {/* Password */}
             <div>
                 <label className="label-wedding">
                     <Lock className="w-3 h-3 inline mr-1"/>
                     {t('password')}
                 </label>
+
                 <input
                     {...register('password')}
                     type="password"
-                    placeholder="••••••••"
+                    placeholder={t('passwordPlaceholder')}
                     className="input-wedding"
                     autoComplete="current-password"
                     disabled={loading}
                 />
-                {errors.password && (
-                    <p className="mt-1 text-xs text-destructive">{t(errors.password.message)}</p>
+
+                {errors.password?.message && (
+                    <p className="mt-1 text-xs text-destructive">
+                        {t(errors.password.message.replace('auth.', ''))}
+                    </p>
                 )}
+
                 <div className="flex justify-end mt-1">
                     <Link
                         href="/admin/forgot-password"
@@ -108,14 +123,20 @@ export function AdminLoginForm() {
                 </div>
             </div>
 
+            {/* Error */}
             {error && (
-                <div
-                    className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3">
-                    <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5"/>
-                    <p className="text-sm text-destructive font-sans">{error}</p>
+                <div className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3">
+                    <AlertCircle
+                        className="w-4 h-4 text-destructive shrink-0 mt-0.5"
+                    />
+
+                    <p className="text-sm text-destructive font-sans">
+                        {error}
+                    </p>
                 </div>
             )}
 
+            {/* Submit */}
             <button
                 type="submit"
                 disabled={loading}

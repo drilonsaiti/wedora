@@ -1,15 +1,16 @@
 'use client'
 
-import {useCallback, useRef, useState} from 'react'
+import {useCallback, useMemo, useRef, useState} from 'react'
 import {useForm} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
-import {useRouter} from 'next/navigation'
+import {useRouter} from '@/lib/navigation'
 import {ArrowLeftRight, Camera, ImageIcon, Loader2, MessageSquare, Upload, User, X} from 'lucide-react'
 import imageCompression from 'browser-image-compression'
 import loadImage from 'blueimp-load-image'
 import {fileSchema, uploadFormSchema, type UploadFormValues} from '@/schemas'
 import {uploadPhotoAction} from '@/actions/upload'
 import {cn, formatBytes, getOrCreateSessionId} from '@/lib/utils'
+import {useTranslations} from 'next-intl'
 
 interface UploadFormProps {
     eventId: string
@@ -19,16 +20,7 @@ interface UploadFormProps {
 type UploadState = 'idle' | 'compressing' | 'uploading' | 'done' | 'error'
 
 /** Filter presets */
-const filterOptions = [
-    {id: 'none', label: 'Normale', css: 'none'},
-    {id: 'grayscale', label: 'Bardhë e zi', css: 'grayscale(100%)'},
-    {id: 'sepia', label: 'Sepia', css: 'sepia(85%)'},
-    {id: 'warm', label: 'E ngrohtë', css: 'brightness(108%) contrast(108%) saturate(125%) hue-rotate(8deg)'},
-    {id: 'cool', label: 'E ftohtë', css: 'brightness(105%) contrast(110%) saturate(115%) hue-rotate(-15deg)'},
-    {id: 'vintage', label: 'Vintage', css: 'sepia(45%) contrast(112%) brightness(92%)'},
-    {id: 'dramatic', label: 'Dramatike', css: 'contrast(125%) brightness(88%) saturate(75%)'},
-    {id: 'soft', label: 'E butë', css: 'brightness(110%) contrast(95%) saturate(90%)'},
-] as const
+const filterOptionsDummy = []
 
 /** Manual pixel filter – 100% reliable on iOS Safari (bypasses ctx.filter export bugs) */
 function applyPixelFilter(imageData: ImageData, filterCss: string): void {
@@ -173,6 +165,20 @@ async function bakeFinalImage(
 
 export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
     const router = useRouter()
+    const t = useTranslations('wedding.upload')
+
+    /** Filter presets */
+    const filterOptions = useMemo(() => [
+        {id: 'none', label: t('normal'), css: 'none'},
+        {id: 'grayscale', label: t('grayscale'), css: 'grayscale(100%)'},
+        {id: 'sepia', label: t('sepia'), css: 'sepia(85%)'},
+        {id: 'warm', label: t('warm'), css: 'brightness(108%) contrast(108%) saturate(125%) hue-rotate(8deg)'},
+        {id: 'cool', label: t('cool'), css: 'brightness(105%) contrast(110%) saturate(115%) hue-rotate(-15deg)'},
+        {id: 'vintage', label: t('vintage'), css: 'sepia(45%) contrast(112%) brightness(92%)'},
+        {id: 'dramatic', label: t('dramatic'), css: 'contrast(125%) brightness(88%) saturate(75%)'},
+        {id: 'soft', label: t('soft'), css: 'brightness(110%) contrast(95%) saturate(90%)'},
+    ] as const, [t])
+
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const [preview, setPreview] = useState<string | null>(null)
     const [isFlipped, setIsFlipped] = useState(false)
@@ -268,7 +274,7 @@ export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
 
     const onSubmit = async (values: UploadFormValues) => {
         if (!selectedFile) {
-            setFileError('Ju lutem zgjidhni një foto së pari')
+            setFileError(t('selectPhotoFirst'))
             return
         }
 
@@ -312,7 +318,7 @@ export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
             setProgress(100)
 
             if (!result.success) {
-                setServerError(result.error ?? 'Ngarkimi dështoi')
+                setServerError(result.error ?? t('uploadFailed'))
                 setUploadState('error')
                 return
             }
@@ -324,7 +330,7 @@ export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
             }, 100)
         } catch (err) {
             console.error(err)
-            setServerError('Diçka shkoi keq. Ju lutem provoni përsëri.')
+            setServerError(t('somethingWentWrong'))
             setUploadState('error')
         }
     }
@@ -335,7 +341,7 @@ export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {maxPhotosPerGuest && (
                 <p className="text-xs text-muted-foreground text-center italic mb-2">
-                    Mund të ngarkoni deri në {maxPhotosPerGuest} foto
+                    {t('maxPhotos', {count: maxPhotosPerGuest})}
                 </p>
             )}
 
@@ -348,7 +354,7 @@ export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
                             <ImageIcon className="w-8 h-8 text-[hsl(var(--primary))]" strokeWidth={1.5}/>
                         </div>
                         <p className="font-sans text-sm text-muted-foreground mb-6">
-                            Zgjidh si dëshiron ta shtosh foton
+                            {t('selectMethod')}
                         </p>
 
                         <div className="grid grid-cols-2 gap-3">
@@ -358,7 +364,7 @@ export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
                                 className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border bg-background hover:bg-accent/50 transition-colors"
                             >
                                 <Camera className="w-6 h-6 text-[hsl(var(--primary))]" strokeWidth={1.5}/>
-                                <span className="font-sans text-xs font-medium">Kamera</span>
+                                <span className="font-sans text-xs font-medium">{t('camera')}</span>
                             </button>
 
                             <button
@@ -367,7 +373,7 @@ export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
                                 className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border bg-background hover:bg-accent/50 transition-colors"
                             >
                                 <Upload className="w-6 h-6 text-[hsl(var(--primary))]" strokeWidth={1.5}/>
-                                <span className="font-sans text-xs font-medium">Galeria</span>
+                                <span className="font-sans text-xs font-medium">{t('gallery')}</span>
                             </button>
                         </div>
                     </div>
@@ -406,7 +412,7 @@ export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
                                     className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 hover:bg-black/80 text-white text-xs px-3 h-8 rounded-full font-sans transition-colors"
                                 >
                                     <ArrowLeftRight className="w-4 h-4"/>
-                                    {isFlipped ? 'Ktheje normal' : 'Rrotullo'}
+                                    {isFlipped ? t('flipNormal') : t('flipRotate')}
                                 </button>
                             </>
                         )}
@@ -423,7 +429,7 @@ export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
                     <div className="mt-5 space-y-5">
                         <div>
                             <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2 font-sans">
-                                Filtrat
+                                {t('filters')}
                             </p>
                             <div className="flex gap-2 overflow-x-auto pb-3 snap-x">
                                 {filterOptions.map((filter) => (
@@ -475,7 +481,7 @@ export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
                 <div>
                     <label className="label-wedding">
                         <User className="w-3 h-3 inline mr-1"/>
-                        Emri juaj (opsionale)
+                        {t('yourName')}
                     </label>
                     <input
                         {...register('guestName')}
@@ -493,11 +499,11 @@ export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
                 <div>
                     <label className="label-wedding">
                         <MessageSquare className="w-3 h-3 inline mr-1"/>
-                        Mesazhi (opsionale)
+                        {t('message')}
                     </label>
                     <textarea
                         {...register('message')}
-                        placeholder="Ndaj një urim ose kujtim…"
+                        placeholder={t('messagePlaceholder')}
                         className="input-wedding resize-none"
                         rows={3}
                         maxLength={500}
@@ -519,8 +525,7 @@ export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
                     />
                     <label htmlFor="isPublic"
                            className="text-xs font-sans text-muted-foreground leading-relaxed cursor-pointer select-none">
-                        Fotot janë private dhe shihen vetëm nga çifti. Nëse e shënoni këtë kutizë, fotoja mund të
-                        shfaqet edhe në galerinë publike.
+                        {t('isPublicLabel')}
                     </label>
                 </div>
             </div>
@@ -535,7 +540,7 @@ export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
                         />
                     </div>
                     <p className="text-xs text-muted-foreground text-center font-sans">
-                        {uploadState === 'compressing' ? 'Duke optimizuar foton tuaj…' : 'Duke u ngarkuar…'}
+                        {uploadState === 'compressing' ? t('optimizing') : t('uploading')}
                     </p>
                 </div>
             )}
@@ -556,12 +561,12 @@ export function UploadForm({eventId, maxPhotosPerGuest}: UploadFormProps) {
                 {isLoading ? (
                     <>
                         <Loader2 className="w-4 h-4 animate-spin"/>
-                        {uploadState === 'compressing' ? 'Duke optimizuar…' : 'Duke u ngarkuar…'}
+                        {uploadState === 'compressing' ? t('optimizing') : t('uploading')}
                     </>
                 ) : (
                     <>
                         <Upload className="w-4 h-4"/>
-                        Dërgo foton
+                        {t('sendPhoto')}
                     </>
                 )}
             </button>

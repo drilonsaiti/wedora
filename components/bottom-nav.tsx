@@ -1,10 +1,10 @@
 'use client';
 
-import Link from 'next/link';
-import {usePathname} from 'next/navigation';
+import {Link, usePathname} from '@/lib/navigation';
 import {Armchair, Camera, Home} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import {ThemeToggle} from '@/components/theme-toggle';
+import {useTranslations} from 'next-intl';
 
 interface BottomNavProps {
     slug: string;
@@ -14,11 +14,12 @@ interface BottomNavProps {
 
 export function BottomNav({slug, enableFindSeat = true, enablePhotoUpload = true}: BottomNavProps) {
     const pathname = usePathname();
+    const t = useTranslations('wedding');
 
     const navItems = [
-        {label: 'Ballina', href: `/${slug}`, icon: Home, show: true},
-        {label: 'Vendi juaj', href: `/${slug}/find-seat`, icon: Armchair, show: enableFindSeat},
-        {label: 'Ngarko', href: `/${slug}/upload`, icon: Camera, show: enablePhotoUpload},
+        {label: t('nav.home'), href: `/${slug}`, icon: Home, show: true},
+        {label: t('nav.findSeat'), href: `/${slug}/find-seat`, icon: Armchair, show: enableFindSeat},
+        {label: t('nav.upload'), href: `/${slug}/upload`, icon: Camera, show: enablePhotoUpload},
     ].filter((item) => item.show);
 
     return (

@@ -5,10 +5,13 @@ import {useForm} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
 import {AlertCircle, ArrowLeft, CheckCircle2, Loader2, Mail} from 'lucide-react'
 import Link from 'next/link'
+import {useTranslations} from 'next-intl'
 import {forgotPasswordSchema, type ForgotPasswordValues} from '@/schemas'
 import {createClient} from '@/lib/supabase/client'
 
 export function ForgotPasswordForm() {
+    const t = useTranslations('auth.forgotPassword')
+
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -27,9 +30,11 @@ export function ForgotPasswordForm() {
 
         try {
             const supabase = await createClient()
-            const {error: resetError} = await supabase.auth.resetPasswordForEmail(values.email, {
-                redirectTo: `${window.location.origin}/api/auth/callback?next=/admin/reset-password`,
-            })
+
+            const {error: resetError} =
+                await supabase.auth.resetPasswordForEmail(values.email, {
+                    redirectTo: `${window.location.origin}/api/auth/callback?next=/admin/reset-password`,
+                })
 
             if (resetError) {
                 setError(resetError.message)
@@ -38,7 +43,7 @@ export function ForgotPasswordForm() {
 
             setSuccess(true)
         } catch {
-            setError('An unexpected error occurred')
+            setError(t('unexpectedError'))
         } finally {
             setLoading(false)
         }
@@ -52,15 +57,20 @@ export function ForgotPasswordForm() {
                         <CheckCircle2 className="w-8 h-8 text-green-600"/>
                     </div>
                 </div>
-                <h2 className="text-xl font-semibold text-wedding-900">Check your email</h2>
+
+                <h2 className="text-xl font-semibold text-wedding-900">
+                    {t('checkYourEmail')}
+                </h2>
+
                 <p className="text-wedding-600">
-                    {'We\'ve sent a password reset link to your email address.'}
+                    {t('resetLinkSent')}
                 </p>
+
                 <Link
                     href="/admin/login"
                     className="btn-secondary w-full justify-center mt-4"
                 >
-                    Back to Login
+                    {t('backToLogin')}
                 </Link>
             </div>
         )
@@ -69,36 +79,50 @@ export function ForgotPasswordForm() {
     return (
         <div className="space-y-6">
             <div className="space-y-2">
-                <h2 className="text-xl font-semibold text-wedding-900">Forgot password?</h2>
+                <h2 className="text-xl font-semibold text-wedding-900">
+                    {t('title')}
+                </h2>
+
                 <p className="text-sm text-wedding-600">
-                    {'Enter your email address and we\'ll send you a link to reset your password.'}
+                    {t('description')}
                 </p>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="space-y-5"
+            >
                 <div>
                     <label className="label-wedding">
                         <Mail className="w-3 h-3 inline mr-1"/>
-                        Email
+                        {t('email')}
                     </label>
+
                     <input
                         {...register('email')}
                         type="email"
-                        placeholder="you@example.com"
+                        placeholder={t('emailPlaceholder')}
                         className="input-wedding"
                         autoComplete="email"
                         disabled={loading}
                     />
+
                     {errors.email && (
-                        <p className="mt-1 text-xs text-destructive">{errors.email.message}</p>
+                        <p className="mt-1 text-xs text-destructive">
+                            {errors.email.message}
+                        </p>
                     )}
                 </div>
 
                 {error && (
                     <div
-                        className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3">
+                        className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3"
+                    >
                         <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5"/>
-                        <p className="text-sm text-destructive font-sans">{error}</p>
+
+                        <p className="text-sm text-destructive font-sans">
+                            {error}
+                        </p>
                     </div>
                 )}
 
@@ -110,10 +134,10 @@ export function ForgotPasswordForm() {
                     {loading ? (
                         <>
                             <Loader2 className="w-4 h-4 animate-spin"/>
-                            Sending link…
+                            {t('sendingLink')}
                         </>
                     ) : (
-                        'Send Reset Link'
+                        t('sendResetLink')
                     )}
                 </button>
 
@@ -122,7 +146,7 @@ export function ForgotPasswordForm() {
                     className="flex items-center justify-center gap-2 text-sm text-wedding-600 hover:text-wedding-900 transition-colors"
                 >
                     <ArrowLeft className="w-4 h-4"/>
-                    Back to Login
+                    {t('backToLogin')}
                 </Link>
             </form>
         </div>

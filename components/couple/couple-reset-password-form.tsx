@@ -5,26 +5,29 @@ import {useForm} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
 import {useRouter} from 'next/navigation'
 import {z} from 'zod'
+import {useTranslations} from 'next-intl'
 import {AlertCircle, CheckCircle2, Loader2, Lock} from 'lucide-react'
 import {createClient} from '@/lib/supabase/client'
 
-const resetPasswordSchema = z
-    .object({
-        password: z.string().min(8, 'Fjalëkalimi duhet të ketë të paktën 8 shkronja'),
-        confirmPassword: z.string(),
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-        message: 'Fjalëkalimet nuk përputhen',
-        path: ['confirmPassword'],
-    })
-
-type ResetPasswordValues = z.infer<typeof resetPasswordSchema>
-
 export function CoupleResetPasswordForm() {
     const router = useRouter()
+    const t = useTranslations('auth')
+
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
     const [loading, setLoading] = useState(false)
+
+    const resetPasswordSchema = z
+        .object({
+            password: z.string().min(8, t('passwordMinLength')),
+            confirmPassword: z.string(),
+        })
+        .refine((data) => data.password === data.confirmPassword, {
+            message: t('passwordsDoNotMatch'),
+            path: ['confirmPassword'],
+        })
+
+    type ResetPasswordValues = z.infer<typeof resetPasswordSchema>
 
     const {
         register,
@@ -40,7 +43,10 @@ export function CoupleResetPasswordForm() {
 
         try {
             const supabase = await createClient()
-            const {error: updateError} = await supabase.auth.updateUser({password: values.password})
+
+            const {error: updateError} = await supabase.auth.updateUser({
+                password: values.password
+            })
 
             if (updateError) {
                 setError(updateError.message)
@@ -48,9 +54,12 @@ export function CoupleResetPasswordForm() {
             }
 
             setSuccess(true)
-            setTimeout(() => router.push('/couple/login'), 2000)
+
+            setTimeout(() => {
+                router.push('/couple/login')
+            }, 2000)
         } catch {
-            setError('Ndodhi një gabim i papritur')
+            setError(t('unexpectedError'))
         } finally {
             setLoading(false)
         }
@@ -64,8 +73,14 @@ export function CoupleResetPasswordForm() {
                         <CheckCircle2 className="w-8 h-8 text-green-600"/>
                     </div>
                 </div>
-                <h2 className="text-xl font-serif font-light text-foreground">Fjalëkalimi u ndryshua</h2>
-                <p className="text-sm text-muted-foreground">Po ju çojmë te faqja e hyrjes...</p>
+
+                <h2 className="text-xl font-serif font-light text-foreground">
+                    {t('passwordChanged')}
+                </h2>
+
+                <p className="text-sm text-muted-foreground">
+                    {t('redirectingToLogin')}
+                </p>
             </div>
         )
     }
@@ -73,15 +88,21 @@ export function CoupleResetPasswordForm() {
     return (
         <div className="space-y-6">
             <div className="space-y-2">
-                <h2 className="text-xl font-serif font-light text-foreground">Vendosni fjalëkalimin e ri</h2>
+                <h2 className="text-xl font-serif font-light text-foreground">
+                    {t('newPasswordTitle')}
+                </h2>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="space-y-5"
+            >
                 <div>
                     <label className="label-wedding">
                         <Lock className="w-3 h-3 inline mr-1"/>
-                        Fjalëkalimi i ri
+                        {t('newPassword')}
                     </label>
+
                     <input
                         {...register('password')}
                         type="password"
@@ -90,14 +111,20 @@ export function CoupleResetPasswordForm() {
                         autoComplete="new-password"
                         disabled={loading}
                     />
-                    {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>}
+
+                    {errors.password && (
+                        <p className="mt-1 text-xs text-destructive">
+                            {errors.password.message}
+                        </p>
+                    )}
                 </div>
 
                 <div>
                     <label className="label-wedding">
                         <Lock className="w-3 h-3 inline mr-1"/>
-                        Konfirmo fjalëkalimin
+                        {t('confirmPassword')}
                     </label>
+
                     <input
                         {...register('confirmPassword')}
                         type="password"
@@ -106,27 +133,40 @@ export function CoupleResetPasswordForm() {
                         autoComplete="new-password"
                         disabled={loading}
                     />
+
                     {errors.confirmPassword && (
-                        <p className="mt-1 text-xs text-destructive">{errors.confirmPassword.message}</p>
+                        <p className="mt-1 text-xs text-destructive">
+                            {errors.confirmPassword.message}
+                        </p>
                     )}
                 </div>
 
                 {error && (
                     <div
-                        className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3">
-                        <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5"/>
-                        <p className="text-sm text-destructive font-sans">{error}</p>
+                        className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3"
+                    >
+                        <AlertCircle
+                            className="w-4 h-4 text-destructive shrink-0 mt-0.5"
+                        />
+
+                        <p className="text-sm text-destructive font-sans">
+                            {error}
+                        </p>
                     </div>
                 )}
 
-                <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="btn-primary w-full justify-center"
+                >
                     {loading ? (
                         <>
                             <Loader2 className="w-4 h-4 animate-spin"/>
-                            Duke ruajtur…
+                            {t('saving')}
                         </>
                     ) : (
-                        'Ndrysho Fjalëkalimin'
+                        t('changePassword')
                     )}
                 </button>
             </form>

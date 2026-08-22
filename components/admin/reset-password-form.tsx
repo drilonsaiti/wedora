@@ -7,9 +7,13 @@ import {useRouter} from 'next/navigation'
 import {AlertCircle, CheckCircle2, Loader2, Lock} from 'lucide-react'
 import {resetPasswordSchema, type ResetPasswordValues} from '@/schemas'
 import {createClient} from '@/lib/supabase/client'
+import {useTranslations} from 'next-intl'
 
 export function ResetPasswordForm() {
     const router = useRouter()
+    const t = useTranslations('auth')
+    const tc = useTranslations('common')
+
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -28,6 +32,7 @@ export function ResetPasswordForm() {
 
         try {
             const supabase = await createClient()
+
             const {error: resetError} = await supabase.auth.updateUser({
                 password: values.password,
             })
@@ -38,11 +43,12 @@ export function ResetPasswordForm() {
             }
 
             setSuccess(true)
+
             setTimeout(() => {
                 router.push('/admin/login')
             }, 3000)
         } catch {
-            setError('An unexpected error occurred')
+            setError(t('unexpectedError'))
         } finally {
             setLoading(false)
         }
@@ -56,9 +62,13 @@ export function ResetPasswordForm() {
                         <CheckCircle2 className="w-8 h-8 text-green-600"/>
                     </div>
                 </div>
-                <h2 className="text-xl font-semibold text-wedding-900">Password reset successful</h2>
+
+                <h2 className="text-xl font-semibold text-wedding-900">
+                    {t('passwordChanged')}
+                </h2>
+
                 <p className="text-wedding-600">
-                    Your password has been successfully reset. Redirecting you to the login page...
+                    {t('redirectingToLogin')}
                 </p>
             </div>
         )
@@ -67,9 +77,12 @@ export function ResetPasswordForm() {
     return (
         <div className="space-y-6">
             <div className="space-y-2">
-                <h2 className="text-xl font-semibold text-wedding-900">Set new password</h2>
+                <h2 className="text-xl font-semibold text-wedding-900">
+                    {t('newPasswordTitle')}
+                </h2>
+
                 <p className="text-sm text-wedding-600">
-                    Please enter your new password below.
+                    {t('newPasswordDescription')}
                 </p>
             </div>
 
@@ -77,44 +90,60 @@ export function ResetPasswordForm() {
                 <div>
                     <label className="label-wedding">
                         <Lock className="w-3 h-3 inline mr-1"/>
-                        New Password
+                        {t('newPassword')}
                     </label>
+
                     <input
                         {...register('password')}
                         type="password"
-                        placeholder="••••••••"
+                        placeholder={t('passwordPlaceholder')}
                         className="input-wedding"
                         autoComplete="new-password"
                         disabled={loading}
                     />
+
                     {errors.password && (
-                        <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>
+                        <p className="mt-1 text-xs text-destructive">
+                            {errors.password.message
+                                ? t(errors.password.message)
+                                : ''}
+                        </p>
                     )}
                 </div>
 
                 <div>
                     <label className="label-wedding">
                         <Lock className="w-3 h-3 inline mr-1"/>
-                        Confirm New Password
+                        {t('confirmPassword')}
                     </label>
+
                     <input
                         {...register('confirmPassword')}
                         type="password"
-                        placeholder="••••••••"
+                        placeholder={t('passwordPlaceholder')}
                         className="input-wedding"
                         autoComplete="new-password"
                         disabled={loading}
                     />
+
                     {errors.confirmPassword && (
-                        <p className="mt-1 text-xs text-destructive">{errors.confirmPassword.message}</p>
+                        <p className="mt-1 text-xs text-destructive">
+                            {errors.confirmPassword.message
+                                ? t(errors.confirmPassword.message)
+                                : ''}
+                        </p>
                     )}
                 </div>
 
                 {error && (
                     <div
-                        className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3">
+                        className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3"
+                    >
                         <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5"/>
-                        <p className="text-sm text-destructive font-sans">{error}</p>
+
+                        <p className="text-sm text-destructive font-sans">
+                            {error}
+                        </p>
                     </div>
                 )}
 
@@ -126,10 +155,10 @@ export function ResetPasswordForm() {
                     {loading ? (
                         <>
                             <Loader2 className="w-4 h-4 animate-spin"/>
-                            Resetting password…
+                            {t('saving')}
                         </>
                     ) : (
-                        'Reset Password'
+                        t('changePassword')
                     )}
                 </button>
             </form>

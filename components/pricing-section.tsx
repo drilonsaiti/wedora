@@ -1,129 +1,177 @@
 import { Check, X } from 'lucide-react'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { cn } from '@/lib/utils'
 
 interface PricingPlan {
-    name: string
+    id: 'basic' | 'standard' | 'premium'
     price: string
-    period: string
-    description: string
     featured?: boolean
-    features: { label: string; included: boolean }[]
+    features: {
+        key:
+            | 'findSeat'
+            | 'tableArrangement'
+            | 'photoUpload'
+            | 'guestLimit'
+            | 'storage'
+            | 'publicGallery'
+        included: boolean
+    }[]
 }
 
 const PLANS: PricingPlan[] = [
     {
-        name: 'Bazë',
+        id: 'basic',
         price: '€39',
-        period: 'për dasmë',
-        description: 'Për dasma të vogla, vetëm gjetja e vendit',
         features: [
-            { label: 'Gjej Vendin Tim', included: true },
-            { label: 'Sistemimi i tavolinave', included: true },
-            { label: 'Ngarko Foto', included: false },
-            { label: 'Deri 150 të ftuar', included: true },
-            { label: 'Ruajtje 30 ditë pas dasmës', included: true },
+            { key: 'findSeat', included: true },
+            { key: 'tableArrangement', included: true },
+            { key: 'photoUpload', included: false },
+            { key: 'guestLimit', included: true },
+            { key: 'storage', included: true },
         ],
     },
     {
-        name: 'Standard',
+        id: 'standard',
         price: '€69',
-        period: 'për dasmë',
-        description: 'Kombinimi më i kërkuar — vend + foto',
         featured: true,
         features: [
-            { label: 'Gjej Vendin Tim', included: true },
-            { label: 'Sistemimi i tavolinave', included: true },
-            { label: 'Ngarko Foto — deri 300 foto', included: true },
-            { label: 'Deri 300 të ftuar', included: true },
-            { label: 'Ruajtje 90 ditë pas dasmës', included: true },
-            { label: 'Galeri e ndashme (link publik)', included: true },
+            { key: 'findSeat', included: true },
+            { key: 'tableArrangement', included: true },
+            { key: 'photoUpload', included: true },
+            { key: 'guestLimit', included: true },
+            { key: 'storage', included: true },
+            { key: 'publicGallery', included: true },
         ],
     },
     {
-        name: 'Premium',
+        id: 'premium',
         price: '€99',
-        period: 'për dasmë',
-        description: 'Pa limite, për dasma të mëdha',
         features: [
-            { label: 'Gjej Vendin Tim', included: true },
-            { label: 'Sistemimi i tavolinave', included: true },
-            { label: 'Ngarko Foto — pa limit', included: true },
-            { label: 'Të ftuar pa limit', included: true },
-            { label: 'Ruajtje 1 vit pas dasmës', included: true },
-            { label: 'Galeri e ndashme (link publik)', included: true },
+            { key: 'findSeat', included: true },
+            { key: 'tableArrangement', included: true },
+            { key: 'photoUpload', included: true },
+            { key: 'guestLimit', included: true },
+            { key: 'storage', included: true },
+            { key: 'publicGallery', included: true },
         ],
     },
 ]
 
-export function PricingSection() {
+export async function PricingSection() {
+    const t = await getTranslations('pricing')
+
     return (
         <div className="relative z-10 w-full max-w-5xl">
+            {/* Header */}
             <div className="text-center mb-10">
                 <p className="font-sans text-xs tracking-[0.3em] uppercase text-muted-foreground mb-3">
-                    Çmimet
+                    {t('eyebrow')}
                 </p>
+
                 <h2 className="font-serif text-3xl font-light text-foreground mb-2">
-                    Zgjidhni planin që ju përshtatet
+                    {t('title')}
                 </h2>
+
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                    Pagesë e vetme për dasmën tuaj — jo abonim mujor.
+                    {t('description')}
                 </p>
             </div>
 
+            {/* Plans */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {PLANS.map((plan) => (
                     <div
-                        key={plan.name}
+                        key={plan.id}
                         className={cn(
                             'card-wedding p-6 flex flex-col relative',
-                            plan.featured && 'border-2 border-[hsl(var(--primary))] shadow-lg md:-translate-y-2'
+                            plan.featured &&
+                            'border-2 border-[hsl(var(--primary))] shadow-lg md:-translate-y-2'
                         )}
                     >
+                        {/* Featured badge */}
                         {plan.featured && (
                             <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[hsl(var(--primary))] text-white text-[10px] uppercase tracking-widest font-medium px-3 py-1 rounded-full">
-                Më i kërkuari
-              </span>
+                                {t('mostPopular')}
+                            </span>
                         )}
 
-                        <h3 className="font-serif text-xl text-foreground mb-1">{plan.name}</h3>
-                        <p className="text-xs text-muted-foreground mb-4">{plan.description}</p>
+                        {/* Plan name */}
+                        <h3 className="font-serif text-xl text-foreground mb-1">
+                            {t(`plans.${plan.id}.name`)}
+                        </h3>
 
+                        {/* Description */}
+                        <p className="text-xs text-muted-foreground mb-4">
+                            {t(`plans.${plan.id}.description`)}
+                        </p>
+
+                        {/* Price */}
                         <div className="mb-6">
-                            <span className="font-serif text-4xl text-foreground">{plan.price}</span>
-                            <span className="text-xs text-muted-foreground ml-1">{plan.period}</span>
+                            <span className="font-serif text-4xl text-foreground">
+                                {plan.price}
+                            </span>
+
+                            <span className="text-xs text-muted-foreground ml-1">
+                                {t('perWedding')}
+                            </span>
                         </div>
 
+                        {/* Features */}
                         <ul className="space-y-2.5 mb-6 flex-1">
-                            {plan.features.map((f) => (
-                                <li key={f.label} className="flex items-start gap-2 text-sm">
-                                    {f.included ? (
+                            {plan.features.map((feature) => (
+                                <li
+                                    key={feature.key}
+                                    className="flex items-start gap-2 text-sm"
+                                >
+                                    {feature.included ? (
                                         <Check className="w-4 h-4 text-[hsl(var(--primary))] shrink-0 mt-0.5" />
                                     ) : (
                                         <X className="w-4 h-4 text-muted-foreground/40 shrink-0 mt-0.5" />
                                     )}
-                                    <span className={cn(!f.included && 'text-muted-foreground/50 line-through')}>
-                    {f.label}
-                  </span>
+
+                                    <span
+                                        className={cn(
+                                            !feature.included &&
+                                            'text-muted-foreground/50 line-through'
+                                        )}
+                                    >
+                                        {t(
+                                            `features.${plan.id}.${feature.key}`
+                                        )}
+                                    </span>
                                 </li>
                             ))}
                         </ul>
 
+                        {/* CTA */}
                         <Link
                             href="#contact"
                             className={cn(
                                 'w-full py-3 rounded-xl text-center text-sm font-medium tracking-wide transition-all',
-                                plan.featured ? 'btn-primary justify-center' : 'btn-ghost justify-center'
+                                plan.featured
+                                    ? 'btn-primary justify-center'
+                                    : 'btn-ghost justify-center'
                             )}
                         >
-                            Zgjidh {plan.name}
+                            {t('choosePlan', {
+                                plan: t(`plans.${plan.id}.name`),
+                            })}
                         </Link>
                     </div>
                 ))}
             </div>
 
+            {/* Bottom CTA */}
             <p className="text-center text-xs text-muted-foreground mt-8">
-                Nuk gjetët çfarë kërkuat? <a href="#contact" className="text-[hsl(var(--primary))] hover:underline">Na kontaktoni</a> për plan të personalizuar.
+                {t('customPlan.text')}{' '}
+                <a
+                    href="#contact"
+                    className="text-[hsl(var(--primary))] hover:underline"
+                >
+                    {t('customPlan.contact')}
+                </a>{' '}
+                {t('customPlan.suffix')}
             </p>
         </div>
     )

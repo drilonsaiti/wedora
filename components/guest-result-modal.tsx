@@ -4,6 +4,7 @@ import {AnimatePresence, motion} from 'framer-motion';
 import {X} from 'lucide-react';
 import {GuestWithTable, Table, VenueElement} from '@/types/seating';
 import {VenueMap} from "@/components/venue-map";
+import {useTranslations} from 'next-intl';
 
 interface GuestResultModalProps {
     guest: GuestWithTable | null;
@@ -13,6 +14,7 @@ interface GuestResultModalProps {
 }
 
 export function GuestResultModal({guest, onClose, tables, venueElements}: GuestResultModalProps) {
+    const t = useTranslations('wedding');
 
     return (
         <AnimatePresence>
@@ -35,7 +37,7 @@ export function GuestResultModal({guest, onClose, tables, venueElements}: GuestR
                             <button
                                 onClick={onClose}
                                 className="absolute top-4 right-4 sm:top-6 sm:right-6 w-9 h-9 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center hover:bg-[hsl(var(--accent))]/70 transition-colors z-20"
-                                aria-label="Mbyll"
+                                aria-label={t('close')}
                             >
                                 <X className="w-4 h-4 text-foreground"/>
                             </button>
@@ -45,7 +47,7 @@ export function GuestResultModal({guest, onClose, tables, venueElements}: GuestR
                             </h2>
 
                             <p className="font-sans text-xs uppercase tracking-[0.3em] text-muted-foreground mb-8">
-                                Mirësevini në dasmën tonë
+                                {t('welcome')}
                             </p>
 
                             <div
@@ -56,14 +58,14 @@ export function GuestResultModal({guest, onClose, tables, venueElements}: GuestR
                                 <div
                                     className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[hsl(var(--gold))]/10 to-transparent"/>
                                 <span
-                                    className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground block mb-4">Tavolina Juaj</span>
+                                    className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground block mb-4">{t('yourTable')}</span>
                                 {guest.tables ? (
                                     <div className="flex flex-col items-center gap-6">
                                         <div className="relative">
                                             <div
                                                 className="w-32 h-32 rounded-full border border-[hsl(var(--gold))]/30 flex flex-col items-center justify-center bg-white shadow-xl relative z-10">
                                                 <span
-                                                    className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Numri</span>
+                                                    className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">{t('number')}</span>
                                                 <span
                                                     className="text-6xl font-serif text-[hsl(var(--primary))] font-medium leading-none">
         {guest.tables.number}
@@ -71,8 +73,8 @@ export function GuestResultModal({guest, onClose, tables, venueElements}: GuestR
                                                 {guest.tables.shape !== 'round' && (
                                                     <span
                                                         className="text-[10px] uppercase tracking-widest text-[hsl(var(--gold))] mt-1">
-            Vendi {(guest.table_seats?.seat_index ?? 0) + 1}
-        </span>
+                                                        {t('seatIndex', {index: (guest.table_seats?.seat_index ?? 0) + 1})}
+                                                    </span>
                                                 )}
                                             </div>
                                             <div
@@ -84,8 +86,8 @@ export function GuestResultModal({guest, onClose, tables, venueElements}: GuestR
                                                 <div className="h-px w-8 bg-[hsl(var(--gold))]/20"/>
                                                 <span
                                                     className="text-[10px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
-                            Harta e Sallës
-                          </span>
+                                                    {t('venueMap')}
+                                                  </span>
                                                 <div className="h-px w-8 bg-[hsl(var(--gold))]/20"/>
                                             </div>
                                             <VenueMap
@@ -104,10 +106,10 @@ export function GuestResultModal({guest, onClose, tables, venueElements}: GuestR
                                             <span className="text-4xl">✨</span>
                                         </div>
                                         <span className="text-lg font-serif text-foreground italic">
-                      Ende pa tavolinë
-                    </span>
+                                          {t('noTable')}
+                                        </span>
                                         <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-2 px-4">
-                                            Vendi juaj do të caktohet së shpejti
+                                            {t('noTableDescription')}
                                         </p>
                                     </div>
                                 )}

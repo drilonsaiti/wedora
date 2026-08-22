@@ -37,9 +37,10 @@ import {
     signOutAction,
     updatePhotoAction,
 } from '@/actions/admin'
-import {cn, formatDate, invertUpdate} from '@/lib/utils'
+import {cn, formatDate, getOrCreateSessionId, invertUpdate} from '@/lib/utils'
 import {ThemeToggle} from "@/components/theme-toggle";
 import {Photo} from "@/types/database";
+import {useLocale, useTranslations} from 'next-intl';
 
 interface AdminDashboardProps {
     initialPhotos: Photo[]
@@ -51,12 +52,7 @@ interface AdminDashboardProps {
     activeFilter?: string
 }
 
-const FILTERS = [
-    {key: undefined, label: 'Të gjitha fotot'},
-    {key: 'favourites', label: 'Të preferuarat'},
-    {key: 'hidden', label: 'Të fshehura'},
-    {key: 'unapproved', label: 'Të paaprovuara'},
-]
+const FILTERS_DUMMY = []
 
 const PAGE_SIZE = 50
 
@@ -70,7 +66,18 @@ export function AdminDashboard({
                                    activeFilter,
                                }: AdminDashboardProps) {
     const router = useRouter()
+    const locale = useLocale()
+    const t = useTranslations('dashboard.photos')
+    const tc = useTranslations('common')
     const [, startTransition] = useTransition()
+
+    const FILTERS = [
+        {key: undefined, label: t('allPhotos')},
+        {key: 'favourites', label: t('favourites')},
+        {key: 'hidden', label: t('hidden')},
+        {key: 'unapproved', label: t('unapproved')},
+    ]
+
     const [photos, setPhotos] = useState<Photo[]>(initialPhotos)
     const [total, setTotal] = useState(initialTotal)
     const [error, setError] = useState(initialError)
@@ -162,7 +169,7 @@ export function AdminDashboard({
     }
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Delete this photo permanently?')) return
+        if (!confirm(t('confirmDelete'))) return
         setActionLoading((prev) => ({...prev, [id]: true}))
         try {
             const result = await deletePhotoAction(id, weddingId)
@@ -172,6 +179,8 @@ export function AdminDashboard({
             }
             if (selectedPhoto?.id === id) closeModal()
             startTransition(() => router.refresh())
+        } catch (err) {
+            alert(t('deleteFailed'))
         } finally {
             setActionLoading((prev) => ({...prev, [id]: false}))
         }
@@ -194,7 +203,7 @@ export function AdminDashboard({
             const url = `/api/admin/zip?weddingId=${weddingId}${filter === 'favourites' ? '&filter=favourites' : ''}`
             const res = await fetch(url)
             if (!res.ok) {
-                alert('Failed to generate ZIP. Please try again.')
+                alert(t('failedToGenerateZip'))
                 return
             }
             const blob = await res.blob()
@@ -249,7 +258,7 @@ export function AdminDashboard({
             setShareUrl(result.url)
             loadGalleryTokens()
         } else {
-            alert(result.error ?? 'Failed to create link')
+            alert(result.error ?? t('failedToCreateLink'))
         }
     }
 
@@ -274,7 +283,7 @@ export function AdminDashboard({
     }
 
     const handleDeleteToken = async (id: string) => {
-        if (!confirm('Delete this gallery link? It will stop working immediately.')) return
+        if (!confirm(t('deleteGalleryLinkConfirm'))) return
         await deleteGalleryTokenAction(id)
         loadGalleryTokens()
     }
@@ -301,12 +310,12 @@ export function AdminDashboard({
             <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
                     <div>
-                        <h1 className="font-serif text-xl font-light text-[hsl(var(--dark))]">Fotot e Dasmës</h1>
+                        <h1 className="font-serif text-xl font-light text-[hsl(var(--dark))]">{t('title')}</h1>
                         <p className="font-sans text-xs text-muted-foreground hidden sm:block">{adminEmail}</p>
                     </div>
                     <div className="flex items-center gap-2">
             <span className="font-sans text-sm text-muted-foreground hidden sm:block">
-              {photos.length} foto
+              {t('photoCount', {count: photos.length})}
             </span>
 
                         <ThemeToggle/>
@@ -318,7 +327,7 @@ export function AdminDashboard({
                                 className="btn-ghost text-xs py-2 px-3 sm:px-4"
                             >
                                 <Armchair className="w-3.5 h-3.5"/>
-                                <span className="hidden sm:inline">Sistemimi</span>
+                                <span className="hidden sm:inline">{t('seating')}</span>
                             </Link>
                         )}
 
@@ -328,7 +337,7 @@ export function AdminDashboard({
                                 className="btn-ghost text-xs py-2 px-3 sm:px-4"
                             >
                                 <Armchair className="w-3.5 h-3.5"/>
-                                <span className="hidden sm:inline">Sistemimi</span>
+                                <span className="hidden sm:inline">{t('seating')}</span>
                             </Link>
                         )}
 
@@ -338,7 +347,7 @@ export function AdminDashboard({
                             className="btn-ghost text-xs py-2 px-3 sm:px-4"
                         >
                             <Share2 className="w-3.5 h-3.5"/>
-                            <span className="hidden sm:inline">Shpërndaj Galerinë</span>
+                            <span className="hidden sm:inline">{t('shareGallery')}</span>
                         </button>
 
                         {/* ZIP dropdown */}
@@ -353,7 +362,7 @@ export function AdminDashboard({
                                     <ArchiveIcon className="w-3.5 h-3.5"/>
                                 )}
                                 <span className="hidden sm:inline">
-                  {zipLoading ? 'Duke u përgatitur…' : 'Shkarko ZIP'}
+                  {zipLoading ? t('preparingZip') : t('downloadZip')}
                 </span>
                             </button>
                             {/* Dropdown */}
@@ -365,7 +374,7 @@ export function AdminDashboard({
                                     className="w-full text-left px-4 py-2.5 font-sans text-sm hover:bg-muted transition-colors flex items-center gap-2"
                                 >
                                     <Download className="w-3.5 h-3.5 text-muted-foreground"/>
-                                    Të gjitha fotot
+                                    {t('allPhotos')}
                                 </button>
                                 <button
                                     onClick={() => handleZipDownload('favourites')}
@@ -373,14 +382,14 @@ export function AdminDashboard({
                                     className="w-full text-left px-4 py-2.5 font-sans text-sm hover:bg-muted transition-colors flex items-center gap-2"
                                 >
                                     <Heart className="w-3.5 h-3.5 text-muted-foreground"/>
-                                    Vetëm të preferuarat
+                                    {t('onlyFavourites')}
                                 </button>
                             </div>
                         </div>
 
                         <button onClick={async () => await signOutAction()} className="btn-ghost text-xs py-2 px-3">
                             <LogOut className="w-3.5 h-3.5"/>
-                            <span className="hidden sm:inline">Çkyçu</span>
+                            <span className="hidden sm:inline">{tc('logout')}</span>
                         </button>
                     </div>
                 </div>
@@ -417,9 +426,9 @@ export function AdminDashboard({
                         <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
                             <Images className="w-8 h-8 text-muted-foreground" strokeWidth={1.5}/>
                         </div>
-                        <h2 className="font-serif text-2xl font-light text-muted-foreground">Ende nuk ka foto</h2>
+                        <h2 className="font-serif text-2xl font-light text-muted-foreground">{t('noPhotos')}</h2>
                         <p className="font-sans text-sm text-muted-foreground mt-2">
-                            {activeFilter ? 'Asnjë foto nuk përputhet me këtë filtër.' : 'Fotot do të shfaqen këtu pasi të ftuarit t\'i ngarkojnë ato.'}
+                            {t('noPhotosMatchingFilter')}
                         </p>
                     </div>
                 )}
@@ -453,7 +462,7 @@ export function AdminDashboard({
                                     Duke u ngarkuar...
                                 </>
                             ) : (
-                                'Ngarko më shumë'
+                                t('loadMore')
                             )}
                         </button>
                     </div>
@@ -493,7 +502,7 @@ export function AdminDashboard({
                                 <h2 className="font-serif text-2xl font-light text-[hsl(var(--dark))]">Share
                                     Gallery</h2>
                                 <p className="font-sans text-xs text-muted-foreground mt-0.5">
-                                    Create a shareable link for guests
+                                    {t('shareGalleryDescription')}
                                 </p>
                             </div>
                             <button
@@ -517,25 +526,34 @@ export function AdminDashboard({
                                             </div>
                                         ) : galleryTokens.length === 0 ? (
                                             <p className="text-sm text-muted-foreground text-center py-6 font-sans">
-                                                No gallery links yet.
+                                                {t('noGalleryLinks')}
                                             </p>
                                         ) : (
                                             <div className="space-y-2 max-h-64 overflow-y-auto">
-                                                {galleryTokens.map((t) => {
-                                                    const url = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/gallery/${t.token}`;
+                                                {galleryTokens.map((token) => {
+                                                    const url = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/gallery/${token.token}`;
 
                                                     return (
                                                         <div
-                                                            key={t.id}
+                                                            key={token.id}
                                                             className="flex items-center justify-between p-3 rounded-xl border border-border"
                                                         >
                                                             <div className="min-w-0">
                                                                 <p className="font-sans text-sm font-medium truncate">
-                                                                    {t.label ?? "Wedding Gallery"}
+                                                                    {token.label ?? "Wedding Gallery"}
                                                                 </p>
+
                                                                 <p className="font-sans text-xs text-muted-foreground">
-                                                                    {t.expires_at ? `Expires ${formatDate(t.expires_at)}` : 'Never expires'}
-                                                                    {t.photo_filter === 'favourites' && ' · Favourites only'}
+                                                                    {token.expires_at
+                                                                        ? t('expires', {
+                                                                            date: formatDate(token.expires_at)
+                                                                        })
+                                                                        : t('neverExpires')
+                                                                    }
+
+                                                                    {token.photo_filter === 'favourites' &&
+                                                                        ` · ${t('favouritesOnly')}`
+                                                                    }
                                                                 </p>
                                                             </div>
 
@@ -548,7 +566,7 @@ export function AdminDashboard({
                                                                 </button>
 
                                                                 <button
-                                                                    onClick={() => handleDeleteToken(t.id)}
+                                                                    onClick={() => handleDeleteToken(token.id)}
                                                                     className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-destructive/10 hover:text-destructive transition-colors"
                                                                 >
                                                                     <Trash2 className="w-3.5 h-3.5"/>
@@ -565,25 +583,24 @@ export function AdminDashboard({
                                             className="btn-primary w-full justify-center"
                                         >
                                             <LinkIcon className="w-4 h-4"/>
-                                            Create New Gallery Link
+                                            {t('createNewGalleryLink')}
                                         </button>
                                     </>
                                 ) : (
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="label-wedding">Link name</label>
-                                            <input
+                                            <label className="label-wedding">{t('linkName')}</label>                                            <input
                                                 type="text"
                                                 value={galleryLabel}
                                                 onChange={(e) => setGalleryLabel(e.target.value)}
-                                                placeholder="e.g. Ceremony, Reception, Family Only"
+                                                placeholder={t('linkNamePlaceholder')}
                                                 className="input-wedding"
                                                 maxLength={60}
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="label-wedding">Which photos?</label>
+                                            <label className="label-wedding">{t('whichPhotos')}</label>
                                             <div className="grid grid-cols-2 gap-2">
                                                 <button
                                                     type="button"
@@ -596,7 +613,7 @@ export function AdminDashboard({
                                                     )}
                                                 >
                                                     <Images className="w-4 h-4"/>
-                                                    All photos
+                                                    {t('allPhotos')}
                                                 </button>
                                                 <button
                                                     type="button"
@@ -609,21 +626,19 @@ export function AdminDashboard({
                                                     )}
                                                 >
                                                     <Heart className="w-4 h-4"/>
-                                                    Favourites only
+                                                    {t('onlyFavourites')}
                                                 </button>
                                             </div>
                                             <p className="text-xs text-muted-foreground mt-1.5 font-sans">
-                                                Only approved photos guests agreed to share publicly are ever included —
-                                                this just narrows within that set.
+                                                {t('filterNote')}
                                             </p>
                                         </div>
 
                                         <label
                                             className="flex items-center justify-between p-3 rounded-xl border border-border cursor-pointer hover:bg-muted transition-colors">
                                             <div>
-                                                <p className="font-sans text-sm font-medium">Show guest messages</p>
-                                                <p className="font-sans text-xs text-muted-foreground">Include names and
-                                                    notes in gallery</p>
+                                                <p className="font-sans text-sm font-medium">{t('showMessagesTitle')}</p>
+                                                <p className="font-sans text-xs text-muted-foreground">{t('showMessagesDescription')}</p>
                                             </div>
                                             <input
                                                 type="checkbox"
@@ -634,17 +649,17 @@ export function AdminDashboard({
                                         </label>
 
                                         <div>
-                                            <label className="label-wedding">Link expires after</label>
+                                            <label className="label-wedding">{t('linkExpiresAfter')}</label>
                                             <select
                                                 value={expiresInDays}
                                                 onChange={(e) => setExpiresInDays(e.target.value)}
                                                 className="input-wedding"
                                             >
-                                                <option value="">Never</option>
-                                                <option value="7">7 days</option>
-                                                <option value="30">30 days</option>
-                                                <option value="90">90 days</option>
-                                                <option value="365">1 year</option>
+                                                <option value="">{t('never')}</option>
+                                                <option value="7">{t('days7')}</option>
+                                                <option value="30">{t('days30')}</option>
+                                                <option value="90">{t('days90')}</option>
+                                                <option value="365">{t('year1')}</option>
                                             </select>
                                         </div>
 
@@ -654,9 +669,9 @@ export function AdminDashboard({
                                             className="btn-primary w-full justify-center"
                                         >
                                             {shareLoading ? (
-                                                <><Loader2 className="w-4 h-4 animate-spin"/>Creating link…</>
+                                                <><Loader2 className="w-4 h-4 animate-spin"/>{t('creatingLink')}</>
                                             ) : (
-                                                <><LinkIcon className="w-4 h-4"/>Create Gallery Link</>
+                                                <><LinkIcon className="w-4 h-4"/>{t('createLink')}</>
                                             )}
                                         </button>
 
@@ -664,7 +679,7 @@ export function AdminDashboard({
                                             onClick={() => setShowCreateForm(false)}
                                             className="w-full text-center font-sans text-xs text-muted-foreground hover:text-foreground transition-colors"
                                         >
-                                            ← Back to gallery list
+                                            ← {t('backToGalleryList')}
                                         </button>
                                     </div>
                                 )}
@@ -674,7 +689,7 @@ export function AdminDashboard({
                                 <div
                                     className="rounded-xl bg-[hsl(var(--accent))] border border-[hsl(var(--primary))]/20 p-4">
                                     <p className="font-sans text-xs text-muted-foreground mb-2">
-                                        Gallery link
+                                        {t('galleryLink')}
                                     </p>
 
                                     <p className="font-mono text-xs text-foreground break-all leading-relaxed">
@@ -693,12 +708,12 @@ export function AdminDashboard({
                                         {copied ? (
                                             <>
                                                 <Check className="w-4 h-4"/>
-                                                Copied!
+                                                {t('linkCopied')}
                                             </>
                                         ) : (
                                             <>
                                                 <Copy className="w-4 h-4"/>
-                                                Copy Link
+                                                {t('copyLink')}
                                             </>
                                         )}
                                     </button>
@@ -720,8 +735,11 @@ export function AdminDashboard({
                                     }}
                                     className="w-full text-center font-sans text-xs text-muted-foreground hover:text-foreground transition-colors pt-1"
                                 >
-                                    Back to gallery links
+                                    {t('backToGalleryLinks')}
                                 </button>
+                                <p className="text-[10px] text-muted-foreground text-center italic mt-2">
+                                    {t('shareWithCouple')}
+                                </p>
                             </div>
                         )}
                     </div>
@@ -851,7 +869,7 @@ function QuickActionBtn({
     )
 }
 
-// ── PhotoModal (unchanged) ──
+
 function PhotoModal({
                         photo,
                         urls,
@@ -879,6 +897,8 @@ function PhotoModal({
     onDelete: (id: string) => void
     onDownload: (photo: Photo) => void
 }) {
+    const t = useTranslations('dashboard.photos')
+    const locale = useLocale()
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
@@ -929,7 +949,7 @@ function PhotoModal({
                 <div className="w-full lg:w-72 p-6 flex flex-col gap-4 overflow-y-auto">
                     <div className="flex items-center justify-between">
                         <h2 className="font-serif text-xl font-light text-[hsl(var(--dark))]">
-                            {photo.guest_name ?? 'Anonymous Guest'}
+                            {photo.guest_name ?? t('anonymousGuest')}
                         </h2>
                         <button
                             onClick={onClose}
@@ -940,7 +960,7 @@ function PhotoModal({
                     </div>
 
                     <p className="font-sans text-xs text-muted-foreground">
-                        {formatDate(photo.created_at)}
+                        {formatDate(photo.created_at, locale)}
                     </p>
 
                     {photo.message && (
@@ -954,9 +974,9 @@ function PhotoModal({
                     <div className="h-px bg-border"/>
 
                     <div className="flex flex-wrap gap-2">
-                        <StatusBadge active={photo.favourite} label="Favourite" color="text-red-500"/>
-                        <StatusBadge active={photo.hidden} label="Hidden" color="text-yellow-600"/>
-                        <StatusBadge active={!photo.approved} label="Unapproved" color="text-orange-500"/>
+                        <StatusBadge active={photo.favourite} label={t('favourites')} color="text-red-500"/>
+                        <StatusBadge active={photo.hidden} label={t('hidden')} color="text-yellow-600"/>
+                        <StatusBadge active={!photo.approved} label={t('unapproved')} color="text-orange-500"/>
                     </div>
 
                     <div className="space-y-2">
@@ -964,31 +984,31 @@ function PhotoModal({
                             onClick={() => onUpdate(photo.id, {favourite: !photo.favourite})}
                             loading={isActionLoading}
                             icon={<Heart className={cn('w-4 h-4', photo.favourite && 'fill-current text-red-400')}/>}
-                            label={photo.favourite ? 'Unfavourite' : 'Favourite'}
+                            label={photo.favourite ? t('unfavourite') : t('favourite')}
                         />
                         <ActionButton
                             onClick={() => onUpdate(photo.id, {hidden: !photo.hidden})}
                             loading={isActionLoading}
                             icon={photo.hidden ? <Eye className="w-4 h-4"/> : <EyeOff className="w-4 h-4"/>}
-                            label={photo.hidden ? 'Show' : 'Hide'}
+                            label={photo.hidden ? t('show') : t('hide')}
                         />
                         <ActionButton
                             onClick={() => onUpdate(photo.id, {approved: !photo.approved})}
                             loading={isActionLoading}
                             icon={photo.approved ? <XCircle className="w-4 h-4"/> : <CheckCircle className="w-4 h-4"/>}
-                            label={photo.approved ? 'Unapprove' : 'Approve'}
+                            label={photo.approved ? t('unapprove') : t('approve')}
                         />
                         <ActionButton
                             onClick={() => onDownload(photo)}
                             loading={isActionLoading}
                             icon={<Download className="w-4 h-4"/>}
-                            label="Download"
+                            label={t('download')}
                         />
                         <ActionButton
                             onClick={() => onDelete(photo.id)}
                             loading={isActionLoading}
                             icon={<Trash2 className="w-4 h-4"/>}
-                            label="Delete permanently"
+                            label={t('deletePermanently')}
                             danger
                         />
                     </div>

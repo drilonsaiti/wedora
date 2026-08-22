@@ -6,6 +6,7 @@ import {GuestWithTable, Table, VenueElement} from '@/types/seating';
 import {GuestAvatar} from '@/components/guest-avatar';
 import {motion} from 'framer-motion';
 import {GuestResultModal} from '@/components/guest-result-modal';
+import {useTranslations} from 'next-intl';
 
 interface FindSeatClientProps {
     guests: GuestWithTable[];
@@ -15,16 +16,31 @@ interface FindSeatClientProps {
     brideName: string;
 }
 
-export function FindSeatClient({guests, tables, venueElements, groomName, brideName}: FindSeatClientProps) {
+export function FindSeatClient({
+                                   guests,
+                                   tables,
+                                   venueElements,
+                                   groomName,
+                                   brideName
+                               }: FindSeatClientProps) {
+    const t = useTranslations('wedding.findSeat');
+
     const [query, setQuery] = useState('');
-    const [selectedGuest, setSelectedGuest] = useState<GuestWithTable | null>(null);
+    const [selectedGuest, setSelectedGuest] =
+        useState<GuestWithTable | null>(null);
 
     const results = useMemo(() => {
         if (query.length < 2) return [];
+
         const q = query.toLowerCase();
-        return guests.filter(g =>
-            `${g.first_name} ${g.last_name}`.toLowerCase().includes(q)
-        ).slice(0, 10);
+
+        return guests
+            .filter((g) =>
+                `${g.first_name} ${g.last_name}`
+                    .toLowerCase()
+                    .includes(q)
+            )
+            .slice(0, 10);
     }, [guests, query]);
 
     return (
@@ -34,31 +50,45 @@ export function FindSeatClient({guests, tables, venueElements, groomName, brideN
                 <div className="text-center mb-10">
                     <div className="flex items-center justify-center gap-2 mb-4">
                         <div className="h-px w-8 bg-[hsl(var(--gold))] opacity-60"/>
-                        <Heart className="w-3 h-3 text-[hsl(var(--primary))] fill-current"/>
+                        <Heart
+                            className="w-3 h-3 text-[hsl(var(--primary))] fill-current"
+                        />
                         <div className="h-px w-8 bg-[hsl(var(--gold))] opacity-60"/>
                     </div>
-                    <h1 className="font-serif text-4xl font-light text-foreground mb-2">Gjeni vendin tuaj</h1>
+
+                    <h1 className="font-serif text-4xl font-light text-foreground mb-2">
+                        {t('title')}
+                    </h1>
+
                     <p className="font-sans text-xs tracking-widest uppercase text-muted-foreground">
-                        Dasma e {brideName} & {groomName}
+                        {t('weddingOf', {
+                            bride: brideName,
+                            groom: groomName
+                        })}
                     </p>
 
                     <p className="font-sans text-xs text-muted-foreground italic mt-3">
-                        Kërkoni emrin tuaj dhe shihni vendin tuaj në hartë 🗺️
+                        {t('hint')}
                     </p>
                 </div>
 
                 {/* Search */}
                 <div className="relative mb-8">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[hsl(var(--gold))]"/>
+                    <Search
+                        className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[hsl(var(--gold))]"
+                    />
+
                     <input
                         type="text"
-                        placeholder="Kërkoni emrin tuaj..."
+                        placeholder={t('searchPlaceholder')}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         className="input-wedding pl-12 py-5 shadow-md border-[hsl(var(--gold))]/30 focus:border-[hsl(var(--gold))] transition-all text-lg"
                     />
+
                     {query && (
                         <button
+                            type="button"
                             onClick={() => setQuery('')}
                             className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-full transition-colors"
                         >
@@ -82,47 +112,65 @@ export function FindSeatClient({guests, tables, venueElements, groomName, brideN
                                     size="lg"
                                     className="border-2 border-[hsl(var(--accent))] shrink-0 self-start"
                                 />
+
                                 <div className="min-w-0">
                                     <h3 className="font-serif text-xl text-foreground truncate">
                                         {guest.first_name} {guest.last_name}
                                     </h3>
+
                                     <p className="font-sans text-xs uppercase tracking-widest text-muted-foreground mt-1">
                                         {guest.tables ? (
                                             <span className="flex items-center gap-1.5">
-            <Armchair className="w-3 h-3 text-[hsl(var(--gold))]"/>
+                                                <Armchair
+                                                    className="w-3 h-3 text-[hsl(var(--gold))]"
+                                                />
+
                                                 {guest.tables.shape === 'round'
-                                                    ? `Tavolina ${guest.tables.number}`
-                                                    : `Tavolina ${guest.tables.number} · Vendi ${(guest.table_seats?.seat_index ?? 0) + 1}`}
-        </span>
-                                        ) : 'Ende pa tavolinë'}
+                                                    ? t('table', {
+                                                        number: guest.tables.number
+                                                    })
+                                                    : t('tableSeat', {
+                                                        number: guest.tables.number,
+                                                        seat: (guest.table_seats?.seat_index ?? 0) + 1
+                                                    })
+                                                }
+                                            </span>
+                                        ) : (
+                                            t('noTable')
+                                        )}
                                     </p>
                                 </div>
                             </div>
+
                             <button
+                                type="button"
                                 onClick={() => setSelectedGuest(guest)}
                                 className="btn-primary w-full sm:w-auto shrink-0 py-2.5 px-4 text-xs rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
                             >
-                                Shiko vendin
+                                {t('viewSeat')}
+
                                 <Heart className="w-3.5 h-3.5 fill-current"/>
                             </button>
                         </motion.div>
                     ))}
+
                     {query.length >= 2 && results.length === 0 && (
                         <div className="text-center py-12 bg-muted/30 rounded-3xl border border-dashed border-muted">
                             <p className="text-sm text-muted-foreground font-sans">
-                                Nuk mundëm të gjenim &ldquo;{query}&rdquo; në listën tonë të të ftuarve.
+                                {t('noResults', {query})}
                             </p>
                         </div>
                     )}
+
                     {query.length > 0 && query.length < 2 && (
                         <p className="text-center py-4 text-xs text-muted-foreground font-sans italic opacity-70">
-                            Vazhdoni të shkruani për të gjetur vendin tuaj...
+                            {t('keepTyping')}
                         </p>
                     )}
                 </div>
             </main>
 
-            {/* Seat Result Modal (Reused Component) */}
+            {/* Seat Result Modal */}
             <GuestResultModal
                 guest={selectedGuest}
                 onClose={() => setSelectedGuest(null)}
@@ -132,4 +180,3 @@ export function FindSeatClient({guests, tables, venueElements, groomName, brideN
         </div>
     );
 }
-

@@ -1,8 +1,9 @@
 'use client';
 
-import {useLocale} from 'next-intl';
+import {useLocale, useTranslations} from 'next-intl';
 import {usePathname, useRouter} from '@/lib/navigation';
 import {locales, localeNames} from '@/lib/i18n';
+import {useSearchParams} from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,11 +15,16 @@ import {Languages} from 'lucide-react';
 
 export function LanguageSwitcher() {
   const locale = useLocale();
+  const t = useTranslations('common');
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   function onLocaleChange(newLocale: string) {
-    router.replace(pathname, {locale: newLocale});
+    const queryString = searchParams.toString();
+    const target = queryString ? `${pathname}?${queryString}` : pathname;
+    
+    router.replace(target, {locale: newLocale});
   }
 
   return (
@@ -26,7 +32,7 @@ export function LanguageSwitcher() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="w-9 px-0">
           <Languages className="h-[1.2rem] w-[1.2rem]" />
-          <span className="sr-only">Switch language</span>
+          <span className="sr-only">{t('switchLanguage')}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

@@ -6,6 +6,7 @@ import {GuestWithTable, Table, VenueElement} from '@/types/seating';
 import {GuestAvatar} from '@/components/guest-avatar';
 import {AnimatePresence, motion} from 'framer-motion';
 import {GuestResultModal} from '@/components/guest-result-modal';
+import {useTranslations} from 'next-intl';
 
 interface HomeSearchProps {
     guests: GuestWithTable[];
@@ -16,6 +17,7 @@ interface HomeSearchProps {
 export function HomeSearch({guests, tables, venueElements}: HomeSearchProps) {
     const [query, setQuery] = useState('');
     const [selectedGuest, setSelectedGuest] = useState<GuestWithTable | null>(null);
+    const t = useTranslations('wedding');
 
     const results = useMemo(() => {
         if (query.length < 2) return [];
@@ -32,7 +34,7 @@ export function HomeSearch({guests, tables, venueElements}: HomeSearchProps) {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[hsl(var(--gold))]"/>
                 <input
                     type="text"
-                    placeholder="Kerko vendin tuaj permes emrit tuaj"
+                    placeholder={t('searchPlaceholder')}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     className="input-wedding pl-12 py-5 shadow-md border-[hsl(var(--gold))]/30 focus:border-[hsl(var(--gold))] transition-all text-lg w-full"
@@ -72,9 +74,12 @@ export function HomeSearch({guests, tables, venueElements}: HomeSearchProps) {
                                                 <p className="text-xs text-muted-foreground group-hover:text-[hsl(var(--accent-foreground))] uppercase tracking-widest mt-0.5">
                                                     {guest.tables
                                                         ? guest.tables.shape === 'round'
-                                                            ? `Tavolina ${guest.tables.number}`
-                                                            : `Tavolina ${guest.tables.number} · Vendi ${(guest.table_seats?.seat_index ?? 0) + 1}`
-                                                        : 'Ende pa tavolinë'}
+                                                            ? t('tableNumber', {number: guest.tables.number})
+                                                            : t('tableSeat', {
+                                                                number: guest.tables.number,
+                                                                seat: (guest.table_seats?.seat_index ?? 0) + 1
+                                                              })
+                                                        : t('noTable')}
                                                 </p>
                                             </div>
                                         </div>
@@ -85,7 +90,7 @@ export function HomeSearch({guests, tables, venueElements}: HomeSearchProps) {
                                             }}
                                             className="btn-primary w-full sm:w-auto sm:ml-auto shrink-0 py-2 px-4 text-xs rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
                                         >
-                                            Shiko vendin
+                                            {t('viewSeat')}
                                             <Heart className="w-3.5 h-3.5 fill-current"/>
                                         </button>
                                     </div>
@@ -93,7 +98,7 @@ export function HomeSearch({guests, tables, venueElements}: HomeSearchProps) {
                             </div>
                         ) : (
                             <div className="p-6 text-center text-sm text-muted-foreground italic">
-                                Nuk u gjet asnjë rezultat.
+                                {t('noResults')}
                             </div>
                         )}
                     </motion.div>

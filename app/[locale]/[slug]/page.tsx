@@ -1,18 +1,21 @@
-import Link from 'next/link'
+import {Link} from '@/lib/navigation'
 import {notFound} from 'next/navigation'
 import {Camera, Heart, Image as ImageIcon} from 'lucide-react'
 import {BottomNav} from "@/components/bottom-nav";
 import {getGuests, getTables, getVenueElements} from '@/actions/seating';
 import {HomeSearch} from '@/components/home-search';
 import {getWeddingBySlug} from '@/actions/wedding';
+import {getTranslations} from 'next-intl/server';
 
-type Props = { params: Promise<{ slug: string }> }
+type Props = { params: Promise<{ locale: string; slug: string }> }
 
 export default async function HomePage({params}: Props) {
-    const {slug} = await params
+    const {locale, slug} = await params
     const wedding = await getWeddingBySlug(slug);
 
     if (!wedding) notFound()
+
+    const t = await getTranslations('wedding');
 
     const settings = wedding.wedding_settings
     const weddingId = wedding.id
@@ -40,7 +43,7 @@ export default async function HomePage({params}: Props) {
 
             <div className="text-center max-w-sm mx-auto relative z-10 w-full">
                 <p className="font-sans text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">
-                    Jeni të ftuar të festoni me ne
+                    {t('welcome')}
                 </p>
                 <h1 className="font-serif text-5xl font-light text-foreground leading-tight mb-2">
                     {wedding.bride_name}
@@ -51,11 +54,11 @@ export default async function HomePage({params}: Props) {
                 </h1>
                 {wedding.wedding_date && (
                     <p className="font-serif italic text-lg text-muted-foreground mb-8">
-                        {new Date(wedding.wedding_date).toLocaleDateString('sq-AL', {
+                        {new Intl.DateTimeFormat(locale, {
                             day: 'numeric',
                             month: 'long',
                             year: 'numeric'
-                        })}
+                        }).format(new Date(wedding.wedding_date))}
                     </p>
                 )}
 
@@ -68,21 +71,20 @@ export default async function HomePage({params}: Props) {
                 {settings?.enable_photo_upload && (
                     <>
                         <p className="font-sans text-sm text-muted-foreground leading-relaxed mb-10">
-                            Na ndihmoni të ruajmë çdo moment të bukur të kësaj dite të veçantë. Ndani fotot dhe mesazhet
-                            tuaja me çiftin.
+                            {t('photoDescription')}
                         </p>
 
                         <Link href={`/${slug}/upload`}
                               className="btn-primary w-full justify-center mb-4 py-4 rounded-xl shadow-lg">
                             <Camera className="w-5 h-5"/>
-                            Ndaj një foto
+                            {t('sharePhoto')}
                         </Link>
 
                         <div className="grid grid-cols-3 gap-4 mt-12 text-center">
                             {[
-                                {icon: Camera, label: 'Bëj një foto'},
-                                {icon: ImageIcon, label: 'Ngarko nga galeria'},
-                                {icon: Heart, label: 'Shto një mesazh'},
+                                {icon: Camera, label: t('takePhoto')},
+                                {icon: ImageIcon, label: t('uploadFromGallery')},
+                                {icon: Heart, label: t('addMessage')},
                             ].map(({icon: Icon, label}) => (
                                 <div key={label} className="flex flex-col items-center gap-2">
                                     <div

@@ -3,12 +3,13 @@
 import {useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {useRouter} from 'next/navigation';
+import {useRouter} from '@/lib/navigation';
 import {createWedding} from '@/actions/wedding';
 import {ArrowRight, Check, Copy, Heart, Loader2} from 'lucide-react';
 import {CreateWeddingInput, createWeddingSchema} from '@/schemas';
 import {ColorPicker} from '@/components/ui/color-picker';
 import {generateWeddingTheme} from '@/lib/theme';
+import {useTranslations} from 'next-intl';
 
 interface CreateWeddingFormProps {
     adminEmail: string;
@@ -24,6 +25,8 @@ interface Credential {
 
 export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProps) {
     const router = useRouter();
+    const t = useTranslations('dashboard');
+    const tw = useTranslations('weddings');
     const [serverError, setServerError] = useState<string | null>(null);
     const [slugTouched, setSlugTouched] = useState(false);
     const [credentials, setCredentials] = useState<Credential[] | null>(null);
@@ -84,9 +87,9 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
                         className="w-14 h-14 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center mx-auto mb-4">
                         <Check className="w-7 h-7 text-[hsl(var(--primary))]"/>
                     </div>
-                    <h2 className="font-serif text-2xl font-light text-[hsl(var(--dark))]">Dasma u krijua!</h2>
+                    <h2 className="font-serif text-2xl font-light text-[hsl(var(--dark))]">{t('weddingCreated')}</h2>
                     <p className="text-sm text-muted-foreground mt-1">
-                        Ruani këto të dhëna hyrjeje — fjalëkalimi s&apos;do shfaqet përsëri
+                        {t('saveCredentials')}
                     </p>
                 </div>
 
@@ -94,7 +97,7 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
                     {credentials.map((cred, i) => (
                         <div key={cred.email} className="card-wedding p-4">
                             <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-                                {cred.role === 'groom' ? 'Dhëndri' : 'Nusja'}
+                                {cred.role === 'groom' ? tw('groom') : tw('bride')}
                             </p>
                             <p className="font-sans text-sm mb-2">{cred.email}</p>
                             <div className="flex items-center gap-2">
@@ -113,7 +116,7 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
                     ))}
                     {credentials.length === 0 && (
                         <p className="text-xs text-muted-foreground text-center italic">
-                            Nuk u krijua asnjë llogari — kontrolloni email-et e vendosura.
+                            {t('noAccountCreated')}
                         </p>
                     )}
                 </div>
@@ -121,7 +124,7 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
                 {failedEmails && failedEmails.length > 0 && (
                     <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3">
                         <p className="text-xs text-destructive">
-                            Dështoi krijimi/rivendosja e llogarisë për: {failedEmails.join(', ')}
+                            {t('failedToCreateAccount', {emails: failedEmails.join(', ')})}
                         </p>
                     </div>
                 )}
@@ -130,7 +133,7 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
                     onClick={() => onSuccess ? onSuccess(createdWeddingId!) : router.push(`/admin/weddings/${createdWeddingId}`)}
                     className="btn-primary w-full py-4 rounded-2xl flex items-center justify-center gap-2"
                 >
-                    Vazhdo te Dashboard-i
+                    {t('continueToDashboard')}
                     <ArrowRight className="w-4 h-4"/>
                 </button>
             </div>
@@ -145,14 +148,14 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
                     <Heart className="w-3 h-3 text-[hsl(var(--primary))] fill-current"/>
                     <div className="h-px w-8 bg-[hsl(var(--gold))] opacity-60"/>
                 </div>
-                <h1 className="font-serif text-3xl font-light text-[hsl(var(--dark))]">Krijoni dasmën tuaj</h1>
+                <h1 className="font-serif text-3xl font-light text-[hsl(var(--dark))]">{t('createYourWedding')}</h1>
                 <p className="text-xs text-muted-foreground mt-2">{adminEmail}</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                        Emri i Dhëndrit
+                        {tw('groomName')}
                     </label>
                     <input
                         {...register('groom_name', {onBlur: handleNameBlur})}
@@ -164,7 +167,7 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
                 </div>
                 <div>
                     <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                        Emri i Nuses
+                        {tw('brideName')}
                     </label>
                     <input
                         {...register('bride_name', {onBlur: handleNameBlur})}
@@ -179,7 +182,7 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                        Email i Dhëndrit <span className="text-destructive">*</span>
+                        {tw('groomName')} Email <span className="text-destructive">*</span>
                     </label>
                     <input
                         {...register('groom_email')}
@@ -192,7 +195,7 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
                 </div>
                 <div>
                     <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                        Email i Nuses <span className="text-muted-foreground normal-case">(opsionale)</span>
+                        {tw('brideName')} Email <span className="text-muted-foreground normal-case">(opsionale)</span>
                     </label>
                     <input
                         {...register('bride_email')}
@@ -205,12 +208,12 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
                 </div>
             </div>
             <p className="text-[10px] text-muted-foreground -mt-3 italic">
-                Do të krijohen automatikisht llogari hyrjeje për çiftin
+                {t('accountsWillBeCreated')}
             </p>
 
             <div>
                 <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                    Data e Dasmës
+                    {tw('date')}
                 </label>
                 <input {...register('wedding_date')} type="date" className="input-wedding py-3 w-full"/>
                 {errors.wedding_date && <p className="text-xs text-destructive mt-1">{errors.wedding_date.message}</p>}
@@ -218,7 +221,7 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
 
             <div>
                 <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                    URL Publike
+                    {t('publicUrl')}
                 </label>
                 <div className="flex items-center gap-1 input-wedding py-3 px-4">
                     <span className="text-xs text-muted-foreground whitespace-nowrap">app.com/</span>
@@ -234,7 +237,7 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
 
             <div>
                 <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-3">
-                    Ngjyra e Temës
+                    {t('themeColor')}
                 </label>
                 <ColorPicker value={themeHue} onChange={(hue) => setValue('theme_hue', hue)}/>
             </div>
@@ -243,27 +246,26 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
                 className="rounded-2xl p-6 border border-border text-center"
                 style={previewTheme as React.CSSProperties}
             >
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3">Pamja paraprake</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3">{t('preview')}</p>
                 <button
                     type="button"
                     className="rounded-full px-6 py-2.5 text-xs font-sans font-medium tracking-widest uppercase text-white"
                     style={{backgroundColor: `hsl(${previewTheme['--primary']})`}}
                 >
-                    Shiko vendin
+                    {tw('emri')}
                 </button>
             </div>
 
             <div>
                 <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-3">
-                    Funksionet Aktive
+                    {t('activeFunctions')}
                 </label>
                 <div className="space-y-2">
                     <label
                         className="flex items-center justify-between p-3 rounded-xl border border-border cursor-pointer hover:bg-muted transition-colors">
                         <div>
-                            <p className="font-sans text-sm font-medium">Gjej Vendin</p>
-                            <p className="text-xs text-muted-foreground">Të ftuarit kërkojnë emrin dhe shohin
-                                tavolinën</p>
+                            <p className="font-sans text-sm font-medium">{tw('emri')}</p>
+                            <p className="text-xs text-muted-foreground">{t('findSeatDescription')}</p>
                         </div>
                         <input type="checkbox" {...register('enable_find_seat')}
                                className="w-4 h-4 accent-[hsl(var(--primary))]"/>
@@ -271,8 +273,8 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
                     <label
                         className="flex items-center justify-between p-3 rounded-xl border border-border cursor-pointer hover:bg-muted transition-colors">
                         <div>
-                            <p className="font-sans text-sm font-medium">Ngarko Foto</p>
-                            <p className="text-xs text-muted-foreground">Të ftuarit ngarkojnë foto nga dasma</p>
+                            <p className="font-sans text-sm font-medium">{tw('create')}</p>
+                            <p className="text-xs text-muted-foreground">{t('photoUploadDescription')}</p>
                         </div>
                         <input type="checkbox" {...register('enable_photo_upload')}
                                className="w-4 h-4 accent-[hsl(var(--primary))]"/>
@@ -286,29 +288,29 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                            Limit Total Fotosh
+                            {t('totalPhotoLimit')}
                         </label>
                         <input
                             {...register('max_photos_total', {valueAsNumber: true})}
                             type="number"
-                            placeholder="Pa limit"
+                            placeholder={t('noLimit')}
                             min={1}
                             className="input-wedding py-3 w-full"
                         />
-                        <p className="text-[10px] text-muted-foreground mt-1 italic">Lëreni bosh për pa limit</p>
+                        <p className="text-[10px] text-muted-foreground mt-1 italic">{t('leaveEmptyForNoLimit')}</p>
                     </div>
                     <div>
                         <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                            Limit për Të Ftuar
+                            {t('photoLimitPerGuest')}
                         </label>
                         <input
                             {...register('max_photos_per_guest', {valueAsNumber: true})}
                             type="number"
-                            placeholder="Pa limit"
+                            placeholder={t('noLimit')}
                             min={1}
                             className="input-wedding py-3 w-full"
                         />
-                        <p className="text-[10px] text-muted-foreground mt-1 italic">Sa foto lejohen për person</p>
+                        <p className="text-[10px] text-muted-foreground mt-1 italic">{t('howManyPhotosPerGuest')}</p>
                     </div>
                 </div>
             )}
@@ -327,10 +329,10 @@ export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProp
                 {isSubmitting ? (
                     <>
                         <Loader2 className="w-4 h-4 animate-spin"/>
-                        Duke krijuar...
+                        {t('creating')}
                     </>
                 ) : (
-                    'Krijo Dasmën'
+                    tw('create')
                 )}
             </button>
         </form>

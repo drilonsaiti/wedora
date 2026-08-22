@@ -33,8 +33,8 @@ export function getOrCreateSessionId(): string {
     return id
 }
 
-export function formatDate(dateStr: string): string {
-    return new Intl.DateTimeFormat('en-US', {
+export function formatDate(dateStr: string, locale: string = 'en-US'): string {
+    return new Intl.DateTimeFormat(locale, {
         year: 'numeric',
         month: 'long',
         day: 'numeric',

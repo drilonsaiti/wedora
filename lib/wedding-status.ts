@@ -12,9 +12,9 @@ export function getWeddingStatus(weddingDate: string | null): WeddingStatus {
 }
 
 export const WEDDING_STATUS_LABELS: Record<WeddingStatus, string> = {
-    upcoming: 'E ardhshme',
-    today: 'Sot',
-    past: 'E kaluar',
+    upcoming: 'upcoming',
+    today: 'today',
+    past: 'past',
 };
 
 export const WEDDING_STATUS_COLORS: Record<WeddingStatus, string> = {

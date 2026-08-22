@@ -10,18 +10,22 @@ import {cn} from '@/lib/utils'
 import {GuestAvatar} from '@/components/guest-avatar'
 import {GuestForm} from '@/components/admin/guest-form'
 import {TableForm} from '@/components/admin/table-form'
-import {useRouter} from "next/navigation";
+import {useRouter} from "@/lib/navigation";
+import {useTranslations} from 'next-intl';
 
 const SeatingDesigner = dynamic(() => import('@/components/admin/designer/seating-designer').then(mod => mod.SeatingDesigner), {
-    loading: () => (
-        <div
-            className="flex-1 flex items-center justify-center bg-muted/20 rounded-2xl border border-dashed border-border min-h-[600px]">
-            <div className="flex flex-col items-center gap-2">
-                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground"/>
-                <p className="text-sm text-muted-foreground font-sans">Duke ngarkuar planin e uljes...</p>
+    loading: () => {
+        const t = useTranslations('seating');
+        return (
+            <div
+                className="flex-1 flex items-center justify-center bg-muted/20 rounded-2xl border border-dashed border-border min-h-[600px]">
+                <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground"/>
+                    <p className="text-sm text-muted-foreground font-sans">{t('loadingDesigner')}</p>
+                </div>
             </div>
-        </div>
-    ),
+        );
+    },
     ssr: false
 })
 
@@ -43,6 +47,8 @@ export function SeatingManagement({
                                       weddingId
                                   }: SeatingManagementProps) {
     const router = useRouter()
+    const t = useTranslations('seating');
+    const tc = useTranslations('common');
     const [, startTransition] = useTransition()
     const [activeTab, setActiveTab] = useState<Tab>('guests')
     const [searchQuery, setSearchQuery] = useState('')
@@ -67,26 +73,26 @@ export function SeatingManagement({
     }, [initialGuests])
 
     const handleDeleteGuest = async (id: string) => {
-        if (!confirm('A jeni të sigurt që dëshironi të fshini këtë të ftuar?')) return
+        if (!confirm(t('confirmDeleteGuest'))) return
         try {
             startTransition(async () => {
                 await deleteGuest(id)
                 router.refresh()
             })
         } catch (err) {
-            alert('Dështoi fshirja e të ftuarit')
+            alert(t('deleteGuestFailed'))
         }
     }
 
     const handleDeleteTable = async (id: string) => {
-        if (!confirm('A jeni të sigurt që dëshironi të fshini këtë tavolinë? Të gjithë të ftuarit e caktuar do të mbeten pa tavolinë.')) return
+        if (!confirm(t('confirmDeleteTable'))) return
         try {
             startTransition(async () => {
                 await deleteTable(id)
                 router.refresh()
             })
         } catch (err) {
-            alert('Dështoi fshirja e tavolinës')
+            alert(t('deleteTableFailed'))
         }
     }
 
@@ -102,8 +108,7 @@ export function SeatingManagement({
                     <div className="flex items-center gap-4">
 
                         <div>
-                            <h1 className="font-serif text-xl font-light text-[hsl(var(--dark))]">Sistemimi i të
-                                ftuarve</h1>
+                            <h1 className="font-serif text-xl font-light text-[hsl(var(--dark))]">{t('title')}</h1>
                         </div>
                     </div>
 
@@ -113,12 +118,12 @@ export function SeatingManagement({
                             className="btn-ghost text-xs py-2 px-3 print:hidden"
                         >
                             <Printer className="w-3.5 h-3.5"/>
-                            <span className="hidden sm:inline">Printo PDF</span>
+                            <span className="hidden sm:inline">{t('print')}</span>
                         </button>
                         <button onClick={async () => await signOutAction()}
                                 className="btn-ghost text-xs py-2 px-3 print:hidden">
                             <LogOut className="w-3.5 h-3.5"/>
-                            <span className="hidden sm:inline">Çkyçu</span>
+                            <span className="hidden sm:inline">{tc('logout')}</span>
                         </button>
                     </div>
                 </div>
@@ -130,19 +135,19 @@ export function SeatingManagement({
                             active={activeTab === 'guests'}
                             onClick={() => setActiveTab('guests')}
                             icon={<Users className="w-4 h-4"/>}
-                            label="Të ftuarit"
+                            label={t('guests')}
                         />
                         <TabButton
                             active={activeTab === 'tables'}
                             onClick={() => setActiveTab('tables')}
                             icon={<LayoutGrid className="w-4 h-4"/>}
-                            label="Tavolinat"
+                            label={t('tables')}
                         />
                         <TabButton
                             active={activeTab === 'designer'}
                             onClick={() => setActiveTab('designer')}
                             icon={<MapIcon className="w-4 h-4"/>}
-                            label="Organizimi"
+                            label={t('designer')}
                         />
                     </div>
                 </div>
@@ -154,13 +159,13 @@ export function SeatingManagement({
                 <div className="hidden print:block print:w-full"
                      style={{colorAdjust: 'exact', WebkitPrintColorAdjust: 'exact'}}>
                     <h2 className="text-2xl font-serif mb-6 text-center" style={{color: '#000000'}}>
-                        Lista e të Ftuarve sipas Tavolinave
+                        {t('printTitle')}
                     </h2>
                     <div className="space-y-8">
                         {initialTables.sort((a, b) => a.number - b.number).map(table => (
                             <div key={table.id} className="border-b pb-4" style={{borderColor: '#000000'}}>
                                 <h3 className="text-lg  mb-2 font-extrabold" style={{color: '#000000'}}>
-                                    Tavolina <span
+                                    {t('table')} <span
                                     className="text-2xl"> {table.number}</span> {table.label ? `- "${table.label}"` : ''}
                                 </h3>
                                 <div className="grid grid-cols-2 gap-2">
@@ -184,15 +189,15 @@ export function SeatingManagement({
                         <div className="grid grid-cols-3 gap-4 print:hidden">
                             <div className="card-wedding p-4 text-center">
                                 <p className="font-serif text-2xl text-[hsl(var(--primary))]">{guestStats.total}</p>
-                                <p className="font-sans text-xs text-muted-foreground mt-1">Total i të ftuarve</p>
+                                <p className="font-sans text-xs text-muted-foreground mt-1">{t('total')}</p>
                             </div>
                             <div className="card-wedding p-4 text-center">
                                 <p className="font-serif text-2xl text-[hsl(var(--primary))]">{guestStats.seated}</p>
-                                <p className="font-sans text-xs text-muted-foreground mt-1">Të vendosur</p>
+                                <p className="font-sans text-xs text-muted-foreground mt-1">{t('seated')}</p>
                             </div>
                             <div className="card-wedding p-4 text-center">
                                 <p className="font-serif text-2xl text-[hsl(var(--primary))]">{guestStats.unseated}</p>
-                                <p className="font-sans text-xs text-muted-foreground mt-1">Pa Tavolinë</p>
+                                <p className="font-sans text-xs text-muted-foreground mt-1">{t('unseated')}</p>
                             </div>
                         </div>
 
@@ -203,7 +208,7 @@ export function SeatingManagement({
                                     className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"/>
                                 <input
                                     type="text"
-                                    placeholder="Kërko të ftuarit..."
+                                    placeholder={t('searchGuests')}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="input-wedding pl-10 py-2"
@@ -217,7 +222,7 @@ export function SeatingManagement({
                                 className="btn-primary py-2 px-4 text-xs w-full sm:w-auto"
                             >
                                 <Plus className="w-4 h-4"/>
-                                Shto të ftuar
+                                {t('addGuest')}
                             </button>
                         </div>
 
@@ -229,7 +234,7 @@ export function SeatingManagement({
                                         <div>
                                             <h3 className="font-sans font-medium text-sm">{guest.first_name} {guest.last_name}</h3>
                                             <p className="font-sans text-xs text-muted-foreground">
-                                                {guest.tables ? `Tavolina ${guest.tables.number}` : 'Pa Tavolinë'}
+                                                {guest.tables ? t('tableNumber', {number: guest.tables.number}) : t('unseated')}
                                             </p>
                                         </div>
                                     </div>
@@ -254,7 +259,7 @@ export function SeatingManagement({
                             ))}
                             {filteredGuests.length === 0 && (
                                 <div className="col-span-full text-center py-12 text-muted-foreground">
-                                    Nuk u gjet asnjë i ftuar.
+                                    {t('noGuests')}
                                 </div>
                             )}
                         </div>
@@ -306,26 +311,25 @@ export function SeatingManagement({
                                         )}
                                     >
                                         <span
-                                            className="text-[10px] uppercase tracking-widest text-muted-foreground">Tavolina</span>
+                                            className="text-[10px] uppercase tracking-widest text-muted-foreground">{t('table')}</span>
                                         <span
                                             className="text-2xl font-serif text-[hsl(var(--primary))]">{table.number}</span>
                                     </div>
 
-                                    <h3 className="font-sans font-medium text-sm">Tavolina {table.number}</h3>
+                                    <h3 className="font-sans font-medium text-sm">{t('table')} {table.number}</h3>
                                     {table.label && (
                                         <p className="font-sans text-[10px] text-[hsl(var(--gold))] font-medium mt-0.5">
                                             {table.label}
                                         </p>
                                     )}
                                     <p className="font-sans text-xs text-muted-foreground mt-1">
-                                        {initialGuests.filter(g => g.table_id === table.id).length} / {table.seats} Vende
-                                        të zëna
+                                        {initialGuests.filter(g => g.table_id === table.id).length} / {table.seats} {t('occupied')}
                                     </p>
                                 </div>
                             ))}
                             {initialTables.length === 0 && (
                                 <div className="col-span-full text-center py-12 text-muted-foreground">
-                                    Nuk është krijuar asnjë tavolinë ende.
+                                    {t('noTablesCreated')}
                                 </div>
                             )}
                         </div>
@@ -345,7 +349,7 @@ export function SeatingManagement({
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
                     <div className="w-full max-w-md bg-card rounded-2xl shadow-2xl p-6 overflow-hidden">
                         <h2 className="font-serif text-2xl font-light text-[hsl(var(--dark))] mb-6">
-                            {editingGuest ? 'Edit Guest' : 'Add New Guest'}
+                            {editingGuest ? t('editGuest') : t('addNewGuest')}
                         </h2>
                         <GuestForm
                             initialValues={editingGuest || undefined}
@@ -364,7 +368,7 @@ export function SeatingManagement({
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
                     <div className="w-full max-w-md bg-card rounded-2xl shadow-2xl p-6 overflow-hidden">
                         <h2 className="font-serif text-2xl font-light text-[hsl(var(--dark))] mb-6">
-                            {editingTable ? 'Edit Table' : 'Add New Table'}
+                            {editingTable ? t('editTable') : t('addNewTable')}
                         </h2>
                         <TableForm
                             initialValues={editingTable ? {

@@ -1,9 +1,12 @@
-import Link from 'next/link'
+import {Link} from '@/lib/navigation'
 import {ArrowRight, Heart, Images, Plus, Users} from 'lucide-react'
 import {getAdminDashboardStats} from '@/actions/admin'
+import {getTranslations} from 'next-intl/server'
 
 export default async function AdminDashboardPage() {
     const stats = await getAdminDashboardStats()
+    const t = await getTranslations('dashboard')
+    const tc = await getTranslations('common')
 
     if (!stats || stats.weddings.length === 0) {
         return (
@@ -11,11 +14,11 @@ export default async function AdminDashboardPage() {
                 <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
                     <Heart className="w-8 h-8 text-muted-foreground" strokeWidth={1.5}/>
                 </div>
-                <h1 className="font-serif text-2xl font-light mb-2">Ende s'keni asnjë dasmë</h1>
-                <p className="text-sm text-muted-foreground mb-6">Krijoni dasmën tuaj të parë për të filluar</p>
+                <h1 className="font-serif text-2xl font-light mb-2">{t('noWeddings')}</h1>
+                <p className="text-sm text-muted-foreground mb-6">{t('noWeddingsDescription')}</p>
                 <Link href="/admin/weddings/new" className="btn-primary inline-flex">
                     <Plus className="w-4 h-4"/>
-                    Krijo Dasmën
+                    {t('createWedding')}
                 </Link>
             </div>
         )
@@ -24,9 +27,9 @@ export default async function AdminDashboardPage() {
     return (
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
             <div className="flex items-center justify-between">
-                <h1 className="font-serif text-2xl font-light text-[hsl(var(--dark))]">Përmbledhje</h1>
+                <h1 className="font-serif text-2xl font-light text-[hsl(var(--dark))]">{t('overview')}</h1>
                 <Link href="/admin/weddings" className="btn-ghost text-xs py-2 px-4">
-                    Shiko të gjitha dasmat
+                    {t('viewAllWeddings')}
                     <ArrowRight className="w-3.5 h-3.5"/>
                 </Link>
             </div>
@@ -35,25 +38,25 @@ export default async function AdminDashboardPage() {
                 <div className="card-wedding p-5">
                     <Heart className="w-5 h-5 text-[hsl(var(--primary))] mb-2"/>
                     <p className="font-serif text-2xl">{stats.weddings.length}</p>
-                    <p className="text-xs text-muted-foreground">Dasma aktive</p>
+                    <p className="text-xs text-muted-foreground">{t('activeWeddings')}</p>
                 </div>
                 <div className="card-wedding p-5">
                     <Users className="w-5 h-5 text-[hsl(var(--primary))] mb-2"/>
                     <p className="font-serif text-2xl">{stats.totalGuests}</p>
-                    <p className="text-xs text-muted-foreground">Të ftuar gjithsej</p>
+                    <p className="text-xs text-muted-foreground">{t('totalGuests')}</p>
                 </div>
                 <div className="card-wedding p-5">
                     <Images className="w-5 h-5 text-[hsl(var(--primary))] mb-2"/>
                     <p className="font-serif text-2xl">{stats.totalPhotos}</p>
                     <p className="text-xs text-muted-foreground">
-                        Foto {stats.pendingPhotos > 0 && `(${stats.pendingPhotos} të reja)`}
+                        {t('photos')} {stats.pendingPhotos > 0 && `(${t('newPhotos', {count: stats.pendingPhotos})})`}
                     </p>
                 </div>
             </div>
 
             <div>
                 <h2 className="font-sans text-xs uppercase tracking-widest text-muted-foreground mb-3">
-                    Dasmat e fundit
+                    {t('recentWeddings')}
                 </h2>
                 <div className="space-y-3">
                     {stats.weddings.slice(0, 5).map((w) => (

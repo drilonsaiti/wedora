@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import {LogOut, Users} from 'lucide-react'
+import {useTranslations} from 'next-intl'
 import {GuestWithTable, Table, VenueElement} from '@/types/seating'
 import {VenueMap} from '@/components/venue-map'
 import {signOutAction} from '@/actions/admin'
@@ -13,7 +14,14 @@ interface CoupleSeatingViewProps {
     weddingId: string
 }
 
-export function CoupleSeatingView({guests, tables, venueElements, weddingId}: CoupleSeatingViewProps) {
+export function CoupleSeatingView({
+                                      guests,
+                                      tables,
+                                      venueElements,
+                                      weddingId
+                                  }: CoupleSeatingViewProps) {
+    const t = useTranslations('couple.seating')
+
     const seatedCount = guests.filter((g) => g.table_id).length
 
     return (
@@ -21,19 +29,35 @@ export function CoupleSeatingView({guests, tables, venueElements, weddingId}: Co
             <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
                     <div>
-                        <h1 className="font-serif text-xl font-light text-foreground">Sistemimi i
-                            Tavolinave</h1>
+                        <h1 className="font-serif text-xl font-light text-foreground">
+                            {t('title')}
+                        </h1>
+
                         <p className="font-sans text-xs text-muted-foreground">
-                            {seatedCount}/{guests.length} të ftuar të vendosur
+                            {t('seatedCount', {
+                                seated: seatedCount,
+                                total: guests.length
+                            })}
                         </p>
                     </div>
+
                     <div className="flex items-center gap-2">
-                        <Link href={`/couple/weddings/${weddingId}/photos`} className="btn-ghost text-xs py-2 px-3">
-                            Fotot
+                        <Link
+                            href={`/couple/weddings/${weddingId}/photos`}
+                            className="btn-ghost text-xs py-2 px-3"
+                        >
+                            {t('photos')}
                         </Link>
-                        <button onClick={async () => await signOutAction()} className="btn-ghost text-xs py-2 px-3">
+
+                        <button
+                            onClick={async () => await signOutAction()}
+                            className="btn-ghost text-xs py-2 px-3"
+                        >
                             <LogOut className="w-3.5 h-3.5"/>
-                            <span className="hidden sm:inline">Çkyçu</span>
+
+                            <span className="hidden sm:inline">
+                                {t('logout')}
+                            </span>
                         </button>
                     </div>
                 </div>
@@ -51,15 +75,26 @@ export function CoupleSeatingView({guests, tables, venueElements, weddingId}: Co
                 <div className="mt-8">
                     <h2 className="font-sans text-xs uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-2">
                         <Users className="w-3.5 h-3.5"/>
-                        Të ftuarit ({guests.length})
+                        {t('guests', {count: guests.length})}
                     </h2>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {guests.map((guest) => (
-                            <div key={guest.id} className="card-wedding p-3 flex items-center justify-between">
-                                <p className="text-sm font-sans">{guest.first_name} {guest.last_name}</p>
+                            <div
+                                key={guest.id}
+                                className="card-wedding p-3 flex items-center justify-between"
+                            >
+                                <p className="text-sm font-sans">
+                                    {guest.first_name} {guest.last_name}
+                                </p>
+
                                 <span className="text-xs text-muted-foreground">
-                  {guest.tables ? `Tavolina ${guest.tables.number}` : 'Pa tavolinë'}
-                </span>
+                                    {guest.tables
+                                        ? t('table', {
+                                            number: guest.tables.number
+                                        })
+                                        : t('noTable')}
+                                </span>
                             </div>
                         ))}
                     </div>

@@ -4,10 +4,10 @@ import {createServiceClient} from '@/lib/supabase/server'
 import {UploadForm} from '@/components/upload-form'
 import {BottomNav} from '@/components/bottom-nav'
 
-type Props = { params: Promise<{ slug: string }> }
+type Props = { params: Promise<{ locale: string; slug: string }> }
 
 export default async function PublicUploadPage({params}: Props) {
-    const {slug} = await params
+    const {locale, slug} = await params
     const wedding = await getWeddingBySlug(slug)
     if (!wedding) notFound()
     if (!wedding.wedding_settings?.enable_photo_upload) notFound()
