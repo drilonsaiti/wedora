@@ -1,177 +1,202 @@
 import { Check, X } from 'lucide-react'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
+
 import { cn } from '@/lib/utils'
 
 interface PricingPlan {
     id: 'basic' | 'standard' | 'premium'
     price: string
     featured?: boolean
-    features: {
-        key:
-            | 'findSeat'
-            | 'tableArrangement'
-            | 'photoUpload'
-            | 'guestLimit'
-            | 'storage'
-            | 'publicGallery'
-        included: boolean
-    }[]
 }
 
 const PLANS: PricingPlan[] = [
     {
         id: 'basic',
         price: '€39',
-        features: [
-            { key: 'findSeat', included: true },
-            { key: 'tableArrangement', included: true },
-            { key: 'photoUpload', included: false },
-            { key: 'guestLimit', included: true },
-            { key: 'storage', included: true },
-        ],
     },
     {
         id: 'standard',
         price: '€69',
         featured: true,
-        features: [
-            { key: 'findSeat', included: true },
-            { key: 'tableArrangement', included: true },
-            { key: 'photoUpload', included: true },
-            { key: 'guestLimit', included: true },
-            { key: 'storage', included: true },
-            { key: 'publicGallery', included: true },
-        ],
     },
     {
         id: 'premium',
         price: '€99',
-        features: [
-            { key: 'findSeat', included: true },
-            { key: 'tableArrangement', included: true },
-            { key: 'photoUpload', included: true },
-            { key: 'guestLimit', included: true },
-            { key: 'storage', included: true },
-            { key: 'publicGallery', included: true },
-        ],
     },
 ]
+
+const FEATURES = [
+    'findSeat',
+    'tableArrangement',
+    'photoUpload',
+    'guestLimit',
+    'storage',
+    'publicGallery',
+] as const
+
+const INCLUDED: Record<
+    PricingPlan['id'],
+    Record<(typeof FEATURES)[number], boolean>
+> = {
+    basic: {
+        findSeat: true,
+        tableArrangement: true,
+        photoUpload: false,
+        guestLimit: true,
+        storage: true,
+        publicGallery: false,
+    },
+    standard: {
+        findSeat: true,
+        tableArrangement: true,
+        photoUpload: true,
+        guestLimit: true,
+        storage: true,
+        publicGallery: true,
+    },
+    premium: {
+        findSeat: true,
+        tableArrangement: true,
+        photoUpload: true,
+        guestLimit: true,
+        storage: true,
+        publicGallery: true,
+    },
+}
 
 export async function PricingSection() {
     const t = await getTranslations('pricing')
 
     return (
-        <div className="relative z-10 w-full max-w-5xl">
-            {/* Header */}
-            <div className="text-center mb-10">
-                <p className="font-sans text-xs tracking-[0.3em] uppercase text-muted-foreground mb-3">
+        <div className="mx-auto w-full max-w-7xl">
+            <div className="mx-auto max-w-2xl text-center">
+                <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.25em] text-[hsl(var(--primary))]">
                     {t('eyebrow')}
                 </p>
 
-                <h2 className="font-serif text-3xl font-light text-foreground mb-2">
+                <h2 className="font-serif text-4xl font-light tracking-tight sm:text-5xl">
                     {t('title')}
                 </h2>
 
-                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-muted-foreground">
                     {t('description')}
                 </p>
             </div>
 
-            {/* Plans */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="mt-14 grid gap-5 lg:grid-cols-3">
                 {PLANS.map((plan) => (
-                    <div
+                    <article
                         key={plan.id}
                         className={cn(
-                            'card-wedding p-6 flex flex-col relative',
-                            plan.featured &&
-                            'border-2 border-[hsl(var(--primary))] shadow-lg md:-translate-y-2'
+                            'relative flex min-h-[560px] flex-col rounded-[2rem] border bg-card p-7 transition duration-300 md:p-8',
+                            plan.featured
+                                ? 'border-[hsl(var(--primary))]/45 shadow-[0_25px_70px_-35px_rgba(130,60,78,0.45)] lg:-translate-y-3'
+                                : 'border-border/70 shadow-sm hover:-translate-y-1 hover:shadow-lg'
                         )}
                     >
-                        {/* Featured badge */}
                         {plan.featured && (
-                            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[hsl(var(--primary))] text-white text-[10px] uppercase tracking-widest font-medium px-3 py-1 rounded-full">
+                            <span className="absolute right-6 top-6 rounded-full bg-[hsl(var(--accent))] px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--primary))]">
                                 {t('mostPopular')}
                             </span>
                         )}
 
-                        {/* Plan name */}
-                        <h3 className="font-serif text-xl text-foreground mb-1">
-                            {t(`plans.${plan.id}.name`)}
-                        </h3>
+                        <div>
+                            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                                {t(`plans.${plan.id}.eyebrow`)}
+                            </p>
 
-                        {/* Description */}
-                        <p className="text-xs text-muted-foreground mb-4">
-                            {t(`plans.${plan.id}.description`)}
-                        </p>
+                            <h3 className="mt-3 font-serif text-3xl font-light">
+                                {t(`plans.${plan.id}.name`)}
+                            </h3>
 
-                        {/* Price */}
-                        <div className="mb-6">
-                            <span className="font-serif text-4xl text-foreground">
-                                {plan.price}
-                            </span>
-
-                            <span className="text-xs text-muted-foreground ml-1">
-                                {t('perWedding')}
-                            </span>
+                            <p className="mt-3 min-h-[48px] max-w-xs text-sm leading-6 text-muted-foreground">
+                                {t(`plans.${plan.id}.description`)}
+                            </p>
                         </div>
 
-                        {/* Features */}
-                        <ul className="space-y-2.5 mb-6 flex-1">
-                            {plan.features.map((feature) => (
-                                <li
-                                    key={feature.key}
-                                    className="flex items-start gap-2 text-sm"
-                                >
-                                    {feature.included ? (
-                                        <Check className="w-4 h-4 text-[hsl(var(--primary))] shrink-0 mt-0.5" />
-                                    ) : (
-                                        <X className="w-4 h-4 text-muted-foreground/40 shrink-0 mt-0.5" />
-                                    )}
+                        <div className="my-8 border-y border-border/70 py-6">
+                            <div className="flex items-end gap-2">
+                                <span className="font-serif text-5xl font-light tracking-tight">
+                                    {plan.price}
+                                </span>
 
-                                    <span
-                                        className={cn(
-                                            !feature.included &&
-                                            'text-muted-foreground/50 line-through'
-                                        )}
+                                <span className="pb-1.5 text-xs text-muted-foreground">
+                                    {t('perWedding')}
+                                </span>
+                            </div>
+                        </div>
+
+                        <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                            {t('included')}
+                        </p>
+
+                        <ul className="mb-8 space-y-3.5">
+                            {FEATURES.map((feature) => {
+                                const included =
+                                    INCLUDED[plan.id][feature]
+
+                                return (
+                                    <li
+                                        key={feature}
+                                        className="flex items-start gap-3"
                                     >
-                                        {t(
-                                            `features.${plan.id}.${feature.key}`
-                                        )}
-                                    </span>
-                                </li>
-                            ))}
+                                        <span
+                                            className={cn(
+                                                'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full',
+                                                included
+                                                    ? 'bg-[hsl(var(--accent))] text-[hsl(var(--primary))]'
+                                                    : 'bg-muted text-muted-foreground/40'
+                                            )}
+                                        >
+                                            {included ? (
+                                                <Check className="h-3 w-3" />
+                                            ) : (
+                                                <X className="h-3 w-3" />
+                                            )}
+                                        </span>
+
+                                        <span
+                                            className={cn(
+                                                'text-sm leading-5',
+                                                !included &&
+                                                'text-muted-foreground/40'
+                                            )}
+                                        >
+                                            {t(
+                                                `features.${plan.id}.${feature}`
+                                            )}
+                                        </span>
+                                    </li>
+                                )
+                            })}
                         </ul>
 
-                        {/* CTA */}
                         <Link
                             href="#contact"
                             className={cn(
-                                'w-full py-3 rounded-xl text-center text-sm font-medium tracking-wide transition-all',
+                                'mt-auto flex w-full items-center justify-center rounded-full px-6 py-3.5 text-sm font-medium transition',
                                 plan.featured
-                                    ? 'btn-primary justify-center'
-                                    : 'btn-ghost justify-center'
+                                    ? 'bg-[hsl(var(--primary))] text-white hover:opacity-90'
+                                    : 'border border-border bg-background hover:bg-secondary'
                             )}
                         >
                             {t('choosePlan', {
                                 plan: t(`plans.${plan.id}.name`),
                             })}
                         </Link>
-                    </div>
+                    </article>
                 ))}
             </div>
 
-            {/* Bottom CTA */}
-            <p className="text-center text-xs text-muted-foreground mt-8">
+            <p className="mt-8 text-center text-xs text-muted-foreground">
                 {t('customPlan.text')}{' '}
                 <a
-                    href="#contact"
-                    className="text-[hsl(var(--primary))] hover:underline"
+                    href="mailto:contact@wedora.com"
+                    className="font-medium text-foreground underline-offset-4 hover:underline"
                 >
                     {t('customPlan.contact')}
-                </a>{' '}
-                {t('customPlan.suffix')}
+                </a>
             </p>
         </div>
     )

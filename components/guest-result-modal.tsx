@@ -1,130 +1,259 @@
-'use client';
+'use client'
 
-import {AnimatePresence, motion} from 'framer-motion';
-import {X} from 'lucide-react';
-import {GuestWithTable, Table, VenueElement} from '@/types/seating';
-import {VenueMap} from "@/components/venue-map";
-import {useTranslations} from 'next-intl';
+import {
+    AnimatePresence,
+    motion,
+} from 'framer-motion'
+import {
+    Armchair,
+    MapPin,
+    X,
+} from 'lucide-react'
+import { useTranslations } from 'next-intl'
+
+import { VenueMap } from '@/components/venue-map'
+import type {
+    GuestWithTable,
+    Table,
+    VenueElement,
+} from '@/types/seating'
 
 interface GuestResultModalProps {
-    guest: GuestWithTable | null;
-    onClose: () => void;
-    tables: Table[];
-    venueElements: VenueElement[];
+    guest: GuestWithTable | null
+    onClose: () => void
+    tables: Table[]
+    venueElements: VenueElement[]
 }
 
-export function GuestResultModal({guest, onClose, tables, venueElements}: GuestResultModalProps) {
-    const t = useTranslations('wedding');
+export function GuestResultModal({
+                                     guest,
+                                     onClose,
+                                     tables,
+                                     venueElements,
+                                 }: GuestResultModalProps) {
+    const t = useTranslations('wedding')
 
     return (
         <AnimatePresence>
             {guest && (
                 <motion.div
-                    initial={{opacity: 0}}
-                    animate={{opacity: 1}}
-                    exit={{opacity: 0}}
-                    className="fixed inset-0 z-[100] bg-[hsl(var(--dark))]/40 backdrop-blur-sm overflow-y-auto "
+                    initial={{
+                        opacity: 0,
+                    }}
+                    animate={{
+                        opacity: 1,
+                    }}
+                    exit={{
+                        opacity: 0,
+                    }}
+                    transition={{
+                        duration: 0.2,
+                    }}
+                    className="fixed inset-0 z-[100] overflow-y-auto bg-black/45 backdrop-blur-md"
                     onClick={onClose}
                 >
-                    <div className="min-h-full flex items-start sm:items-center justify-center ">
+                    <div className="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-6">
                         <motion.div
-                            initial={{y: 50, opacity: 0}}
-                            animate={{y: 0, opacity: 1}}
-                            exit={{y: 50, opacity: 0}}
-                            className="relative w-full max-w-xl bg-card rounded-[2.5rem] p-6 sm:p-10 text-center shadow-2xl border border-[hsl(var(--gold))]/30"
-                            onClick={e => e.stopPropagation()}
+                            initial={{
+                                opacity: 0,
+                                y: 30,
+                                scale: 0.98,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                                scale: 1,
+                            }}
+                            exit={{
+                                opacity: 0,
+                                y: 30,
+                                scale: 0.98,
+                            }}
+                            transition={{
+                                type: 'spring',
+                                stiffness: 320,
+                                damping: 30,
+                            }}
+                            role="dialog"
+                            aria-modal="true"
+                            className="relative w-full max-w-xl overflow-hidden rounded-t-[2rem] border border-border/70 bg-card shadow-[0_30px_100px_-30px_rgba(0,0,0,0.55)] sm:rounded-[2rem]"
+                            onClick={(event) =>
+                                event.stopPropagation()
+                            }
                         >
-                            <button
-                                onClick={onClose}
-                                className="absolute top-4 right-4 sm:top-6 sm:right-6 w-9 h-9 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center hover:bg-[hsl(var(--accent))]/70 transition-colors z-20"
-                                aria-label={t('close')}
-                            >
-                                <X className="w-4 h-4 text-foreground"/>
-                            </button>
+                            {/* Header */}
+                            <div className="relative px-6 pb-6 pt-7 text-center sm:px-8 sm:pt-8">
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    aria-label={t('close')}
+                                    className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/80 text-muted-foreground backdrop-blur transition hover:bg-secondary hover:text-foreground sm:right-5 sm:top-5"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
 
-                            <h2 className="font-serif text-3xl text-foreground mb-1 flex items-center justify-center gap-3 pr-8">
-                                {guest.first_name} {guest.last_name}
-                            </h2>
+                                <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.2em] text-[hsl(var(--primary))]">
+                                    {t('welcome')}
+                                </p>
 
-                            <p className="font-sans text-xs uppercase tracking-[0.3em] text-muted-foreground mb-8">
-                                {t('welcome')}
-                            </p>
+                                <h2 className="mx-auto max-w-sm pr-6 font-serif text-3xl font-light tracking-[-0.02em] text-foreground sm:text-4xl">
+                                    {guest.first_name}{' '}
+                                    {guest.last_name}
+                                </h2>
+                            </div>
 
-                            <div
-                                className="h-px w-full bg-gradient-to-r from-transparent via-[hsl(var(--gold))]/30 to-transparent mb-8"/>
+                            {guest.tables ? (
+                                <>
+                                    {/* Seat summary */}
+                                    <div className="border-y border-border/60 bg-secondary/25 px-6 py-6 sm:px-8">
+                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                            <div className="rounded-2xl border border-border/60 bg-background p-5 text-left">
+                                                <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                                                    <Armchair
+                                                        className="h-4 w-4 text-[hsl(var(--primary))]"
+                                                        strokeWidth={
+                                                            1.6
+                                                        }
+                                                    />
+                                                </div>
 
-                            <div
-                                className="bg-[hsl(var(--accent))]/10 backdrop-blur-sm rounded-[3rem] py-8 px-4 mb-6 border border-[hsl(var(--gold))]/10 shadow-sm relative overflow-hidden">
-                                <div
-                                    className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[hsl(var(--gold))]/10 to-transparent"/>
-                                <span
-                                    className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground block mb-4">{t('yourTable')}</span>
-                                {guest.tables ? (
-                                    <div className="flex flex-col items-center gap-6">
-                                        <div className="relative">
-                                            <div
-                                                className="w-32 h-32 rounded-full border border-[hsl(var(--gold))]/30 flex flex-col items-center justify-center bg-white shadow-xl relative z-10">
-                                                <span
-                                                    className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">{t('number')}</span>
-                                                <span
-                                                    className="text-6xl font-serif text-[hsl(var(--primary))] font-medium leading-none">
-        {guest.tables.number}
-    </span>
-                                                {guest.tables.shape !== 'round' && (
-                                                    <span
-                                                        className="text-[10px] uppercase tracking-widest text-[hsl(var(--gold))] mt-1">
-                                                        {t('seatIndex', {index: (guest.table_seats?.seat_index ?? 0) + 1})}
-                                                    </span>
+                                                <p className="text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                                                    {t(
+                                                        'yourTable'
+                                                    )}
+                                                </p>
+
+                                                <p className="mt-1 font-serif text-4xl font-light tracking-tight text-foreground">
+                                                    {
+                                                        guest
+                                                            .tables
+                                                            .number
+                                                    }
+                                                </p>
+                                            </div>
+
+                                            <div className="rounded-2xl border border-border/60 bg-background p-5 text-left">
+                                                <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                                                    <MapPin
+                                                        className="h-4 w-4 text-[hsl(var(--primary))]"
+                                                        strokeWidth={
+                                                            1.6
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <p className="text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                                                    {guest.tables
+                                                        .shape !==
+                                                    'round'
+                                                        ? t(
+                                                            'seat'
+                                                        )
+                                                        : t(
+                                                            'venueMap'
+                                                        )}
+                                                </p>
+
+                                                {guest.tables
+                                                    .shape !==
+                                                'round' ? (
+                                                    <p className="mt-1 font-serif text-4xl font-light tracking-tight text-foreground">
+                                                        {(guest
+                                                                    .table_seats
+                                                                    ?.seat_index ??
+                                                                0) +
+                                                            1}
+                                                    </p>
+                                                ) : (
+                                                    <p className="mt-2 text-sm leading-5 text-muted-foreground">
+                                                        {t(
+                                                            'tableLocation'
+                                                        )}
+                                                    </p>
                                                 )}
                                             </div>
-                                            <div
-                                                className="absolute -inset-2 bg-[hsl(var(--gold))]/5 rounded-full blur-xl -z-0"/>
+                                        </div>
+                                    </div>
+
+                                    {/* Venue map */}
+                                    <div className="px-4 py-6 sm:px-8 sm:py-8">
+                                        <div className="mb-4 flex items-center justify-between gap-4">
+                                            <div>
+                                                <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                                                    {t(
+                                                        'venueMap'
+                                                    )}
+                                                </p>
+
+                                                <p className="mt-1 text-xs text-muted-foreground">
+                                                    {t(
+                                                        'venueMapDescription'
+                                                    )}
+                                                </p>
+                                            </div>
+
+                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                                                <MapPin
+                                                    className="h-4 w-4 text-[hsl(var(--primary))]"
+                                                    strokeWidth={
+                                                        1.6
+                                                    }
+                                                />
+                                            </div>
                                         </div>
 
-                                        <div className="w-full">
-                                            <div className="flex items-center justify-center gap-2 mb-3">
-                                                <div className="h-px w-8 bg-[hsl(var(--gold))]/20"/>
-                                                <span
-                                                    className="text-[10px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
-                                                    {t('venueMap')}
-                                                  </span>
-                                                <div className="h-px w-8 bg-[hsl(var(--gold))]/20"/>
-                                            </div>
+                                        <div className="overflow-hidden rounded-[1.5rem] border border-border/70 bg-background">
                                             <VenueMap
-                                                tables={tables}
-                                                venueElements={venueElements}
-                                                highlightedTableId={guest.table_id}
-                                                highlightedSeatId={guest.seat_id}
-                                                maxHeight={400}
+                                                tables={
+                                                    tables
+                                                }
+                                                venueElements={
+                                                    venueElements
+                                                }
+                                                highlightedTableId={
+                                                    guest.table_id
+                                                }
+                                                highlightedSeatId={
+                                                    guest.seat_id
+                                                }
+                                                maxHeight={
+                                                    400
+                                                }
                                             />
                                         </div>
                                     </div>
-                                ) : (
-                                    <div className="flex flex-col items-center py-4">
-                                        <div
-                                            className="w-20 h-20 rounded-full border-2 border-dashed border-[hsl(var(--gold))]/40 flex items-center justify-center mb-4">
-                                            <span className="text-4xl">✨</span>
+                                </>
+                            ) : (
+                                /* No table */
+                                <div className="px-6 pb-8 sm:px-8">
+                                    <div className="rounded-[1.5rem] border border-border/60 bg-secondary/30 px-6 py-9 text-center">
+                                        <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                                            <Armchair
+                                                className="h-5 w-5 text-[hsl(var(--primary))]"
+                                                strokeWidth={
+                                                    1.5
+                                                }
+                                            />
                                         </div>
-                                        <span className="text-lg font-serif text-foreground italic">
-                                          {t('noTable')}
-                                        </span>
-                                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-2 px-4">
-                                            {t('noTableDescription')}
+
+                                        <h3 className="font-serif text-2xl font-light text-foreground">
+                                            {t(
+                                                'noTable'
+                                            )}
+                                        </h3>
+
+                                        <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
+                                            {t(
+                                                'noTableDescription'
+                                            )}
                                         </p>
                                     </div>
-                                )}
-                            </div>
-
-                            {/*<button
-                      onClick={onClose}
-                      className="btn-primary w-full py-5 rounded-2xl shadow-lg hover:shadow-xl transition-all"
-                  >
-                    Shumë faleminderit!
-                  </button>*/}
+                                </div>
+                            )}
                         </motion.div>
                     </div>
                 </motion.div>
             )}
         </AnimatePresence>
-    );
+    )
 }

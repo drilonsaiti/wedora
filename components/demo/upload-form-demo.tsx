@@ -1,174 +1,384 @@
 'use client'
 
-import {useCallback, useRef, useState} from 'react'
-import {useForm} from 'react-hook-form'
-import {zodResolver} from '@hookform/resolvers/zod'
+import {
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from 'react'
+
 import {
     ArrowLeftRight,
     Camera,
-    CheckCircle2,
+    Check,
     ImageIcon,
     Loader2,
-    MessageSquare,
     Upload,
-    User,
-    X
+    X,
 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import imageCompression from 'browser-image-compression'
 import loadImage from 'blueimp-load-image'
-import {useTranslations} from 'next-intl'
-import {fileSchema, uploadFormSchema, type UploadFormValues} from '@/schemas'
-import {cn, formatBytes} from '@/lib/utils'
 
-type UploadState = 'idle' | 'compressing' | 'uploading' | 'done' | 'error'
+import {
+    fileSchema,
+    uploadFormSchema,
+    type UploadFormValues,
+} from '@/schemas'
+import { cn, formatBytes } from '@/lib/utils'
+
+type UploadState =
+    | 'idle'
+    | 'compressing'
+    | 'uploading'
+    | 'done'
+    | 'error'
 
 const filterOptions = [
-    {id: 'none', css: 'none'},
-    {id: 'grayscale', css: 'grayscale(100%)'},
-    {id: 'sepia', css: 'sepia(85%)'},
-    {id: 'warm', css: 'brightness(108%) contrast(108%) saturate(125%) hue-rotate(8deg)'},
-    {id: 'cool', css: 'brightness(105%) contrast(110%) saturate(115%) hue-rotate(-15deg)'},
-    {id: 'vintage', css: 'sepia(45%) contrast(112%) brightness(92%)'},
-    {id: 'dramatic', css: 'contrast(125%) brightness(88%) saturate(75%)'},
-    {id: 'soft', css: 'brightness(110%) contrast(95%) saturate(90%)'},
+    {
+        id: 'none',
+        css: 'none',
+    },
+    {
+        id: 'grayscale',
+        css: 'grayscale(100%)',
+    },
+    {
+        id: 'sepia',
+        css: 'sepia(85%)',
+    },
+    {
+        id: 'warm',
+        css: 'brightness(108%) contrast(108%) saturate(125%) hue-rotate(8deg)',
+    },
+    {
+        id: 'cool',
+        css: 'brightness(105%) contrast(110%) saturate(115%) hue-rotate(-15deg)',
+    },
+    {
+        id: 'vintage',
+        css: 'sepia(45%) contrast(112%) brightness(92%)',
+    },
+    {
+        id: 'dramatic',
+        css: 'contrast(125%) brightness(88%) saturate(75%)',
+    },
+    {
+        id: 'soft',
+        css: 'brightness(110%) contrast(95%) saturate(90%)',
+    },
 ] as const
 
 export function UploadFormDemo() {
     const t = useTranslations('wedding.upload')
 
-    const [selectedFile, setSelectedFile] = useState<File | null>(null)
-    const [preview, setPreview] = useState<string | null>(null)
-    const [isFlipped, setIsFlipped] = useState(false)
-    const [selectedFilter, setSelectedFilter] = useState<string>('none')
-    const [uploadState, setUploadState] = useState<UploadState>('idle')
-    const [progress, setProgress] = useState(0)
-    const [fileError, setFileError] = useState<string | null>(null)
+    const [selectedFile, setSelectedFile] =
+        useState<File | null>(null)
 
-    const cameraRef = useRef<HTMLInputElement>(null)
-    const galleryRef = useRef<HTMLInputElement>(null)
+    const [preview, setPreview] =
+        useState<string | null>(null)
+
+    const [isFlipped, setIsFlipped] =
+        useState(false)
+
+    const [selectedFilter, setSelectedFilter] =
+        useState('none')
+
+    const [uploadState, setUploadState] =
+        useState<UploadState>('idle')
+
+    const [progress, setProgress] =
+        useState(0)
+
+    const [fileError, setFileError] =
+        useState<string | null>(null)
+
+    const cameraRef =
+        useRef<HTMLInputElement>(null)
+
+    const galleryRef =
+        useRef<HTMLInputElement>(null)
 
     const {
         register,
         handleSubmit,
-        formState: {errors},
+        formState: { errors },
         reset,
     } = useForm<UploadFormValues>({
-        resolver: zodResolver(uploadFormSchema),
-        defaultValues: {isPublic: false},
+        resolver: zodResolver(
+            uploadFormSchema
+        ),
+        defaultValues: {
+            isPublic: false,
+        },
     })
 
-    const handleFileSelect = useCallback(async (file: File) => {
-        setFileError(null)
-        setIsFlipped(false)
-        setSelectedFilter('none')
-
-        const result = fileSchema.safeParse(file)
-
-        if (!result.success) {
-            setFileError(
-                result.error.errors[0]?.message ?? t('errors.invalidFile')
-            )
-            return
-        }
-
-        try {
-            const orientedBlob = await new Promise<Blob>((resolve, reject) => {
-                loadImage(
-                    file,
-                    (canvas) => {
-                        if (!(canvas instanceof HTMLCanvasElement)) {
-                            reject(new Error('Failed to create oriented canvas'))
-                            return
-                        }
-
-                        canvas.toBlob(
-                            (blob) =>
-                                blob
-                                    ? resolve(blob)
-                                    : reject(),
-                            'image/jpeg',
-                            0.92
-                        )
-                    },
-                    {
-                        orientation: true,
-                        canvas: true,
-                        maxWidth: 2048,
-                        maxHeight: 2048,
-                    }
+    /*
+     * Revoke the preview URL when
+     * the component unmounts.
+     */
+    useEffect(() => {
+        return () => {
+            if (preview) {
+                URL.revokeObjectURL(
+                    preview
                 )
-            })
-
-            const orientedFile = new File(
-                [orientedBlob],
-                'photo.jpg',
-                {type: 'image/jpeg'}
-            )
-
-            const corrected = await imageCompression(orientedFile, {
-                maxSizeMB: 3,
-                maxWidthOrHeight: 2048,
-                useWebWorker: true,
-                fileType: 'image/jpeg',
-                initialQuality: 0.92,
-                exifOrientation: 1,
-            })
-
-            setSelectedFile(corrected)
-            setPreview(URL.createObjectURL(corrected))
-        } catch {
-            setSelectedFile(file)
-            setPreview(URL.createObjectURL(file))
-        }
-    }, [t])
-
-    const clearFile = useCallback(() => {
-        if (preview) {
-            URL.revokeObjectURL(preview)
-        }
-
-        setSelectedFile(null)
-        setPreview(null)
-        setIsFlipped(false)
-        setSelectedFilter('none')
-        setFileError(null)
-
-        if (cameraRef.current) {
-            cameraRef.current.value = ''
-        }
-
-        if (galleryRef.current) {
-            galleryRef.current.value = ''
+            }
         }
     }, [preview])
 
-    const toggleFlip = useCallback(
-        () => setIsFlipped((prev) => !prev),
-        []
+    /*
+     * Prepare selected image.
+     *
+     * 1. Validate file
+     * 2. Correct EXIF orientation
+     * 3. Resize to max 2048px
+     * 4. Compress to JPEG
+     */
+    const handleFileSelect = useCallback(
+        async (file: File) => {
+            setFileError(null)
+            setIsFlipped(false)
+            setSelectedFilter('none')
+
+            const result =
+                fileSchema.safeParse(file)
+
+            if (!result.success) {
+                setFileError(
+                    result.error.errors[0]
+                        ?.message ??
+                    t(
+                        'errors.invalidFile'
+                    )
+                )
+
+                return
+            }
+
+            try {
+                const orientedBlob =
+                    await new Promise<Blob>(
+                        (
+                            resolve,
+                            reject
+                        ) => {
+                            loadImage(
+                                file,
+                                (
+                                    canvas
+                                ) => {
+                                    if (
+                                        !(
+                                            canvas instanceof
+                                            HTMLCanvasElement
+                                        )
+                                    ) {
+                                        reject(
+                                            new Error(
+                                                'Failed to create oriented canvas'
+                                            )
+                                        )
+
+                                        return
+                                    }
+
+                                    canvas.toBlob(
+                                        (
+                                            blob
+                                        ) => {
+                                            if (
+                                                blob
+                                            ) {
+                                                resolve(
+                                                    blob
+                                                )
+                                            } else {
+                                                reject(
+                                                    new Error(
+                                                        'Failed to create image blob'
+                                                    )
+                                                )
+                                            }
+                                        },
+                                        'image/jpeg',
+                                        0.92
+                                    )
+                                },
+                                {
+                                    orientation:
+                                        true,
+                                    canvas: true,
+                                    maxWidth:
+                                        2048,
+                                    maxHeight:
+                                        2048,
+                                }
+                            )
+                        }
+                    )
+
+                const orientedFile =
+                    new File(
+                        [
+                            orientedBlob,
+                        ],
+                        'photo.jpg',
+                        {
+                            type: 'image/jpeg',
+                        }
+                    )
+
+                const corrected =
+                    await imageCompression(
+                        orientedFile,
+                        {
+                            maxSizeMB: 3,
+                            maxWidthOrHeight:
+                                2048,
+                            useWebWorker:
+                                true,
+                            fileType:
+                                'image/jpeg',
+                            initialQuality:
+                                0.92,
+                            exifOrientation:
+                                1,
+                        }
+                    )
+
+                if (preview) {
+                    URL.revokeObjectURL(
+                        preview
+                    )
+                }
+
+                const previewUrl =
+                    URL.createObjectURL(
+                        corrected
+                    )
+
+                setSelectedFile(
+                    corrected
+                )
+                setPreview(previewUrl)
+            } catch {
+                if (preview) {
+                    URL.revokeObjectURL(
+                        preview
+                    )
+                }
+
+                const previewUrl =
+                    URL.createObjectURL(
+                        file
+                    )
+
+                setSelectedFile(file)
+                setPreview(previewUrl)
+            }
+        },
+        [preview, t]
     )
 
-    // Demo only — no real upload
-    const onSubmit = async (_values: UploadFormValues) => {
+    /*
+     * Remove selected image
+     */
+    const clearFile =
+        useCallback(() => {
+            if (preview) {
+                URL.revokeObjectURL(
+                    preview
+                )
+            }
+
+            setSelectedFile(null)
+            setPreview(null)
+            setIsFlipped(false)
+            setSelectedFilter('none')
+            setFileError(null)
+
+            if (cameraRef.current) {
+                cameraRef.current.value =
+                    ''
+            }
+
+            if (galleryRef.current) {
+                galleryRef.current.value =
+                    ''
+            }
+        }, [preview])
+
+    /*
+     * Mirror image
+     */
+    const toggleFlip =
+        useCallback(() => {
+            setIsFlipped(
+                (current) =>
+                    !current
+            )
+        }, [])
+
+    /*
+     * Demo upload simulation
+     */
+    const onSubmit = async (
+        _values: UploadFormValues
+    ) => {
         if (!selectedFile) {
-            setFileError(t('errors.selectPhoto'))
+            setFileError(
+                t(
+                    'errors.selectPhoto'
+                )
+            )
+
             return
         }
 
-        setUploadState('compressing')
+        setUploadState(
+            'compressing'
+        )
         setProgress(15)
-        await new Promise((r) => setTimeout(r, 500))
+
+        await new Promise(
+            (resolve) =>
+                setTimeout(
+                    resolve,
+                    500
+                )
+        )
 
         setProgress(45)
         setUploadState('uploading')
-        await new Promise((r) => setTimeout(r, 700))
+
+        await new Promise(
+            (resolve) =>
+                setTimeout(
+                    resolve,
+                    700
+                )
+        )
 
         setProgress(80)
-        await new Promise((r) => setTimeout(r, 400))
+
+        await new Promise(
+            (resolve) =>
+                setTimeout(
+                    resolve,
+                    400
+                )
+        )
 
         setProgress(100)
         setUploadState('done')
     }
 
+    /*
+     * Reset after demo upload
+     */
     const handleReset = () => {
         clearFile()
         reset()
@@ -177,33 +387,50 @@ export function UploadFormDemo() {
     }
 
     const isLoading =
-        uploadState === 'compressing' ||
-        uploadState === 'uploading'
+        uploadState ===
+        'compressing' ||
+        uploadState ===
+        'uploading'
 
+    /*
+     * SUCCESS
+     */
     if (uploadState === 'done') {
         return (
-            <div className="text-center py-16 space-y-4">
-                <div
-                    className="w-16 h-16 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center mx-auto"
-                >
-                    <CheckCircle2
-                        className="w-8 h-8 text-[hsl(var(--primary))]"
+            <div className="py-7 text-center sm:py-9">
+                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]">
+                    <Check
+                        className="h-6 w-6 text-[hsl(var(--primary))]"
+                        strokeWidth={
+                            1.7
+                        }
                     />
                 </div>
 
-                <h2 className="font-serif text-2xl font-light text-foreground">
-                    {t('success.title')}
+                <h2 className="font-serif text-3xl font-light tracking-[-0.02em] text-foreground">
+                    {t(
+                        'success.title'
+                    )}
                 </h2>
 
-                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                    {t('success.description')}
+                <p className="mx-auto mt-3 max-w-xs text-sm leading-6 text-muted-foreground">
+                    {t(
+                        'success.description'
+                    )}
                 </p>
 
                 <button
-                    onClick={handleReset}
-                    className="btn-ghost mt-2"
+                    type="button"
+                    onClick={
+                        handleReset
+                    }
+                    className="btn-secondary mt-7 w-full justify-center"
                 >
-                    {t('success.tryAgain')}
+                    <Camera className="h-4 w-4" />
+
+                    {t(
+                        'success.tryAgain'
+                    )}
                 </button>
             </div>
         )
@@ -211,268 +438,395 @@ export function UploadFormDemo() {
 
     return (
         <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="space-y-6"
+            onSubmit={handleSubmit(
+                onSubmit
+            )}
+            className="space-y-7"
         >
+            {/* IMAGE SELECTION */}
             {!selectedFile ? (
-                <div className="space-y-4">
-                    <div className="card-wedding p-6 text-center border-dashed border-2 border-border">
-                        <div
-                            className="w-16 h-16 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center mx-auto mb-4"
-                        >
+                <div>
+                    <div className="text-center">
+                        <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
                             <ImageIcon
-                                className="w-8 h-8 text-[hsl(var(--primary))]"
-                                strokeWidth={1.5}
+                                className="h-5 w-5 text-[hsl(var(--primary))]"
+                                strokeWidth={
+                                    1.5
+                                }
                             />
                         </div>
 
-                        <p className="font-sans text-sm text-muted-foreground mb-6">
-                            {t('selectMethod')}
+                        <p className="mx-auto max-w-xs text-sm leading-6 text-muted-foreground">
+                            {t(
+                                'selectMethod'
+                            )}
                         </p>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        {/* Source selection */}
+                        <div className="mt-6 grid grid-cols-2 gap-3">
                             <button
                                 type="button"
-                                onClick={() => cameraRef.current?.click()}
-                                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border bg-background hover:bg-accent/50 transition-colors"
+                                onClick={() =>
+                                    cameraRef.current?.click()
+                                }
+                                className="group flex min-h-[112px] flex-col items-center justify-center gap-3 rounded-2xl border border-border/70 bg-background px-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[hsl(var(--primary))]/25 hover:shadow-sm"
                             >
-                                <Camera
-                                    className="w-6 h-6 text-[hsl(var(--primary))]"
-                                    strokeWidth={1.5}
-                                />
+                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--accent))] transition-transform duration-200 group-hover:scale-105">
+                                    <Camera
+                                        className="h-4 w-4 text-[hsl(var(--primary))]"
+                                        strokeWidth={
+                                            1.6
+                                        }
+                                    />
+                                </div>
 
-                                <span className="font-sans text-xs font-medium">
-                                    {t('camera')}
+                                <span className="text-xs font-medium text-foreground">
+                                    {t(
+                                        'camera'
+                                    )}
                                 </span>
                             </button>
 
                             <button
                                 type="button"
-                                onClick={() => galleryRef.current?.click()}
-                                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border bg-background hover:bg-accent/50 transition-colors"
+                                onClick={() =>
+                                    galleryRef.current?.click()
+                                }
+                                className="group flex min-h-[112px] flex-col items-center justify-center gap-3 rounded-2xl border border-border/70 bg-background px-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[hsl(var(--primary))]/25 hover:shadow-sm"
                             >
-                                <Upload
-                                    className="w-6 h-6 text-[hsl(var(--primary))]"
-                                    strokeWidth={1.5}
-                                />
+                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--accent))] transition-transform duration-200 group-hover:scale-105">
+                                    <Upload
+                                        className="h-4 w-4 text-[hsl(var(--primary))]"
+                                        strokeWidth={
+                                            1.6
+                                        }
+                                    />
+                                </div>
 
-                                <span className="font-sans text-xs font-medium">
-                                    {t('gallery')}
+                                <span className="text-xs font-medium text-foreground">
+                                    {t(
+                                        'gallery'
+                                    )}
                                 </span>
                             </button>
                         </div>
                     </div>
 
                     {fileError && (
-                        <p className="text-sm text-destructive text-center">
+                        <p className="mt-4 text-center text-xs leading-5 text-destructive">
                             {fileError}
                         </p>
                     )}
                 </div>
             ) : (
                 <>
-                    <div className="relative rounded-2xl overflow-hidden bg-muted aspect-square">
+                    {/* PHOTO PREVIEW */}
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-[1.6rem] bg-[#111] shadow-sm">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={preview!}
-                            alt={t('preview')}
-                            className="w-full h-full object-cover transition-all duration-300"
+                            alt={t(
+                                'preview'
+                            )}
+                            className="h-full w-full object-contain transition-all duration-300"
                             style={{
-                                filter: selectedFilter,
-                                transform: isFlipped
-                                    ? 'scaleX(-1)'
-                                    : 'none'
+                                filter:
+                                selectedFilter,
+                                transform:
+                                    isFlipped
+                                        ? 'scaleX(-1)'
+                                        : 'none',
                             }}
                         />
 
+                        {/* Subtle overlay */}
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
+
                         {!isLoading && (
                             <>
+                                {/* Remove */}
                                 <button
                                     type="button"
-                                    onClick={clearFile}
-                                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
+                                    onClick={
+                                        clearFile
+                                    }
+                                    aria-label="Remove photo"
+                                    className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/35 text-white backdrop-blur-md transition hover:bg-black/55"
                                 >
-                                    <X className="w-4 h-4"/>
+                                    <X className="h-4 w-4" />
                                 </button>
 
+                                {/* Flip */}
                                 <button
                                     type="button"
-                                    onClick={toggleFlip}
-                                    className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 hover:bg-black/80 text-white text-xs px-3 h-8 rounded-full font-sans transition-colors"
+                                    onClick={
+                                        toggleFlip
+                                    }
+                                    className="absolute left-3 top-3 flex h-9 items-center gap-1.5 rounded-full border border-white/10 bg-black/35 px-3 text-[10px] font-medium text-white backdrop-blur-md transition hover:bg-black/55"
                                 >
-                                    <ArrowLeftRight className="w-4 h-4"/>
+                                    <ArrowLeftRight className="h-3.5 w-3.5" />
 
                                     {isFlipped
-                                        ? t('flip.normal')
-                                        : t('flip.flip')}
+                                        ? t(
+                                            'flip.normal'
+                                        )
+                                        : t(
+                                            'flip.flip'
+                                        )}
                                 </button>
                             </>
                         )}
 
-                        <div
-                            className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full font-sans"
-                        >
-                            {formatBytes(selectedFile.size)}
+                        {/* File size */}
+                        <div className="absolute bottom-3 left-3 rounded-full border border-white/10 bg-black/35 px-2.5 py-1.5 text-[9px] font-medium tracking-wide text-white/80 backdrop-blur-md">
+                            {formatBytes(
+                                selectedFile.size
+                            )}
                         </div>
                     </div>
 
-                    <div className="mt-5 space-y-5">
-                        <div>
-                            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2 font-sans">
-                                {t('filters.title')}
-                            </p>
+                    {/* FILTERS */}
+                    <div>
+                        <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                            {t(
+                                'filters.title'
+                            )}
+                        </p>
 
-                            <div className="flex gap-2 overflow-x-auto pb-3 snap-x">
-                                {filterOptions.map((filter) => (
+                        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2">
+                            {filterOptions.map(
+                                (
+                                    filter
+                                ) => (
                                     <button
-                                        key={filter.id}
+                                        key={
+                                            filter.id
+                                        }
                                         type="button"
+                                        disabled={
+                                            isLoading
+                                        }
                                         onClick={() =>
-                                            setSelectedFilter(filter.css)
+                                            setSelectedFilter(
+                                                filter.css
+                                            )
                                         }
                                         className={cn(
-                                            'flex-shrink-0 snap-start px-5 py-2 text-sm font-medium rounded-3xl border transition-all whitespace-nowrap',
-                                            selectedFilter === filter.css
-                                                ? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary))] text-white shadow-inner'
-                                                : 'border-border hover:border-[hsl(var(--primary))]/30'
+                                            'shrink-0 rounded-full border px-4 py-2 text-[11px] font-medium transition-all disabled:pointer-events-none disabled:opacity-50',
+                                            selectedFilter ===
+                                            filter.css
+                                                ? 'border-foreground bg-foreground text-background shadow-sm'
+                                                : 'border-border/70 bg-background text-muted-foreground hover:border-foreground/20 hover:text-foreground'
                                         )}
                                     >
-                                        {t(`filters.${filter.id}`)}
+                                        {t(
+                                            `filters.${filter.id}`
+                                        )}
                                     </button>
-                                ))}
-                            </div>
+                                )
+                            )}
                         </div>
                     </div>
                 </>
             )}
 
+            {/* CAMERA INPUT */}
             <input
                 ref={cameraRef}
                 type="file"
                 accept="image/*"
                 capture="environment"
                 className="hidden"
-                onChange={(e) => {
-                    const file = e.target.files?.[0]
+                onChange={(event) => {
+                    const file =
+                        event.target
+                            .files?.[0]
 
                     if (file) {
-                        handleFileSelect(file)
+                        void handleFileSelect(
+                            file
+                        )
                     }
                 }}
             />
 
+            {/* GALLERY INPUT */}
             <input
                 ref={galleryRef}
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => {
-                    const file = e.target.files?.[0]
+                onChange={(event) => {
+                    const file =
+                        event.target
+                            .files?.[0]
 
                     if (file) {
-                        handleFileSelect(file)
+                        void handleFileSelect(
+                            file
+                        )
                     }
                 }}
             />
 
-            <div className="space-y-4">
+            {/* DETAILS */}
+            <div className="space-y-5 border-t border-border/60 pt-6">
+                {/* Guest name */}
                 <div>
-                    <label className="label-wedding">
-                        <User className="w-3 h-3 inline mr-1"/>
-                        {t('guestName.label')}
+                    <label
+                        htmlFor="guestName"
+                        className="label-wedding"
+                    >
+                        {t(
+                            'guestName.label'
+                        )}
                     </label>
 
                     <input
-                        {...register('guestName')}
+                        {...register(
+                            'guestName'
+                        )}
+                        id="guestName"
                         type="text"
-                        placeholder={t('guestName.placeholder')}
+                        placeholder={t(
+                            'guestName.placeholder'
+                        )}
                         className="input-wedding"
                         maxLength={100}
-                        disabled={isLoading}
+                        disabled={
+                            isLoading
+                        }
                     />
 
                     {errors.guestName && (
-                        <p className="mt-1 text-xs text-destructive">
-                            {errors.guestName.message}
+                        <p className="mt-1.5 text-xs text-destructive">
+                            {
+                                errors
+                                    .guestName
+                                    .message
+                            }
                         </p>
                     )}
                 </div>
 
+                {/* Message */}
                 <div>
-                    <label className="label-wedding">
-                        <MessageSquare className="w-3 h-3 inline mr-1"/>
-                        {t('message.label')}
+                    <label
+                        htmlFor="message"
+                        className="label-wedding"
+                    >
+                        {t(
+                            'message.label'
+                        )}
                     </label>
 
                     <textarea
-                        {...register('message')}
-                        placeholder={t('message.placeholder')}
+                        {...register(
+                            'message'
+                        )}
+                        id="message"
+                        placeholder={t(
+                            'message.placeholder'
+                        )}
                         className="input-wedding resize-none"
                         rows={3}
                         maxLength={500}
-                        disabled={isLoading}
+                        disabled={
+                            isLoading
+                        }
                     />
 
                     {errors.message && (
-                        <p className="mt-1 text-xs text-destructive">
-                            {errors.message.message}
+                        <p className="mt-1.5 text-xs text-destructive">
+                            {
+                                errors
+                                    .message
+                                    .message
+                            }
                         </p>
                     )}
                 </div>
 
-                <div
-                    className="flex items-start gap-3 p-4 rounded-2xl bg-[hsl(var(--accent))] border border-[hsl(var(--gold))]/20"
-                >
+                {/* Privacy */}
+                <div className="flex items-start gap-3 rounded-2xl border border-border/60 bg-secondary/40 p-4">
                     <input
-                        {...register('isPublic')}
+                        {...register(
+                            'isPublic'
+                        )}
                         type="checkbox"
                         id="isPublic"
-                        className="mt-1 w-4 h-4 rounded border-[hsl(var(--gold))] text-[hsl(var(--primary))] focus:ring-[hsl(var(--primary))]"
-                        disabled={isLoading}
+                        className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-border accent-[hsl(var(--primary))]"
+                        disabled={
+                            isLoading
+                        }
                     />
 
                     <label
                         htmlFor="isPublic"
-                        className="text-xs font-sans text-muted-foreground leading-relaxed cursor-pointer select-none"
+                        className="cursor-pointer select-none text-xs leading-5 text-muted-foreground"
                     >
                         {t('privacy')}
                     </label>
                 </div>
             </div>
 
+            {/* UPLOAD PROGRESS */}
             {isLoading && (
-                <div className="space-y-2">
-                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                <div className="space-y-3">
+                    <div className="h-1 overflow-hidden rounded-full bg-muted">
                         <div
-                            className="h-full bg-[hsl(var(--primary))] rounded-full transition-all duration-300"
-                            style={{width: `${progress}%`}}
+                            className="h-full rounded-full bg-[hsl(var(--primary))] transition-[width] duration-300 ease-out"
+                            style={{
+                                width: `${progress}%`,
+                            }}
                         />
                     </div>
 
-                    <p className="text-xs text-muted-foreground text-center font-sans">
-                        {uploadState === 'compressing'
-                            ? t('progress.optimizing')
-                            : t('progress.uploading')}
-                    </p>
+                    <div className="flex items-center justify-between">
+                        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                            {uploadState ===
+                            'compressing'
+                                ? t(
+                                    'progress.optimizing'
+                                )
+                                : t(
+                                    'progress.uploading'
+                                )}
+                        </p>
+
+                        <span className="text-[10px] tabular-nums text-muted-foreground">
+                            {progress}%
+                        </span>
+                    </div>
                 </div>
             )}
 
+            {/* SUBMIT */}
             <button
                 type="submit"
-                disabled={isLoading || !selectedFile}
-                className="btn-primary w-full justify-center"
+                disabled={
+                    isLoading ||
+                    !selectedFile
+                }
+                className="btn-primary w-full justify-center py-3.5"
             >
                 {isLoading ? (
                     <>
-                        <Loader2 className="w-4 h-4 animate-spin"/>
+                        <Loader2 className="h-4 w-4 animate-spin" />
 
-                        {uploadState === 'compressing'
-                            ? t('progress.optimizing')
-                            : t('progress.uploading')}
+                        {uploadState ===
+                        'compressing'
+                            ? t(
+                                'progress.optimizing'
+                            )
+                            : t(
+                                'progress.uploading'
+                            )}
                     </>
                 ) : (
                     <>
-                        <Upload className="w-4 h-4"/>
+                        <Upload className="h-4 w-4" />
+
                         {t('submit')}
                     </>
                 )}

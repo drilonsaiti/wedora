@@ -296,7 +296,10 @@
         "takePhoto": "Take a photo",
         "gallery": "Upload from gallery",
         "message": "Add a message"
-      }
+      },
+      "findSeatEyebrow": "Seating",
+      "findSeatTitle": "Find your seat",
+      "photoTitle": "Share your moments"
     },
     "demo": {
       "banner": "Portfolio Demo — Sample Data"
@@ -429,27 +432,106 @@
   },
   "landing": {
     "eyebrow": "Wedding Management Platform",
+    "nav": {
+      "features": "Features",
+      "howItWorks": "How it works",
+      "pricing": "Pricing",
+      "demo": "View demo"
+    },
     "hero": {
+      "eyebrow": "Wedding Management Platform",
+      "title": "Every guest, seated. Every moment, saved.",
       "description": "One platform where couples organize their seating, share photos with guests, and create a digital wedding experience — without paperwork, without chaos.",
-      "demoButton": "View Demo"
+      "primaryCta": "View Demo",
+      "secondaryCta": "See how it works",
+      "pointOne": "No app to install",
+      "pointTwo": "Set up in one afternoon",
+      "pointThree": "One-time payment"
+    },
+    "preview": {
+      "event": "Event",
+      "guests": "Guests",
+      "tables": "Tables",
+      "photos": "Photos",
+      "seatingTitle": "Seating plan",
+      "seatingDescription": "Drag and drop to arrange tables",
+      "findSeat": "Find your seat",
+      "yourTable": "Your table"
+    },
+    "value": {
+      "title": "No spreadsheets. No printed seating charts.",
+      "description": "Everything the couple and their guests need lives on one page — updated in real time, right up to the wedding day."
     },
     "features": {
-      "guests": {
-        "title": "Guest Seating",
-        "description": "Organize tables with drag-and-drop, assign guests, and export your seating plan as an image or PDF."
-      },
-      "seat": {
-        "title": "Find My Seat",
-        "description": "Guests search for their name and instantly see their table and the venue map."
-      },
-      "photos": {
-        "title": "Photo Gallery",
-        "description": "Guests upload photos directly from their phones while the couple manages and shares them."
-      },
-      "theme": {
-        "title": "Custom Theme",
-        "description": "Every wedding gets its own colors, names, and public URL."
+      "eyebrow": "Features",
+      "title": "Everything your wedding day needs",
+      "description": "Four tools that replace the spreadsheets, printed charts, and group chats couples usually juggle before the big day.",
+      "items": {
+        "guests": {
+          "title": "Guest Seating",
+          "description": "Organize tables with drag-and-drop, assign guests, and export your seating plan as an image or PDF."
+        },
+        "seat": {
+          "title": "Find My Seat",
+          "description": "Guests search for their name and instantly see their table and the venue map."
+        },
+        "photos": {
+          "title": "Photo Gallery",
+          "description": "Guests upload photos directly from their phones while the couple manages and shares them."
+        },
+        "theme": {
+          "title": "Custom Theme",
+          "description": "Every wedding gets its own colors, names, and public URL."
+        }
       }
+    },
+    "howItWorks": {
+      "eyebrow": "How it works",
+      "title": "From guest list to wedding day in three steps",
+      "description": "No plugins, no spreadsheets to email around. Set everything up once, then share a single link with your guests.",
+      "steps": {
+        "create": {
+          "title": "Create your wedding",
+          "description": "Add your names, date, and venue, then pick a theme. Your private dashboard and public page are ready in minutes."
+        },
+        "organise": {
+          "title": "Organise your seating",
+          "description": "Add guests and tables, then drag and drop to arrange the room. Changes save instantly and sync to the guest page."
+        },
+        "share": {
+          "title": "Share with your guests",
+          "description": "Send one link. Guests find their seat, upload photos, and leave messages — all from their phone."
+        }
+      },
+      "cta": "Start planning your wedding"
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Frequently asked questions",
+      "description": "Everything you need to know before setting up your wedding.",
+      "items": {
+        "one": {
+          "question": "Do my guests need to install an app?",
+          "answer": "No. Guests just open the link you share — on any phone, tablet, or computer, with no download or account required."
+        },
+        "two": {
+          "question": "Can I change the seating after I've shared the link?",
+          "answer": "Yes. Any change you make to tables or guests updates instantly, so guests always see the current seating plan."
+        },
+        "three": {
+          "question": "How long is my wedding page available after the event?",
+          "answer": "It depends on your plan — from 30 days up to a full year of storage after the wedding, so you can keep collecting and downloading photos."
+        },
+        "four": {
+          "question": "Can I use my own colors and names?",
+          "answer": "Yes. Every wedding gets its own theme color, couple names, and a public URL, so the page matches your wedding's style."
+        }
+      }
+    },
+    "finalCta": {
+      "title": "Ready to plan your wedding day?",
+      "description": "Set up your seating, gallery, and guest page in one afternoon — no monthly subscription required.",
+      "button": "View Demo"
     },
     "contact": {
       "eyebrow": "Contact",
@@ -489,4 +571,3 @@
     }
   }
 }
-

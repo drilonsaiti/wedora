@@ -7,139 +7,164 @@
 
 @layer base {
     :root {
-        --background: 30 20% 97%;
-        --foreground: 20 15% 15%;
-        --card: 30 20% 99%;
-        --card-foreground: 20 15% 15%;
-        --primary: 355 30% 55%;
+        --background: 36 28% 97%;
+        --foreground: 24 15% 13%;
+
+        --card: 35 30% 99%;
+        --card-foreground: 24 15% 13%;
+
+        --primary: 347 38% 44%;
         --primary-foreground: 0 0% 100%;
-        --secondary: 30 25% 92%;
-        --secondary-foreground: 20 15% 25%;
-        --muted: 30 15% 94%;
-        --muted-foreground: 20 10% 55%;
-        --accent: 355 25% 92%;
-        --accent-foreground: 355 30% 35%;
+
+        --secondary: 32 24% 93%;
+        --secondary-foreground: 24 15% 18%;
+
+        --muted: 32 18% 94%;
+        --muted-foreground: 24 8% 47%;
+
+        --accent: 348 32% 94%;
+        --accent-foreground: 347 38% 35%;
+
         --destructive: 0 72% 51%;
         --destructive-foreground: 0 0% 100%;
-        --border: 30 15% 88%;
-        --input: 30 15% 88%;
-        --ring: 355 30% 55%;
-        --radius: 0.5rem;
 
-        /* Wedding-specific */
-        --gold: 38 60% 55%;
-        --blush: 355 40% 85%;
-        --cream: 30 30% 96%;
-        --dark: 20 20% 12%;
+        --border: 32 18% 87%;
+        --input: 32 18% 87%;
+        --ring: 347 38% 44%;
+
+        --radius: 1rem;
+
+        --gold: 38 45% 54%;
+        --blush: 350 40% 88%;
+        --cream: 36 28% 97%;
+        --dark: 24 18% 10%;
+
+        /*
+         * --ink: a fixed "always near-black" surface, identical in both
+         * light and dark mode. Use this (not --dark) for any element that
+         * must stay a dark, moody surface regardless of site theme — e.g.
+         * the "How It Works" section and the phone-mockup card. --dark
+         * itself is intentionally theme-reversing (it flips to a light
+         * value under .dark) and should only be used where that reversal
+         * is actually wanted.
+         */
+        --ink: 24 18% 10%;
     }
 
     .dark {
-        --background: 20 16% 8%;
-        --foreground: 30 20% 92%;
-        --card: 20 15% 11%;
-        --card-foreground: 30 20% 92%;
-        --primary: 355 55% 68%;
-        --primary-foreground: 20 20% 10%;
-        --secondary: 20 13% 15%;
-        --secondary-foreground: 30 15% 85%;
-        --muted: 20 13% 16%;
-        --muted-foreground: 30 8% 60%;
-        --accent: 355 32% 22%;
-        --accent-foreground: 355 45% 82%;
-        --destructive: 0 62% 55%;
-        --destructive-foreground: 0 0% 100%;
-        --border: 20 13% 20%;
-        --input: 20 13% 20%;
-        --ring: 355 55% 68%;
+        --background: 24 16% 8%;
+        --foreground: 35 24% 94%;
 
-        /* Wedding-specific */
-        --gold: 38 70% 64%;
-        --blush: 355 35% 32%;
-        --cream: 20 15% 11%;
-        --dark: 30 20% 92%;
+        --card: 24 15% 10%;
+        --card-foreground: 35 24% 94%;
+
+        --primary: 347 50% 66%;
+        --primary-foreground: 24 18% 10%;
+
+        --secondary: 24 13% 15%;
+        --secondary-foreground: 35 15% 86%;
+
+        --muted: 24 13% 15%;
+        --muted-foreground: 32 9% 62%;
+
+        --accent: 347 28% 20%;
+        --accent-foreground: 347 48% 82%;
+
+        --border: 24 12% 20%;
+        --input: 24 12% 20%;
+        --ring: 347 50% 66%;
+
+        --gold: 38 55% 64%;
+        --blush: 347 28% 28%;
+        --cream: 24 15% 10%;
+        --dark: 35 24% 94%;
+
+        /* stays fixed — same value as :root, on purpose */
+        --ink: 24 18% 10%;
     }
 
     * {
         @apply border-border;
     }
 
-    body {
-        @apply bg-background text-foreground;
-        background-color: hsl(var(--cream));
-        transition: background-color 0.3s ease, color 0.3s ease;
+    html {
+        scroll-behavior: smooth;
     }
 
-    h1, h2, h3, h4, h5, h6 {
+    body {
+        @apply bg-background text-foreground antialiased;
+        background-color: hsl(var(--cream));
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
         @apply font-serif;
+    }
+
+    ::selection {
+        background: hsl(var(--primary) / 0.18);
     }
 }
 
 @layer components {
     .btn-primary {
-        @apply inline-flex items-center justify-center gap-2 rounded-full bg-[hsl(var(--primary))]
-        px-8 py-3 text-sm font-sans font-medium tracking-widest uppercase text-white
-        transition-all duration-200 hover:opacity-90 active:scale-95
-        disabled:opacity-50 disabled:cursor-not-allowed;
+        @apply inline-flex items-center justify-center gap-2
+        rounded-full bg-[hsl(var(--primary))]
+        px-7 py-3.5
+        text-xs font-medium tracking-[0.08em] text-white
+        shadow-sm transition-all duration-200
+        hover:-translate-y-0.5 hover:shadow-lg hover:opacity-95
+        active:translate-y-0;
     }
 
-    .btn-ghost {
-        @apply inline-flex items-center justify-center gap-2 rounded-full border border-border
-        px-6 py-2.5 text-sm font-sans font-medium tracking-wide text-foreground
-        transition-all duration-200 hover:bg-secondary active:scale-95
-        disabled:opacity-50 disabled:cursor-not-allowed;
+    .btn-secondary {
+        @apply inline-flex items-center justify-center gap-2
+        rounded-full border border-border
+        bg-card px-7 py-3.5
+        text-xs font-medium tracking-[0.06em]
+        text-foreground
+        transition-all duration-200
+        hover:-translate-y-0.5 hover:bg-secondary;
+    }
+
+    .nav-link {
+        @apply text-xs font-medium text-muted-foreground
+        transition-colors hover:text-foreground;
     }
 
     .card-wedding {
-        @apply rounded-2xl border border-border/50 bg-card shadow-sm;
+        @apply rounded-[2rem] border border-border/70 bg-card shadow-sm;
     }
 
     .input-wedding {
-        @apply w-full rounded-xl border border-input bg-background px-4 py-3
-        text-sm font-sans placeholder:text-muted-foreground
-        focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring
-        transition-colors duration-150;
+        @apply w-full rounded-xl border border-input
+        bg-background px-4 py-3
+        text-sm placeholder:text-muted-foreground
+        transition-colors
+        focus:border-ring focus:outline-none
+        focus:ring-2 focus:ring-ring/20;
     }
 
     .label-wedding {
-        @apply block text-xs font-sans font-medium tracking-widest uppercase
-        text-muted-foreground mb-1.5;
-    }
-
-    .shimmer {
-        background: linear-gradient(
-                90deg,
-                hsl(var(--muted)) 25%,
-                hsl(var(--secondary)) 50%,
-                hsl(var(--muted)) 75%
-        );
-        background-size: 200% 100%;
-        animation: shimmer 1.5s infinite;
+        @apply mb-1.5 block text-[10px]
+        font-medium uppercase tracking-[0.16em]
+        text-muted-foreground;
     }
 }
 
 ::-webkit-scrollbar {
     width: 6px;
-    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-    background: hsl(var(--muted));
+    background: hsl(var(--background));
 }
 
 ::-webkit-scrollbar-thumb {
     background: hsl(var(--border));
-    border-radius: 3px;
-}
-
-.photo-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
-}
-
-@media (max-width: 640px) {
-    .photo-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
+    border-radius: 100px;
 }

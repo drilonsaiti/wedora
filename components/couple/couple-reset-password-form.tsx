@@ -1,175 +1,411 @@
 'use client'
 
-import {useState} from 'react'
-import {useForm} from 'react-hook-form'
-import {zodResolver} from '@hookform/resolvers/zod'
-import {useRouter} from 'next/navigation'
-import {z} from 'zod'
-import {useTranslations} from 'next-intl'
-import {AlertCircle, CheckCircle2, Loader2, Lock} from 'lucide-react'
-import {createClient} from '@/lib/supabase/client'
+import {
+    useEffect,
+    useMemo,
+    useState,
+} from 'react'
+
+import {
+    AlertCircle,
+    Check,
+    Eye,
+    EyeOff,
+    Loader2,
+    Lock,
+} from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+
+import { createClient } from '@/lib/supabase/client'
+import { Link } from '@/lib/navigation'
 
 export function CoupleResetPasswordForm() {
     const router = useRouter()
     const t = useTranslations('auth')
 
-    const [error, setError] = useState<string | null>(null)
-    const [success, setSuccess] = useState(false)
-    const [loading, setLoading] = useState(false)
+    const [error, setError] =
+        useState<string | null>(null)
 
-    const resetPasswordSchema = z
-        .object({
-            password: z.string().min(8, t('passwordMinLength')),
-            confirmPassword: z.string(),
-        })
-        .refine((data) => data.password === data.confirmPassword, {
-            message: t('passwordsDoNotMatch'),
-            path: ['confirmPassword'],
-        })
+    const [success, setSuccess] =
+        useState(false)
 
-    type ResetPasswordValues = z.infer<typeof resetPasswordSchema>
+    const [loading, setLoading] =
+        useState(false)
+
+    const [
+        showPassword,
+        setShowPassword,
+    ] = useState(false)
+
+    const [
+        showConfirmPassword,
+        setShowConfirmPassword,
+    ] = useState(false)
+
+    /*
+     * Schema depends on translations, therefore
+     * memoise it instead of recreating it unnecessarily.
+     */
+    const resetPasswordSchema =
+        useMemo(
+            () =>
+                z
+                    .object({
+                        password:
+                            z
+                                .string()
+                                .min(
+                                    8,
+                                    t(
+                                        'passwordMinLength'
+                                    )
+                                ),
+                        confirmPassword:
+                            z.string(),
+                    })
+                    .refine(
+                        (data) =>
+                            data.password ===
+                            data.confirmPassword,
+                        {
+                            message:
+                                t(
+                                    'passwordsDoNotMatch'
+                                ),
+                            path: [
+                                'confirmPassword',
+                            ],
+                        }
+                    ),
+            [t]
+        )
+
+    type ResetPasswordValues =
+        z.infer<
+            typeof resetPasswordSchema
+        >
 
     const {
         register,
         handleSubmit,
-        formState: {errors},
+        formState: { errors },
     } = useForm<ResetPasswordValues>({
-        resolver: zodResolver(resetPasswordSchema),
+        resolver: zodResolver(
+            resetPasswordSchema
+        ),
     })
 
-    const onSubmit = async (values: ResetPasswordValues) => {
+    /*
+     * Redirect after successful password change.
+     */
+    useEffect(() => {
+        if (!success) return
+
+        const timeout =
+            window.setTimeout(() => {
+                router.push(
+                    '/couple/login'
+                )
+            }, 2000)
+
+        return () => {
+            window.clearTimeout(
+                timeout
+            )
+        }
+    }, [success, router])
+
+    const onSubmit = async (
+        values: ResetPasswordValues
+    ) => {
         setError(null)
         setLoading(true)
 
         try {
-            const supabase = await createClient()
+            const supabase =
+                await createClient()
 
-            const {error: updateError} = await supabase.auth.updateUser({
-                password: values.password
-            })
+            const {
+                error: updateError,
+            } =
+                await supabase.auth.updateUser(
+                    {
+                        password:
+                        values.password,
+                    }
+                )
 
             if (updateError) {
-                setError(updateError.message)
+                setError(
+                    updateError.message
+                )
                 return
             }
 
             setSuccess(true)
-
-            setTimeout(() => {
-                router.push('/couple/login')
-            }, 2000)
         } catch {
-            setError(t('unexpectedError'))
+            setError(
+                t('unexpectedError')
+            )
         } finally {
             setLoading(false)
         }
     }
 
+    /*
+     * Success
+     */
     if (success) {
         return (
-            <div className="text-center space-y-4">
-                <div className="flex justify-center">
-                    <div className="rounded-full bg-green-100 p-3">
-                        <CheckCircle2 className="w-8 h-8 text-green-600"/>
-                    </div>
+            <div className="py-3 text-center">
+                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]">
+                    <Check
+                        className="h-6 w-6 text-[hsl(var(--primary))]"
+                        strokeWidth={1.7}
+                    />
                 </div>
 
-                <h2 className="text-xl font-serif font-light text-foreground">
-                    {t('passwordChanged')}
+                <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.2em] text-[hsl(var(--primary))]">
+                    {t(
+                        'passwordChangedEyebrow'
+                    )}
+                </p>
+
+                <h2 className="font-serif text-3xl font-light tracking-[-0.02em] text-foreground">
+                    {t(
+                        'passwordChanged'
+                    )}
                 </h2>
 
-                <p className="text-sm text-muted-foreground">
-                    {t('redirectingToLogin')}
+                <p className="mx-auto mt-3 max-w-xs text-sm leading-6 text-muted-foreground">
+                    {t(
+                        'redirectingToLogin'
+                    )}
                 </p>
+
+                <Link
+                    href="/couple/login"
+                    className="btn-secondary mt-7 w-full justify-center"
+                >
+                    {t('signIn')}
+                </Link>
             </div>
         )
     }
 
     return (
-        <div className="space-y-6">
-            <div className="space-y-2">
-                <h2 className="text-xl font-serif font-light text-foreground">
-                    {t('newPasswordTitle')}
-                </h2>
+        <form
+            onSubmit={handleSubmit(
+                onSubmit
+            )}
+            className="space-y-5"
+        >
+            {/* New password */}
+            <div>
+                <label
+                    htmlFor="password"
+                    className="label-wedding"
+                >
+                    {t('newPassword')}
+                </label>
+
+                <div className="relative">
+                    <Lock
+                        className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        strokeWidth={1.6}
+                    />
+
+                    <input
+                        {...register(
+                            'password'
+                        )}
+                        id="password"
+                        type={
+                            showPassword
+                                ? 'text'
+                                : 'password'
+                        }
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                        disabled={loading}
+                        className="input-wedding h-12 pl-11 pr-11"
+                    />
+
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setShowPassword(
+                                (
+                                    current
+                                ) =>
+                                    !current
+                            )
+                        }
+                        disabled={loading}
+                        aria-label={
+                            showPassword
+                                ? t(
+                                    'hidePassword'
+                                )
+                                : t(
+                                    'showPassword'
+                                )
+                        }
+                        className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+                    >
+                        {showPassword ? (
+                            <EyeOff
+                                className="h-4 w-4"
+                                strokeWidth={
+                                    1.6
+                                }
+                            />
+                        ) : (
+                            <Eye
+                                className="h-4 w-4"
+                                strokeWidth={
+                                    1.6
+                                }
+                            />
+                        )}
+                    </button>
+                </div>
+
+                {errors.password && (
+                    <p className="mt-1.5 text-xs leading-5 text-destructive">
+                        {
+                            errors.password
+                                .message
+                        }
+                    </p>
+                )}
             </div>
 
-            <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="space-y-5"
-            >
-                <div>
-                    <label className="label-wedding">
-                        <Lock className="w-3 h-3 inline mr-1"/>
-                        {t('newPassword')}
-                    </label>
-
-                    <input
-                        {...register('password')}
-                        type="password"
-                        placeholder="••••••••"
-                        className="input-wedding"
-                        autoComplete="new-password"
-                        disabled={loading}
-                    />
-
-                    {errors.password && (
-                        <p className="mt-1 text-xs text-destructive">
-                            {errors.password.message}
-                        </p>
-                    )}
-                </div>
-
-                <div>
-                    <label className="label-wedding">
-                        <Lock className="w-3 h-3 inline mr-1"/>
-                        {t('confirmPassword')}
-                    </label>
-
-                    <input
-                        {...register('confirmPassword')}
-                        type="password"
-                        placeholder="••••••••"
-                        className="input-wedding"
-                        autoComplete="new-password"
-                        disabled={loading}
-                    />
-
-                    {errors.confirmPassword && (
-                        <p className="mt-1 text-xs text-destructive">
-                            {errors.confirmPassword.message}
-                        </p>
-                    )}
-                </div>
-
-                {error && (
-                    <div
-                        className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3"
-                    >
-                        <AlertCircle
-                            className="w-4 h-4 text-destructive shrink-0 mt-0.5"
-                        />
-
-                        <p className="text-sm text-destructive font-sans">
-                            {error}
-                        </p>
-                    </div>
-                )}
-
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="btn-primary w-full justify-center"
+            {/* Confirm password */}
+            <div>
+                <label
+                    htmlFor="confirmPassword"
+                    className="label-wedding"
                 >
-                    {loading ? (
-                        <>
-                            <Loader2 className="w-4 h-4 animate-spin"/>
-                            {t('saving')}
-                        </>
-                    ) : (
-                        t('changePassword')
+                    {t(
+                        'confirmPassword'
                     )}
-                </button>
-            </form>
-        </div>
+                </label>
+
+                <div className="relative">
+                    <Lock
+                        className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        strokeWidth={1.6}
+                    />
+
+                    <input
+                        {...register(
+                            'confirmPassword'
+                        )}
+                        id="confirmPassword"
+                        type={
+                            showConfirmPassword
+                                ? 'text'
+                                : 'password'
+                        }
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                        disabled={loading}
+                        className="input-wedding h-12 pl-11 pr-11"
+                    />
+
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setShowConfirmPassword(
+                                (
+                                    current
+                                ) =>
+                                    !current
+                            )
+                        }
+                        disabled={loading}
+                        aria-label={
+                            showConfirmPassword
+                                ? t(
+                                    'hidePassword'
+                                )
+                                : t(
+                                    'showPassword'
+                                )
+                        }
+                        className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+                    >
+                        {showConfirmPassword ? (
+                            <EyeOff
+                                className="h-4 w-4"
+                                strokeWidth={
+                                    1.6
+                                }
+                            />
+                        ) : (
+                            <Eye
+                                className="h-4 w-4"
+                                strokeWidth={
+                                    1.6
+                                }
+                            />
+                        )}
+                    </button>
+                </div>
+
+                {errors
+                    .confirmPassword && (
+                    <p className="mt-1.5 text-xs leading-5 text-destructive">
+                        {
+                            errors
+                                .confirmPassword
+                                .message
+                        }
+                    </p>
+                )}
+            </div>
+
+            {/* Error */}
+            {error && (
+                <div
+                    role="alert"
+                    className="flex items-start gap-3 rounded-2xl border border-destructive/15 bg-destructive/[0.06] px-4 py-3.5"
+                >
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+
+                    <p className="text-xs leading-5 text-destructive">
+                        {error}
+                    </p>
+                </div>
+            )}
+
+            {/* Submit */}
+            <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full justify-center py-3.5"
+            >
+                {loading ? (
+                    <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+
+                        {t('saving')}
+                    </>
+                ) : (
+                    <>
+                        <Lock className="h-4 w-4" />
+
+                        {t(
+                            'changePassword'
+                        )}
+                    </>
+                )}
+            </button>
+        </form>
     )
 }

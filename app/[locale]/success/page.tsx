@@ -1,68 +1,114 @@
-'use client';
+'use client'
 
-import {Camera, CheckCircle, Heart} from 'lucide-react';
-import {Link} from '@/lib/navigation';
-import {useTranslations} from 'next-intl';
+import {
+    ArrowLeft,
+    Camera,
+    Check,
+    Heart,
+} from 'lucide-react'
+import { useTranslations } from 'next-intl'
+
+import { Link } from '@/lib/navigation'
 
 export default function SuccessPage() {
-    const t = useTranslations('wedding');
+    const t = useTranslations('wedding')
 
     return (
-        <main className="min-h-screen flex flex-col items-center justify-center px-6 py-16 relative overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute inset-0 pointer-events-none">
-                <div
-                    className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-[hsl(var(--blush))] opacity-20 blur-3xl"
-                />
+        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-6 py-16">
+            {/* Ambient background */}
+            <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0"
+            >
+                <div className="absolute left-1/2 top-1/3 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[hsl(var(--blush))]/30 blur-[120px]" />
+
+                <div className="absolute bottom-[-180px] right-[-120px] h-[400px] w-[400px] rounded-full bg-[hsl(var(--gold))]/10 blur-[120px]" />
             </div>
 
-            <div className="text-center max-w-sm mx-auto relative z-10 animate-fade-in">
-                <div
-                    className="w-20 h-20 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center mx-auto mb-8"
+            <section className="relative z-10 mx-auto w-full max-w-lg text-center">
+
+                {/* Brand */}
+                <Link
+                    href="/"
+                    className="mb-14 inline-flex items-center gap-2 text-foreground"
                 >
-                    <CheckCircle
-                        className="w-10 h-10 text-[hsl(var(--primary))]"
-                        strokeWidth={1.5}
-                    />
-                </div>
-
-                <div className="flex items-center gap-3 justify-center mb-6">
-                    <div className="h-px w-12 bg-[hsl(var(--gold))] opacity-60" />
                     <Heart
-                        className="w-3 h-3 text-[hsl(var(--primary))] fill-current"
+                        className="h-4 w-4 text-[hsl(var(--primary))]"
+                        fill="currentColor"
                     />
-                    <div className="h-px w-12 bg-[hsl(var(--gold))] opacity-60" />
+
+                    <span className="font-serif text-lg">
+                        Wedora
+                    </span>
+                </Link>
+
+                {/* Success state */}
+                <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-2xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))] shadow-sm">
+                    <Check
+                        className="h-7 w-7 text-[hsl(var(--primary))]"
+                        strokeWidth={1.7}
+                    />
                 </div>
 
-                <h1 className="font-serif text-4xl font-light text-foreground mb-3">
+                <p className="mb-4 text-[10px] font-medium uppercase tracking-[0.25em] text-[hsl(var(--primary))]">
+                    {t('upload.success.eyebrow')}
+                </p>
+
+                <h1 className="font-serif text-4xl font-light tracking-tight text-foreground sm:text-5xl">
                     {t('upload.success.title')}
                 </h1>
 
-                <p className="font-serif italic text-xl text-[hsl(var(--primary))] mb-6">
-                    {t('upload.success.subtitle')}
-                </p>
-
-                <p className="font-sans text-sm text-muted-foreground leading-relaxed mb-10">
+                <p className="mx-auto mt-5 max-w-md text-base leading-7 text-muted-foreground">
                     {t('upload.success.description')}
                 </p>
 
-                <div className="space-y-3">
+                {/* Confirmation card */}
+                <div className="mt-9 rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur">
+                    <div className="flex items-center gap-3 text-left">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                            <Camera
+                                className="h-4 w-4 text-[hsl(var(--primary))]"
+                                strokeWidth={1.6}
+                            />
+                        </div>
+
+                        <div>
+                            <p className="text-sm font-medium text-foreground">
+                                {t('upload.success.savedTitle')}
+                            </p>
+
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                {t('upload.success.savedDescription')}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Actions */}
+                <div className="mt-8 flex flex-col gap-3">
                     <Link
                         href="/upload"
                         className="btn-primary w-full justify-center"
                     >
-                        <Camera className="w-4 h-4" />
+                        <Camera className="h-4 w-4" />
+
                         {t('upload.success.uploadAnother')}
                     </Link>
 
                     <Link
                         href="/"
-                        className="btn-ghost w-full justify-center"
+                        className="btn-secondary w-full justify-center"
                     >
+                        <ArrowLeft className="h-4 w-4" />
+
                         {t('upload.success.backHome')}
                     </Link>
                 </div>
-            </div>
+
+                <p className="mt-8 text-xs text-muted-foreground/70">
+                    {t('upload.success.footer')}
+                </p>
+            </section>
         </main>
-    );
+    )
 }
