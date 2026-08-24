@@ -5,30 +5,7 @@ import {getTranslations} from 'next-intl/server'
 import {getLocale} from 'next-intl/server'
 
 export default async function AdminLoginPage() {
-    const supabase = await createClient()
-    const {
-        data: {user},
-    } = await supabase.auth.getUser()
-
-    const locale = await getLocale()
-
-    if (user) {
-        const {data: admin} = await supabase
-            .from('admins')
-            .select('id')
-            .eq('id', user.id)
-            .single()
-
-        if (admin) {
-            redirect({
-                href: '/admin/dashboard',
-                locale,
-            })
-        }
-    }
-
     const t = await getTranslations('auth')
-
     return (
         <main className="min-h-screen flex items-center justify-center px-6 py-16">
             <div className="w-full max-w-sm">

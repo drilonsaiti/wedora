@@ -34,13 +34,10 @@ export async function middleware(request: NextRequest) {
                     return request.cookies.getAll()
                 },
                 setAll(cookiesToSet: CookieToSet[]) {
-                    cookiesToSet.forEach(({name, value}) =>
+                    cookiesToSet.forEach(({name, value, options}) => {
                         request.cookies.set(name, value)
-                    )
-
-                    // We need to pass the request to NextResponse.next to refresh the response with the new cookies
-                    // But here we are already in the middle of a response from i18nMiddleware.
-                    // next-intl's response is what we should modify.
+                        response.cookies.set(name, value, options)
+                    })
                 },
             },
         }
@@ -64,12 +61,6 @@ export async function middleware(request: NextRequest) {
         return supabaseResponse
     }
 
-    if (pathnameWithoutLocale === '/admin/login' && user) {
-        const url = request.nextUrl.clone()
-        const locale = pathname.split('/')[1]
-        url.pathname = `/${locale}/admin/dashboard`
-        return NextResponse.redirect(url)
-    }
 
     if (pathnameWithoutLocale.startsWith('/admin/weddings')) {
         if (!user) {
