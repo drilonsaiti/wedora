@@ -1,10 +1,10 @@
-import {memo} from 'react';
-import {cn} from '@/lib/utils';
+import { memo } from 'react'
+import { cn } from '@/lib/utils'
 
 interface GuestAvatarProps {
-    initials: string;
-    className?: string;
-    size?: 'sm' | 'md' | 'lg' | 'xl';
+    initials: string
+    className?: string
+    size?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
 const colorMap: Record<string, string> = {
@@ -34,29 +34,36 @@ const colorMap: Record<string, string> = {
     X: 'bg-orange-100 text-orange-700',
     Y: 'bg-cyan-100 text-cyan-700',
     Z: 'bg-violet-100 text-violet-700',
-};
+}
 
-export const GuestAvatar = memo(({initials, className, size = 'md'}: GuestAvatarProps) => {
-    const firstLetter = initials.charAt(0).toUpperCase();
-    const colors = colorMap[firstLetter] || 'bg-secondary text-secondary-foreground';
+export const GuestAvatar = memo(
+    ({ initials, className, size = 'md' }: GuestAvatarProps) => {
+        const firstLetter = initials.charAt(0).toUpperCase()
 
-    const sizeClasses = {
-        sm: 'w-8 h-8 text-[10px]',
-        md: 'w-10 h-10 text-xs',
-        lg: 'w-14 h-14 text-base',
-        xl: 'w-16 h-16 text-lg',
-    };
+        const colors =
+            colorMap[firstLetter] ||
+            'bg-secondary text-secondary-foreground'
 
-    return (
-        <div
-            className={cn(
-                'flex items-center justify-center rounded-full font-sans font-semibold tracking-tighter shadow-sm border border-white/50',
-                colors,
-                sizeClasses[size],
-                className
-            )}
-        >
-            {initials}
-        </div>
-    );
-});
+        const sizeClasses = {
+            sm: 'w-8 h-8 text-[10px]',
+            md: 'w-10 h-10 text-xs',
+            lg: 'w-14 h-14 text-base',
+            xl: 'w-16 h-16 text-lg',
+        }
+
+        return (
+            <div
+                className={cn(
+                    'flex items-center justify-center rounded-full font-sans font-semibold tracking-tighter shadow-sm border border-white/50',
+                    colors,
+                    sizeClasses[size],
+                    className
+                )}
+            >
+                {initials}
+            </div>
+        )
+    }
+)
+
+GuestAvatar.displayName = 'GuestAvatar'

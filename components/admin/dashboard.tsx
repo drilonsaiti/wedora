@@ -11,10 +11,10 @@ import {
 } from 'react'
 
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import {
     ArchiveIcon,
     Armchair,
+    ArrowLeft,
     Check,
     CheckCircle,
     ChevronLeft,
@@ -50,7 +50,10 @@ import {
     updatePhotoAction,
 } from '@/actions/admin'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Link } from '@/lib/navigation'
+import {
+    Link,
+    useRouter,
+} from '@/lib/navigation'
 import {
     cn,
     formatDate,
@@ -63,6 +66,7 @@ interface AdminDashboardProps {
     initialTotal: number
     adminEmail: string
     weddingId: string
+    weddingName?: string
     role: 'admin' | 'couple'
     error?: string
     activeFilter?: string
@@ -94,91 +98,134 @@ export function AdminDashboard({
                                    initialTotal,
                                    adminEmail,
                                    weddingId,
+                                   weddingName,
                                    role,
                                    error: initialError,
                                    activeFilter,
                                }: AdminDashboardProps) {
-    const router = useRouter()
-    const t = useTranslations(
-        'dashboard.photos'
-    )
-    const tc =
-        useTranslations('common')
+    const router =
+        useRouter()
 
-    const [, startTransition] =
-        useTransition()
+    const t =
+        useTranslations(
+            'dashboard.photos'
+        )
+
+    const tc =
+        useTranslations(
+            'common'
+        )
+
+    const [
+        ,
+        startTransition,
+    ] = useTransition()
 
     const FILTERS = [
         {
             key: undefined,
-            label: t('allPhotos'),
+            label: t(
+                'allPhotos'
+            ),
         },
         {
             key: 'favourites',
-            label: t('favourites'),
+            label: t(
+                'favourites'
+            ),
         },
         {
             key: 'hidden',
-            label: t('hidden'),
+            label: t(
+                'hidden'
+            ),
         },
         {
             key: 'unapproved',
-            label: t('unapproved'),
+            label: t(
+                'unapproved'
+            ),
         },
     ]
 
     /*
      * Photos
      */
-    const [photos, setPhotos] =
+    const [
+        photos,
+        setPhotos,
+    ] =
         useState<Photo[]>(
             initialPhotos
         )
 
-    const [total, setTotal] =
-        useState(initialTotal)
+    const [
+        total,
+        setTotal,
+    ] =
+        useState(
+            initialTotal
+        )
 
-    const [error, setError] =
-        useState(initialError)
+    const [
+        error,
+        setError,
+    ] =
+        useState<
+            string | undefined
+        >(
+            initialError
+        )
 
     const [
         loadingMore,
         setLoadingMore,
-    ] = useState(false)
+    ] =
+        useState(false)
 
     const [
         selectedPhoto,
         setSelectedPhoto,
-    ] = useState<Photo | null>(
-        null
-    )
+    ] =
+        useState<Photo | null>(
+            null
+        )
 
     const [
         signedUrls,
         setSignedUrls,
-    ] = useState<
-        Record<
-            string,
-            {
-                thumb: string
-                original: string
-            }
-        >
-    >({})
+    ] =
+        useState<
+            Record<
+                string,
+                {
+                    thumb: string
+                    original: string
+                }
+            >
+        >({})
 
     const [
         loadingUrls,
         setLoadingUrls,
-    ] = useState<
-        Record<string, boolean>
-    >({})
+    ] =
+        useState<
+            Record<
+                string,
+                boolean
+            >
+        >({})
 
     const [
         actionLoading,
         setActionLoading,
-    ] = useState<
-        Record<string, boolean>
-    >({})
+    ] =
+        useState<
+            Record<
+                string,
+                boolean
+            >
+        >({})
 
     /*
      * ZIP
@@ -186,11 +233,12 @@ export function AdminDashboard({
     const [
         zipLoading,
         setZipLoading,
-    ] = useState<
-        | 'all'
-        | 'favourites'
-        | null
-    >(null)
+    ] =
+        useState<
+            | 'all'
+            | 'favourites'
+            | null
+        >(null)
 
     /*
      * Gallery sharing
@@ -198,49 +246,60 @@ export function AdminDashboard({
     const [
         shareOpen,
         setShareOpen,
-    ] = useState(false)
+    ] =
+        useState(false)
 
     const [
         shareLoading,
         setShareLoading,
-    ] = useState(false)
+    ] =
+        useState(false)
 
     const [
         shareUrl,
         setShareUrl,
-    ] = useState<string | null>(
-        null
-    )
+    ] =
+        useState<
+            string | null
+        >(null)
 
     const [
         galleryTokens,
         setGalleryTokens,
-    ] = useState<
-        GalleryToken[]
-    >([])
+    ] =
+        useState<
+            GalleryToken[]
+        >([])
 
     const [
         loadingTokens,
         setLoadingTokens,
-    ] = useState(false)
+    ] =
+        useState(false)
 
     const [
         showCreateForm,
         setShowCreateForm,
-    ] = useState(false)
+    ] =
+        useState(false)
 
-    const [copied, setCopied] =
+    const [
+        copied,
+        setCopied,
+    ] =
         useState(false)
 
     const [
         showMessages,
         setShowMessages,
-    ] = useState(true)
+    ] =
+        useState(true)
 
     const [
         expiresInDays,
         setExpiresInDays,
-    ] = useState('')
+    ] =
+        useState('')
 
     const [
         photoFilter,
@@ -253,19 +312,31 @@ export function AdminDashboard({
     const [
         galleryLabel,
         setGalleryLabel,
-    ] = useState(
-        'Wedding Gallery'
-    )
+    ] =
+        useState(
+            'Wedding Gallery'
+        )
 
     /*
-     * Keep client state synchronised
-     * with server-side filter results.
+     * Synchronise client state with
+     * server-side filter results.
      */
     useEffect(() => {
-        setPhotos(initialPhotos)
-        setTotal(initialTotal)
-        setError(initialError)
-        setSelectedPhoto(null)
+        setPhotos(
+            initialPhotos
+        )
+
+        setTotal(
+            initialTotal
+        )
+
+        setError(
+            initialError
+        )
+
+        setSelectedPhoto(
+            null
+        )
     }, [
         initialPhotos,
         initialTotal,
@@ -292,7 +363,9 @@ export function AdminDashboard({
                 }
 
                 setLoadingUrls(
-                    (current) => ({
+                    (
+                        current
+                    ) => ({
                         ...current,
                         [photo.id]:
                             true,
@@ -321,12 +394,13 @@ export function AdminDashboard({
                         thumbResult.url &&
                         originalResult.url
                     ) {
-                        const urls = {
-                            thumb:
-                            thumbResult.url,
-                            original:
-                            originalResult.url,
-                        }
+                        const urls =
+                            {
+                                thumb:
+                                thumbResult.url,
+                                original:
+                                originalResult.url,
+                            }
 
                         setSignedUrls(
                             (
@@ -342,7 +416,9 @@ export function AdminDashboard({
                     }
                 } finally {
                     setLoadingUrls(
-                        (current) => ({
+                        (
+                            current
+                        ) => ({
                             ...current,
                             [photo.id]:
                                 false,
@@ -362,19 +438,24 @@ export function AdminDashboard({
         async (
             photo: Photo
         ) => {
-            setSelectedPhoto(photo)
+            setSelectedPhoto(
+                photo
+            )
 
             await getSignedUrls(
                 photo
             )
         }
 
-    const closeModal = () => {
-        setSelectedPhoto(null)
-    }
+    const closeModal =
+        () => {
+            setSelectedPhoto(
+                null
+            )
+        }
 
     /*
-     * Photo updates
+     * Update photo
      */
     const handleUpdate =
         async (
@@ -382,19 +463,26 @@ export function AdminDashboard({
             update: PhotoUpdate
         ) => {
             setActionLoading(
-                (current) => ({
+                (
+                    current
+                ) => ({
                     ...current,
-                    [id]: true,
+                    [id]:
+                        true,
                 })
             )
 
             /*
-             * Optimistic UI
+             * Optimistic update
              */
             setPhotos(
-                (current) =>
+                (
+                    current
+                ) =>
                     current.map(
-                        (photo) =>
+                        (
+                            photo
+                        ) =>
                             photo.id ===
                             id
                                 ? {
@@ -406,8 +494,11 @@ export function AdminDashboard({
             )
 
             setSelectedPhoto(
-                (current) =>
-                    current?.id === id
+                (
+                    current
+                ) =>
+                    current?.id ===
+                    id
                         ? {
                             ...current,
                             ...update,
@@ -472,9 +563,12 @@ export function AdminDashboard({
                 )
             } finally {
                 setActionLoading(
-                    (current) => ({
+                    (
+                        current
+                    ) => ({
                         ...current,
-                        [id]: false,
+                        [id]:
+                            false,
                     })
                 )
             }
@@ -484,7 +578,9 @@ export function AdminDashboard({
      * Delete photo
      */
     const handleDelete =
-        async (id: string) => {
+        async (
+            id: string
+        ) => {
             if (
                 !window.confirm(
                     t(
@@ -496,9 +592,12 @@ export function AdminDashboard({
             }
 
             setActionLoading(
-                (current) => ({
+                (
+                    current
+                ) => ({
                     ...current,
-                    [id]: true,
+                    [id]:
+                        true,
                 })
             )
 
@@ -526,7 +625,9 @@ export function AdminDashboard({
                     )
 
                     setTotal(
-                        (current) =>
+                        (
+                            current
+                        ) =>
                             Math.max(
                                 0,
                                 current -
@@ -547,11 +648,11 @@ export function AdminDashboard({
                         router.refresh()
                 )
             } catch (
-                error
+                deleteError
                 ) {
                 console.error(
                     'Delete photo error:',
-                    error
+                    deleteError
                 )
 
                 window.alert(
@@ -561,16 +662,19 @@ export function AdminDashboard({
                 )
             } finally {
                 setActionLoading(
-                    (current) => ({
+                    (
+                        current
+                    ) => ({
                         ...current,
-                        [id]: false,
+                        [id]:
+                            false,
                     })
                 )
             }
         }
 
     /*
-     * Download single photo
+     * Download one photo
      */
     const handleDownload =
         async (
@@ -581,7 +685,9 @@ export function AdminDashboard({
                     photo
                 )
 
-            if (!urls) return
+            if (!urls) {
+                return
+            }
 
             const anchor =
                 document.createElement(
@@ -606,7 +712,7 @@ export function AdminDashboard({
         }
 
     /*
-     * ZIP download
+     * Download ZIP
      */
     const handleZipDownload =
         async (
@@ -614,7 +720,9 @@ export function AdminDashboard({
                 | 'all'
                 | 'favourites'
         ) => {
-            setZipLoading(filter)
+            setZipLoading(
+                filter
+            )
 
             try {
                 const url =
@@ -625,7 +733,9 @@ export function AdminDashboard({
                         : '')
 
                 const response =
-                    await fetch(url)
+                    await fetch(
+                        url
+                    )
 
                 if (
                     !response.ok
@@ -677,7 +787,9 @@ export function AdminDashboard({
                     objectUrl
                 )
             } finally {
-                setZipLoading(null)
+                setZipLoading(
+                    null
+                )
             }
         }
 
@@ -694,7 +806,9 @@ export function AdminDashboard({
                 return
             }
 
-            setLoadingMore(true)
+            setLoadingMore(
+                true
+            )
 
             try {
                 const filters =
@@ -707,7 +821,8 @@ export function AdminDashboard({
                         : activeFilter ===
                         'hidden'
                             ? {
-                                hidden: true,
+                                hidden:
+                                    true,
                             }
                             : activeFilter ===
                             'unapproved'
@@ -747,11 +862,11 @@ export function AdminDashboard({
                     }
                 }
             } catch (
-                error
+                loadError
                 ) {
                 console.error(
                     'Load more error:',
-                    error
+                    loadError
                 )
             } finally {
                 setLoadingMore(
@@ -789,9 +904,18 @@ export function AdminDashboard({
 
     const openShareModal =
         () => {
-            setShareOpen(true)
-            setShareUrl(null)
-            setCopied(false)
+            setShareOpen(
+                true
+            )
+
+            setShareUrl(
+                null
+            )
+
+            setCopied(
+                false
+            )
+
             setShowCreateForm(
                 false
             )
@@ -801,9 +925,18 @@ export function AdminDashboard({
 
     const closeShareModal =
         () => {
-            setShareOpen(false)
-            setShareUrl(null)
-            setCopied(false)
+            setShareOpen(
+                false
+            )
+
+            setShareUrl(
+                null
+            )
+
+            setCopied(
+                false
+            )
+
             setShowCreateForm(
                 false
             )
@@ -811,13 +944,16 @@ export function AdminDashboard({
 
     const handleCreateGalleryLink =
         async () => {
-            setShareLoading(true)
+            setShareLoading(
+                true
+            )
 
             try {
                 const result =
                     await createGalleryTokenAction(
                         {
                             showMessages,
+
                             expiresInDays:
                                 expiresInDays
                                     ? Number.parseInt(
@@ -825,9 +961,11 @@ export function AdminDashboard({
                                         10
                                     )
                                     : undefined,
+
                             label:
                                 galleryLabel ||
                                 'Wedding Gallery',
+
                             photoFilter,
                         }
                     )
@@ -857,13 +995,19 @@ export function AdminDashboard({
 
     const handleCopy =
         async () => {
-            if (!shareUrl) return
+            if (
+                !shareUrl
+            ) {
+                return
+            }
 
             await navigator.clipboard.writeText(
                 shareUrl
             )
 
-            setCopied(true)
+            setCopied(
+                true
+            )
 
             window.setTimeout(
                 () => {
@@ -876,7 +1020,9 @@ export function AdminDashboard({
         }
 
     const handleDeleteToken =
-        async (id: string) => {
+        async (
+            id: string
+        ) => {
             if (
                 !window.confirm(
                     t(
@@ -898,7 +1044,9 @@ export function AdminDashboard({
      * Filters
      */
     const handleFilterChange =
-        (filter?: string) => {
+        (
+            filter?: string
+        ) => {
             const base =
                 role === 'admin'
                     ? `/admin/weddings/${weddingId}/photos`
@@ -909,7 +1057,9 @@ export function AdminDashboard({
                     ? `${base}?filter=${filter}`
                     : base
 
-            router.push(url)
+            router.push(
+                url
+            )
         }
 
     /*
@@ -917,7 +1067,9 @@ export function AdminDashboard({
      */
     const modalIndex =
         photos.findIndex(
-            (photo) =>
+            (
+                photo
+            ) =>
                 photo.id ===
                 selectedPhoto?.id
         )
@@ -925,14 +1077,16 @@ export function AdminDashboard({
     const goPrev =
         async () => {
             if (
-                modalIndex <= 0
+                modalIndex <=
+                0
             ) {
                 return
             }
 
             await openModal(
                 photos[
-                modalIndex - 1
+                modalIndex -
+                1
                     ]
             )
         }
@@ -941,244 +1095,259 @@ export function AdminDashboard({
         async () => {
             if (
                 modalIndex >=
-                photos.length - 1
+                photos.length -
+                1
             ) {
                 return
             }
 
             await openModal(
                 photos[
-                modalIndex + 1
+                modalIndex +
+                1
                     ]
             )
         }
 
     return (
-        <div className="relative min-h-screen overflow-hidden bg-background">
-            {/* Ambient background */}
-            <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0"
-            >
-                <div className="absolute left-1/2 top-[-320px] h-[680px] w-[920px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/20 blur-[150px]" />
-            </div>
-
-            {/* HEADER */}
-            <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl">
-                <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-                    {/* Brand */}
-                    <Link
-                        href={
-                            role ===
-                            'couple'
-                                ? `/couple/weddings/${weddingId}`
-                                : `/admin/weddings/${weddingId}`
-                        }
-                        className="flex items-center gap-2.5"
+        <div
+            className={cn(
+                'relative overflow-hidden bg-background',
+                role === 'admin'
+                    ? 'min-h-[calc(100vh-4rem)]'
+                    : 'min-h-screen'
+            )}
+        >
+            {/* Couple ambient only */}
+            {role ===
+                'couple' && (
+                    <div
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0"
                     >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
-                            <Heart
-                                className="h-3.5 w-3.5"
-                                fill="currentColor"
-                            />
-                        </div>
+                        <div className="absolute left-1/2 top-[-320px] h-[680px] w-[920px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/20 blur-[150px]" />
+                    </div>
+                )}
 
-                        <span className="font-serif text-xl tracking-tight text-foreground">
-                            Wedora
-                        </span>
-                    </Link>
-
-                    {/* Header actions */}
-                    <div className="flex items-center gap-1 sm:gap-2">
-                        <ThemeToggle />
-
-                        {/* Seating */}
-                        <Link
-                            href={
-                                role ===
-                                'admin'
-                                    ? `/admin/weddings/${weddingId}`
-                                    : `/couple/weddings/${weddingId}/seating`
-                            }
-                            aria-label={t(
-                                'seating'
-                            )}
-                            className="flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:px-4"
-                        >
-                            <Armchair
-                                className="h-3.5 w-3.5"
-                                strokeWidth={
-                                    1.6
-                                }
-                            />
-
-                            <span className="hidden sm:inline">
-                                {t(
-                                    'seating'
-                                )}
-                            </span>
-                        </Link>
-
-                        {/* Share */}
-                        <button
-                            type="button"
-                            onClick={
-                                openShareModal
-                            }
-                            aria-label={t(
-                                'shareGallery'
-                            )}
-                            className="flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:px-4"
-                        >
-                            <Share2
-                                className="h-3.5 w-3.5"
-                                strokeWidth={
-                                    1.6
-                                }
-                            />
-
-                            <span className="hidden md:inline">
-                                {t(
-                                    'shareGallery'
-                                )}
-                            </span>
-                        </button>
-
-                        {/* ZIP */}
-                        <div className="group relative">
-                            <button
-                                type="button"
-                                disabled={
-                                    zipLoading !==
-                                    null
-                                }
-                                aria-label={t(
-                                    'downloadZip'
-                                )}
-                                className="flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-50 sm:px-4"
+            {/* =====================================
+                COUPLE HEADER ONLY
+            ===================================== */}
+            {role ===
+                'couple' && (
+                    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl">
+                        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+                            {/* Brand */}
+                            <Link
+                                href={`/couple/weddings/${weddingId}`}
+                                className="flex items-center gap-2.5"
                             >
-                                {zipLoading ? (
-                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : (
-                                    <ArchiveIcon
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
+                                    <Heart
+                                        className="h-3.5 w-3.5"
+                                        fill="currentColor"
+                                    />
+                                </div>
+
+                                <span className="font-serif text-xl tracking-tight text-foreground">
+                                Wedora
+                            </span>
+                            </Link>
+
+                            <div className="flex items-center gap-1 sm:gap-2">
+                                <ThemeToggle />
+
+                                <Link
+                                    href={`/couple/weddings/${weddingId}/seating`}
+                                    aria-label={t(
+                                        'seating'
+                                    )}
+                                    className="flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:px-4"
+                                >
+                                    <Armchair
                                         className="h-3.5 w-3.5"
                                         strokeWidth={
                                             1.6
                                         }
                                     />
-                                )}
 
-                                <span className="hidden lg:inline">
-                                    {zipLoading
-                                        ? t(
-                                            'preparingZip'
-                                        )
-                                        : t(
-                                            'downloadZip'
-                                        )}
+                                    <span className="hidden sm:inline">
+                                    {t(
+                                        'seating'
+                                    )}
                                 </span>
-                            </button>
+                                </Link>
 
-                            {/* ZIP dropdown */}
-                            <div className="invisible absolute right-0 top-full z-20 mt-2 w-52 translate-y-1 overflow-hidden rounded-2xl border border-border/70 bg-card p-1.5 opacity-0 shadow-xl transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        void handleZipDownload(
-                                            'all'
-                                        )
+                                    onClick={
+                                        openShareModal
                                     }
-                                    disabled={
-                                        zipLoading !==
-                                        null
-                                    }
-                                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs text-foreground transition-colors hover:bg-secondary"
-                                >
-                                    <Download className="h-3.5 w-3.5 text-muted-foreground" />
-
-                                    {t(
-                                        'allPhotos'
+                                    aria-label={t(
+                                        'shareGallery'
                                     )}
+                                    className="flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:px-4"
+                                >
+                                    <Share2
+                                        className="h-3.5 w-3.5"
+                                        strokeWidth={
+                                            1.6
+                                        }
+                                    />
+
+                                    <span className="hidden md:inline">
+                                    {t(
+                                        'shareGallery'
+                                    )}
+                                </span>
                                 </button>
 
+                                <ZipMenu
+                                    zipLoading={
+                                        zipLoading
+                                    }
+                                    onDownload={
+                                        handleZipDownload
+                                    }
+                                    compact
+                                />
+
                                 <button
                                     type="button"
                                     onClick={() =>
-                                        void handleZipDownload(
-                                            'favourites'
-                                        )
+                                        void signOutAction()
                                     }
-                                    disabled={
-                                        zipLoading !==
-                                        null
-                                    }
-                                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs text-foreground transition-colors hover:bg-secondary"
-                                >
-                                    <Heart className="h-3.5 w-3.5 text-muted-foreground" />
-
-                                    {t(
-                                        'onlyFavourites'
+                                    aria-label={tc(
+                                        'logout'
                                     )}
+                                    className="flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-card text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:w-auto sm:px-3"
+                                >
+                                    <LogOut
+                                        className="h-3.5 w-3.5"
+                                        strokeWidth={
+                                            1.6
+                                        }
+                                    />
+
+                                    <span className="ml-2 hidden lg:inline">
+                                    {tc(
+                                        'logout'
+                                    )}
+                                </span>
                                 </button>
                             </div>
                         </div>
+                    </header>
+                )}
 
-                        {/* Logout */}
-                        <button
-                            type="button"
-                            onClick={() =>
-                                void signOutAction()
-                            }
-                            aria-label={tc(
-                                'logout'
-                            )}
-                            className="flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-card text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:w-auto sm:px-3"
-                        >
-                            <LogOut
-                                className="h-3.5 w-3.5"
-                                strokeWidth={
-                                    1.6
-                                }
-                            />
-
-                            <span className="ml-2 hidden lg:inline">
-                                {tc(
-                                    'logout'
-                                )}
-                            </span>
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            {/* PAGE */}
+            {/* =====================================
+                PAGE
+            ===================================== */}
             <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
                 {/* Heading */}
-                <div className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-                    <div>
-                        <h1 className="font-serif text-4xl font-light tracking-[-0.025em] text-foreground sm:text-5xl">
-                            {t('title')}
-                        </h1>
+                <div className="mb-8">
+                    {/* Admin navigation */}
+                    {role ===
+                        'admin' && (
+                            <Link
+                                href={`/admin/weddings/${weddingId}`}
+                                className="mb-6 inline-flex items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                            >
+                                <ArrowLeft
+                                    className="h-3.5 w-3.5"
+                                    strokeWidth={
+                                        1.6
+                                    }
+                                />
 
-                        <p className="mt-3 text-xs text-muted-foreground">
-                            {adminEmail}
-                        </p>
-                    </div>
+                                {t(
+                                    'backToWedding'
+                                )}
+                            </Link>
+                        )}
 
-                    <div className="flex items-center gap-3">
-                        <div className="rounded-full border border-border/70 bg-card px-4 py-2 text-xs text-muted-foreground shadow-sm">
-                            {t(
-                                'photoCount',
-                                {
-                                    count:
-                                    total,
-                                }
+                    <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+                        <div>
+                            {role ===
+                                'admin' &&
+                                weddingName && (
+                                    <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.2em] text-[hsl(var(--primary))]">
+                                        {
+                                            weddingName
+                                        }
+                                    </p>
+                                )}
+
+                            <h1 className="font-serif text-4xl font-light tracking-[-0.025em] text-foreground sm:text-5xl">
+                                {t(
+                                    'title'
+                                )}
+                            </h1>
+
+                            {role ===
+                            'admin' ? (
+                                <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
+                                    {t(
+                                        'description'
+                                    )}
+                                </p>
+                            ) : (
+                                adminEmail && (
+                                    <p className="mt-3 text-xs text-muted-foreground">
+                                        {
+                                            adminEmail
+                                        }
+                                    </p>
+                                )
                             )}
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                            {/* Count */}
+                            <div className="rounded-full border border-border/70 bg-card px-4 py-2.5 text-xs text-muted-foreground shadow-sm">
+                                {t(
+                                    'photoCount',
+                                    {
+                                        count:
+                                        total,
+                                    }
+                                )}
+                            </div>
+
+                            {/* Admin actions */}
+                            {role ===
+                                'admin' && (
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={
+                                                openShareModal
+                                            }
+                                            className="btn-secondary justify-center"
+                                        >
+                                            <Share2 className="h-4 w-4" />
+
+                                            {t(
+                                                'shareGallery'
+                                            )}
+                                        </button>
+
+                                        <ZipMenu
+                                            zipLoading={
+                                                zipLoading
+                                            }
+                                            onDownload={
+                                                handleZipDownload
+                                            }
+                                        />
+                                    </>
+                                )}
                         </div>
                     </div>
                 </div>
 
-                {/* Filters */}
+                {/* =====================================
+                    FILTERS
+                ===================================== */}
                 <div className="mb-7 flex items-center gap-2 overflow-x-auto pb-1">
                     {FILTERS.map(
                         ({
@@ -1225,7 +1394,9 @@ export function AdminDashboard({
                         className="mb-6 rounded-2xl border border-destructive/15 bg-destructive/[0.06] px-4 py-3.5"
                     >
                         <p className="text-xs leading-5 text-destructive">
-                            {error}
+                            {
+                                error
+                            }
                         </p>
                     </div>
                 )}
@@ -1345,7 +1516,9 @@ export function AdminDashboard({
                     )}
             </main>
 
-            {/* Photo viewer */}
+            {/* =====================================
+                PHOTO VIEWER
+            ===================================== */}
             {selectedPhoto && (
                 <PhotoModal
                     photo={
@@ -1399,7 +1572,9 @@ export function AdminDashboard({
                 />
             )}
 
-            {/* Share gallery */}
+            {/* =====================================
+                SHARE GALLERY
+            ===================================== */}
             {shareOpen && (
                 <ShareGalleryModal
                     shareUrl={
@@ -1473,7 +1648,163 @@ export function AdminDashboard({
 }
 
 /*
+ * ============================================
+ * ZIP MENU
+ * ============================================
+ */
+function ZipMenu({
+                     zipLoading,
+                     onDownload,
+                     compact = false,
+                 }: {
+    zipLoading:
+        | 'all'
+        | 'favourites'
+        | null
+    onDownload: (
+        filter:
+            | 'all'
+            | 'favourites'
+    ) => Promise<void>
+    compact?: boolean
+}) {
+    const t =
+        useTranslations(
+            'dashboard.photos'
+        )
+
+    const [
+        open,
+        setOpen,
+    ] =
+        useState(false)
+
+    return (
+        <div className="relative">
+            <button
+                type="button"
+                disabled={
+                    zipLoading !==
+                    null
+                }
+                onClick={() =>
+                    setOpen(
+                        (
+                            current
+                        ) =>
+                            !current
+                    )
+                }
+                aria-label={t(
+                    'downloadZip'
+                )}
+                className={cn(
+                    compact
+                        ? 'flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-50 sm:px-4'
+                        : 'btn-secondary justify-center disabled:opacity-50'
+                )}
+            >
+                {zipLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                    <ArchiveIcon
+                        className="h-4 w-4"
+                        strokeWidth={
+                            1.6
+                        }
+                    />
+                )}
+
+                <span
+                    className={cn(
+                        compact
+                            ? 'hidden lg:inline'
+                            : 'hidden sm:inline'
+                    )}
+                >
+                    {zipLoading
+                        ? t(
+                            'preparingZip'
+                        )
+                        : t(
+                            'downloadZip'
+                        )}
+                </span>
+            </button>
+
+            {open && (
+                <>
+                    {/* Click-away layer */}
+                    <button
+                        type="button"
+                        aria-label="Close download menu"
+                        className="fixed inset-0 z-20 cursor-default"
+                        onClick={() =>
+                            setOpen(
+                                false
+                            )
+                        }
+                    />
+
+                    <div className="absolute right-0 top-full z-30 mt-2 w-52 overflow-hidden rounded-2xl border border-border/70 bg-card p-1.5 shadow-xl">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setOpen(
+                                    false
+                                )
+
+                                void onDownload(
+                                    'all'
+                                )
+                            }}
+                            disabled={
+                                zipLoading !==
+                                null
+                            }
+                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs text-foreground transition-colors hover:bg-secondary"
+                        >
+                            <Download className="h-3.5 w-3.5 text-muted-foreground" />
+
+                            {t(
+                                'allPhotos'
+                            )}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setOpen(
+                                    false
+                                )
+
+                                void onDownload(
+                                    'favourites'
+                                )
+                            }}
+                            disabled={
+                                zipLoading !==
+                                null
+                            }
+                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs text-foreground transition-colors hover:bg-secondary"
+                        >
+                            <Heart className="h-3.5 w-3.5 text-muted-foreground" />
+
+                            {t(
+                                'onlyFavourites'
+                            )}
+                        </button>
+                    </div>
+                </>
+            )}
+        </div>
+    )
+}
+
+/*
+ * ============================================
  * PHOTO CARD
+ * ============================================
  */
 function PhotoCard({
                        photo,
@@ -1505,10 +1836,10 @@ function PhotoCard({
         )
 
     /*
-     * Load signed image URLs when
-     * the card approaches the viewport.
+     * Load signed URLs as cards
+     * approach the viewport.
      *
-     * This also fixes mobile, where
+     * Important for mobile where
      * hover does not exist.
      */
     useEffect(() => {
@@ -1540,6 +1871,7 @@ function PhotoCard({
                             ?.isIntersecting
                     ) {
                         onUrlNeeded()
+
                         observer.disconnect()
                     }
                 },
@@ -1549,7 +1881,9 @@ function PhotoCard({
                 }
             )
 
-        observer.observe(element)
+        observer.observe(
+            element
+        )
 
         return () =>
             observer.disconnect()
@@ -1560,7 +1894,9 @@ function PhotoCard({
 
     return (
         <div
-            ref={cardRef}
+            ref={
+                cardRef
+            }
             className={cn(
                 'group relative aspect-[4/5] overflow-hidden rounded-[1.4rem] bg-muted',
                 photo.hidden &&
@@ -1573,7 +1909,9 @@ function PhotoCard({
             {/* Photo */}
             {thumbnailUrl ? (
                 <Image
-                    src={thumbnailUrl}
+                    src={
+                        thumbnailUrl
+                    }
                     alt={
                         photo.guest_name ??
                         'Wedding photo'
@@ -1636,7 +1974,7 @@ function PhotoCard({
             </div>
 
             {/* Quick actions */}
-            <div className="absolute right-3 top-3 flex gap-1.5 opacity-100 transition-all duration-200 sm:translate-y-[-4px] sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
+            <div className="absolute right-3 top-3 flex gap-1.5 opacity-100 transition-all duration-200 sm:-translate-y-1 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
                 <QuickActionBtn
                     onClick={(
                         event
@@ -1711,7 +2049,7 @@ function PhotoCard({
                 </QuickActionBtn>
             </div>
 
-            {/* Guest */}
+            {/* Guest name */}
             {photo.guest_name && (
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 px-4 pb-4 opacity-100 transition-all duration-300 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
                     <p className="truncate text-left text-xs font-medium text-white drop-shadow">
@@ -1726,7 +2064,9 @@ function PhotoCard({
 }
 
 /*
- * QUICK ACTION BUTTON
+ * ============================================
+ * QUICK PHOTO ACTION
+ * ============================================
  */
 function QuickActionBtn({
                             children,
@@ -1746,8 +2086,12 @@ function QuickActionBtn({
     return (
         <button
             type="button"
-            onClick={onClick}
-            disabled={loading}
+            onClick={
+                onClick
+            }
+            disabled={
+                loading
+            }
             className={cn(
                 'flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white backdrop-blur-md transition-colors disabled:opacity-50',
                 active &&
@@ -1769,7 +2113,9 @@ function QuickActionBtn({
 }
 
 /*
+ * ============================================
  * PHOTO VIEWER
+ * ============================================
  */
 function PhotoModal({
                         photo,
@@ -1820,32 +2166,33 @@ function PhotoModal({
      * Keyboard navigation
      */
     useEffect(() => {
-        const handleKeyDown = (
-            event: KeyboardEvent
-        ) => {
-            if (
-                event.key ===
-                'Escape'
-            ) {
-                onClose()
-            }
+        const handleKeyDown =
+            (
+                event: KeyboardEvent
+            ) => {
+                if (
+                    event.key ===
+                    'Escape'
+                ) {
+                    onClose()
+                }
 
-            if (
-                event.key ===
-                'ArrowLeft' &&
-                hasPrev
-            ) {
-                onPrev()
-            }
+                if (
+                    event.key ===
+                    'ArrowLeft' &&
+                    hasPrev
+                ) {
+                    onPrev()
+                }
 
-            if (
-                event.key ===
-                'ArrowRight' &&
-                hasNext
-            ) {
-                onNext()
+                if (
+                    event.key ===
+                    'ArrowRight' &&
+                    hasNext
+                ) {
+                    onNext()
+                }
             }
-        }
 
         window.addEventListener(
             'keydown',
@@ -1879,7 +2226,9 @@ function PhotoModal({
     return (
         <div
             className="fixed inset-0 z-50 flex bg-[#090909] text-white"
-            onClick={onClose}
+            onClick={
+                onClose
+            }
         >
             {/* Main viewer */}
             <div
@@ -1890,7 +2239,7 @@ function PhotoModal({
                     event.stopPropagation()
                 }
             >
-                {/* Ambient photo */}
+                {/* Ambient */}
                 {urls?.original && (
                     <div
                         aria-hidden
@@ -1910,7 +2259,7 @@ function PhotoModal({
                     </div>
                 )}
 
-                {/* Mobile top controls */}
+                {/* Top controls */}
                 <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between p-4 sm:p-6">
                     <button
                         type="button"
@@ -1964,7 +2313,6 @@ function PhotoModal({
                         <div className="h-52 w-52 rounded-3xl bg-white/5" />
                     )}
 
-                    {/* Previous */}
                     {hasPrev && (
                         <button
                             type="button"
@@ -1978,7 +2326,6 @@ function PhotoModal({
                         </button>
                     )}
 
-                    {/* Next */}
                     {hasNext && (
                         <button
                             type="button"
@@ -2003,7 +2350,6 @@ function PhotoModal({
                     event.stopPropagation()
                 }
             >
-                {/* Header */}
                 <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
                         <h2 className="truncate font-serif text-2xl font-light tracking-tight">
@@ -2198,9 +2544,6 @@ function PhotoModal({
                                 photo
                             )
                         }
-                        loading={
-                            isActionLoading
-                        }
                         icon={
                             <Download className="h-4 w-4" />
                         }
@@ -2245,15 +2588,18 @@ function PhotoModal({
                                 </p>
                             )}
 
-                        <p>
-                            {(
-                                photo.file_size /
-                                1024
-                            ).toFixed(
-                                0
-                            )}{' '}
-                            KB
-                        </p>
+                        {photo.file_size !=
+                            null && (
+                                <p>
+                                    {(
+                                        photo.file_size /
+                                        1024
+                                    ).toFixed(
+                                        0
+                                    )}{' '}
+                                    KB
+                                </p>
+                            )}
                     </div>
                 </div>
             </aside>
@@ -2262,7 +2608,9 @@ function PhotoModal({
 }
 
 /*
+ * ============================================
  * STATUS BADGE
+ * ============================================
  */
 function StatusBadge({
                          icon,
@@ -2274,13 +2622,16 @@ function StatusBadge({
     return (
         <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-[10px] font-medium text-muted-foreground">
             {icon}
+
             {label}
         </span>
     )
 }
 
 /*
+ * ============================================
  * PHOTO ACTION
+ * ============================================
  */
 function ActionButton({
                           onClick,
@@ -2300,8 +2651,12 @@ function ActionButton({
     return (
         <button
             type="button"
-            onClick={onClick}
-            disabled={loading}
+            onClick={
+                onClick
+            }
+            disabled={
+                loading
+            }
             className={cn(
                 'flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium transition-colors disabled:opacity-50',
                 danger
@@ -2325,7 +2680,9 @@ function ActionButton({
 }
 
 /*
+ * ============================================
  * SHARE GALLERY
+ * ============================================
  */
 function ShareGalleryModal({
                                shareUrl,
@@ -2351,7 +2708,9 @@ function ShareGalleryModal({
                            }: {
     shareUrl: string | null
     setShareUrl: (
-        value: string | null
+        value:
+            | string
+            | null
     ) => void
     onClose: () => void
     galleryTokens: GalleryToken[]
@@ -2389,10 +2748,6 @@ function ShareGalleryModal({
             'dashboard.photos'
         )
 
-    /*
-     * Lock background while modal
-     * is open and allow Escape.
-     */
     useEffect(() => {
         const previousOverflow =
             document.body.style
@@ -2401,16 +2756,17 @@ function ShareGalleryModal({
         document.body.style.overflow =
             'hidden'
 
-        const handleKeyDown = (
-            event: KeyboardEvent
-        ) => {
-            if (
-                event.key ===
-                'Escape'
-            ) {
-                onClose()
+        const handleKeyDown =
+            (
+                event: KeyboardEvent
+            ) => {
+                if (
+                    event.key ===
+                    'Escape'
+                ) {
+                    onClose()
+                }
             }
-        }
 
         window.addEventListener(
             'keydown',
@@ -2428,14 +2784,17 @@ function ShareGalleryModal({
         }
     }, [onClose])
 
-    const useGalleryToken = (
-        token: string
-    ) => {
-        const url =
-            `${window.location.origin}/gallery/${token}`
+    const useGalleryToken =
+        (
+            token: string
+        ) => {
+            const url =
+                `${window.location.origin}/gallery/${token}`
 
-        setShareUrl(url)
-    }
+            setShareUrl(
+                url
+            )
+        }
 
     return (
         <div
@@ -2573,6 +2932,7 @@ function ShareGalleryModal({
                                                                         token.id
                                                                     )
                                                                 }
+                                                                aria-label="Delete"
                                                                 className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive"
                                                             >
                                                                 <Trash2 className="h-3.5 w-3.5" />
@@ -2641,7 +3001,7 @@ function ShareGalleryModal({
                                         />
                                     </div>
 
-                                    {/* Photo filter */}
+                                    {/* Photos */}
                                     <div>
                                         <label className="label-wedding">
                                             {t(
@@ -2795,7 +3155,6 @@ function ShareGalleryModal({
                                         </select>
                                     </div>
 
-                                    {/* Create */}
                                     <button
                                         type="button"
                                         onClick={

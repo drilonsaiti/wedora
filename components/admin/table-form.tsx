@@ -1,74 +1,118 @@
 'use client'
 
-import {useEffect, useState} from 'react'
-import {useForm} from 'react-hook-form'
-import {zodResolver} from '@hookform/resolvers/zod'
+import {
+    useEffect,
+    useState,
+} from 'react'
+
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
     Circle,
     Loader2,
     Minus,
-    Plus as PlusIcon,
+    Plus,
     RectangleHorizontal,
     Square,
+    type LucideIcon,
 } from 'lucide-react'
-import {useTranslations} from 'next-intl'
+import { useTranslations } from 'next-intl'
+import { useForm } from 'react-hook-form'
+
+import {
+    addTable,
+    updateTable,
+} from '@/actions/seating'
+import { distributeSeatsEvenly } from '@/lib/seat-generator'
+import { cn } from '@/lib/utils'
+import { getValidationMessage } from '@/lib/validation'
 import {
     type SeatSides,
     type TableFormValues,
     tableSchema,
 } from '@/schemas'
-import {addTable, updateTable} from '@/actions/seating'
-import {cn} from '@/lib/utils'
-import {distributeSeatsEvenly} from '@/lib/seat-generator'
-import {getValidationMessage} from '@/lib/validation'
 
 interface TableFormProps {
-    initialValues?: Partial<TableFormValues> & { id?: string }
+    initialValues?: Partial<TableFormValues> & {
+        id?: string
+    }
     weddingId: string
     onSuccess: () => void
     onCancel: () => void
 }
 
 const DIMENSIONS = {
-    round: {width: 128, height: 128},
-    square: {width: 140, height: 140},
-    rectangle: {width: 240, height: 100},
+    round: {
+        width: 128,
+        height: 128,
+    },
+    square: {
+        width: 140,
+        height: 140,
+    },
+    rectangle: {
+        width: 240,
+        height: 100,
+    },
+} as const
+
+interface SideStepperProps {
+    label: string
+    value: number
+    onChange: (value: number) => void
 }
 
 function SideStepper({
                          label,
                          value,
                          onChange,
-                     }: {
-    label: string
-    value: number
-    onChange: (v: number) => void
-}) {
+                     }: SideStepperProps) {
     return (
-        <div className="flex flex-col items-center gap-1">
-            <span className="text-[9px] uppercase tracking-widest text-muted-foreground">
+        <div className="flex flex-col items-center gap-1.5">
+            <span className="text-[8px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
                 {label}
             </span>
 
-            <div className="flex items-center gap-1 bg-muted rounded-lg">
+            <div className="flex h-8 items-center overflow-hidden rounded-xl border border-border/70 bg-background shadow-sm">
                 <button
                     type="button"
-                    onClick={() => onChange(Math.max(0, value - 1))}
-                    className="w-6 h-6 flex items-center justify-center hover:bg-border rounded-l-lg transition-colors"
+                    onClick={() =>
+                        onChange(
+                            Math.max(
+                                0,
+                                value - 1
+                            )
+                        )
+                    }
+                    disabled={
+                        value <= 0
+                    }
+                    aria-label={`${label} −`}
+                    className="flex h-full w-8 items-center justify-center text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
                 >
-                    <Minus className="w-3 h-3"/>
+                    <Minus
+                        className="h-3 w-3"
+                        strokeWidth={1.8}
+                    />
                 </button>
 
-                <span className="w-6 text-center text-sm font-medium">
+                <span className="w-7 text-center text-xs font-medium tabular-nums text-foreground">
                     {value}
                 </span>
 
                 <button
                     type="button"
-                    onClick={() => onChange(value + 1)}
-                    className="w-6 h-6 flex items-center justify-center hover:bg-border rounded-r-lg transition-colors"
+                    onClick={() =>
+                        onChange(
+                            value + 1
+                        )
+                    }
+                    aria-label={`${label} +`}
+                    className="flex h-full w-8 items-center justify-center text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 >
-                    <PlusIcon className="w-3 h-3"/>
+                    <Plus
+                        className="h-3 w-3"
+                        strokeWidth={1.8}
+                    />
                 </button>
             </div>
         </div>
@@ -81,94 +125,194 @@ export function TableForm({
                               onSuccess,
                               onCancel,
                           }: TableFormProps) {
-    const t = useTranslations('dashboard.seating')
-    const tv = useTranslations('validation')
-    const tc = useTranslations('common')
+    const t =
+        useTranslations(
+            'seating'
+        )
 
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
+    const tv =
+        useTranslations(
+            'validation'
+        )
+
+    const tc =
+        useTranslations(
+            'common'
+        )
+
+    const [
+        loading,
+        setLoading,
+    ] =
+        useState(false)
+
+    const [
+        error,
+        setError,
+    ] =
+        useState<string | null>(
+            null
+        )
 
     const {
         register,
         handleSubmit,
         watch,
         setValue,
-        formState: {errors},
-    } = useForm<TableFormValues>({
-        resolver: zodResolver(tableSchema),
-        defaultValues: {
-            number: initialValues?.number || undefined,
-            seats: initialValues?.seats || 8,
-            label: initialValues?.label || '',
-            shape: initialValues?.shape || 'round',
-            seatSides:
-                initialValues?.seatSides ??
-                distributeSeatsEvenly(
-                    initialValues?.seats || 8,
-                    DIMENSIONS[initialValues?.shape || 'round'].width,
-                    DIMENSIONS[initialValues?.shape || 'round'].height
-                ),
+        formState: {
+            errors,
         },
-    })
+    } =
+        useForm<TableFormValues>({
+            resolver:
+                zodResolver(
+                    tableSchema
+                ),
 
-    const selectedShape = watch('shape')
-    const seatsCount = watch('seats')
-    const sides = watch('seatSides') as SeatSides
+            defaultValues: {
+                number:
+                    initialValues?.number ??
+                    undefined,
 
-    const shapeOptions: {
+                seats:
+                    initialValues?.seats ??
+                    8,
+
+                label:
+                    initialValues?.label ??
+                    '',
+
+                shape:
+                    initialValues?.shape ??
+                    'round',
+
+                seatSides:
+                    initialValues?.seatSides ??
+                    distributeSeatsEvenly(
+                        initialValues?.seats ??
+                        8,
+                        DIMENSIONS[
+                        initialValues?.shape ??
+                        'round'
+                            ].width,
+                        DIMENSIONS[
+                        initialValues?.shape ??
+                        'round'
+                            ].height
+                    ),
+            },
+        })
+
+    const selectedShape =
+        watch(
+            'shape'
+        )
+
+    const seatsCount =
+        watch(
+            'seats'
+        ) || 0
+
+    const sides =
+        watch(
+            'seatSides'
+        ) as SeatSides
+
+    const shapeOptions: Array<{
         value: TableFormValues['shape']
         label: string
-        Icon: typeof Circle
-    }[] = [
+        Icon: LucideIcon
+    }> = [
         {
             value: 'round',
-            label: t('shapeRound'),
+            label: t(
+                'shapeRound'
+            ),
             Icon: Circle,
         },
         {
             value: 'square',
-            label: t('shapeSquare'),
+            label: t(
+                'shapeSquare'
+            ),
             Icon: Square,
         },
         {
             value: 'rectangle',
-            label: t('shapeRectangle'),
+            label: t(
+                'shapeRectangle'
+            ),
             Icon: RectangleHorizontal,
         },
     ]
 
+    /*
+     * ============================================
+     * KEEP SEAT DISTRIBUTION IN SYNC
+     * ============================================
+     *
+     * For square / rectangular tables we
+     * redistribute seats when:
+     *
+     * - seat count changes
+     * - table shape changes
+     *
+     * Manual changes remain untouched until
+     * one of those values changes.
+     */
     useEffect(() => {
-        if (selectedShape === 'round') return
-
-        const total =
-            (sides?.top ?? 0) +
-            (sides?.right ?? 0) +
-            (sides?.bottom ?? 0) +
-            (sides?.left ?? 0)
-
-        if (total !== seatsCount) {
-            const dims = DIMENSIONS[selectedShape]
-
-            setValue(
-                'seatSides',
-                distributeSeatsEvenly(
-                    seatsCount || 0,
-                    dims.width,
-                    dims.height
-                )
-            )
+        if (
+            selectedShape ===
+            'round'
+        ) {
+            return
         }
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [seatsCount, selectedShape])
+        const dimensions =
+            DIMENSIONS[
+                selectedShape
+                ]
+
+        setValue(
+            'seatSides',
+            distributeSeatsEvenly(
+                seatsCount,
+                dimensions.width,
+                dimensions.height
+            ),
+            {
+                shouldValidate:
+                    true,
+            }
+        )
+    }, [
+        seatsCount,
+        selectedShape,
+        setValue,
+    ])
 
     const totalAssigned =
-        (sides?.top ?? 0) +
-        (sides?.right ?? 0) +
-        (sides?.bottom ?? 0) +
-        (sides?.left ?? 0)
+        (sides?.top ??
+            0) +
+        (sides?.right ??
+            0) +
+        (sides?.bottom ??
+            0) +
+        (sides?.left ??
+            0)
 
-    const isBalanced = totalAssigned === seatsCount
+    const isBalanced =
+        totalAssigned ===
+        seatsCount
+
+    /*
+     * A round table doesn't use individual
+     * side distribution.
+     */
+    const distributionValid =
+        selectedShape ===
+        'round' ||
+        isBalanced
 
     const updateSide = (
         side: keyof SeatSides,
@@ -178,280 +322,520 @@ export function TableForm({
             'seatSides',
             {
                 ...sides,
-                [side]: value,
+                [side]:
+                value,
             },
             {
-                shouldValidate: true,
+                shouldValidate:
+                    true,
+                shouldDirty:
+                    true,
             }
         )
     }
 
-    const numberError = getValidationMessage(
-        errors.number,
-        {
-            validation: tv,
-        }
-    )
-
-    const seatsError = getValidationMessage(
-        errors.seats,
-        {
-            validation: tv,
-        }
-    )
-
-    const seatSidesError = getValidationMessage(
-        errors.seatSides,
-        {
-            validation: tv,
-        }
-    )
-
-    const labelError = getValidationMessage(
-        errors.label,
-        {
-            validation: tv,
-        }
-    )
-
-    const onSubmit = async (data: TableFormValues) => {
-        setLoading(true)
-        setError(null)
-
-        try {
-            if (initialValues?.id) {
-                await updateTable(initialValues.id, data)
-            } else {
-                await addTable({
-                    ...data,
-                    weddingId,
-                })
+    const numberError =
+        getValidationMessage(
+            errors.number,
+            {
+                validation:
+                tv,
             }
+        )
 
-            onSuccess()
-        } catch {
-            setError(tc('error'))
-        } finally {
-            setLoading(false)
+    const seatsError =
+        getValidationMessage(
+            errors.seats,
+            {
+                validation:
+                tv,
+            }
+        )
+
+    const seatSidesError =
+        getValidationMessage(
+            errors.seatSides,
+            {
+                validation:
+                tv,
+            }
+        )
+
+    const labelError =
+        getValidationMessage(
+            errors.label,
+            {
+                validation:
+                tv,
+            }
+        )
+
+    const onSubmit =
+        async (
+            data: TableFormValues
+        ) => {
+            setLoading(
+                true
+            )
+
+            setError(
+                null
+            )
+
+            try {
+                if (
+                    initialValues?.id
+                ) {
+                    await updateTable(
+                        initialValues.id,
+                        data
+                    )
+                } else {
+                    await addTable(
+                        {
+                            ...data,
+                            weddingId,
+                        }
+                    )
+                }
+
+                onSuccess()
+            } catch {
+                setError(
+                    tc(
+                        'error'
+                    )
+                )
+            } finally {
+                setLoading(
+                    false
+                )
+            }
         }
-    }
 
     return (
         <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="space-y-4"
+            onSubmit={handleSubmit(
+                onSubmit
+            )}
+            className="space-y-6"
         >
-            <div className="space-y-4">
-                {/* Shape */}
-                <div>
-                    <label className="label-wedding">
-                        {t('tableShape')}
-                    </label>
+            {/* =====================================
+                SHAPE
+            ===================================== */}
+            <div>
+                <label className="label-wedding">
+                    {t(
+                        'tableShape'
+                    )}
+                </label>
 
-                    <div className="grid grid-cols-3 gap-2 mt-1">
-                        {shapeOptions.map(
-                            ({value, label, Icon}) => (
+                <div className="mt-2 grid grid-cols-3 gap-2">
+                    {shapeOptions.map(
+                        ({
+                             value,
+                             label,
+                             Icon,
+                         }) => {
+                            const active =
+                                selectedShape ===
+                                value
+
+                            return (
                                 <button
-                                    key={value}
+                                    key={
+                                        value
+                                    }
                                     type="button"
+                                    aria-pressed={
+                                        active
+                                    }
                                     onClick={() =>
                                         setValue(
                                             'shape',
                                             value,
                                             {
-                                                shouldValidate: true,
+                                                shouldValidate:
+                                                    true,
+                                                shouldDirty:
+                                                    true,
                                             }
                                         )
                                     }
                                     className={cn(
-                                        'flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition-colors text-xs font-sans',
-                                        selectedShape === value
-                                            ? 'border-[hsl(var(--primary))] bg-[hsl(var(--accent))] text-[hsl(var(--primary))]'
-                                            : 'border-border text-muted-foreground hover:border-[hsl(var(--gold))]/50'
+                                        'group flex min-h-[82px] flex-col items-center justify-center gap-2 rounded-2xl border px-2 py-3 transition-all',
+                                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20',
+
+                                        active
+                                            ? 'border-foreground/15 bg-secondary/70 text-foreground shadow-sm'
+                                            : 'border-border/70 bg-background text-muted-foreground hover:border-foreground/10 hover:bg-secondary/30 hover:text-foreground'
                                     )}
                                 >
-                                    <Icon className="w-5 h-5"/>
-                                    {label}
+                                    <div
+                                        className={cn(
+                                            'flex h-8 w-8 items-center justify-center rounded-xl transition-colors',
+
+                                            active
+                                                ? 'bg-foreground text-background'
+                                                : 'bg-secondary text-muted-foreground group-hover:text-foreground'
+                                        )}
+                                    >
+                                        <Icon
+                                            className="h-4 w-4"
+                                            strokeWidth={
+                                                1.6
+                                            }
+                                        />
+                                    </div>
+
+                                    <span className="text-[10px] font-medium">
+                                        {
+                                            label
+                                        }
+                                    </span>
                                 </button>
                             )
-                        )}
-                    </div>
+                        }
+                    )}
                 </div>
+            </div>
 
+            {/* =====================================
+                TABLE DETAILS
+            ===================================== */}
+            <div className="grid gap-4 sm:grid-cols-2">
                 {/* Table number */}
                 <div>
-                    <label className="label-wedding">
-                        {t('tableNumberLabel')}
+                    <label
+                        htmlFor="table-number"
+                        className="label-wedding"
+                    >
+                        {t(
+                            'tableNumberLabel'
+                        )}
                     </label>
 
                     <input
-                        {...register('number', {
-                            valueAsNumber: true,
-                        })}
+                        {...register(
+                            'number',
+                            {
+                                valueAsNumber:
+                                    true,
+                            }
+                        )}
+                        id="table-number"
                         type="number"
-                        placeholder={t('tableNumberPlaceholder')}
-                        className="input-wedding"
+                        min={1}
+                        inputMode="numeric"
+                        placeholder={t(
+                            'tableNumberPlaceholder'
+                        )}
+                        className="input-wedding h-11"
                     />
 
                     {numberError && (
-                        <p className="text-xs text-destructive mt-1">
-                            {numberError}
+                        <p className="mt-1.5 text-xs text-destructive">
+                            {
+                                numberError
+                            }
                         </p>
                     )}
                 </div>
 
                 {/* Seats */}
                 <div>
-                    <label className="label-wedding">
-                        {t('seats')}
+                    <label
+                        htmlFor="table-seats"
+                        className="label-wedding"
+                    >
+                        {t(
+                            'seats'
+                        )}
                     </label>
 
                     <input
-                        {...register('seats', {
-                            valueAsNumber: true,
-                        })}
+                        {...register(
+                            'seats',
+                            {
+                                valueAsNumber:
+                                    true,
+                            }
+                        )}
+                        id="table-seats"
                         type="number"
-                        placeholder={t('seatsPlaceholder')}
-                        className="input-wedding"
+                        min={1}
+                        inputMode="numeric"
+                        placeholder={t(
+                            'seatsPlaceholder'
+                        )}
+                        className="input-wedding h-11"
                     />
 
                     {seatsError && (
-                        <p className="text-xs text-destructive mt-1">
-                            {seatsError}
-                        </p>
-                    )}
-                </div>
-
-                {/* Seat distribution */}
-                {selectedShape !== 'round' && (
-                    <div>
-                        <label className="label-wedding">
-                            {t('seatDistribution')}
-                        </label>
-
-                        <div className="grid grid-cols-3 gap-y-3 items-center justify-items-center mt-2 max-w-[220px] mx-auto">
-                            <div/>
-
-                            <SideStepper
-                                label={t('top')}
-                                value={sides?.top ?? 0}
-                                onChange={(v) =>
-                                    updateSide('top', v)
-                                }
-                            />
-
-                            <div/>
-
-                            <SideStepper
-                                label={t('left')}
-                                value={sides?.left ?? 0}
-                                onChange={(v) =>
-                                    updateSide('left', v)
-                                }
-                            />
-
-                            <div
-                                className={cn(
-                                    'w-12 h-12 border-2 border-dashed border-[hsl(var(--gold))]/50 flex items-center justify-center text-[9px] text-muted-foreground',
-                                    selectedShape === 'square'
-                                        ? 'rounded-xl'
-                                        : 'rounded-lg'
-                                )}
-                            >
-                                {t('table')}
-                            </div>
-
-                            <SideStepper
-                                label={t('right')}
-                                value={sides?.right ?? 0}
-                                onChange={(v) =>
-                                    updateSide('right', v)
-                                }
-                            />
-
-                            <div/>
-
-                            <SideStepper
-                                label={t('bottom')}
-                                value={sides?.bottom ?? 0}
-                                onChange={(v) =>
-                                    updateSide('bottom', v)
-                                }
-                            />
-
-                            <div/>
-                        </div>
-
-                        <p
-                            className={cn(
-                                'text-center text-xs mt-3',
-                                isBalanced
-                                    ? 'text-muted-foreground'
-                                    : 'text-destructive font-medium'
-                            )}
-                        >
-                            {t('assignedSeats', {
-                                assigned: totalAssigned,
-                                total: seatsCount || 0,
-                            })}
-                        </p>
-
-                        {seatSidesError && (
-                            <p className="text-xs text-destructive mt-1 text-center">
-                                {seatSidesError}
-                            </p>
-                        )}
-                    </div>
-                )}
-
-                {/* Label */}
-                <div>
-                    <label className="label-wedding">
-                        {t('tableLabelOptional')}
-                    </label>
-
-                    <input
-                        {...register('label')}
-                        type="text"
-                        placeholder={t('tableLabelPlaceholder')}
-                        className="input-wedding"
-                    />
-
-                    {labelError && (
-                        <p className="text-xs text-destructive mt-1">
-                            {labelError}
+                        <p className="mt-1.5 text-xs text-destructive">
+                            {
+                                seatsError
+                            }
                         </p>
                     )}
                 </div>
             </div>
 
+            {/* =====================================
+                SEAT DISTRIBUTION
+            ===================================== */}
+            {selectedShape !==
+                'round' && (
+                    <div className="rounded-[1.5rem] border border-border/70 bg-secondary/20 p-4 sm:p-5">
+                        <div className="mb-5 flex items-start justify-between gap-4">
+                            <div>
+                                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                                    {t(
+                                        'seatDistribution'
+                                    )}
+                                </p>
+
+                                <p
+                                    className={cn(
+                                        'mt-1 text-xs tabular-nums',
+
+                                        isBalanced
+                                            ? 'text-muted-foreground'
+                                            : 'font-medium text-destructive'
+                                    )}
+                                >
+                                    {t(
+                                        'assignedSeats',
+                                        {
+                                            assigned:
+                                            totalAssigned,
+
+                                            total:
+                                            seatsCount,
+                                        }
+                                    )}
+                                </p>
+                            </div>
+
+                            <div
+                                className={cn(
+                                    'flex h-8 min-w-8 items-center justify-center rounded-full border px-2 text-[10px] font-medium tabular-nums',
+
+                                    isBalanced
+                                        ? 'border-border/70 bg-background text-foreground'
+                                        : 'border-destructive/20 bg-destructive/[0.06] text-destructive'
+                                )}
+                            >
+                                {totalAssigned}
+                                /
+                                {
+                                    seatsCount
+                                }
+                            </div>
+                        </div>
+
+                        {/* Visual table layout */}
+                        <div className="mx-auto grid max-w-[270px] grid-cols-[1fr_auto_1fr] grid-rows-[auto_1fr_auto] items-center justify-items-center gap-x-3 gap-y-4">
+                            <div />
+
+                            <SideStepper
+                                label={t(
+                                    'top'
+                                )}
+                                value={
+                                    sides?.top ??
+                                    0
+                                }
+                                onChange={(
+                                    value
+                                ) =>
+                                    updateSide(
+                                        'top',
+                                        value
+                                    )
+                                }
+                            />
+
+                            <div />
+
+                            <SideStepper
+                                label={t(
+                                    'left'
+                                )}
+                                value={
+                                    sides?.left ??
+                                    0
+                                }
+                                onChange={(
+                                    value
+                                ) =>
+                                    updateSide(
+                                        'left',
+                                        value
+                                    )
+                                }
+                            />
+
+                            {/* Table preview */}
+                            <div
+                                className={cn(
+                                    'flex items-center justify-center border border-border bg-card text-[8px] font-medium uppercase tracking-[0.14em] text-muted-foreground shadow-sm',
+
+                                    selectedShape ===
+                                    'square'
+                                        ? 'h-16 w-16 rounded-2xl'
+                                        : 'h-12 w-24 rounded-2xl'
+                                )}
+                            >
+                                {t(
+                                    'table'
+                                )}
+                            </div>
+
+                            <SideStepper
+                                label={t(
+                                    'right'
+                                )}
+                                value={
+                                    sides?.right ??
+                                    0
+                                }
+                                onChange={(
+                                    value
+                                ) =>
+                                    updateSide(
+                                        'right',
+                                        value
+                                    )
+                                }
+                            />
+
+                            <div />
+
+                            <SideStepper
+                                label={t(
+                                    'bottom'
+                                )}
+                                value={
+                                    sides?.bottom ??
+                                    0
+                                }
+                                onChange={(
+                                    value
+                                ) =>
+                                    updateSide(
+                                        'bottom',
+                                        value
+                                    )
+                                }
+                            />
+
+                            <div />
+                        </div>
+
+                        {seatSidesError && (
+                            <p className="mt-4 text-center text-xs text-destructive">
+                                {
+                                    seatSidesError
+                                }
+                            </p>
+                        )}
+                    </div>
+                )}
+
+            {/* =====================================
+                OPTIONAL LABEL
+            ===================================== */}
+            <div>
+                <label
+                    htmlFor="table-label"
+                    className="label-wedding"
+                >
+                    {t(
+                        'tableLabelOptional'
+                    )}
+                </label>
+
+                <input
+                    {...register(
+                        'label'
+                    )}
+                    id="table-label"
+                    type="text"
+                    placeholder={t(
+                        'tableLabelPlaceholder'
+                    )}
+                    className="input-wedding h-11"
+                />
+
+                {labelError && (
+                    <p className="mt-1.5 text-xs text-destructive">
+                        {
+                            labelError
+                        }
+                    </p>
+                )}
+            </div>
+
+            {/* =====================================
+                ERROR
+            ===================================== */}
             {error && (
-                <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
-                    {error}
-                </p>
+                <div
+                    role="alert"
+                    className="rounded-2xl border border-destructive/15 bg-destructive/[0.06] px-4 py-3"
+                >
+                    <p className="text-xs leading-5 text-destructive">
+                        {
+                            error
+                        }
+                    </p>
+                </div>
             )}
 
-            <div className="flex gap-3 pt-2">
+            {/* =====================================
+                ACTIONS
+            ===================================== */}
+            <div className="flex gap-3 border-t border-border/60 pt-5">
                 <button
                     type="button"
-                    onClick={onCancel}
-                    className="btn-ghost flex-1"
-                    disabled={loading}
+                    onClick={
+                        onCancel
+                    }
+                    disabled={
+                        loading
+                    }
+                    className="btn-secondary flex-1 justify-center disabled:pointer-events-none disabled:opacity-50"
                 >
-                    {tc('cancel')}
+                    {tc(
+                        'cancel'
+                    )}
                 </button>
 
                 <button
                     type="submit"
-                    className="btn-primary flex-1"
-                    disabled={loading || !isBalanced}
+                    disabled={
+                        loading ||
+                        !distributionValid
+                    }
+                    className="btn-primary flex-1 justify-center disabled:pointer-events-none disabled:opacity-50"
                 >
                     {loading ? (
-                        <Loader2 className="w-4 h-4 animate-spin"/>
+                        <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+
+                            {tc(
+                                'saving'
+                            )}
+                        </>
                     ) : initialValues?.id ? (
-                        t('updateTable')
+                        t(
+                            'updateTable'
+                        )
                     ) : (
-                        t('addTable')
+                        t(
+                            'addTable'
+                        )
                     )}
                 </button>
             </div>

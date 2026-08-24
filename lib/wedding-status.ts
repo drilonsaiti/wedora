@@ -20,5 +20,5 @@ export const WEDDING_STATUS_LABELS: Record<WeddingStatus, string> = {
 export const WEDDING_STATUS_COLORS: Record<WeddingStatus, string> = {
     upcoming: 'bg-blue-100 text-blue-700',
     today: 'bg-green-100 text-green-700',
-    past: 'bg-gray-100 text-gray-500',
+    past: 'bg-secondary text-muted-foreground',
 };

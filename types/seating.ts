@@ -33,7 +33,7 @@ export interface Guest {
 }
 
 export interface GuestWithTable extends Guest {
-    tables: Pick<Table, 'id' | 'number' | 'shape'> | null;
+    tables: Pick<Table, 'id' | 'number' | 'shape' | 'label'> | null;
     table_seats: Pick<TableSeat, 'seat_index'> | null;
 }
 

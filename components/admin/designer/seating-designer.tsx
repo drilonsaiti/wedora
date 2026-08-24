@@ -409,7 +409,7 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
                         />
                         <button
                             onClick={exportAsImage}
-                            className="btn-ghost text-xs py-2 px-3 border border-border rounded-xl"
+                            className="flex items-center gap-2 btn-ghost text-xs py-2 px-3 border border-border rounded-xl"
                             title="Shkarko si Foto"
                         >
                             <ImageIcon className="w-3.5 h-3.5"/>
@@ -417,7 +417,7 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
                         </button>
                         <button
                             onClick={() => setIsFullscreen(prev => !prev)}
-                            className="btn-ghost text-xs py-2 px-3 border border-border rounded-xl"
+                            className="flex items-center gap-2 btn-ghost text-xs py-2 px-3 border border-border rounded-xl"
                             title={isFullscreen ? "Dil nga ekrani i plotë" : "Ekran i plotë"}
                         >
                             {isFullscreen ? <Minimize2 className="w-3.5 h-3.5"/> : <Maximize2 className="w-3.5 h-3.5"/>}

@@ -1,132 +1,418 @@
-'use client';
+'use client'
 
-import {memo} from 'react';
-import {useDraggable, useDroppable} from '@dnd-kit/core';
-import {cn} from '@/lib/utils';
-import {Guest, Table, TableSeat} from '@/types/seating';
-import {DraggableGuest} from './draggable-guest';
+import { memo } from 'react'
+
+import {
+    useDraggable,
+    useDroppable,
+} from '@dnd-kit/core'
+import { useTranslations } from 'next-intl'
+
+import { DraggableGuest } from './draggable-guest'
+import { cn } from '@/lib/utils'
+import type {
+    Guest,
+    Table,
+    TableSeat,
+} from '@/types/seating'
 
 interface DraggableTableProps {
-    table: Table;
-    guests: (Guest & { seat_id: string | null })[];
-    seats: TableSeat[];
-    showGuests: boolean;
+    table: Table
+    guests: Array<
+        Guest & {
+        seat_id: string | null
+    }
+    >
+    seats: TableSeat[]
+    showGuests: boolean
 }
 
 const SHAPE_CLASSES = {
     round: 'rounded-full',
     square: 'rounded-2xl',
     rectangle: 'rounded-2xl',
-};
+} as const
 
-export const DraggableTable = memo(({table, guests, seats, showGuests}: DraggableTableProps) => {
-    const {attributes, listeners, setNodeRef: setDraggableRef, transform, isDragging} = useDraggable({
-        id: `table-${table.id}`,
-        data: {type: 'table', table},
-    });
+export const DraggableTable =
+    memo(function DraggableTable({
+                                     table,
+                                     guests,
+                                     seats,
+                                     showGuests,
+                                 }: DraggableTableProps) {
+        const t =
+            useTranslations(
+                'seating'
+            )
 
-    const {setNodeRef: setDroppableRef, isOver} = useDroppable({
-        id: `table-drop-${table.id}`,
-        data: {type: 'table', table},
-    });
+        const {
+            attributes,
+            listeners,
+            setNodeRef:
+                setDraggableRef,
+            transform,
+            isDragging,
+        } = useDraggable({
+            id: `table-${table.id}`,
 
-    const style = {
-        position: 'absolute' as const,
-        left: table.pos_x,
-        top: table.pos_y,
-        width: table.width,
-        height: table.height,
-        transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
-    };
+            data: {
+                type: 'table',
+                table,
+            },
+        })
 
-    const isFull = guests.length >= table.seats;
+        const {
+            setNodeRef:
+                setDroppableRef,
+            isOver,
+        } = useDroppable({
+            id: `table-drop-${table.id}`,
 
-    const setRefs = (node: HTMLElement | null) => {
-        setDraggableRef(node);
-        setDroppableRef(node);
-    };
+            data: {
+                type: 'table',
+                table,
+            },
+        })
 
-    return (
-        <div
-            ref={setRefs}
-            style={style}
-            className={cn(
-                'group relative border-2 bg-card flex flex-col items-center justify-center shadow-md transition-shadow',
-                SHAPE_CLASSES[table.shape],
-                isDragging ? 'z-50 shadow-xl opacity-80 cursor-grabbing' : 'cursor-grab',
-                isOver && !isFull && 'border-[hsl(var(--primary))] bg-[hsl(var(--accent))] scale-105',
-                isOver && isFull && 'border-destructive bg-destructive/10',
-                !isOver && 'border-[hsl(var(--gold))]'
-            )}
-            {...listeners}
-            {...attributes}
-        >
-            <div className="text-center">
-                <span className="text-[10px] uppercase tracking-widest text-muted-foreground block">Tavolina</span>
-                <span className="text-2xl font-serif text-[hsl(var(--primary))]">{table.number}</span>
-                {table.label && (
-                    <span className="text-[10px] font-medium text-[hsl(var(--gold))] block truncate max-w-[100px] px-1">
-            {table.label}
-          </span>
+        const setRefs = (
+            node: HTMLElement | null
+        ) => {
+            setDraggableRef(
+                node
+            )
+
+            setDroppableRef(
+                node
+            )
+        }
+
+        const isFull =
+            guests.length >=
+            table.seats
+
+        const shapeClass =
+            SHAPE_CLASSES[
+                table.shape as keyof typeof SHAPE_CLASSES
+                ] ??
+            SHAPE_CLASSES.rectangle
+
+        const style = {
+            position:
+                'absolute' as const,
+
+            left:
+            table.pos_x,
+
+            top:
+            table.pos_y,
+
+            width:
+            table.width,
+
+            height:
+            table.height,
+
+            transform:
+                transform
+                    ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+                    : undefined,
+
+            touchAction:
+                'none' as const,
+        }
+
+        const tableLabel =
+            t(
+                'tableNumber',
+                {
+                    number:
+                    table.number,
+                }
+            )
+
+        /*
+         * Newer tables should have real seat
+         * coordinates regardless of shape.
+         *
+         * Older round tables may not have
+         * TableSeat records yet, so we keep
+         * a legacy visual fallback for them.
+         */
+        const hasSeatPositions =
+            seats.length >
+            0
+
+        return (
+            <div
+                ref={
+                    setRefs
+                }
+                style={
+                    style
+                }
+                aria-label={
+                    tableLabel
+                }
+                className={cn(
+                    'group absolute flex select-none flex-col items-center justify-center border bg-card/95 text-center shadow-sm backdrop-blur-sm',
+                    'transition-[border-color,background-color,box-shadow,opacity,transform] duration-200',
+                    shapeClass,
+
+                    /*
+                     * Normal
+                     */
+                    !isDragging &&
+                    !isOver &&
+                    'cursor-grab border-border/80 hover:border-foreground/15 hover:shadow-md active:cursor-grabbing',
+
+                    /*
+                     * Dragging table
+                     */
+                    isDragging &&
+                    'z-50 cursor-grabbing border-foreground/20 opacity-80 shadow-xl ring-2 ring-foreground/10',
+
+                    /*
+                     * Valid table drop
+                     */
+                    isOver &&
+                    !isFull &&
+                    'z-30 border-[hsl(var(--primary))] bg-[hsl(var(--accent))]/70 shadow-lg ring-4 ring-[hsl(var(--primary))]/10',
+
+                    /*
+                     * Table full
+                     */
+                    isOver &&
+                    isFull &&
+                    'z-30 border-destructive/50 bg-destructive/[0.06] shadow-lg ring-4 ring-destructive/10'
                 )}
-                <span className="text-[10px] text-muted-foreground block mt-0.5">
-          {guests.length} / {table.seats}
-        </span>
+                {...listeners}
+                {...attributes}
+            >
+                {/* =====================================
+                    TABLE CONTENT
+                ===================================== */}
+                <div className="pointer-events-none relative z-10 max-w-full px-3">
+                    <span className="block text-[8px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                        {t(
+                            'table'
+                        )}
+                    </span>
+
+                    <span
+                        className={cn(
+                            'mt-0.5 block font-sans font-medium leading-none tabular-nums tracking-[-0.04em]',
+                            isOver &&
+                            !isFull
+                                ? 'text-[hsl(var(--primary))]'
+                                : 'text-foreground',
+
+                            table.width <
+                            80 ||
+                            table.height <
+                            80
+                                ? 'text-xl'
+                                : 'text-2xl'
+                        )}
+                    >
+                        {
+                            table.number
+                        }
+                    </span>
+
+                    {table.label && (
+                        <span className="mt-1 block max-w-[110px] truncate px-1 text-[9px] font-medium text-muted-foreground">
+                            {
+                                table.label
+                            }
+                        </span>
+                    )}
+
+                    <span
+                        className={cn(
+                            'mt-1 block text-[9px] font-medium tabular-nums',
+                            isFull
+                                ? 'text-foreground'
+                                : 'text-muted-foreground'
+                        )}
+                    >
+                        {
+                            guests.length
+                        }
+                        {' / '}
+                        {
+                            table.seats
+                        }
+                    </span>
+                </div>
+
+                {/* =====================================
+                    SEATS / GUESTS
+                ===================================== */}
+                {showGuests &&
+                    (hasSeatPositions ? (
+                        /*
+                         * Correct path:
+                         * use actual seat coordinates
+                         * for ALL table shapes.
+                         */
+                        seats.map(
+                            (
+                                seat
+                            ) => {
+                                const guest =
+                                    guests.find(
+                                        (
+                                            item
+                                        ) =>
+                                            item.seat_id ===
+                                            seat.id
+                                    )
+
+                                return (
+                                    <SeatSlot
+                                        key={
+                                            seat.id
+                                        }
+                                        seat={
+                                            seat
+                                        }
+                                        guest={
+                                            guest
+                                        }
+                                    />
+                                )
+                            }
+                        )
+                    ) : table.shape ===
+                    'round' ? (
+                        /*
+                         * Legacy fallback for old
+                         * round tables without
+                         * TableSeat records.
+                         */
+                        guests.map(
+                            (
+                                guest,
+                                index
+                            ) => {
+                                const divisor =
+                                    Math.max(
+                                        table.seats,
+                                        1
+                                    )
+
+                                const angle =
+                                    (index /
+                                        divisor) *
+                                    2 *
+                                    Math.PI -
+                                    Math.PI /
+                                    2
+
+                                const radius =
+                                    Math.max(
+                                        38,
+                                        Math.min(
+                                            table.width,
+                                            table.height
+                                        ) /
+                                        2
+                                    )
+
+                                const x =
+                                    Math.cos(
+                                        angle
+                                    ) *
+                                    radius
+
+                                const y =
+                                    Math.sin(
+                                        angle
+                                    ) *
+                                    radius
+
+                                return (
+                                    <div
+                                        key={
+                                            guest.id
+                                        }
+                                        className="absolute left-1/2 top-1/2 z-20"
+                                        style={{
+                                            transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
+                                        }}
+                                    >
+                                        <DraggableGuest
+                                            guest={
+                                                guest
+                                            }
+                                        />
+                                    </div>
+                                )
+                            }
+                        )
+                    ) : null)}
             </div>
+        )
+    })
 
-            {showGuests && (
-                table.shape === 'round' ? (
-                    guests.map((guest, index) => {
-                        const angle = (index / table.seats) * 2 * Math.PI - Math.PI / 2;
-                        const radius = 64;
-                        const x = Math.cos(angle) * radius;
-                        const y = Math.sin(angle) * radius;
-                        return (
-                            <div key={guest.id} className="absolute z-10"
-                                 style={{transform: `translate(${x}px, ${y}px)`}}>
-                                <DraggableGuest guest={guest}/>
-                            </div>
-                        );
-                    })
-                ) : (
-                    seats.map((seat) => (
-                        <SeatSlot key={seat.id} seat={seat} guest={guests.find((g) => g.seat_id === seat.id)}
-                        />
-                    ))
-                )
-            )}
-        </div>
-    );
-});
+DraggableTable.displayName =
+    'DraggableTable'
 
-DraggableTable.displayName = 'DraggableTable';
+interface SeatSlotProps {
+    seat: TableSeat
+    guest?: Guest & {
+        seat_id: string | null
+    }
+}
 
-function SeatSlot({seat, guest}: { seat: TableSeat; guest?: Guest & { seat_id: string | null } }) {
-    const {setNodeRef, isOver} = useDroppable({
-        id: `seat-${seat.id}`,
-        data: {type: 'seat', seat},
-    });
+function SeatSlot({
+                      seat,
+                      guest,
+                  }: SeatSlotProps) {
+    const {
+        setNodeRef,
+        isOver,
+    } =
+        useDroppable({
+            id: `seat-${seat.id}`,
+
+            data: {
+                type: 'seat',
+                seat,
+            },
+        })
 
     return (
         <div
-            ref={setNodeRef}
-            className="absolute top-0 left-0 z-10 w-12 h-12 flex items-center justify-center"
+            ref={
+                setNodeRef
+            }
+            className="absolute left-0 top-0 z-20 flex h-12 w-12 items-center justify-center"
             style={{
                 transform: `translate(${seat.relative_x}px, ${seat.relative_y}px) translate(-50%, -50%)`,
             }}
         >
             {guest ? (
-                <DraggableGuest guest={guest}/>
+                <DraggableGuest
+                    guest={
+                        guest
+                    }
+                />
             ) : (
                 <div
                     className={cn(
-                        'w-8 h-8 rounded-full border-2 border-dashed flex items-center justify-center text-[9px] text-muted-foreground transition-colors',
-                        isOver ? 'border-[hsl(var(--primary))] bg-[hsl(var(--accent))] scale-110' : 'border-border'
+                        'flex h-8 w-8 items-center justify-center rounded-full border bg-card text-[9px] font-medium tabular-nums text-muted-foreground shadow-sm',
+                        'transition-[border-color,background-color,color,box-shadow,transform] duration-150',
+
+                        isOver
+                            ? 'scale-110 border-[hsl(var(--primary))] bg-[hsl(var(--primary))] text-white shadow-md ring-4 ring-[hsl(var(--primary))]/10'
+                            : 'border-border/90'
                     )}
                 >
-                    {seat.seat_index + 1}
+                    {seat.seat_index +
+                        1}
                 </div>
             )}
         </div>
-    );
+    )
 }

@@ -1,154 +1,230 @@
 'use client'
 
-import {useState} from 'react'
-import {useForm} from 'react-hook-form'
-import {zodResolver} from '@hookform/resolvers/zod'
-import {AlertCircle, ArrowLeft, CheckCircle2, Loader2, Mail} from 'lucide-react'
-import Link from 'next/link'
-import {useTranslations} from 'next-intl'
-import {forgotPasswordSchema, type ForgotPasswordValues} from '@/schemas'
-import {createClient} from '@/lib/supabase/client'
+import { useState } from 'react'
+
+import {
+    AlertCircle,
+    ArrowLeft,
+    Check,
+    Loader2,
+    Mail,
+} from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+import { Link } from '@/lib/navigation'
+import { createClient } from '@/lib/supabase/client'
+import {
+    forgotPasswordSchema,
+    type ForgotPasswordValues,
+} from '@/schemas'
 
 export function ForgotPasswordForm() {
-    const t = useTranslations('auth.forgotPassword')
+    const t = useTranslations(
+        'auth.forgotPassword'
+    )
 
-    const [error, setError] = useState<string | null>(null)
-    const [success, setSuccess] = useState(false)
-    const [loading, setLoading] = useState(false)
+    const [error, setError] =
+        useState<string | null>(null)
+
+    const [success, setSuccess] =
+        useState(false)
+
+    const [loading, setLoading] =
+        useState(false)
 
     const {
         register,
         handleSubmit,
-        formState: {errors},
+        formState: { errors },
     } = useForm<ForgotPasswordValues>({
-        resolver: zodResolver(forgotPasswordSchema),
+        resolver: zodResolver(
+            forgotPasswordSchema
+        ),
     })
 
-    const onSubmit = async (values: ForgotPasswordValues) => {
+    const onSubmit = async (
+        values: ForgotPasswordValues
+    ) => {
         setError(null)
         setLoading(true)
 
         try {
-            const supabase = await createClient()
+            const supabase =
+                await createClient()
 
-            const {error: resetError} =
-                await supabase.auth.resetPasswordForEmail(values.email, {
-                    redirectTo: `${window.location.origin}/api/auth/callback?next=/admin/reset-password`,
-                })
+            const {
+                error: resetError,
+            } =
+                await supabase.auth.resetPasswordForEmail(
+                    values.email,
+                    {
+                        redirectTo: `${window.location.origin}/api/auth/callback?next=/admin/reset-password`,
+                    }
+                )
 
             if (resetError) {
-                setError(resetError.message)
+                setError(
+                    resetError.message
+                )
                 return
             }
 
             setSuccess(true)
         } catch {
-            setError(t('unexpectedError'))
+            setError(
+                t(
+                    'unexpectedError'
+                )
+            )
         } finally {
             setLoading(false)
         }
     }
 
+    /*
+     * SUCCESS
+     */
     if (success) {
         return (
-            <div className="text-center space-y-4">
-                <div className="flex justify-center">
-                    <div className="rounded-full bg-green-100 p-3">
-                        <CheckCircle2 className="w-8 h-8 text-green-600"/>
-                    </div>
+            <div className="py-3 text-center">
+                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]">
+                    <Check
+                        className="h-6 w-6 text-[hsl(var(--primary))]"
+                        strokeWidth={1.7}
+                    />
                 </div>
 
-                <h2 className="text-xl font-semibold text-wedding-900">
-                    {t('checkYourEmail')}
+                <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.2em] text-[hsl(var(--primary))]">
+                    {t(
+                        'emailSent'
+                    )}
+                </p>
+
+                <h2 className="font-serif text-3xl font-light tracking-[-0.02em] text-foreground">
+                    {t(
+                        'checkYourEmail'
+                    )}
                 </h2>
 
-                <p className="text-wedding-600">
-                    {t('resetLinkSent')}
+                <p className="mx-auto mt-3 max-w-xs text-sm leading-6 text-muted-foreground">
+                    {t(
+                        'resetLinkSent'
+                    )}
                 </p>
 
                 <Link
                     href="/admin/login"
-                    className="btn-secondary w-full justify-center mt-4"
+                    className="btn-secondary mt-7 w-full justify-center"
                 >
-                    {t('backToLogin')}
+                    <ArrowLeft className="h-4 w-4" />
+
+                    {t(
+                        'backToLogin'
+                    )}
                 </Link>
             </div>
         )
     }
 
     return (
-        <div className="space-y-6">
-            <div className="space-y-2">
-                <h2 className="text-xl font-semibold text-wedding-900">
-                    {t('title')}
-                </h2>
+        <form
+            onSubmit={handleSubmit(
+                onSubmit
+            )}
+            className="space-y-6"
+        >
+            {/* Email */}
+            <div>
+                <label
+                    htmlFor="email"
+                    className="label-wedding"
+                >
+                    {t('email')}
+                </label>
 
-                <p className="text-sm text-wedding-600">
-                    {t('description')}
-                </p>
-            </div>
-
-            <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="space-y-5"
-            >
-                <div>
-                    <label className="label-wedding">
-                        <Mail className="w-3 h-3 inline mr-1"/>
-                        {t('email')}
-                    </label>
-
-                    <input
-                        {...register('email')}
-                        type="email"
-                        placeholder={t('emailPlaceholder')}
-                        className="input-wedding"
-                        autoComplete="email"
-                        disabled={loading}
+                <div className="relative">
+                    <Mail
+                        className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                        strokeWidth={1.6}
                     />
 
-                    {errors.email && (
-                        <p className="mt-1 text-xs text-destructive">
-                            {errors.email.message}
-                        </p>
-                    )}
+                    <input
+                        {...register(
+                            'email'
+                        )}
+                        id="email"
+                        type="email"
+                        placeholder={t(
+                            'emailPlaceholder'
+                        )}
+                        autoComplete="email"
+                        disabled={loading}
+                        className="input-wedding h-12 pl-11"
+                    />
                 </div>
 
-                {error && (
-                    <div
-                        className="flex items-start gap-2 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3"
-                    >
-                        <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5"/>
-
-                        <p className="text-sm text-destructive font-sans">
-                            {error}
-                        </p>
-                    </div>
+                {errors.email && (
+                    <p className="mt-1.5 text-xs leading-5 text-destructive">
+                        {
+                            errors.email
+                                .message
+                        }
+                    </p>
                 )}
+            </div>
 
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="btn-primary w-full justify-center"
+            {/* Error */}
+            {error && (
+                <div
+                    role="alert"
+                    className="flex items-start gap-3 rounded-2xl border border-destructive/15 bg-destructive/[0.06] px-4 py-3.5"
                 >
-                    {loading ? (
-                        <>
-                            <Loader2 className="w-4 h-4 animate-spin"/>
-                            {t('sendingLink')}
-                        </>
-                    ) : (
-                        t('sendResetLink')
-                    )}
-                </button>
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
 
-                <Link
-                    href="/admin/login"
-                    className="flex items-center justify-center gap-2 text-sm text-wedding-600 hover:text-wedding-900 transition-colors"
-                >
-                    <ArrowLeft className="w-4 h-4"/>
-                    {t('backToLogin')}
-                </Link>
-            </form>
-        </div>
+                    <p className="text-xs leading-5 text-destructive">
+                        {error}
+                    </p>
+                </div>
+            )}
+
+            {/* Submit */}
+            <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full justify-center py-3.5"
+            >
+                {loading ? (
+                    <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+
+                        {t(
+                            'sendingLink'
+                        )}
+                    </>
+                ) : (
+                    <>
+                        <Mail className="h-4 w-4" />
+
+                        {t(
+                            'sendResetLink'
+                        )}
+                    </>
+                )}
+            </button>
+
+            {/* Back */}
+            <Link
+                href="/admin/login"
+                className="group flex items-center justify-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+                <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+
+                {t(
+                    'backToLogin'
+                )}
+            </Link>
+        </form>
     )
 }

@@ -1,351 +1,1021 @@
-'use client';
+'use client'
 
-import {useState} from 'react';
-import {useForm} from 'react-hook-form';
-import {zodResolver} from '@hookform/resolvers/zod';
-import {useRouter} from '@/lib/navigation';
-import {createWedding} from '@/actions/wedding';
-import {ArrowRight, Check, Copy, Heart, Loader2} from 'lucide-react';
-import {CreateWeddingInput, createWeddingSchema} from '@/schemas';
-import {ColorPicker} from '@/components/ui/color-picker';
-import {generateWeddingTheme} from '@/lib/theme';
-import {useTranslations} from 'next-intl';
+import {
+    type CSSProperties,
+    useState,
+} from 'react'
+
+import {
+    ArrowRight,
+    CalendarDays,
+    Check,
+    Copy,
+    Heart,
+    ImageUp,
+    Link as LinkIcon,
+    Loader2,
+    Mail,
+    MapPin,
+    Palette,
+    Users,
+} from 'lucide-react'
+import {
+    useTranslations,
+} from 'next-intl'
+import {
+    useForm,
+} from 'react-hook-form'
+import {
+    zodResolver,
+} from '@hookform/resolvers/zod'
+
+import {
+    createWedding,
+} from '@/actions/wedding'
+import {
+    ColorPicker,
+} from '@/components/ui/color-picker'
+import {
+    useRouter,
+} from '@/lib/navigation'
+import {
+    createWeddingSchema,
+    type CreateWeddingInput,
+} from '@/schemas'
+import {
+    generateWeddingTheme,
+} from '@/lib/theme'
+import {
+    cn,
+} from '@/lib/utils'
 
 interface CreateWeddingFormProps {
-    adminEmail: string;
-    onSuccess?: (weddingId: string) => void;
+    adminEmail: string
+    onSuccess?: (
+        weddingId: string
+    ) => void
 }
 
 interface Credential {
-    email: string;
-    password: string;
-    role: 'groom' | 'bride';
+    email: string
+    password: string
+    role: 'groom' | 'bride'
 }
 
+export function CreateWeddingForm({
+                                      adminEmail,
+                                      onSuccess,
+                                  }: CreateWeddingFormProps) {
+    const router =
+        useRouter()
 
-export function CreateWeddingForm({adminEmail, onSuccess}: CreateWeddingFormProps) {
-    const router = useRouter();
-    const t = useTranslations('dashboard');
-    const tw = useTranslations('weddings');
-    const [serverError, setServerError] = useState<string | null>(null);
-    const [slugTouched, setSlugTouched] = useState(false);
-    const [credentials, setCredentials] = useState<Credential[] | null>(null);
-    const [createdWeddingId, setCreatedWeddingId] = useState<string | null>(null);
-    const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-    const [failedEmails, setFailedEmails] = useState<string[] | undefined>(undefined);
+    const t =
+        useTranslations(
+            'dashboard'
+        )
+
+    const tw =
+        useTranslations(
+            'weddings'
+        )
+
+    const [
+        serverError,
+        setServerError,
+    ] =
+        useState<string | null>(
+            null
+        )
+
+    const [
+        slugTouched,
+        setSlugTouched,
+    ] = useState(false)
+
+    const [
+        credentials,
+        setCredentials,
+    ] =
+        useState<
+            Credential[] | null
+        >(null)
+
+    const [
+        createdWeddingId,
+        setCreatedWeddingId,
+    ] =
+        useState<string | null>(
+            null
+        )
+
+    const [
+        copiedIndex,
+        setCopiedIndex,
+    ] =
+        useState<number | null>(
+            null
+        )
+
+    const [
+        failedEmails,
+        setFailedEmails,
+    ] =
+        useState<
+            string[] | undefined
+        >(undefined)
 
     const {
         register,
         handleSubmit,
         watch,
         setValue,
-        formState: {errors, isSubmitting},
-    } = useForm<CreateWeddingInput>({
-        resolver: zodResolver(createWeddingSchema),
-        defaultValues: {
-            groom_name: '', bride_name: '', groom_email: '', bride_email: '',
-            slug: '', theme_hue: 355, wedding_date: '',
-            enable_find_seat: true, enable_photo_upload: true,
+        formState: {
+            errors,
+            isSubmitting,
         },
-    });
+    } =
+        useForm<CreateWeddingInput>(
+            {
+                resolver:
+                    zodResolver(
+                        createWeddingSchema
+                    ),
+                defaultValues:
+                    {
+                        groom_name:
+                            '',
+                        bride_name:
+                            '',
+                        groom_email:
+                            '',
+                        bride_email:
+                            '',
+                        slug: '',
+                        theme_hue:
+                            355,
+                        wedding_date:
+                            '',
+                        enable_find_seat:
+                            true,
+                        enable_photo_upload:
+                            true,
+                    },
+            }
+        )
 
-    const themeHue = watch('theme_hue');
-    const previewTheme = generateWeddingTheme(themeHue);
-    const groomName = watch('groom_name');
-    const brideName = watch('bride_name');
+    const themeHue =
+        watch('theme_hue')
 
-    const handleNameBlur = () => {
-        if (slugTouched) return;
-        if (groomName && brideName) {
-            setValue('slug', slugify(`${brideName}-${groomName}`));
+    const previewTheme =
+        generateWeddingTheme(
+            themeHue
+        )
+
+    const groomName =
+        watch('groom_name')
+
+    const brideName =
+        watch('bride_name')
+
+    const photoUploadEnabled =
+        watch(
+            'enable_photo_upload'
+        )
+
+    const handleNameBlur =
+        () => {
+            if (
+                slugTouched
+            ) {
+                return
+            }
+
+            if (
+                groomName &&
+                brideName
+            ) {
+                setValue(
+                    'slug',
+                    slugify(
+                        `${brideName}-${groomName}`
+                    )
+                )
+            }
         }
-    };
 
-    const handleCopy = (text: string, index: number) => {
-        navigator.clipboard.writeText(text);
-        setCopiedIndex(index);
-        setTimeout(() => setCopiedIndex(null), 2000);
-    };
+    const handleCopy =
+        async (
+            text: string,
+            index: number
+        ) => {
+            await navigator.clipboard.writeText(
+                text
+            )
 
-    const onSubmit = async (data: CreateWeddingInput) => {
-        setServerError(null);
-        const result = await createWedding(data);
-        if (!result.success) {
-            setServerError(result.error);
-            return;
+            setCopiedIndex(index)
+
+            window.setTimeout(
+                () =>
+                    setCopiedIndex(
+                        null
+                    ),
+                2000
+            )
         }
-        setCreatedWeddingId(result.weddingId);
-        setCredentials(result.credentials);
-        setFailedEmails(result.failedEmails);
-    };
 
+    const onSubmit =
+        async (
+            data: CreateWeddingInput
+        ) => {
+            setServerError(null)
+
+            const result =
+                await createWedding(
+                    data
+                )
+
+            if (
+                !result.success
+            ) {
+                setServerError(
+                    result.error
+                )
+
+                return
+            }
+
+            setCreatedWeddingId(
+                result.weddingId
+            )
+
+            setCredentials(
+                result.credentials
+            )
+
+            setFailedEmails(
+                result.failedEmails
+            )
+        }
+
+    /*
+     * SUCCESS
+     */
     if (credentials) {
         return (
-            <div className="space-y-6 w-full max-w-md">
+            <div className="mx-auto w-full max-w-lg">
                 <div className="text-center">
-                    <div
-                        className="w-14 h-14 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center mx-auto mb-4">
-                        <Check className="w-7 h-7 text-[hsl(var(--primary))]"/>
+                    <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]">
+                        <Check
+                            className="h-6 w-6 text-[hsl(var(--primary))]"
+                            strokeWidth={
+                                1.7
+                            }
+                        />
                     </div>
-                    <h2 className="font-serif text-2xl font-light text-[hsl(var(--dark))]">{t('weddingCreated')}</h2>
-                    <p className="text-sm text-muted-foreground mt-1">
-                        {t('saveCredentials')}
+
+                    <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.2em] text-[hsl(var(--primary))]">
+                        Wedora Admin
+                    </p>
+
+                    <h2 className="font-serif text-3xl font-light tracking-tight text-foreground">
+                        {t(
+                            'weddingCreated'
+                        )}
+                    </h2>
+
+                    <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
+                        {t(
+                            'saveCredentials'
+                        )}
                     </p>
                 </div>
 
-                <div className="space-y-3">
-                    {credentials.map((cred, i) => (
-                        <div key={cred.email} className="card-wedding p-4">
-                            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-                                {cred.role === 'groom' ? tw('groom') : tw('bride')}
-                            </p>
-                            <p className="font-sans text-sm mb-2">{cred.email}</p>
-                            <div className="flex items-center gap-2">
-                                <code
-                                    className="text-sm bg-muted px-3 py-1.5 rounded-lg flex-1 font-mono">{cred.password}</code>
-                                <button
-                                    type="button"
-                                    onClick={() => handleCopy(cred.password, i)}
-                                    className="p-2 hover:bg-muted rounded-lg transition-colors"
-                                >
-                                    {copiedIndex === i ? <Check className="w-4 h-4 text-green-600"/> :
-                                        <Copy className="w-4 h-4"/>}
-                                </button>
+                {/* Credentials */}
+                {credentials.length >
+                    0 && (
+                        <div className="mt-7 overflow-hidden rounded-[1.5rem] border border-border/70 bg-background">
+                            <div className="divide-y divide-border/60">
+                                {credentials.map(
+                                    (
+                                        credential,
+                                        index
+                                    ) => (
+                                        <div
+                                            key={
+                                                credential.email
+                                            }
+                                            className="p-4"
+                                        >
+                                            <div className="mb-3 flex items-center justify-between gap-3">
+                                                <div>
+                                                    <p className="text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                                                        {credential.role ===
+                                                        'groom'
+                                                            ? tw(
+                                                                'groom'
+                                                            )
+                                                            : tw(
+                                                                'bride'
+                                                            )}
+                                                    </p>
+
+                                                    <p className="mt-1 text-sm font-medium text-foreground">
+                                                        {
+                                                            credential.email
+                                                        }
+                                                    </p>
+                                                </div>
+
+                                                <Mail className="h-4 w-4 text-muted-foreground" />
+                                            </div>
+
+                                            <div className="flex items-center gap-2">
+                                                <code className="min-w-0 flex-1 truncate rounded-xl bg-secondary px-3 py-2.5 font-mono text-xs text-foreground">
+                                                    {
+                                                        credential.password
+                                                    }
+                                                </code>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        void handleCopy(
+                                                            credential.password,
+                                                            index
+                                                        )
+                                                    }
+                                                    className={cn(
+                                                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/70 transition-colors',
+                                                        copiedIndex ===
+                                                        index
+                                                            ? 'bg-foreground text-background'
+                                                            : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                                                    )}
+                                                >
+                                                    {copiedIndex ===
+                                                    index ? (
+                                                        <Check className="h-4 w-4" />
+                                                    ) : (
+                                                        <Copy className="h-4 w-4" />
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )
+                                )}
                             </div>
                         </div>
-                    ))}
-                    {credentials.length === 0 && (
-                        <p className="text-xs text-muted-foreground text-center italic">
-                            {t('noAccountCreated')}
+                    )}
+
+                {credentials.length ===
+                    0 && (
+                        <p className="mt-6 text-center text-xs text-muted-foreground">
+                            {t(
+                                'noAccountCreated'
+                            )}
                         </p>
                     )}
-                </div>
 
-                {failedEmails && failedEmails.length > 0 && (
-                    <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3">
-                        <p className="text-xs text-destructive">
-                            {t('failedToCreateAccount', {emails: failedEmails.join(', ')})}
-                        </p>
-                    </div>
-                )}
+                {/* Account creation error */}
+                {failedEmails &&
+                    failedEmails.length >
+                    0 && (
+                        <div
+                            role="alert"
+                            className="mt-5 rounded-2xl border border-destructive/15 bg-destructive/[0.06] p-4"
+                        >
+                            <p className="text-xs leading-5 text-destructive">
+                                {t(
+                                    'failedToCreateAccount',
+                                    {
+                                        emails:
+                                            failedEmails.join(
+                                                ', '
+                                            ),
+                                    }
+                                )}
+                            </p>
+                        </div>
+                    )}
 
                 <button
-                    onClick={() => onSuccess ? onSuccess(createdWeddingId!) : router.push(`/admin/weddings/${createdWeddingId}`)}
-                    className="btn-primary w-full py-4 rounded-2xl flex items-center justify-center gap-2"
+                    type="button"
+                    onClick={() => {
+                        if (
+                            !createdWeddingId
+                        ) {
+                            return
+                        }
+
+                        if (onSuccess) {
+                            onSuccess(
+                                createdWeddingId
+                            )
+
+                            return
+                        }
+
+                        router.push(
+                            `/admin/weddings/${createdWeddingId}`
+                        )
+                    }}
+                    className="btn-primary mt-7 w-full justify-center"
                 >
-                    {t('continueToDashboard')}
-                    <ArrowRight className="w-4 h-4"/>
+                    {t(
+                        'continueToDashboard'
+                    )}
+
+                    <ArrowRight className="h-4 w-4" />
                 </button>
             </div>
-        );
+        )
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 w-full max-w-md">
-            <div className="text-center mb-8">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                    <div className="h-px w-8 bg-[hsl(var(--gold))] opacity-60"/>
-                    <Heart className="w-3 h-3 text-[hsl(var(--primary))] fill-current"/>
-                    <div className="h-px w-8 bg-[hsl(var(--gold))] opacity-60"/>
-                </div>
-                <h1 className="font-serif text-3xl font-light text-[hsl(var(--dark))]">{t('createYourWedding')}</h1>
-                <p className="text-xs text-muted-foreground mt-2">{adminEmail}</p>
-            </div>
+        <form
+            onSubmit={handleSubmit(
+                onSubmit
+            )}
+            className="mx-auto w-full max-w-xl"
+        >
+            {/* Header */}
+            <header className="mb-8 pr-12">
+                <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.2em] text-[hsl(var(--primary))]">
+                    Wedora Admin
+                </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                        {tw('groomName')}
-                    </label>
-                    <input
-                        {...register('groom_name', {onBlur: handleNameBlur})}
-                        type="text"
-                        placeholder="p.sh. Drilon"
-                        className="input-wedding py-3 w-full"
-                    />
-                    {errors.groom_name && <p className="text-xs text-destructive mt-1">{errors.groom_name.message}</p>}
-                </div>
-                <div>
-                    <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                        {tw('brideName')}
-                    </label>
-                    <input
-                        {...register('bride_name', {onBlur: handleNameBlur})}
-                        type="text"
-                        placeholder="p.sh. Sara"
-                        className="input-wedding py-3 w-full"
-                    />
-                    {errors.bride_name && <p className="text-xs text-destructive mt-1">{errors.bride_name.message}</p>}
-                </div>
-            </div>
+                <h1 className="font-serif text-3xl font-light tracking-tight text-foreground sm:text-4xl">
+                    {t(
+                        'createYourWedding'
+                    )}
+                </h1>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                        {tw('groomName')} Email <span className="text-destructive">*</span>
-                    </label>
-                    <input
-                        {...register('groom_email')}
-                        type="email"
-                        placeholder="drilon@example.com"
-                        className="input-wedding py-3 w-full"
-                    />
-                    {errors.groom_email &&
-                        <p className="text-xs text-destructive mt-1">{errors.groom_email.message}</p>}
-                </div>
-                <div>
-                    <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                        {tw('brideName')} Email <span className="text-muted-foreground normal-case">(opsionale)</span>
-                    </label>
-                    <input
-                        {...register('bride_email')}
-                        type="email"
-                        placeholder="sara@example.com"
-                        className="input-wedding py-3 w-full"
-                    />
-                    {errors.bride_email &&
-                        <p className="text-xs text-destructive mt-1">{errors.bride_email.message}</p>}
-                </div>
-            </div>
-            <p className="text-[10px] text-muted-foreground -mt-3 italic">
-                {t('accountsWillBeCreated')}
-            </p>
+                <p className="mt-3 text-xs text-muted-foreground">
+                    {adminEmail}
+                </p>
+            </header>
 
-            <div>
-                <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                    {tw('date')}
-                </label>
-                <input {...register('wedding_date')} type="date" className="input-wedding py-3 w-full"/>
-                {errors.wedding_date && <p className="text-xs text-destructive mt-1">{errors.wedding_date.message}</p>}
-            </div>
-
-            <div>
-                <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                    {t('publicUrl')}
-                </label>
-                <div className="flex items-center gap-1 input-wedding py-3 px-4">
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">app.com/</span>
-                    <input
-                        {...register('slug', {onChange: () => setSlugTouched(true)})}
-                        type="text"
-                        placeholder="sara-drilon"
-                        className="bg-transparent outline-none flex-1 min-w-0 text-sm"
-                    />
-                </div>
-                {errors.slug && <p className="text-xs text-destructive mt-1">{errors.slug.message}</p>}
-            </div>
-
-            <div>
-                <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-3">
-                    {t('themeColor')}
-                </label>
-                <ColorPicker value={themeHue} onChange={(hue) => setValue('theme_hue', hue)}/>
-            </div>
-
-            <div
-                className="rounded-2xl p-6 border border-border text-center"
-                style={previewTheme as React.CSSProperties}
-            >
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3">{t('preview')}</p>
-                <button
-                    type="button"
-                    className="rounded-full px-6 py-2.5 text-xs font-sans font-medium tracking-widest uppercase text-white"
-                    style={{backgroundColor: `hsl(${previewTheme['--primary']})`}}
+            <div className="space-y-8">
+                {/* Couple */}
+                <FormSection
+                    icon={Users}
+                    title={`${tw(
+                        'groom'
+                    )} & ${tw(
+                        'bride'
+                    )}`}
                 >
-                    {tw('emri')}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <FormField
+                            label={tw(
+                                'groomName'
+                            )}
+                            error={
+                                errors
+                                    .groom_name
+                                    ?.message
+                            }
+                        >
+                            <input
+                                {...register(
+                                    'groom_name',
+                                    {
+                                        onBlur:
+                                        handleNameBlur,
+                                    }
+                                )}
+                                type="text"
+                                placeholder="Drilon"
+                                className="input-wedding h-12"
+                            />
+                        </FormField>
+
+                        <FormField
+                            label={tw(
+                                'brideName'
+                            )}
+                            error={
+                                errors
+                                    .bride_name
+                                    ?.message
+                            }
+                        >
+                            <input
+                                {...register(
+                                    'bride_name',
+                                    {
+                                        onBlur:
+                                        handleNameBlur,
+                                    }
+                                )}
+                                type="text"
+                                placeholder="Sara"
+                                className="input-wedding h-12"
+                            />
+                        </FormField>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <FormField
+                            label={`${tw(
+                                'groomName'
+                            )} Email`}
+                            required
+                            error={
+                                errors
+                                    .groom_email
+                                    ?.message
+                            }
+                        >
+                            <input
+                                {...register(
+                                    'groom_email'
+                                )}
+                                type="email"
+                                placeholder="drilon@example.com"
+                                autoComplete="off"
+                                className="input-wedding h-12"
+                            />
+                        </FormField>
+
+                        <FormField
+                            label={`${tw(
+                                'brideName'
+                            )} Email`}
+                            optional
+                            error={
+                                errors
+                                    .bride_email
+                                    ?.message
+                            }
+                        >
+                            <input
+                                {...register(
+                                    'bride_email'
+                                )}
+                                type="email"
+                                placeholder="sara@example.com"
+                                autoComplete="off"
+                                className="input-wedding h-12"
+                            />
+                        </FormField>
+                    </div>
+
+                    <div className="mt-4 rounded-xl bg-secondary/35 px-4 py-3">
+                        <p className="text-[10px] leading-5 text-muted-foreground">
+                            {t(
+                                'accountsWillBeCreated'
+                            )}
+                        </p>
+                    </div>
+                </FormSection>
+
+                {/* Wedding details */}
+                <FormSection
+                    icon={
+                        CalendarDays
+                    }
+                    title={tw(
+                        'date'
+                    )}
+                >
+                    <FormField
+                        label={tw(
+                            'date'
+                        )}
+                        error={
+                            errors
+                                .wedding_date
+                                ?.message
+                        }
+                    >
+                        <input
+                            {...register(
+                                'wedding_date'
+                            )}
+                            type="date"
+                            className="input-wedding h-12"
+                        />
+                    </FormField>
+
+                    <div className="mt-4">
+                        <FormField
+                            label={t(
+                                'publicUrl'
+                            )}
+                            error={
+                                errors
+                                    .slug
+                                    ?.message
+                            }
+                        >
+                            <div className="flex h-12 items-center rounded-xl border border-input bg-background px-4 transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20">
+                                <LinkIcon
+                                    className="mr-3 h-4 w-4 shrink-0 text-muted-foreground"
+                                    strokeWidth={
+                                        1.6
+                                    }
+                                />
+
+                                <span className="mr-0.5 text-sm text-muted-foreground">
+                                    /
+                                </span>
+
+                                <input
+                                    {...register(
+                                        'slug',
+                                        {
+                                            onChange:
+                                                () =>
+                                                    setSlugTouched(
+                                                        true
+                                                    ),
+                                        }
+                                    )}
+                                    type="text"
+                                    placeholder="sara-drilon"
+                                    className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                                />
+                            </div>
+                        </FormField>
+                    </div>
+                </FormSection>
+
+                {/* Theme */}
+                <FormSection
+                    icon={Palette}
+                    title={t(
+                        'themeColor'
+                    )}
+                >
+                    <ColorPicker
+                        value={
+                            themeHue
+                        }
+                        onChange={(
+                            hue
+                        ) =>
+                            setValue(
+                                'theme_hue',
+                                hue
+                            )
+                        }
+                    />
+
+                    <div
+                        className="mt-4 overflow-hidden rounded-[1.5rem] border border-border/70 bg-background p-5"
+                        style={
+                            previewTheme as CSSProperties
+                        }
+                    >
+                        <p className="mb-4 text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                            {t(
+                                'preview'
+                            )}
+                        </p>
+
+                        <div className="flex items-center justify-between gap-4">
+                            <p className="font-serif text-2xl font-light text-foreground">
+                                {brideName ||
+                                    tw(
+                                        'bride'
+                                    )}{' '}
+                                &{' '}
+                                {groomName ||
+                                    tw(
+                                        'groom'
+                                    )}
+                            </p>
+
+                            <div
+                                className="h-9 w-9 shrink-0 rounded-full shadow-sm"
+                                style={{
+                                    backgroundColor: `hsl(${previewTheme['--primary']})`,
+                                }}
+                            />
+                        </div>
+                    </div>
+                </FormSection>
+
+                {/* Features */}
+                <FormSection
+                    icon={MapPin}
+                    title={t(
+                        'activeFunctions'
+                    )}
+                >
+                    <div className="space-y-2">
+                        <FeatureToggle
+                            icon={
+                                MapPin
+                            }
+                            title={tw(
+                                'emri'
+                            )}
+                            description={t(
+                                'findSeatDescription'
+                            )}
+                        >
+                            <input
+                                type="checkbox"
+                                {...register(
+                                    'enable_find_seat'
+                                )}
+                                className="h-4 w-4 shrink-0 accent-[hsl(var(--primary))]"
+                            />
+                        </FeatureToggle>
+
+                        <FeatureToggle
+                            icon={
+                                ImageUp
+                            }
+                            title={tw(
+                                'create'
+                            )}
+                            description={t(
+                                'photoUploadDescription'
+                            )}
+                        >
+                            <input
+                                type="checkbox"
+                                {...register(
+                                    'enable_photo_upload'
+                                )}
+                                className="h-4 w-4 shrink-0 accent-[hsl(var(--primary))]"
+                            />
+                        </FeatureToggle>
+                    </div>
+
+                    {errors.enable_find_seat && (
+                        <p className="mt-2 text-xs text-destructive">
+                            {
+                                errors
+                                    .enable_find_seat
+                                    .message
+                            }
+                        </p>
+                    )}
+                </FormSection>
+
+                {/* Photo limits */}
+                {photoUploadEnabled && (
+                    <FormSection
+                        icon={
+                            ImageUp
+                        }
+                        title={t(
+                            'totalPhotoLimit'
+                        )}
+                    >
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <FormField
+                                label={t(
+                                    'totalPhotoLimit'
+                                )}
+                            >
+                                <input
+                                    {...register(
+                                        'max_photos_total',
+                                        {
+                                            valueAsNumber:
+                                                true,
+                                        }
+                                    )}
+                                    type="number"
+                                    min={1}
+                                    placeholder={t(
+                                        'noLimit'
+                                    )}
+                                    className="input-wedding h-12"
+                                />
+
+                                <p className="mt-1.5 text-[10px] leading-4 text-muted-foreground">
+                                    {t(
+                                        'leaveEmptyForNoLimit'
+                                    )}
+                                </p>
+                            </FormField>
+
+                            <FormField
+                                label={t(
+                                    'photoLimitPerGuest'
+                                )}
+                            >
+                                <input
+                                    {...register(
+                                        'max_photos_per_guest',
+                                        {
+                                            valueAsNumber:
+                                                true,
+                                        }
+                                    )}
+                                    type="number"
+                                    min={1}
+                                    placeholder={t(
+                                        'noLimit'
+                                    )}
+                                    className="input-wedding h-12"
+                                />
+
+                                <p className="mt-1.5 text-[10px] leading-4 text-muted-foreground">
+                                    {t(
+                                        'howManyPhotosPerGuest'
+                                    )}
+                                </p>
+                            </FormField>
+                        </div>
+                    </FormSection>
+                )}
+
+                {/* Error */}
+                {serverError && (
+                    <div
+                        role="alert"
+                        className="rounded-2xl border border-destructive/15 bg-destructive/[0.06] px-4 py-3.5"
+                    >
+                        <p className="text-xs leading-5 text-destructive">
+                            {
+                                serverError
+                            }
+                        </p>
+                    </div>
+                )}
+
+                {/* Submit */}
+                <button
+                    type="submit"
+                    disabled={
+                        isSubmitting
+                    }
+                    className="btn-primary w-full justify-center py-3.5 disabled:opacity-60"
+                >
+                    {isSubmitting ? (
+                        <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+
+                            {t(
+                                'creating'
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            <PlusIcon />
+
+                            {tw(
+                                'create'
+                            )}
+                        </>
+                    )}
                 </button>
             </div>
-
-            <div>
-                <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-3">
-                    {t('activeFunctions')}
-                </label>
-                <div className="space-y-2">
-                    <label
-                        className="flex items-center justify-between p-3 rounded-xl border border-border cursor-pointer hover:bg-muted transition-colors">
-                        <div>
-                            <p className="font-sans text-sm font-medium">{tw('emri')}</p>
-                            <p className="text-xs text-muted-foreground">{t('findSeatDescription')}</p>
-                        </div>
-                        <input type="checkbox" {...register('enable_find_seat')}
-                               className="w-4 h-4 accent-[hsl(var(--primary))]"/>
-                    </label>
-                    <label
-                        className="flex items-center justify-between p-3 rounded-xl border border-border cursor-pointer hover:bg-muted transition-colors">
-                        <div>
-                            <p className="font-sans text-sm font-medium">{tw('create')}</p>
-                            <p className="text-xs text-muted-foreground">{t('photoUploadDescription')}</p>
-                        </div>
-                        <input type="checkbox" {...register('enable_photo_upload')}
-                               className="w-4 h-4 accent-[hsl(var(--primary))]"/>
-                    </label>
-                </div>
-                {errors.enable_find_seat &&
-                    <p className="text-xs text-destructive mt-2">{errors.enable_find_seat.message}</p>}
-            </div>
-
-            {watch('enable_photo_upload') && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                            {t('totalPhotoLimit')}
-                        </label>
-                        <input
-                            {...register('max_photos_total', {valueAsNumber: true})}
-                            type="number"
-                            placeholder={t('noLimit')}
-                            min={1}
-                            className="input-wedding py-3 w-full"
-                        />
-                        <p className="text-[10px] text-muted-foreground mt-1 italic">{t('leaveEmptyForNoLimit')}</p>
-                    </div>
-                    <div>
-                        <label className="font-sans text-xs uppercase tracking-widest text-muted-foreground block mb-2">
-                            {t('photoLimitPerGuest')}
-                        </label>
-                        <input
-                            {...register('max_photos_per_guest', {valueAsNumber: true})}
-                            type="number"
-                            placeholder={t('noLimit')}
-                            min={1}
-                            className="input-wedding py-3 w-full"
-                        />
-                        <p className="text-[10px] text-muted-foreground mt-1 italic">{t('howManyPhotosPerGuest')}</p>
-                    </div>
-                </div>
-            )}
-
-            {serverError && (
-                <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3">
-                    <p className="text-xs text-destructive text-center">{serverError}</p>
-                </div>
-            )}
-
-            <button
-                type="submit"
-                disabled={isSubmitting}
-                className="btn-primary w-full py-4 rounded-2xl flex items-center justify-center gap-2 disabled:opacity-60"
-            >
-                {isSubmitting ? (
-                    <>
-                        <Loader2 className="w-4 h-4 animate-spin"/>
-                        {t('creating')}
-                    </>
-                ) : (
-                    tw('create')
-                )}
-            </button>
         </form>
-    );
+    )
 }
 
-function slugify(value: string) {
+function FormSection({
+                         icon: Icon,
+                         title,
+                         children,
+                     }: {
+    icon: typeof Users
+    title: string
+    children: React.ReactNode
+}) {
+    return (
+        <section>
+            <div className="mb-4 flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                    <Icon
+                        className="h-3.5 w-3.5 text-[hsl(var(--primary))]"
+                        strokeWidth={
+                            1.6
+                        }
+                    />
+                </div>
+
+                <h2 className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                    {title}
+                </h2>
+            </div>
+
+            {children}
+        </section>
+    )
+}
+
+function FormField({
+                       label,
+                       children,
+                       error,
+                       required,
+                       optional,
+                   }: {
+    label: string
+    children: React.ReactNode
+    error?: string
+    required?: boolean
+    optional?: boolean
+}) {
+    return (
+        <div>
+            <label className="label-wedding">
+                {label}
+
+                {required && (
+                    <span className="ml-1 text-destructive">
+                        *
+                    </span>
+                )}
+
+                {optional && (
+                    <span className="ml-1 normal-case tracking-normal text-muted-foreground/60">
+                        optional
+                    </span>
+                )}
+            </label>
+
+            {children}
+
+            {error && (
+                <p className="mt-1.5 text-xs leading-5 text-destructive">
+                    {error}
+                </p>
+            )}
+        </div>
+    )
+}
+
+function FeatureToggle({
+                           icon: Icon,
+                           title,
+                           description,
+                           children,
+                       }: {
+    icon: typeof MapPin
+    title: string
+    description: string
+    children: React.ReactNode
+}) {
+    return (
+        <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-border/60 bg-background p-4 transition-colors hover:bg-secondary/30">
+            <div className="flex min-w-0 items-start gap-3">
+                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-secondary">
+                    <Icon
+                        className="h-3.5 w-3.5 text-muted-foreground"
+                        strokeWidth={
+                            1.6
+                        }
+                    />
+                </div>
+
+                <div>
+                    <p className="text-sm font-medium text-foreground">
+                        {title}
+                    </p>
+
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                        {description}
+                    </p>
+                </div>
+            </div>
+
+            {children}
+        </label>
+    )
+}
+
+function PlusIcon() {
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            className="h-4 w-4"
+        >
+            <path
+                d="M12 5v14M5 12h14"
+                strokeLinecap="round"
+            />
+        </svg>
+    )
+}
+
+function slugify(
+    value: string
+) {
     return value
         .toLowerCase()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(
+            /[\u0300-\u036f]/g,
+            ''
+        )
+        .replace(
+            /[^a-z0-9\s-]/g,
+            ''
+        )
         .trim()
         .replace(/\s+/g, '-')
-        .replace(/-+/g, '-');
+        .replace(/-+/g, '-')
 }

@@ -1,31 +1,115 @@
 'use client'
 
-import {Moon, Sun} from 'lucide-react'
-import {useTheme} from 'next-themes'
-import {useEffect, useState} from 'react'
-import {cn} from '@/lib/utils'
+import {
+    useEffect,
+    useState,
+} from 'react'
 
-export function ThemeToggle({className}: { className?: string }) {
-    const {resolvedTheme, setTheme} = useTheme()
-    const [mounted, setMounted] = useState(false)
+import {
+    Moon,
+    Sun,
+} from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useTheme } from 'next-themes'
 
-    useEffect(() => setMounted(true), [])
+import { cn } from '@/lib/utils'
 
+interface ThemeToggleProps {
+    className?: string
+}
+
+export function ThemeToggle({
+                                className,
+                            }: ThemeToggleProps) {
+    const {
+        resolvedTheme,
+        setTheme,
+    } = useTheme()
+
+    const t =
+        useTranslations(
+            'common'
+        )
+
+    const [
+        mounted,
+        setMounted,
+    ] =
+        useState(false)
+
+    useEffect(() => {
+        setMounted(
+            true
+        )
+    }, [])
+
+    /*
+     * Prevent hydration mismatch because
+     * the active theme only exists client-side.
+     */
     if (!mounted) {
-        return <div className={cn('w-9 h-9', className)}/>
+        return (
+            <div
+                aria-hidden
+                className={cn(
+                    'h-9 w-9 shrink-0 rounded-full',
+                    className
+                )}
+            />
+        )
     }
+
+    const isDark =
+        resolvedTheme ===
+        'dark'
+
+    const label =
+        isDark
+            ? t(
+                'switchToLightMode'
+            )
+            : t(
+                'switchToDarkMode'
+            )
 
     return (
         <button
-            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-            aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            type="button"
+            onClick={() =>
+                setTheme(
+                    isDark
+                        ? 'light'
+                        : 'dark'
+                )
+            }
+            aria-label={
+                label
+            }
+            title={
+                label
+            }
             className={cn(
-                'w-9 h-9 rounded-full border border-border flex items-center justify-center',
-                'text-muted-foreground hover:bg-muted transition-colors',
+                'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 bg-card text-muted-foreground transition-colors',
+                'hover:bg-secondary hover:text-foreground',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20',
                 className
             )}
         >
-            {resolvedTheme === 'dark' ? <Sun className="w-4 h-4"/> : <Moon className="w-4 h-4"/>}
+            {isDark ? (
+                <Sun
+                    className="h-3.5 w-3.5"
+                    strokeWidth={
+                        1.7
+                    }
+                />
+            ) : (
+                <Moon
+                    className="h-3.5 w-3.5"
+                    strokeWidth={
+                        1.7
+                    }
+                />
+            )}
         </button>
     )
 }
