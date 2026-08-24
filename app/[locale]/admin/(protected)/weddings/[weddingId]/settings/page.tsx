@@ -1,6 +1,7 @@
 import { EditWeddingForm } from '@/components/admin/edit-wedding-form'
 import { redirect } from '@/lib/navigation'
 import { createClient } from '@/lib/supabase/server'
+import {notFound} from "next/navigation";
 
 type Props = {
     params: Promise<{
@@ -42,7 +43,7 @@ export default async function WeddingSettingsPage({
 
     if (!admin) {
         redirect({
-            href: '/admin/login',
+            href: '/admin/unauthorized',
             locale,
         })
     }
@@ -50,9 +51,10 @@ export default async function WeddingSettingsPage({
     const {
         data: wedding,
         error,
-    } = await supabase
-        .from('weddings')
-        .select(`
+    } =
+        await supabase
+            .from('weddings')
+            .select(`
             id,
             groom_name,
             bride_name,
@@ -61,19 +63,20 @@ export default async function WeddingSettingsPage({
             wedding_date,
             slug,
             wedding_settings (
-                theme_color,
-                enable_find_seat,
-                enable_photo_upload
+                *
             )
         `)
-        .eq('id', weddingId)
-        .single()
+            .eq(
+                'id',
+                weddingId
+            )
+            .maybeSingle()
 
-    if (error || !wedding) {
-        redirect({
-            href: '/admin/weddings',
-            locale,
-        })
+    if (
+        error ||
+        !wedding
+    ) {
+        notFound()
     }
 
     return (

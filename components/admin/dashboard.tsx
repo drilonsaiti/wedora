@@ -60,6 +60,8 @@ import {
     invertUpdate,
 } from '@/lib/utils'
 import type { Photo } from '@/types/database'
+import {toast} from "sonner";
+import {ConfirmationModal} from "@/components/ui/confirmation-modal";
 
 interface AdminDashboardProps {
     initialPhotos: Photo[]
@@ -120,6 +122,20 @@ export function AdminDashboard({
         ,
         startTransition,
     ] = useTransition()
+
+    const [
+        photoToDelete,
+        setPhotoToDelete,
+    ] = useState<string | null>(
+        null
+    )
+
+    const [
+        galleryTokenToDelete,
+        setGalleryTokenToDelete,
+    ] = useState<string | null>(
+        null
+    )
 
     const FILTERS = [
         {
@@ -577,19 +593,28 @@ export function AdminDashboard({
     /*
      * Delete photo
      */
+    /*
+ * Delete photo
+ */
     const handleDelete =
-        async (
+        (
             id: string
         ) => {
+            setPhotoToDelete(
+                id
+            )
+        }
+
+    const confirmDeletePhoto =
+        async () => {
             if (
-                !window.confirm(
-                    t(
-                        'confirmDelete'
-                    )
-                )
+                !photoToDelete
             ) {
                 return
             }
+
+            const id =
+                photoToDelete
 
             setActionLoading(
                 (
@@ -609,43 +634,53 @@ export function AdminDashboard({
                     )
 
                 if (
-                    result.success
+                    !result.success
                 ) {
-                    setPhotos(
-                        (
-                            current
-                        ) =>
-                            current.filter(
-                                (
-                                    photo
-                                ) =>
-                                    photo.id !==
-                                    id
-                            )
+                    throw new Error(
+                        'Delete failed'
                     )
-
-                    setTotal(
-                        (
-                            current
-                        ) =>
-                            Math.max(
-                                0,
-                                current -
-                                1
-                            )
-                    )
-
-                    if (
-                        selectedPhoto?.id ===
-                        id
-                    ) {
-                        closeModal()
-                    }
                 }
 
+                setPhotos(
+                    (
+                        current
+                    ) =>
+                        current.filter(
+                            (
+                                photo
+                            ) =>
+                                photo.id !==
+                                id
+                        )
+                )
+
+                setTotal(
+                    (
+                        current
+                    ) =>
+                        Math.max(
+                            0,
+                            current - 1
+                        )
+                )
+
+                if (
+                    selectedPhoto?.id ===
+                    id
+                ) {
+                    closeModal()
+                }
+
+                toast.success(
+                    t(
+                        'notifications.photoDeleted'
+                    )
+                )
+
                 startTransition(
-                    () =>
+                    () => {
                         router.refresh()
+                    }
                 )
             } catch (
                 deleteError
@@ -655,11 +690,18 @@ export function AdminDashboard({
                     deleteError
                 )
 
-                window.alert(
+                toast.error(
                     t(
                         'deleteFailed'
                     )
                 )
+
+                /*
+                 * Important:
+                 * throw again so ConfirmationModal
+                 * does NOT close on failure.
+                 */
+                throw deleteError
             } finally {
                 setActionLoading(
                     (
@@ -740,7 +782,7 @@ export function AdminDashboard({
                 if (
                     !response.ok
                 ) {
-                    window.alert(
+                    toast.error(
                         t(
                             'failedToGenerateZip'
                         )
@@ -979,7 +1021,7 @@ export function AdminDashboard({
 
                     await loadGalleryTokens()
                 } else {
-                    window.alert(
+                    toast.error(
                         result.error ??
                         t(
                             'failedToCreateLink'
@@ -1020,24 +1062,48 @@ export function AdminDashboard({
         }
 
     const handleDeleteToken =
-        async (
+        (
             id: string
         ) => {
+            setGalleryTokenToDelete(
+                id
+            )
+        }
+
+    const confirmDeleteToken =
+        async () => {
             if (
-                !window.confirm(
-                    t(
-                        'deleteGalleryLinkConfirm'
-                    )
-                )
+                !galleryTokenToDelete
             ) {
                 return
             }
 
-            await deleteGalleryTokenAction(
-                id
-            )
+            try {
+                await deleteGalleryTokenAction(
+                    galleryTokenToDelete
+                )
 
-            await loadGalleryTokens()
+                await loadGalleryTokens()
+
+                toast.success(
+                    t(
+                        'notifications.galleryLinkDeleted'
+                    )
+                )
+            } catch (error) {
+                console.error(
+                    'Delete gallery link error:',
+                    error
+                )
+
+                toast.error(
+                    t(
+                        'notifications.galleryLinkDeleteFailed'
+                    )
+                )
+
+                throw error
+            }
         }
 
     /*
@@ -1643,6 +1709,73 @@ export function AdminDashboard({
                     }
                 />
             )}
+            <ConfirmationModal
+                open={
+                    photoToDelete !==
+                    null
+                }
+                onOpenChange={(
+                    open
+                ) => {
+                    if (!open) {
+                        setPhotoToDelete(
+                            null
+                        )
+                    }
+                }}
+                variant="destructive"
+                title={t(
+                    'confirmations.deletePhoto.title'
+                )}
+                description={t(
+                    'confirmations.deletePhoto.description'
+                )}
+                confirmLabel={t(
+                    'confirmations.deletePhoto.confirm'
+                )}
+                cancelLabel={tc(
+                    'cancel'
+                )}
+                onConfirm={
+                    confirmDeletePhoto
+                }
+            />
+
+            {/* =====================================
+    DELETE GALLERY LINK CONFIRMATION
+===================================== */}
+            <ConfirmationModal
+                open={
+                    galleryTokenToDelete !==
+                    null
+                }
+                onOpenChange={(
+                    open
+                ) => {
+                    if (!open) {
+                        setGalleryTokenToDelete(
+                            null
+                        )
+                    }
+                }}
+                variant="destructive"
+                title={t(
+                    'confirmations.deleteGalleryLink.title'
+                )}
+                description={t(
+                    'confirmations.deleteGalleryLink.description'
+                )}
+                confirmLabel={t(
+                    'confirmations.deleteGalleryLink.confirm'
+                )}
+                cancelLabel={tc(
+                    'cancel'
+                )}
+                onConfirm={
+                    confirmDeleteToken
+                }
+            />
+
         </div>
     )
 }
@@ -2784,17 +2917,11 @@ function ShareGalleryModal({
         }
     }, [onClose])
 
-    const useGalleryToken =
-        (
-            token: string
-        ) => {
-            const url =
-                `${window.location.origin}/gallery/${token}`
+    const handleGalleryToken = (token: string) => {
+        const url = `${window.location.origin}/gallery/${token}`
 
-            setShareUrl(
-                url
-            )
-        }
+        setShareUrl(url)
+    }
 
     return (
         <div
@@ -2913,9 +3040,7 @@ function ShareGalleryModal({
                                                             <button
                                                                 type="button"
                                                                 onClick={() =>
-                                                                    useGalleryToken(
-                                                                        token.token
-                                                                    )
+                                                                    handleGalleryToken(token.token)
                                                                 }
                                                                 aria-label={t(
                                                                     'copyLink'

@@ -1,5 +1,5 @@
 import {ReactNode} from 'react'
-import {redirect} from 'next/navigation'
+import {notFound, redirect} from 'next/navigation'
 import {createClient} from '@/lib/supabase/server'
 
 type Props = {
@@ -35,7 +35,7 @@ export default async function WeddingAdminLayout({children, params}: Props) {
     if (error) {
         console.error('WEDDING FETCH ERROR:', error.message, error.code, error.details)
     }
-    if (error || !wedding) redirect('/admin/weddings')
+    if (error || !wedding) notFound()
 
     return (
         <>{children}</>

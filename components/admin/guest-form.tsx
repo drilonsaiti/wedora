@@ -22,6 +22,7 @@ import {
 import type { Table } from '@/types/seating'
 
 interface GuestFormProps {
+    weddingId: string
     initialValues?: Partial<GuestFormValues> & {
         id?: string
     }
@@ -31,6 +32,7 @@ interface GuestFormProps {
 }
 
 export function GuestForm({
+    weddingId,
                               initialValues,
                               tables,
                               onSuccess,
@@ -142,6 +144,7 @@ export function GuestForm({
                     )
                 } else {
                     await addGuest(
+                        weddingId,
                         data
                     )
                 }

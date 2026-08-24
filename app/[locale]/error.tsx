@@ -1,0 +1,143 @@
+'use client'
+
+import { useEffect } from 'react'
+
+import {
+    AlertCircle,
+    Heart,
+    RefreshCw,
+} from 'lucide-react'
+import { useTranslations } from 'next-intl'
+
+import { Link } from '@/lib/navigation'
+
+interface PublicErrorProps {
+    error: Error & {
+        digest?: string
+    }
+    reset: () => void
+}
+
+export default function PublicError({
+                                        error,
+                                        reset,
+                                    }: PublicErrorProps) {
+    const t =
+        useTranslations(
+            'errors.public'
+        )
+
+    useEffect(() => {
+        console.error(
+            '[Public error boundary]',
+            error
+        )
+    }, [error])
+
+    return (
+        <main className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-4 py-12 sm:px-6">
+            {/* Ambient background */}
+            <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 overflow-hidden"
+            >
+                <div className="absolute left-1/2 top-[-240px] h-[560px] w-[760px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/30 blur-[140px]" />
+
+                <div className="absolute bottom-[-220px] right-[-180px] h-[420px] w-[420px] rounded-full bg-[hsl(var(--gold))]/8 blur-[130px]" />
+            </div>
+
+            <div className="relative z-10 w-full max-w-xl">
+                {/* Brand */}
+                <div className="mb-7 flex justify-center">
+                    <Link
+                        href="/"
+                        className="inline-flex items-center gap-2.5"
+                    >
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
+                            <Heart
+                                className="h-3.5 w-3.5"
+                                fill="currentColor"
+                            />
+                        </div>
+
+                        <span className="font-serif text-xl tracking-tight text-foreground">
+                            Wedora
+                        </span>
+                    </Link>
+                </div>
+
+                {/* Error card */}
+                <section className="card-wedding px-6 py-10 text-center sm:px-10 sm:py-12">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-destructive/15 bg-destructive/[0.05] text-destructive">
+                        <AlertCircle
+                            className="h-6 w-6"
+                            strokeWidth={1.5}
+                        />
+                    </div>
+
+                    <p className="mt-6 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                        {t(
+                            'eyebrow'
+                        )}
+                    </p>
+
+                    <h1 className="mx-auto mt-2 max-w-md font-serif text-3xl font-light tracking-[-0.025em] text-foreground sm:text-4xl">
+                        {t(
+                            'title'
+                        )}
+                    </h1>
+
+                    <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">
+                        {t(
+                            'description'
+                        )}
+                    </p>
+
+                    <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+                        <button
+                            type="button"
+                            onClick={
+                                reset
+                            }
+                            className="btn-primary justify-center"
+                        >
+                            <RefreshCw
+                                className="h-4 w-4"
+                                strokeWidth={1.7}
+                            />
+
+                            {t(
+                                'retry'
+                            )}
+                        </button>
+
+                        <Link
+                            href="/"
+                            className="btn-secondary justify-center"
+                        >
+                            {t(
+                                'home'
+                            )}
+                        </Link>
+                    </div>
+
+                    {error.digest && (
+                        <div className="mt-8 border-t border-border/60 pt-5">
+                            <p className="text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground/60">
+                                {t(
+                                    'reference'
+                                )}
+                            </p>
+
+                            <code className="mt-1 block break-all text-[10px] text-muted-foreground">
+                                {
+                                    error.digest
+                                }
+                            </code>
+                        </div>
+                    )}
+                </section>
+            </div>
+        </main>
+    )
+}

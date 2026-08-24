@@ -177,7 +177,7 @@ export function CoupleLoginForm() {
                         className="text-[11px] font-medium text-muted-foreground transition-colors hover:text-[hsl(var(--primary))]"
                     >
                         {t(
-                            'forgotPassword'
+                            'forgotPassword.title'
                         )}
                     </Link>
                 </div>

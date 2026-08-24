@@ -33,6 +33,7 @@ import {
     WEDDING_STATUS_LABELS,
 } from '@/lib/wedding-status'
 import { cn } from '@/lib/utils'
+import {toast} from "sonner";
 
 export type WeddingSettings = {
     theme_color?: string | null
@@ -83,6 +84,10 @@ export function WeddingsPageClient({
             'status'
         )
 
+    const tw =
+        useTranslations(
+            'weddings'
+        )
     /*
      * Create modal
      */
@@ -506,6 +511,12 @@ export function WeddingsPageClient({
                         }
                         modal
                         onSuccess={() => {
+                            toast.success(
+                                tw(
+                                    'notifications.updated'
+                                )
+                            )
+
                             setSelectedWedding(
                                 null
                             )

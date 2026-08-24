@@ -2,6 +2,7 @@ import { getPhotosAction } from '@/actions/admin'
 import { AdminDashboard } from '@/components/admin/dashboard'
 import { redirect } from '@/lib/navigation'
 import { createClient } from '@/lib/supabase/server'
+import {notFound} from "next/navigation";
 
 export const dynamic = 'force-dynamic'
 
@@ -49,7 +50,7 @@ export default async function AdminWeddingPhotosPage({
 
     if (!admin) {
         redirect({
-            href: '/admin/login',
+            href: '/admin/unauthorized',
             locale,
         })
     }
@@ -72,7 +73,7 @@ export default async function AdminWeddingPhotosPage({
             locale,
         })
 
-        return null
+        notFound()
     }
 
     const { filter } =

@@ -43,6 +43,8 @@ import type {
     TableWithSeats,
     VenueElement,
 } from '@/types/seating'
+import {toast} from "sonner";
+import {ConfirmationModal} from "@/components/ui/confirmation-modal";
 
 /*
  * Dynamic designer loading component.
@@ -126,6 +128,10 @@ export function SeatingManagement({
             'dashboard'
         )
 
+    const tc =
+        useTranslations(
+            'common'
+        )
     const [
         isPending,
         startTransition,
@@ -172,6 +178,22 @@ export function SeatingManagement({
         useState<TableWithSeats | null>(
             null
         )
+
+    const [
+        guestToDelete,
+        setGuestToDelete,
+    ] = useState<{
+        id: string
+        name: string
+    } | null>(null)
+
+    const [
+        tableToDelete,
+        setTableToDelete,
+    ] = useState<{
+        id: string
+        number: number
+    } | null>(null)
 
     /*
      * Wedding name
@@ -289,77 +311,81 @@ export function SeatingManagement({
             [initialTables]
         )
 
-    const handleDeleteGuest =
-        async (
-            id: string
-        ) => {
+    const confirmDeleteGuest =
+        async () => {
             if (
-                !window.confirm(
-                    t(
-                        'confirmDeleteGuest'
-                    )
-                )
+                !guestToDelete
             ) {
                 return
             }
 
             try {
-                await deleteGuest(id)
+                await deleteGuest(
+                    guestToDelete.id
+                )
+
+                toast.success(
+                    t(
+                        'notifications.guestDeleted'
+                    )
+                )
 
                 startTransition(
-                    () =>
+                    () => {
                         router.refresh()
+                    }
                 )
-            } catch (
-                error
-                ) {
+            } catch (error) {
                 console.error(
                     'Delete guest error:',
                     error
                 )
 
-                window.alert(
+                toast.error(
                     t(
                         'deleteGuestFailed'
                     )
                 )
+                throw error;
             }
         }
 
-    const handleDeleteTable =
-        async (
-            id: string
-        ) => {
+    const confirmDeleteTable =
+        async () => {
             if (
-                !window.confirm(
-                    t(
-                        'confirmDeleteTable'
-                    )
-                )
+                !tableToDelete
             ) {
                 return
             }
 
             try {
-                await deleteTable(id)
+                await deleteTable(
+                    tableToDelete.id
+                )
+
+                toast.success(
+                    t(
+                        'notifications.tableDeleted'
+                    )
+                )
 
                 startTransition(
-                    () =>
+                    () => {
                         router.refresh()
+                    }
                 )
-            } catch (
-                error
-                ) {
+            } catch (error) {
                 console.error(
                     'Delete table error:',
                     error
                 )
 
-                window.alert(
+                toast.error(
                     t(
                         'deleteTableFailed'
                     )
                 )
+                throw error;
             }
         }
 
@@ -552,7 +578,7 @@ export function SeatingManagement({
                                 <MapIcon className="h-3.5 w-3.5" />
                             }
                             label={t(
-                                'designer'
+                                'designerLabel'
                             )}
                         />
                     </section>
@@ -740,9 +766,10 @@ export function SeatingManagement({
                                                                         isPending
                                                                     }
                                                                     onClick={() =>
-                                                                        void handleDeleteGuest(
-                                                                            guest.id
-                                                                        )
+                                                                        setGuestToDelete({
+                                                                            id: guest.id,
+                                                                            name: `${guest.first_name} ${guest.last_name}`.trim(),
+                                                                        })
                                                                     }
                                                                     aria-label="Delete"
                                                                     className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive disabled:opacity-50"
@@ -851,9 +878,11 @@ export function SeatingManagement({
                                                                     isPending
                                                                 }
                                                                 onClick={() =>
-                                                                    void handleDeleteTable(
-                                                                        table.id
-                                                                    )
+                                                                    setTableToDelete({
+                                                                        id: table.id,
+                                                                        number:
+                                                                        table.number,
+                                                                    })
                                                                 }
                                                                 aria-label="Delete"
                                                                 className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive disabled:opacity-50"
@@ -1155,6 +1184,7 @@ export function SeatingManagement({
 
                 <div className="mt-7">
                     <GuestForm
+                        weddingId={wedding.id}
                         initialValues={
                             editingGuest ??
                             undefined
@@ -1163,8 +1193,22 @@ export function SeatingManagement({
                             initialTables
                         }
                         onSuccess={() => {
+                            toast.success(
+                                editingGuest
+                                    ? t(
+                                        'notifications.guestUpdated'
+                                    )
+                                    : t(
+                                        'notifications.guestCreated'
+                                    )
+                            )
+
                             setIsGuestModalOpen(
                                 false
+                            )
+
+                            setEditingGuest(
+                                null
                             )
 
                             startTransition(
@@ -1213,6 +1257,8 @@ export function SeatingManagement({
                     </h2>
                 </div>
 
+
+
                 <div className="mt-7">
                     <TableForm
                         initialValues={
@@ -1233,8 +1279,22 @@ export function SeatingManagement({
                             wedding.id
                         }
                         onSuccess={() => {
+                            toast.success(
+                                editingTable
+                                    ? t(
+                                        'notifications.tableUpdated'
+                                    )
+                                    : t(
+                                        'notifications.tableCreated'
+                                    )
+                            )
+
                             setIsTableModalOpen(
                                 false
+                            )
+
+                            setEditingTable(
+                                null
                             )
 
                             startTransition(
@@ -1250,6 +1310,86 @@ export function SeatingManagement({
                     />
                 </div>
             </Modal>
+
+            <ConfirmationModal
+                open={
+                    guestToDelete !==
+                    null
+                }
+                onOpenChange={(
+                    open
+                ) => {
+                    if (!open) {
+                        setGuestToDelete(
+                            null
+                        )
+                    }
+                }}
+                variant="destructive"
+                title={t(
+                    'confirmations.deleteGuest.title'
+                )}
+                description={
+                    guestToDelete
+                        ? t(
+                            'confirmations.deleteGuest.description',
+                            {
+                                name:
+                                guestToDelete.name,
+                            }
+                        )
+                        : undefined
+                }
+                confirmLabel={t(
+                    'confirmations.deleteGuest.confirm'
+                )}
+                cancelLabel={tc(
+                    'cancel'
+                )}
+                onConfirm={
+                    confirmDeleteGuest
+                }
+            />
+
+            <ConfirmationModal
+                open={
+                    tableToDelete !==
+                    null
+                }
+                onOpenChange={(
+                    open
+                ) => {
+                    if (!open) {
+                        setTableToDelete(
+                            null
+                        )
+                    }
+                }}
+                variant="destructive"
+                title={t(
+                    'confirmations.deleteTable.title'
+                )}
+                description={
+                    tableToDelete
+                        ? t(
+                            'confirmations.deleteTable.description',
+                            {
+                                number:
+                                tableToDelete.number,
+                            }
+                        )
+                        : undefined
+                }
+                confirmLabel={t(
+                    'confirmations.deleteTable.confirm'
+                )}
+                cancelLabel={tc(
+                    'cancel'
+                )}
+                onConfirm={
+                    confirmDeleteTable
+                }
+            />
         </div>
     )
 }

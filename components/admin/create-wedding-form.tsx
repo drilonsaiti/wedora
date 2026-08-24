@@ -48,6 +48,7 @@ import {
 import {
     cn,
 } from '@/lib/utils'
+import {toast} from "sonner";
 
 interface CreateWeddingFormProps {
     adminEmail: string
@@ -252,8 +253,10 @@ export function CreateWeddingForm({
                 result.credentials
             )
 
-            setFailedEmails(
-                result.failedEmails
+            toast.success(
+                tw(
+                    'notifications.created'
+                )
             )
         }
 

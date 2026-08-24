@@ -1,6 +1,6 @@
 'use client';
 
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {toPng} from 'html-to-image';
 import {
     Bath,
@@ -54,6 +54,8 @@ import {DraggableVenueElement} from "@/components/admin/designer/draggable-venue
 import {ToggleSwitch} from '@/components/ui/toggle-switch';
 import {VenueElementModal} from '@/components/ui/venue-element-modal'
 import {VenueColorKey, VenueIconKey} from '@/lib/venue-icons'
+import {useTranslations} from "next-intl";
+import {toast} from "sonner";
 
 interface SeatingDesignerProps {
     guests: GuestWithTable[];
@@ -77,7 +79,7 @@ const ELEMENT_TYPES: { type: VenueElementType; label: string; Icon: any }[] = [
 ];
 
 export function SeatingDesigner({guests, tables, venueElements, weddingId}: SeatingDesignerProps) {
-    const [localTables, setLocalTables] = useState<Table[]>(tables);
+    const [localTables, setLocalTables] = useState<TableWithSeats[]>(tables);
     const [localGuests, setLocalGuests] = useState<GuestWithTable[]>(guests);
     const [activeGuest, setActiveGuest] = useState<Guest | null>(null);
     const [activeTable, setActiveTable] = useState<Table | null>(null);
@@ -89,13 +91,89 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
     const [showGuests, setShowGuests] = useState(true);
     const [venueModalOpen, setVenueModalOpen] = useState(false)
 
+    const t =
+        useTranslations(
+            'seating.designer'
+        )
+
+    const canvasSize = useMemo(() => {
+        const EDGE_SPACE = 260;
+        const MIN_WIDTH = 1400;
+        const MIN_HEIGHT = 1100;
+
+        let width = MIN_WIDTH;
+        let height = MIN_HEIGHT;
+
+        for (const table of localTables) {
+            width = Math.max(
+                width,
+                table.pos_x + table.width + EDGE_SPACE
+            );
+
+            height = Math.max(
+                height,
+                table.pos_y + table.height + EDGE_SPACE
+            );
+        }
+
+        for (const element of localVenueElements) {
+            width = Math.max(
+                width,
+                element.pos_x + element.width + EDGE_SPACE
+            );
+
+            height = Math.max(
+                height,
+                element.pos_y + element.height + EDGE_SPACE
+            );
+        }
+
+        return {
+            width,
+            height,
+        };
+    }, [localTables, localVenueElements]);
+
     useEffect(() => {
         if (!isFullscreen) return;
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setIsFullscreen(false);
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setIsFullscreen(false);
+            }
         };
+
+        const previousBodyOverflow =
+            document.body.style.overflow;
+        const previousHtmlOverflow =
+            document.documentElement.style.overflow;
+
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+
         window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
+
+        const frame = requestAnimationFrame(() => {
+            containerRef.current?.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: 'auto',
+            });
+        });
+
+        return () => {
+            cancelAnimationFrame(frame);
+
+            document.body.style.overflow =
+                previousBodyOverflow;
+            document.documentElement.style.overflow =
+                previousHtmlOverflow;
+
+            window.removeEventListener(
+                'keydown',
+                handleKeyDown
+            );
+        };
     }, [isFullscreen]);
 
     const sensors = useSensors(
@@ -201,71 +279,230 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
 
         const overData = over.data.current;
 
-        if (activeData?.type === 'guest' && overData?.type === 'seat') {
-            const guest = activeData.guest;
-            const seat = overData.seat;
+        if (
+            activeData?.type ===
+            'guest' &&
+            overData?.type ===
+            'seat'
+        ) {
+            const guest =
+                activeData.guest
 
-            const seatTaken = localGuests.some((g) => g.seat_id === seat.id);
+            const seat =
+                overData.seat
+
+            const seatTaken =
+                localGuests.some(
+                    (guest) =>
+                        guest.seat_id ===
+                        seat.id
+                )
+
             if (seatTaken) {
-                alert('Ky vend është zënë tashmë!');
-                return;
+                toast.warning(
+                    t(
+                        'seatOccupied'
+                    )
+                )
+
+                return
             }
 
             try {
-                await assignGuestToSeat(guest.id, seat.id, seat.table_id);
-                setLocalGuests(prev => prev.map(g =>
-                    g.id === guest.id ? {...g, table_id: seat.table_id, seat_id: seat.id} : g
-                ));
-            } catch (err) {
-                alert('Dështoi caktimi i vendit');
+                await assignGuestToSeat(
+                    guest.id,
+                    seat.id,
+                    seat.table_id
+                )
+
+                setLocalGuests(
+                    (current) =>
+                        current.map(
+                            (item) =>
+                                item.id ===
+                                guest.id
+                                    ? {
+                                        ...item,
+                                        table_id:
+                                        seat.table_id,
+                                        seat_id:
+                                        seat.id,
+                                    }
+                                    : item
+                        )
+                )
+            } catch (error) {
+                console.error(
+                    'Assign seat error:',
+                    error
+                )
+
+                toast.error(
+                    t(
+                        'assignSeatFailed'
+                    )
+                )
             }
-            return;
+
+            return
         }
 
-        if (activeData?.type === 'guest' && overData?.type === 'table') {
-            const guest = activeData.guest;
-            const table: Table = overData.table;
+        if (
+            activeData?.type ===
+            'guest' &&
+            overData?.type ===
+            'table'
+        ) {
+            const guest =
+                activeData.guest
 
-            const guestsAtTable = localGuests.filter(g => g.table_id === table.id);
+            const table: Table =
+                overData.table
 
-            if (guestsAtTable.length >= table.seats) {
-                alert(`Tavolina ${table.number} është plot!`);
-                return;
+            const guestsAtTable =
+                localGuests.filter(
+                    (item) =>
+                        item.table_id ===
+                        table.id
+                )
+
+            if (
+                guestsAtTable.length >=
+                table.seats
+            ) {
+                toast.warning(
+                    t(
+                        'tableFull',
+                        {
+                            number:
+                            table.number,
+                        }
+                    )
+                )
+
+                return
             }
 
-            if (table.shape !== 'round') {
-                const occupiedSeatIds = new Set(guestsAtTable.map(g => g.seat_id).filter(Boolean));
-                const freeSeat = [...table.table_seats]
-                    .sort((a, b) => a.seat_index - b.seat_index)
-                    .find(s => !occupiedSeatIds.has(s.id));
+            if (
+                table.shape !==
+                'round'
+            ) {
+                const occupiedSeatIds =
+                    new Set(
+                        guestsAtTable
+                            .map(
+                                (item) =>
+                                    item.seat_id
+                            )
+                            .filter(Boolean)
+                    )
+
+                const freeSeat = [
+                    ...table.table_seats,
+                ]
+                    .sort(
+                        (a, b) =>
+                            a.seat_index -
+                            b.seat_index
+                    )
+                    .find(
+                        (seat) =>
+                            !occupiedSeatIds.has(
+                                seat.id
+                            )
+                    )
 
                 if (!freeSeat) {
-                    alert(`Tavolina ${table.number} është plot!`);
-                    return;
+                    toast.warning(
+                        t(
+                            'tableFull',
+                            {
+                                number:
+                                table.number,
+                            }
+                        )
+                    )
+
+                    return
                 }
 
                 try {
-                    await assignGuestToSeat(guest.id, freeSeat.id, table.id);
-                    setLocalGuests(prev => prev.map(g =>
-                        g.id === guest.id ? { ...g, table_id: table.id, tables: table, seat_id: freeSeat.id } : g
-                    ));
-                } catch (err) {
-                    alert('Dështoi caktimi i të ftuarit në tavolinë');
+                    await assignGuestToSeat(
+                        guest.id,
+                        freeSeat.id,
+                        table.id
+                    )
+
+                    setLocalGuests(
+                        (current) =>
+                            current.map(
+                                (item) =>
+                                    item.id ===
+                                    guest.id
+                                        ? {
+                                            ...item,
+                                            table_id:
+                                            table.id,
+                                            tables:
+                                            table,
+                                            seat_id:
+                                            freeSeat.id,
+                                        }
+                                        : item
+                            )
+                    )
+                } catch (error) {
+                    console.error(
+                        'Assign guest error:',
+                        error
+                    )
+
+                    toast.error(
+                        t(
+                            'assignGuestFailed'
+                        )
+                    )
                 }
-                return;
+
+                return
             }
 
             try {
-                await assignGuestToTable(guest.id, table.id);
-                setLocalGuests(prev => prev.map(g => g.id === guest.id ? {
-                    ...g,
-                    table_id: table.id,
-                    tables: table
-                } : g));
-            } catch (err) {
-                alert('Dështoi caktimi i të ftuarit në tavolinë');
+                await assignGuestToTable(
+                    guest.id,
+                    table.id
+                )
+
+                setLocalGuests(
+                    (current) =>
+                        current.map(
+                            (item) =>
+                                item.id ===
+                                guest.id
+                                    ? {
+                                        ...item,
+                                        table_id:
+                                        table.id,
+                                        tables:
+                                        table,
+                                    }
+                                    : item
+                        )
+                )
+            } catch (error) {
+                console.error(
+                    'Assign guest error:',
+                    error
+                )
+
+                toast.error(
+                    t(
+                        'assignGuestFailed'
+                    )
+                )
             }
         }
+
     };
 
     const unassignedGuests = localGuests
@@ -298,33 +535,91 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
             })
     }, [])
 
-    const handleAddElement = async (data: {
-        type: string
-        label: string
-        icon: VenueIconKey
-        shape: VenueElementShape
-        color: VenueColorKey
-    }) => {
-        try {
-            const newElement = await createVenueElement({
-                weddingId,
-                ...data,
-            })
-            setLocalVenueElements(prev => [...prev, newElement])
-        } catch (err) {
-            alert('Dështoi shtimi i elementit')
-        }
-    }
+    const handleAddElement =
+        async (
+            data: {
+                type: string
+                label: string
+                icon: VenueIconKey
+                shape: VenueElementShape
+                color: VenueColorKey
+            }
+        ) => {
+            try {
+                const newElement =
+                    await createVenueElement(
+                        {
+                            weddingId,
+                            ...data,
+                        }
+                    )
 
-    const handleDeleteElement = async (id: string) => {
-        try {
-            await deleteVenueElement(id);
-            setLocalVenueElements(prev => prev.filter(e => e.id !== id));
-        } catch (err) {
-            alert('Dështoi fshirja e elementit');
-        }
-    };
+                setLocalVenueElements(
+                    (current) => [
+                        ...current,
+                        newElement,
+                    ]
+                )
 
+                toast.success(
+                    t(
+                        'elementAdded'
+                    )
+                )
+            } catch (error) {
+                console.error(
+                    'Create venue element error:',
+                    error
+                )
+
+                toast.error(
+                    t(
+                        'addElementFailed'
+                    )
+                )
+
+                throw error
+            }
+        }
+
+    const handleDeleteElement =
+        async (
+            id: string
+        ) => {
+            try {
+                await deleteVenueElement(
+                    id
+                )
+
+                setLocalVenueElements(
+                    (current) =>
+                        current.filter(
+                            (element) =>
+                                element.id !==
+                                id
+                        )
+                )
+
+                toast.success(
+                    t(
+                        'elementDeleted'
+                    )
+                )
+            } catch (error) {
+                console.error(
+                    'Delete venue element error:',
+                    error
+                )
+
+                toast.error(
+                    t(
+                        'deleteElementFailed'
+                    )
+                )
+
+                throw error
+            }
+        }
     const seatPriorityCollisionDetection: CollisionDetection = (args) => {
         // 1. Provo pointerWithin fillimisht (i saktë kur pointer-i është ekzaktësisht brenda)
         const pointerCollisions = pointerWithin(args);
@@ -359,100 +654,186 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
             onDragEnd={handleDragEnd}
             modifiers={[restrictToWindowEdges]}
         >
-            <div className={cn(
-                "flex flex-col gap-6 print:hidden",
-                isFullscreen
-                    ? "fixed inset-0 z-50 bg-background p-6"
-                    : "h-full"
-            )}>
+            <div
+                className={cn(
+                    'flex flex-col gap-6 print:hidden',
+                    isFullscreen
+                        ? 'fixed inset-0 z-[999] h-[100dvh] min-h-0 overflow-hidden bg-background p-3 sm:p-6'
+                        : 'h-full min-h-0'
+                )}
+            >
                 {/* Sidebar: Unassigned Guests */}
                 <div
-                    className="bg-card border border-border rounded-2xl p-4 flex flex-col sm:flex-row gap-4 justify-between items-start">
-                    <div className="flex-1 w-full">
-                        <h3 className="font-sans font-medium text-sm mb-4">Të ftuarit e pa caktuar
-                            ({unassignedGuests.length})</h3>
-                        <div className="relative w-full sm:w-64 mb-3">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"/>
+                    className="flex shrink-0 flex-col items-start justify-between gap-4 rounded-2xl border border-border bg-card p-4 sm:flex-row"
+                >
+                    <div className="w-full flex-1">
+                        <h3 className="mb-4 font-sans text-sm font-medium">
+                            {t(
+                                'unassignedGuests',
+                                {
+                                    count:
+                                    unassignedGuests.length,
+                                }
+                            )}
+                        </h3>
+
+                        <div className="relative mb-3 w-full sm:w-64">
+                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"/>
                             <input
                                 type="text"
-                                placeholder="Kërko sipas emrit..."
+                                placeholder={t(
+                                    'searchGuests'
+                                )}
                                 value={guestSearchQuery}
                                 onChange={(e) => setGuestSearchQuery(e.target.value)}
-                                className="input-wedding pl-10 py-2 w-full"
+                                className="input-wedding w-full py-2 pl-10"
                             />
                         </div>
-                        <div className="flex flex-wrap gap-2 mb-3">
+
+                        <div className="mb-3 flex flex-wrap gap-2">
                             <button
+                                type="button"
                                 onClick={() => setVenueModalOpen(true)}
-                                className="btn-ghost text-[10px] py-1.5 px-3 border border-dashed border-border rounded-lg flex items-center gap-1"
+                                className="btn-ghost flex items-center gap-1 rounded-lg border border-dashed border-border px-3 py-1.5 text-[10px]"
                             >
-                                <Plus className="w-3 h-3"/>
-                                Shto Element
+                                <Plus className="h-3 w-3"/>
+                                {t(
+                                    'addElement'
+                                )}
                             </button>
                         </div>
-                        <div className="flex flex-wrap gap-3 max-h-32 overflow-y-auto p-1">
+
+                        <div className="flex max-h-32 flex-wrap gap-3 overflow-y-auto p-1">
                             {unassignedGuests.map(guest => (
-                                <DraggableGuest key={guest.id} guest={guest}/>
+                                <DraggableGuest
+                                    key={guest.id}
+                                    guest={guest}
+                                />
                             ))}
+
                             {unassignedGuests.length === 0 && (
-                                <p className="text-xs text-muted-foreground italic">
-                                    {guestSearchQuery ? 'Asnjë i ftuar nuk përputhet.' : 'Të gjithë të ftuarit janë caktuar.'}
+                                <p className="text-xs italic text-muted-foreground">
+                                    {guestSearchQuery
+                                        ? t(
+                                            'noGuestsFound'
+                                        )
+                                        : t(
+                                            'allGuestsAssigned'
+                                        )}
                                 </p>
                             )}
                         </div>
                     </div>
-                    <div className="flex gap-2 shrink-0">
+
+                    <div className="flex shrink-0 flex-wrap gap-2">
                         <ToggleSwitch
                             checked={showGuests}
                             onChange={setShowGuests}
-                            label="Shfaq të ftuarit"
+                            label={t(
+                                'showGuests'
+                            )}
                         />
+
                         <button
+                            type="button"
                             onClick={exportAsImage}
-                            className="flex items-center gap-2 btn-ghost text-xs py-2 px-3 border border-border rounded-xl"
-                            title="Shkarko si Foto"
+                            className="btn-ghost flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-xs"
+                            title={t(
+                                'downloadImage'
+                            )}
                         >
-                            <ImageIcon className="w-3.5 h-3.5"/>
-                            <span className="hidden sm:inline">Shkarko si Foto</span>
+                            <ImageIcon className="h-3.5 w-3.5"/>
+                            <span className="hidden sm:inline">
+                                {t(
+                                    'downloadImage'
+                                )}
+                            </span>
                         </button>
+
                         <button
+                            type="button"
                             onClick={() => setIsFullscreen(prev => !prev)}
-                            className="flex items-center gap-2 btn-ghost text-xs py-2 px-3 border border-border rounded-xl"
-                            title={isFullscreen ? "Dil nga ekrani i plotë" : "Ekran i plotë"}
+                            className="btn-ghost flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-xs"
+                            title={
+                                isFullscreen
+                                    ? t(
+                                        'exitFullscreen'
+                                    )
+                                    : t(
+                                        'fullscreen'
+                                    )
+                            }
                         >
-                            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5"/> : <Maximize2 className="w-3.5 h-3.5"/>}
-                            <span className="hidden sm:inline">{isFullscreen ? "Dil" : "Ekran i plotë"}</span>
+                            {isFullscreen
+                                ? <Minimize2 className="h-3.5 w-3.5"/>
+                                : <Maximize2 className="h-3.5 w-3.5"/>
+                            }
+
+                            <span className="hidden sm:inline">
+                                {isFullscreen
+                                    ? t(
+                                        'exit'
+                                    )
+                                    : t(
+                                        'fullscreen'
+                                    )
+                                }
+                            </span>
                         </button>
                     </div>
                 </div>
-                {/* Canvas Area */}
+
                 {/* Canvas Area */}
                 <div
                     ref={containerRef}
-                    className="flex-1 bg-background border border-border rounded-2xl relative overflow-auto shadow-inner min-h-[600px] p-20"
+                    className={cn(
+                        'relative min-h-0 overflow-auto overscroll-contain rounded-2xl border border-border bg-background shadow-inner',
+                        isFullscreen
+                            ? 'flex-1'
+                            : 'h-[700px] min-h-[600px]'
+                    )}
                     style={{
-                        backgroundImage: 'radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)',
-                        backgroundSize: '30px 30px'
+                        backgroundImage:
+                            'radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)',
+                        backgroundSize:
+                            '30px 30px',
                     }}
                 >
-                    <div
-                        ref={innerContentRef}
-                        className="relative w-full h-full"
-                        style={{minHeight: '870px', minWidth: '1000px'}}
-                    >
-                        {localTables.map(table => (
-                            <DraggableTable
-                                key={table.id}
-                                table={table}
-                                guests={localGuests.filter(g => g.table_id === table.id)}
-                                seats={table.table_seats}
-                                showGuests={showGuests}
-                            />
-                        ))}
+                    <div className="p-20">
+                        <div
+                            ref={innerContentRef}
+                            className="relative"
+                            style={{
+                                width:
+                                canvasSize.width,
+                                height:
+                                canvasSize.height,
+                                minWidth:
+                                    '100%',
+                            }}
+                        >
+                            {localTables.map(table => (
+                                <DraggableTable
+                                    key={table.id}
+                                    table={table}
+                                    guests={localGuests.filter(
+                                        g =>
+                                            g.table_id ===
+                                            table.id
+                                    )}
+                                    seats={table.table_seats}
+                                    showGuests={showGuests}
+                                />
+                            ))}
 
-                        {localVenueElements.map(element => (
-                            <DraggableVenueElement key={element.id} element={element} onDelete={handleDeleteElement}/>
-                        ))}
+                            {localVenueElements.map(element => (
+                                <DraggableVenueElement
+                                    key={element.id}
+                                    element={element}
+                                    onDelete={handleDeleteElement}
+                                />
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -477,7 +858,9 @@ export function SeatingDesigner({guests, tables, venueElements, weddingId}: Seat
                         style={{width: activeTable.width, height: activeTable.height}}
                     >
                         <span
-                            className="text-[10px] uppercase tracking-widest text-muted-foreground block">Tavolina</span>
+                            className="text-[10px] uppercase tracking-widest text-muted-foreground block">{t(
+                            'table'
+                        )}</span>
                         <span className="text-2xl font-serif text-[hsl(var(--primary))]">{activeTable.number}</span>
                     </div>
                 )}

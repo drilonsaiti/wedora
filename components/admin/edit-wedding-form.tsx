@@ -46,7 +46,7 @@ export interface Wedding {
     groom_name: string | null
     bride_name: string | null
     groom_email: string | null
-    bride_email: string | null
+    bride_email?: string | null
     wedding_date: string | null
     slug: string | null
 

@@ -13,6 +13,7 @@ async function requireAdmin() {
         data: {user},
     } = await supabase.auth.getUser()
 
+    console.log("requiredAdmin")
     if (!user) redirect('/admin/login')
 
     const {data: admin} = await supabase

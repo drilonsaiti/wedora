@@ -7,6 +7,7 @@ import {NextIntlClientProvider} from 'next-intl';
 import {getMessages, getTranslations} from 'next-intl/server';
 import {locales, type Locale} from '@/lib/i18n';
 import {notFound} from 'next/navigation';
+import {Toaster} from "sonner";
 
 const geist = Geist({subsets: ['latin'], variable: '--font-sans'})
 
@@ -42,7 +43,9 @@ export default async function RootLayout({
                                        params
                                    }: {
     children: React.ReactNode;
-    params: {locale: string};
+    params: Promise<{
+        locale: string
+    }>
 }) {
     const {locale} = await params;
 
@@ -65,6 +68,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
                 {children}
+                <Toaster />
             </ThemeProvider>
         </NextIntlClientProvider>
         </body>

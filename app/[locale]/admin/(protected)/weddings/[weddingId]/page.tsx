@@ -2,6 +2,7 @@ import { getGuests, getTables, getVenueElements } from '@/actions/seating'
 import { SeatingManagement } from '@/components/admin/seating-management'
 import { redirect } from '@/lib/navigation'
 import { createClient } from '@/lib/supabase/server'
+import {notFound} from "next/navigation";
 
 type Props = {
     params: Promise<{
@@ -45,7 +46,7 @@ export default async function WeddingDashboardPage({
 
     if (!admin) {
         redirect({
-            href: '/admin/login',
+            href: '/admin/unauthorized',
             locale,
         })
 
@@ -73,7 +74,7 @@ export default async function WeddingDashboardPage({
             locale,
         })
 
-        return null
+        notFound()
     }
 
     const [

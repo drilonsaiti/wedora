@@ -40,7 +40,7 @@ export default async function AdminLayout({
 
     if (!admin) {
         redirect({
-            href: '/admin/login',
+            href: '/admin/unauthorized',
             locale,
         })
 

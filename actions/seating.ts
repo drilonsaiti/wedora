@@ -39,7 +39,7 @@ function generateInitials(
     return `${first}${last}`.toLocaleUpperCase()
 }
 
-async function requireAdmin() {
+async function requireActor() {
     const authClient =
         await createClient()
 
@@ -56,9 +56,196 @@ async function requireAdmin() {
         )
     }
 
+    /*
+     * Check global-admin status after authentication.
+     * We use the service client here so this lookup
+     * does not depend on RLS on the admins table.
+     */
+    const serviceClient =
+        createServiceClient()
+
     const {
         data: admin,
+        error: adminError,
+    } =
+        await serviceClient
+            .from('admins')
+            .select('id')
+            .eq(
+                'id',
+                user.id
+            )
+            .maybeSingle()
+
+    if (adminError) {
+        console.error(
+            'Admin check failed:',
+            adminError
+        )
+
+        throw new Error(
+            'Failed to verify access'
+        )
+    }
+
+    return {
+        user,
+        role:
+            admin
+                ? 'admin' as const
+                : 'owner' as const,
+    }
+}
+
+/*
+ * ============================================
+ * WEDDING ACCESS
+ * ============================================
+ *
+ * Admin:
+ *   may access every wedding.
+ *
+ * Owner:
+ *   may access only a wedding whose
+ *   owner_user_id equals the current auth user.
+ *
+ * The service client is returned only after
+ * the exact wedding has been authorized.
+ */
+async function requireWeddingAccess(
+    weddingId: string,
+    actor?: Awaited<
+        ReturnType<
+            typeof requireActor
+        >
+    >
+) {
+    const access =
+        actor ??
+        await requireActor()
+
+    const {
+        user,
+        role,
+    } =
+        access
+
+    const supabase =
+        createServiceClient()
+
+    let query =
+        supabase
+            .from('weddings')
+            .select(
+                'id, owner_user_id'
+            )
+            .eq(
+                'id',
+                weddingId
+            )
+
+    if (
+        role ===
+        'owner'
+    ) {
+        query =
+            query.eq(
+                'owner_user_id',
+                user.id
+            )
+    }
+
+    const {
+        data: wedding,
         error,
+    } =
+        await query
+            .maybeSingle()
+
+    if (error) {
+        throw new Error(
+            error.message
+        )
+    }
+
+    if (!wedding) {
+        if (
+            role ===
+            'owner'
+        ) {
+            redirect(
+                '/admin/unauthorized'
+            )
+        }
+
+        throw new Error(
+            'Wedding not found'
+        )
+    }
+
+    return {
+        user,
+        role,
+        supabase,
+        weddingId:
+        wedding.id,
+    }
+}
+
+async function requireWeddingReadAccess(
+    weddingId: string
+) {
+    const authClient =
+        await createClient()
+
+    const {
+        data: {
+            user,
+        },
+    } =
+        await authClient.auth.getUser()
+
+    if (!user) {
+        throw new Error(
+            'Unauthorized'
+        )
+    }
+
+    /*
+     * ============================================
+     * COUPLE
+     * ============================================
+     *
+     * Couple accounts may READ only the wedding
+     * assigned to them in app_metadata.
+     */
+    const appMetadata =
+        user.app_metadata as {
+            role?: string
+            wedding_id?: string
+        }
+
+    if (
+        appMetadata.role ===
+        'couple' &&
+        appMetadata.wedding_id ===
+        weddingId
+    ) {
+        return {
+            user,
+            role:
+                'couple' as const,
+        }
+    }
+
+    /*
+     * ============================================
+     * GLOBAL ADMIN
+     * ============================================
+     */
+    const {
+        data: admin,
+        error: adminError,
     } =
         await authClient
             .from('admins')
@@ -69,97 +256,84 @@ async function requireAdmin() {
             )
             .maybeSingle()
 
-    if (
-        error ||
-        !admin
-    ) {
-        redirect(
-            '/admin/login'
+    if (adminError) {
+        console.error(
+            'Admin check failed:',
+            adminError
         )
     }
 
-    /*
-     * We intentionally use the service client
-     * only AFTER verifying that this user is
-     * actually an administrator.
-     *
-     * This allows admins to manage weddings
-     * even when owner_user_id belongs to another
-     * user and owner-based RLS would otherwise
-     * prevent access.
-     */
-    const supabase =
-        createServiceClient()
-
-    return {
-        user,
-        supabase,
+    if (admin) {
+        return {
+            user,
+            role:
+                'admin' as const,
+        }
     }
-}
 
-/*
- * ============================================
- * WEDDING VALIDATION
- * ============================================
- */
-async function requireWedding(
-    weddingId: string
-) {
+    /*
+     * ============================================
+     * WEDDING OWNER
+     * ============================================
+     *
+     * Owner must own THIS exact wedding.
+     */
     const {
-        supabase,
-        user,
+        data: ownedWedding,
+        error: ownerError,
     } =
-        await requireAdmin()
-
-    const {
-        data: wedding,
-        error,
-    } =
-        await supabase
+        await authClient
             .from('weddings')
             .select('id')
             .eq(
                 'id',
                 weddingId
             )
+            .eq(
+                'owner_user_id',
+                user.id
+            )
             .maybeSingle()
 
     if (
-        error ||
-        !wedding
+        ownerError ||
+        !ownedWedding
     ) {
         throw new Error(
-            'Wedding not found'
+            'Forbidden'
         )
     }
 
     return {
         user,
-        supabase,
-        weddingId:
-        wedding.id,
+        role:
+            'owner' as const,
     }
 }
 
 /*
  * ============================================
- * ENTITY → WEDDING HELPERS
- *
- * These allow update/delete functions to find
- * the wedding from the entity itself.
+ * ENTITY → WEDDING ACCESS
  * ============================================
+ *
+ * Entity actions only receive an entity id.
+ * We first authenticate, resolve its wedding id,
+ * then authorize that exact wedding.
  */
-async function getGuestWeddingId(
-    supabase: ReturnType<
-        typeof createServiceClient
-    >,
+async function requireGuestAccess(
     guestId: string
 ) {
+    const actor =
+        await requireActor()
+
+    const lookupClient =
+        createServiceClient()
+
     const {
         data,
         error,
     } =
-        await supabase
+        await lookupClient
             .from('guests')
             .select(
                 'wedding_id'
@@ -179,9 +353,97 @@ async function getGuestWeddingId(
         )
     }
 
-    return data.wedding_id
+    return requireWeddingAccess(
+        data.wedding_id,
+        actor
+    )
 }
 
+async function requireTableAccess(
+    tableId: string
+) {
+    const actor =
+        await requireActor()
+
+    const lookupClient =
+        createServiceClient()
+
+    const {
+        data,
+        error,
+    } =
+        await lookupClient
+            .from('tables')
+            .select(
+                'wedding_id'
+            )
+            .eq(
+                'id',
+                tableId
+            )
+            .maybeSingle()
+
+    if (
+        error ||
+        !data
+    ) {
+        throw new Error(
+            'Table not found'
+        )
+    }
+
+    return requireWeddingAccess(
+        data.wedding_id,
+        actor
+    )
+}
+
+async function requireVenueElementAccess(
+    elementId: string
+) {
+    const actor =
+        await requireActor()
+
+    const lookupClient =
+        createServiceClient()
+
+    const {
+        data,
+        error,
+    } =
+        await lookupClient
+            .from(
+                'venue_elements'
+            )
+            .select(
+                'wedding_id'
+            )
+            .eq(
+                'id',
+                elementId
+            )
+            .maybeSingle()
+
+    if (
+        error ||
+        !data
+    ) {
+        throw new Error(
+            'Venue element not found'
+        )
+    }
+
+    return requireWeddingAccess(
+        data.wedding_id,
+        actor
+    )
+}
+
+/*
+ * Destination validation helper.
+ * Called only with an already-authorized
+ * service client.
+ */
 async function getTableWeddingId(
     supabase: ReturnType<
         typeof createServiceClient
@@ -209,41 +471,6 @@ async function getTableWeddingId(
     ) {
         throw new Error(
             'Table not found'
-        )
-    }
-
-    return data.wedding_id
-}
-
-async function getVenueElementWeddingId(
-    supabase: ReturnType<
-        typeof createServiceClient
-    >,
-    elementId: string
-) {
-    const {
-        data,
-        error,
-    } =
-        await supabase
-            .from(
-                'venue_elements'
-            )
-            .select(
-                'wedding_id'
-            )
-            .eq(
-                'id',
-                elementId
-            )
-            .maybeSingle()
-
-    if (
-        error ||
-        !data
-    ) {
-        throw new Error(
-            'Venue element not found'
         )
     }
 
@@ -293,23 +520,29 @@ export async function getGuests(
     weddingId: string
 ) {
     /*
-     * Never allow an unauthenticated caller to
-     * reach the service-role query.
+     * Admin, owner and the couple assigned to this
+     * exact wedding may read the guest list.
      */
-    await requireAdmin()
+    await requireWeddingReadAccess(
+        weddingId
+    )
 
     return unstable_cache(
         async (
             wId: string
         ) => {
+            /*
+             * Safe to use service role here because
+             * access to THIS wedding was verified
+             * before entering the cached query.
+             */
             const supabase =
                 createServiceClient()
 
-            /*
-             * Confirm that this wedding exists.
-             */
             const {
                 data: wedding,
+                error:
+                    weddingError,
             } =
                 await supabase
                     .from(
@@ -325,6 +558,7 @@ export async function getGuests(
                     .maybeSingle()
 
             if (
+                weddingError ||
                 !wedding
             ) {
                 throw new Error(
@@ -340,19 +574,19 @@ export async function getGuests(
                     .from(
                         'guests'
                     )
-                    .select(
-                        `
+                    .select(`
                         *,
-                        tables(
+                        tables (
                             id,
                             number,
-                            shape
+                            shape,
+                            label
                         ),
-                        table_seats(
+                        table_seats (
+                            id,
                             seat_index
                         )
-                        `
-                    )
+                    `)
                     .eq(
                         'wedding_id',
                         wId
@@ -374,7 +608,7 @@ export async function getGuests(
             return data
         },
         [
-            'admin-guests',
+            'wedding-guests',
             weddingId,
         ],
         {
@@ -406,7 +640,7 @@ export async function addGuest(
     const {
         supabase,
     } =
-        await requireWedding(
+        await requireWeddingAccess(
             weddingId
         )
 
@@ -497,12 +731,9 @@ export async function updateGuest(
 ) {
     const {
         supabase,
+        weddingId,
     } =
-        await requireAdmin()
-
-    const weddingId =
-        await getGuestWeddingId(
-            supabase,
+        await requireGuestAccess(
             id
         )
 
@@ -584,12 +815,9 @@ export async function deleteGuest(
 ) {
     const {
         supabase,
+        weddingId,
     } =
-        await requireAdmin()
-
-    const weddingId =
-        await getGuestWeddingId(
-            supabase,
+        await requireGuestAccess(
             id
         )
 
@@ -625,12 +853,9 @@ export async function assignGuestToTable(
 ) {
     const {
         supabase,
+        weddingId,
     } =
-        await requireAdmin()
-
-    const weddingId =
-        await getGuestWeddingId(
-            supabase,
+        await requireGuestAccess(
             guestId
         )
 
@@ -691,7 +916,9 @@ export async function assignGuestToTable(
 export async function getTables(
     weddingId: string
 ) {
-    await requireAdmin()
+    await requireWeddingReadAccess(
+        weddingId
+    )
 
     return unstable_cache(
         async (
@@ -702,6 +929,8 @@ export async function getTables(
 
             const {
                 data: wedding,
+                error:
+                    weddingError,
             } =
                 await supabase
                     .from(
@@ -717,6 +946,7 @@ export async function getTables(
                     .maybeSingle()
 
             if (
+                weddingError ||
                 !wedding
             ) {
                 throw new Error(
@@ -756,7 +986,7 @@ export async function getTables(
             return data as Table[]
         },
         [
-            'admin-tables',
+            'wedding-tables',
             weddingId,
         ],
         {
@@ -783,7 +1013,7 @@ export async function addTable(
     const {
         supabase,
     } =
-        await requireWedding(
+        await requireWeddingAccess(
             input.weddingId
         )
 
@@ -947,12 +1177,9 @@ export async function assignGuestToSeat(
 ) {
     const {
         supabase,
+        weddingId,
     } =
-        await requireAdmin()
-
-    const weddingId =
-        await getGuestWeddingId(
-            supabase,
+        await requireGuestAccess(
             guestId
         )
 
@@ -1096,12 +1323,9 @@ export async function updateTable(
 ) {
     const {
         supabase,
+        weddingId,
     } =
-        await requireAdmin()
-
-    const weddingId =
-        await getTableWeddingId(
-            supabase,
+        await requireTableAccess(
             id
         )
 
@@ -1270,12 +1494,9 @@ export async function deleteTable(
 ) {
     const {
         supabase,
+        weddingId,
     } =
-        await requireAdmin()
-
-    const weddingId =
-        await getTableWeddingId(
-            supabase,
+        await requireTableAccess(
             id
         )
 
@@ -1312,12 +1533,9 @@ export async function updateTablePosition(
 ) {
     const {
         supabase,
+        weddingId,
     } =
-        await requireAdmin()
-
-    const weddingId =
-        await getTableWeddingId(
-            supabase,
+        await requireTableAccess(
             id
         )
 
@@ -1375,7 +1593,7 @@ export async function createVenueElement(
     const {
         supabase,
     } =
-        await requireWedding(
+        await requireWeddingAccess(
             input.weddingId
         )
 
@@ -1472,12 +1690,9 @@ export async function updateVenueElementPosition(
 ) {
     const {
         supabase,
+        weddingId,
     } =
-        await requireAdmin()
-
-    const weddingId =
-        await getVenueElementWeddingId(
-            supabase,
+        await requireVenueElementAccess(
             id
         )
 
@@ -1520,12 +1735,9 @@ export async function deleteVenueElement(
 ) {
     const {
         supabase,
+        weddingId,
     } =
-        await requireAdmin()
-
-    const weddingId =
-        await getVenueElementWeddingId(
-            supabase,
+        await requireVenueElementAccess(
             id
         )
 
@@ -1557,11 +1769,12 @@ export async function deleteVenueElement(
         'max'
     )
 }
-
 export async function getVenueElements(
     weddingId: string
 ) {
-    await requireAdmin()
+    await requireWeddingReadAccess(
+        weddingId
+    )
 
     return unstable_cache(
         async (
@@ -1572,6 +1785,8 @@ export async function getVenueElements(
 
             const {
                 data: wedding,
+                error:
+                    weddingError,
             } =
                 await supabase
                     .from(
@@ -1587,6 +1802,7 @@ export async function getVenueElements(
                     .maybeSingle()
 
             if (
+                weddingError ||
                 !wedding
             ) {
                 throw new Error(
@@ -1602,8 +1818,7 @@ export async function getVenueElements(
                     .from(
                         'venue_elements'
                     )
-                    .select(
-                        `
+                    .select(`
                         id,
                         type,
                         label,
@@ -1614,8 +1829,7 @@ export async function getVenueElements(
                         pos_y,
                         width,
                         height
-                        `
-                    )
+                    `)
                     .eq(
                         'wedding_id',
                         wId
@@ -1637,7 +1851,7 @@ export async function getVenueElements(
             return data as VenueElement[]
         },
         [
-            'admin-venue-elements',
+            'wedding-venue-elements',
             weddingId,
         ],
         {

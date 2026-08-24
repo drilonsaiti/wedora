@@ -79,12 +79,15 @@
 
     "showPassword": "Show password",
     "hidePassword": "Hide password",
+    "loginEyebrow": "Login",
 
     "forgotPassword": {
       "title": "Forgot password?",
+      "eyebrow": "Forgot password?",
       "description": "Enter your email address and we'll send you a link to reset your password.",
       "email": "Email",
       "emailPlaceholder": "you@example.com",
+      "sendLink": "Send Link",
       "sendResetLink": "Send Reset Link",
       "sendingLink": "Sending link…",
       "backToLogin": "Back to Login",
@@ -276,7 +279,7 @@
     "guests": "Guests",
     "tables": "Tables",
     "photos": "Photos",
-    "designer": "Designer",
+    "designerLabel": "Designer",
 
     "searchGuests": "Search guests...",
 
@@ -351,6 +354,64 @@
       "music": "Music",
       "bar": "Bar",
       "toilet": "Restroom"
+    },
+
+    "confirmations": {
+      "deleteGuest": {
+        "title": "Delete guest?",
+        "description": "{name} will be permanently removed from the guest list.",
+        "confirm": "Delete guest"
+      },
+      "deleteTable": {
+        "title": "Delete table?",
+        "description": "Table {number} will be removed and all guests assigned to it will become unseated.",
+        "confirm": "Delete table"
+      },
+      "deleteVenueElement": {
+        "title": "Delete venue element?",
+        "description": "{name} will be permanently removed from the venue layout.",
+        "confirm": "Delete element"
+      },
+      "deletePhoto": {
+        "title": "Delete photo?",
+        "description": "This photo will be permanently deleted and cannot be recovered.",
+        "confirm": "Delete photo"
+      },
+      "deleteGalleryLink": {
+        "title": "Delete gallery link?",
+        "description": "This shared gallery link will stop working immediately.",
+        "confirm": "Delete link"
+      }
+    },
+    "notifications": {
+      "guestDeleted": "Guest deleted",
+      "tableDeleted": "Table deleted",
+      "venueElementDeleted": "Venue element deleted",
+      "photoDeleted": "Photo deleted",
+      "galleryLinkDeleted": "Gallery link deleted",
+      "galleryLinkDeleteFailed": "The gallery link could not be deleted"
+    },
+
+    "designer": {
+      "unassignedGuests": "Unassigned guests ({count})",
+      "searchGuests": "Search by name...",
+      "addElement": "Add element",
+      "noGuestsFound": "No guests match your search.",
+      "allGuestsAssigned": "All guests are assigned.",
+      "showGuests": "Show guests",
+      "downloadImage": "Download image",
+      "fullscreen": "Fullscreen",
+      "exitFullscreen": "Exit fullscreen",
+      "exit": "Exit",
+      "table": "Table",
+      "seatOccupied": "This seat is already occupied.",
+      "tableFull": "Table {number} is full.",
+      "assignSeatFailed": "The guest could not be assigned to this seat.",
+      "assignGuestFailed": "The guest could not be assigned to this table.",
+      "elementAdded": "Venue element added",
+      "elementDeleted": "Venue element deleted",
+      "addElementFailed": "The venue element could not be added.",
+      "deleteElementFailed": "The venue element could not be deleted."
     },
 
     "venueEditor": {
@@ -475,6 +536,12 @@
         "violet": "Violet",
         "terracotta": "Terracotta",
         "burgundy": "Burgundy"
+      },
+
+      "notifications": {
+        "created": "Wedding created",
+        "updated": "Wedding updated",
+        "deleted": "Wedding deleted"
       }
     }
   },
@@ -819,6 +886,78 @@
       "guests": "Guests ({count})",
       "table": "Table {number}",
       "noTable": "No table"
+    }
+  },
+  "notFound": {
+    "eyebrow": "Page not found",
+    "title": "This page seems to have wandered off.",
+    "description": "The page you're looking for doesn't exist, has moved, or is no longer available.",
+    "home": "Back to Wedora",
+    "back": "Return to home",
+
+    "admin": {
+      "eyebrow": "Page not found",
+      "title": "We couldn't find this admin page.",
+      "description": "The page may have been moved, deleted, or the link may no longer be valid.",
+      "dashboard": "Dashboard",
+      "weddings": "Weddings",
+      "back": "Back to dashboard"
+    }
+  },
+  "errors": {
+    "public": {
+      "eyebrow": "Something went wrong",
+      "title": "We couldn't load this page.",
+      "description": "Something unexpected happened while loading this page. Try again or return to Wedora.",
+      "retry": "Try again",
+      "home": "Back to Wedora",
+      "reference": "Error reference"
+    }
+  },
+
+  "adminSettings": {
+    "eyebrow": "Admin",
+    "title": "Settings",
+    "description": "Manage your Wedora admin account and interface preferences.",
+    "account": {
+      "title": "Account",
+      "description": "Information about the account currently signed in.",
+      "email": "Email address",
+      "role": "Role",
+      "admin": "Administrator"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Choose how the Wedora admin interface appears.",
+      "theme": "Interface theme",
+      "themeDescription": "Switch between light and dark appearance."
+    },
+    "security": {
+      "title": "Security",
+      "description": "Your admin session is protected by your Wedora authentication account."
+    },
+    "session": {
+      "title": "Current session",
+      "description": "Sign out of this browser when you are finished.",
+      "logout": "Sign out"
+    }
+  },
+  "adminNav": {
+    "navigation": "Admin navigation",
+    "dashboard": "Dashboard",
+    "weddings": "Weddings",
+    "settings": "Settings",
+    "openMenu": "Open navigation",
+    "closeMenu": "Close navigation",
+    "signedInAs": "Signed in as"
+  },
+  "unauthorized": {
+    "admin": {
+      "eyebrow": "Access restricted",
+      "title": "You don't have admin access.",
+      "description": "This account is signed in, but it does not have permission to access the Wedora administration area.",
+      "login": "Use another account",
+      "home": "Back to Wedora"
     }
   }
 }
