@@ -198,6 +198,9 @@ async function requireWeddingReadAccess(
     const authClient =
         await createClient()
 
+    const serviceClient =
+        createServiceClient()
+
     const {
         data: {
             user,
@@ -205,6 +208,58 @@ async function requireWeddingReadAccess(
     } =
         await authClient.auth.getUser()
 
+    /*
+     * ============================================
+     * PUBLIC FIND-SEAT ACCESS
+     * ============================================
+     *
+     * The public wedding page is intentionally
+     * accessible without authentication.
+     *
+     * Seating data may be read publicly ONLY when
+     * enable_find_seat is enabled for this exact
+     * wedding.
+     */
+    const {
+        data: publicSettings,
+        error: settingsError,
+    } =
+        await serviceClient
+            .from(
+                'wedding_settings'
+            )
+            .select(
+                'enable_find_seat'
+            )
+            .eq(
+                'wedding_id',
+                weddingId
+            )
+            .maybeSingle()
+
+    if (settingsError) {
+        throw new Error(
+            settingsError.message
+        )
+    }
+
+    if (
+        publicSettings
+            ?.enable_find_seat
+    ) {
+        return {
+            user,
+            role:
+                'public' as const,
+        }
+    }
+
+    /*
+     * From here on, the wedding is NOT publicly
+     * readable.
+     *
+     * Therefore authentication is required.
+     */
     if (!user) {
         throw new Error(
             'Unauthorized'
@@ -215,9 +270,6 @@ async function requireWeddingReadAccess(
      * ============================================
      * COUPLE
      * ============================================
-     *
-     * Couple accounts may READ only the wedding
-     * assigned to them in app_metadata.
      */
     const appMetadata =
         user.app_metadata as {
@@ -247,7 +299,7 @@ async function requireWeddingReadAccess(
         data: admin,
         error: adminError,
     } =
-        await authClient
+        await serviceClient
             .from('admins')
             .select('id')
             .eq(
@@ -257,9 +309,8 @@ async function requireWeddingReadAccess(
             .maybeSingle()
 
     if (adminError) {
-        console.error(
-            'Admin check failed:',
-            adminError
+        throw new Error(
+            adminError.message
         )
     }
 
@@ -275,14 +326,12 @@ async function requireWeddingReadAccess(
      * ============================================
      * WEDDING OWNER
      * ============================================
-     *
-     * Owner must own THIS exact wedding.
      */
     const {
         data: ownedWedding,
         error: ownerError,
     } =
-        await authClient
+        await serviceClient
             .from('weddings')
             .select('id')
             .eq(
@@ -295,10 +344,13 @@ async function requireWeddingReadAccess(
             )
             .maybeSingle()
 
-    if (
-        ownerError ||
-        !ownedWedding
-    ) {
+    if (ownerError) {
+        throw new Error(
+            ownerError.message
+        )
+    }
+
+    if (!ownedWedding) {
         throw new Error(
             'Forbidden'
         )

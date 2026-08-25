@@ -1,12 +1,12 @@
 import { PricingSection } from '@/components/pricing-section'
-import {SiteHeader} from "@/components/SiteHeader";
-import {HeroSection} from "@/components/HeroSection";
-import {ValueSection} from "@/components/ValueSection";
-import {FeaturesSection} from "@/components/FeaturesSection";
-import {HowItWorksSection} from "@/components/HowItWorksSection";
-import {FaqSection} from "@/components/FaqSection";
-import {FinalCtaSection} from "@/components/FinalCtaSection";
-import {SiteFooter} from "@/components/SiteFooter";
+import {SiteHeader} from "@/components/landing/SiteHeader";
+import {HeroSection} from "@/components/landing/HeroSection";
+import {ValueSection} from "@/components/landing/ValueSection";
+import {FeaturesSection} from "@/components/landing/FeaturesSection";
+import {HowItWorksSection} from "@/components/landing/HowItWorksSection";
+import {FaqSection} from "@/components/landing/FaqSection";
+import {FinalCtaSection} from "@/components/landing/FinalCtaSection";
+import {SiteFooter} from "@/components/landing/SiteFooter";
 
 export default function PortfolioLandingPage() {
     return (

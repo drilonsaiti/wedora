@@ -263,7 +263,20 @@
       "favouritesOnly": "Favourites only",
 
       "deleteGalleryLinkConfirm": "Delete this gallery link? It will stop working immediately.",
-      "failedToCreateLink": "Failed to create link"
+      "failedToCreateLink": "Failed to create link",
+
+      "confirmations": {
+        "deletePhoto": {
+          "title": "Delete photo?",
+          "description": "This photo will be permanently deleted and cannot be recovered.",
+          "confirm": "Delete photo"
+        },
+        "deleteGalleryLink": {
+          "title": "Delete gallery link?",
+          "description": "This shared gallery link will stop working immediately.",
+          "confirm": "Delete link"
+        }
+      }
     }
   },
   "seating": {
@@ -875,7 +888,31 @@
     "photoAlt": "Photo {number}",
     "openPhoto": "Open photo {number}",
     "goToPhoto": "Go to photo {number}",
-    "photoCounter": "{current} / {total}"
+    "photoCounter": "{current} / {total}",
+    "empty": {
+      "eyebrow": "Shared gallery",
+      "title": "No photos available yet",
+      "description": "Photos will appear here once they are ready to be shared."
+    },
+    "imageUnavailable": {
+      "short": "Photo unavailable",
+      "title": "This photo couldn't be loaded",
+      "description": "The image is temporarily unavailable. The rest of the gallery is still available."
+    },
+    "unavailable": {
+      "invalid": {
+        "eyebrow": "Gallery unavailable",
+        "title": "This gallery link is no longer available.",
+        "description": "The link may have been removed or is no longer valid."
+      },
+      "expired": {
+        "eyebrow": "Link expired",
+        "title": "This gallery link has expired.",
+        "description": "This shared gallery was available for a limited time and can no longer be opened."
+      },
+      "contact": "Please contact the person who shared this gallery with you if you would like a new link.",
+      "home": "Back to Wedora"
+    }
   },
   "couple": {
     "seating": {

@@ -1,83 +1,162 @@
-'use server'
+"use server";
 
-import {createServiceClient} from '@/lib/supabase/server'
-import {GALLERY_PAGE_SIZE} from "@/types/seating";
-import {unstable_cache} from "next/cache";
+import { createServiceClient } from "@/lib/supabase/server";
+
+import { GALLERY_PAGE_SIZE } from "@/types/seating";
 
 export async function getGalleryPhotosAction(token: string, offset: number) {
-    return unstable_cache(
-        async (t: string, o: number) => {
-            const supabase = createServiceClient()
+    const supabase = createServiceClient();
 
-            const tokenResult = await supabase
-                .from('gallery_tokens')
-                .select('id, event_id, wedding_id, show_messages, expires_at, photo_filter')
-                .eq('token', t)
-                .single()
+    const { data: galleryToken, error: tokenError } = await supabase
+        .from("gallery_tokens")
+        .select(
+            `
+                id,
+                event_id,
+                wedding_id,
+                show_messages,
+                expires_at,
+                photo_filter
+            `
+        )
+        .eq("token", token)
+        .maybeSingle();
 
-            if (tokenResult.error || !tokenResult.data) {
-                return {photos: [], error: 'Invalid gallery link'}
-            }
+    if (tokenError || !galleryToken) {
+        return {
+            photos: [],
+            error: "Invalid gallery link",
+        };
+    }
 
-            const galleryToken = tokenResult.data
-            const weddingId = galleryToken.wedding_id
 
-            if (galleryToken.expires_at && new Date(galleryToken.expires_at) < new Date()) {
-                return {photos: [], error: 'Gallery expired'}
-            }
+    if (
+        galleryToken.expires_at &&
+        new Date(galleryToken.expires_at).getTime() <= Date.now()
+    ) {
+        return {
+            photos: [],
+            error: "Gallery expired",
+        };
+    }
 
-            let query = supabase
-                .from('photos')
-                .select('id, guest_name, message, thumbnail_path, original_path, created_at, width, height')
-                .eq('wedding_id', weddingId)
-                .eq('approved', true)
-                .eq('is_public', true)
-                .eq('hidden', false)
 
-            if (galleryToken.photo_filter === 'favourites') {
-                query = query.eq('favourite', true)
-            }
+    let query = supabase
+        .from("photos")
+        .select(
+            `
+                id,
+                guest_name,
+                message,
+                thumbnail_path,
+                original_path,
+                created_at,
+                width,
+                height
+            `
+        )
+        .eq("wedding_id", galleryToken.wedding_id)
+        .eq("approved", true)
+        .eq("is_public", true)
+        .eq("hidden", false);
 
-            const {data: photos, error} = await query
-                .order('created_at', {ascending: true})
-                .range(o, o + GALLERY_PAGE_SIZE - 1)
+    if (galleryToken.photo_filter === "favourites") {
+        query = query.eq("favourite", true);
+    }
 
-            if (error || !photos) return {photos: [], error: 'Failed to load photos'}
+    const { data: photos, error } = await query
+        .order("created_at", {
+            ascending: true,
+        })
+        .range(offset, offset + GALLERY_PAGE_SIZE - 1);
 
-            const thumbPaths = photos.map((p) => p.thumbnail_path)
-            const origPaths = photos.map((p) => p.original_path)
+    if (error) {
+        console.error("Gallery photo query error:", error);
 
-            const [{data: signedThumbs}, {data: signedOriginals}] = await Promise.all([
-                supabase.storage.from('thumbnails').createSignedUrls(thumbPaths, 86400),
-                supabase.storage.from('photos').createSignedUrls(origPaths, 86400),
-            ])
+        return {
+            photos: [],
+            error: error.message,
+        };
+    }
 
-            const thumbUrlMap: Record<string, string> = {}
-            signedThumbs?.forEach((s) => {
-                const photo = photos.find((p) => p.thumbnail_path === s.path)
-                if (s.signedUrl && photo) thumbUrlMap[photo.id] = s.signedUrl
-            })
+    if (!photos || photos.length === 0) {
+        return {
+            photos: [],
+        };
+    }
 
-            const origUrlMap: Record<string, string> = {}
-            signedOriginals?.forEach((s) => {
-                const photo = photos.find((p) => p.original_path === s.path)
-                if (s.signedUrl && photo) origUrlMap[photo.id] = s.signedUrl
-            })
 
-            const photoData = photos.map((p) => ({
-                id: p.id,
-                guest_name: p.guest_name,
-                message: galleryToken.show_messages ? p.message : null,
-                created_at: p.created_at,
-                width: p.width,
-                height: p.height,
-                thumbUrl: thumbUrlMap[p.id] ?? null,
-                originalUrl: origUrlMap[p.id] ?? null,
-            }))
+    const thumbPaths = photos
+        .map((photo) => photo.thumbnail_path)
+        .filter((path): path is string => Boolean(path));
 
-            return {photos: photoData}
-        },
-        ['gallery-photos', token, offset.toString()],
-        {tags: ['gallery-photos', `gallery-${token}`], revalidate: 3600}
-    )(token, offset)
+    const originalPaths = photos
+        .map((photo) => photo.original_path)
+        .filter((path): path is string => Boolean(path));
+
+
+    const [thumbResult, originalResult] = await Promise.all([
+        thumbPaths.length
+            ? supabase.storage.from("thumbnails").createSignedUrls(thumbPaths, 86400)
+            : Promise.resolve({
+                data: [],
+                error: null,
+            }),
+
+        originalPaths.length
+            ? supabase.storage.from("photos").createSignedUrls(originalPaths, 86400)
+            : Promise.resolve({
+                data: [],
+                error: null,
+            }),
+    ]);
+
+    if (thumbResult.error) {
+        console.error("Thumbnail signing error:", thumbResult.error);
+    }
+
+    if (originalResult.error) {
+        console.error("Original signing error:", originalResult.error);
+    }
+
+    const thumbUrlMap: Record<string, string> = {};
+
+    for (const signed of thumbResult.data ?? []) {
+        const photo = photos.find((item) => item.thumbnail_path === signed.path);
+
+        if (photo && signed.signedUrl) {
+            thumbUrlMap[photo.id] = signed.signedUrl;
+        }
+    }
+
+    const originalUrlMap: Record<string, string> = {};
+
+    for (const signed of originalResult.data ?? []) {
+        const photo = photos.find((item) => item.original_path === signed.path);
+
+        if (photo && signed.signedUrl) {
+            originalUrlMap[photo.id] = signed.signedUrl;
+        }
+    }
+
+
+    return {
+        photos: photos.map((photo) => ({
+            id: photo.id,
+
+            guest_name: galleryToken.show_messages ? photo.guest_name : null,
+
+            message: galleryToken.show_messages ? photo.message : null,
+
+            created_at: photo.created_at,
+
+            width: photo.width,
+
+            height: photo.height,
+
+            thumbUrl: thumbUrlMap[photo.id] ?? null,
+
+            originalUrl: originalUrlMap[photo.id] ?? null,
+        })),
+    };
 }

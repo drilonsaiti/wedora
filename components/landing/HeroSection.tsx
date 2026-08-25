@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import {ArrowRight, Check, Sparkles} from 'lucide-react'
 import {getTranslations} from 'next-intl/server'
-import {DashboardPreview} from "@/components/DashboardMetric";
+import {DashboardPreview} from "@/components/landing/DashboardMetric";
 
 
 export async function HeroSection() {

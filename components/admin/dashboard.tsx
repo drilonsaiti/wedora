@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import {
     type MouseEvent,
@@ -8,9 +8,9 @@ import {
     useRef,
     useState,
     useTransition,
-} from 'react'
+} from "react";
 
-import Image from 'next/image'
+import Image from "next/image";
 import {
     ArchiveIcon,
     Armchair,
@@ -33,11 +33,8 @@ import {
     Trash2,
     X,
     XCircle,
-} from 'lucide-react'
-import {
-    useLocale,
-    useTranslations,
-} from 'next-intl'
+} from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 import {
     createGalleryTokenAction,
@@ -48,52 +45,43 @@ import {
     listGalleryTokensAction,
     signOutAction,
     updatePhotoAction,
-} from '@/actions/admin'
-import { ThemeToggle } from '@/components/theme-toggle'
-import {
-    Link,
-    useRouter,
-} from '@/lib/navigation'
-import {
-    cn,
-    formatDate,
-    invertUpdate,
-} from '@/lib/utils'
-import type { Photo } from '@/types/database'
-import {toast} from "sonner";
-import {ConfirmationModal} from "@/components/ui/confirmation-modal";
+} from "@/actions/admin";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Link, useRouter } from "@/lib/navigation";
+import { cn, formatDate, invertUpdate } from "@/lib/utils";
+import type { Photo } from "@/types/database";
+import { toast } from "sonner";
+import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 
 interface AdminDashboardProps {
-    initialPhotos: Photo[]
-    initialTotal: number
-    adminEmail: string
-    weddingId: string
-    weddingName?: string
-    role: 'admin' | 'couple'
-    error?: string
-    activeFilter?: string
+    initialPhotos: Photo[];
+    initialTotal: number;
+    adminEmail: string;
+    weddingId: string;
+    weddingName?: string;
+    role: "admin" | "couple";
+    error?: string;
+    activeFilter?: string;
 }
 
 interface GalleryToken {
-    id: string
-    token: string
-    label: string | null
-    expires_at: string | null
-    created_at: string
-    photo_filter: string
+    id: string;
+    token: string;
+    label: string | null;
+    expires_at: string | null;
+    created_at: string;
+    photo_filter: string;
 }
 
 type PhotoUpdate = {
-    approved?: boolean
-    hidden?: boolean
-    favourite?: boolean
-}
+    approved?: boolean;
+    hidden?: boolean;
+    favourite?: boolean;
+};
 
-type PhotoFilter =
-    | 'all'
-    | 'favourites'
+type PhotoFilter = "all" | "favourites";
 
-const PAGE_SIZE = 50
+const PAGE_SIZE = 50;
 
 export function AdminDashboard({
                                    initialPhotos,
@@ -105,1205 +93,660 @@ export function AdminDashboard({
                                    error: initialError,
                                    activeFilter,
                                }: AdminDashboardProps) {
-    const router =
-        useRouter()
+    const router = useRouter();
 
-    const t =
-        useTranslations(
-            'dashboard.photos'
-        )
+    const t = useTranslations("dashboard.photos");
 
-    const tc =
-        useTranslations(
-            'common'
-        )
+    const tc = useTranslations("common");
 
-    const [
-        ,
-        startTransition,
-    ] = useTransition()
+    const [, startTransition] = useTransition();
 
-    const [
-        photoToDelete,
-        setPhotoToDelete,
-    ] = useState<string | null>(
-        null
-    )
+    const [photoToDelete, setPhotoToDelete] = useState<string | null>(null);
 
-    const [
-        galleryTokenToDelete,
-        setGalleryTokenToDelete,
-    ] = useState<string | null>(
-        null
-    )
+    const [galleryTokenToDelete, setGalleryTokenToDelete] = useState<
+        string | null
+    >(null);
 
     const FILTERS = [
         {
             key: undefined,
-            label: t(
-                'allPhotos'
-            ),
+            label: t("allPhotos"),
         },
         {
-            key: 'favourites',
-            label: t(
-                'favourites'
-            ),
+            key: "favourites",
+            label: t("favourites"),
         },
         {
-            key: 'hidden',
-            label: t(
-                'hidden'
-            ),
+            key: "hidden",
+            label: t("hidden"),
         },
         {
-            key: 'unapproved',
-            label: t(
-                'unapproved'
-            ),
+            key: "unapproved",
+            label: t("unapproved"),
         },
-    ]
+    ];
 
     /*
      * Photos
      */
-    const [
-        photos,
-        setPhotos,
-    ] =
-        useState<Photo[]>(
-            initialPhotos
-        )
+    const [photos, setPhotos] = useState<Photo[]>(initialPhotos);
 
-    const [
-        total,
-        setTotal,
-    ] =
-        useState(
-            initialTotal
-        )
+    const [total, setTotal] = useState(initialTotal);
 
-    const [
-        error,
-        setError,
-    ] =
-        useState<
-            string | undefined
-        >(
-            initialError
-        )
+    const [error, setError] = useState<string | undefined>(initialError);
 
-    const [
-        loadingMore,
-        setLoadingMore,
-    ] =
-        useState(false)
+    const [loadingMore, setLoadingMore] = useState(false);
 
-    const [
-        selectedPhoto,
-        setSelectedPhoto,
-    ] =
-        useState<Photo | null>(
-            null
-        )
+    const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
 
-    const [
-        signedUrls,
-        setSignedUrls,
-    ] =
-        useState<
-            Record<
-                string,
-                {
-                    thumb: string
-                    original: string
-                }
-            >
-        >({})
+    const [signedUrls, setSignedUrls] = useState<
+        Record<
+            string,
+            {
+                thumb: string;
+                original: string;
+            }
+        >
+    >({});
 
-    const [
-        loadingUrls,
-        setLoadingUrls,
-    ] =
-        useState<
-            Record<
-                string,
-                boolean
-            >
-        >({})
+    const signedUrlRequestsRef = useRef<Set<string>>(new Set());
 
-    const [
-        actionLoading,
-        setActionLoading,
-    ] =
-        useState<
-            Record<
-                string,
-                boolean
-            >
-        >({})
+    const [loadingUrls, setLoadingUrls] = useState<Record<string, boolean>>({});
+
+    const [actionLoading, setActionLoading] = useState<Record<string, boolean>>(
+        {}
+    );
 
     /*
      * ZIP
      */
-    const [
-        zipLoading,
-        setZipLoading,
-    ] =
-        useState<
-            | 'all'
-            | 'favourites'
-            | null
-        >(null)
+    const [zipLoading, setZipLoading] = useState<"all" | "favourites" | null>(
+        null
+    );
 
     /*
      * Gallery sharing
      */
-    const [
-        shareOpen,
-        setShareOpen,
-    ] =
-        useState(false)
+    const [shareOpen, setShareOpen] = useState(false);
 
-    const [
-        shareLoading,
-        setShareLoading,
-    ] =
-        useState(false)
+    const [shareLoading, setShareLoading] = useState(false);
 
-    const [
-        shareUrl,
-        setShareUrl,
-    ] =
-        useState<
-            string | null
-        >(null)
+    const [shareUrl, setShareUrl] = useState<string | null>(null);
 
-    const [
-        galleryTokens,
-        setGalleryTokens,
-    ] =
-        useState<
-            GalleryToken[]
-        >([])
+    const [galleryTokens, setGalleryTokens] = useState<GalleryToken[]>([]);
 
-    const [
-        loadingTokens,
-        setLoadingTokens,
-    ] =
-        useState(false)
+    const [loadingTokens, setLoadingTokens] = useState(false);
 
-    const [
-        showCreateForm,
-        setShowCreateForm,
-    ] =
-        useState(false)
+    const [showCreateForm, setShowCreateForm] = useState(false);
 
-    const [
-        copied,
-        setCopied,
-    ] =
-        useState(false)
+    const [copied, setCopied] = useState(false);
 
-    const [
-        showMessages,
-        setShowMessages,
-    ] =
-        useState(true)
+    const [showMessages, setShowMessages] = useState(true);
 
-    const [
-        expiresInDays,
-        setExpiresInDays,
-    ] =
-        useState('')
+    const [expiresInDays, setExpiresInDays] = useState("");
 
-    const [
-        photoFilter,
-        setPhotoFilter,
-    ] =
-        useState<PhotoFilter>(
-            'all'
-        )
+    const [photoFilter, setPhotoFilter] = useState<PhotoFilter>("all");
 
-    const [
-        galleryLabel,
-        setGalleryLabel,
-    ] =
-        useState(
-            'Wedding Gallery'
-        )
+    const [galleryLabel, setGalleryLabel] = useState("Wedding Gallery");
 
     /*
      * Synchronise client state with
      * server-side filter results.
      */
     useEffect(() => {
-        setPhotos(
-            initialPhotos
-        )
+        setPhotos(initialPhotos);
 
-        setTotal(
-            initialTotal
-        )
+        setTotal(initialTotal);
 
-        setError(
-            initialError
-        )
+        setError(initialError);
 
-        setSelectedPhoto(
-            null
-        )
-    }, [
-        initialPhotos,
-        initialTotal,
-        initialError,
-        activeFilter,
-    ])
+        setSelectedPhoto(null);
+    }, [initialPhotos, initialTotal, initialError, activeFilter]);
 
     /*
      * Signed URLs
      */
-    const getSignedUrls =
-        useCallback(
-            async (
-                photo: Photo
-            ) => {
-                if (
-                    signedUrls[
-                        photo.id
-                        ]
-                ) {
-                    return signedUrls[
-                        photo.id
-                        ]
+    const getSignedUrls = useCallback(
+        async (photo: Photo) => {
+            /*
+             * Already loaded.
+             */
+            const existing = signedUrls[photo.id];
+
+            if (existing) {
+                return existing;
+            }
+
+            /*
+             * A request for this photo is already
+             * running. Do not start another one.
+             */
+            if (signedUrlRequestsRef.current.has(photo.id)) {
+                return null;
+            }
+
+            signedUrlRequestsRef.current.add(photo.id);
+
+            setLoadingUrls((current) => ({
+                ...current,
+                [photo.id]: true,
+            }));
+
+            try {
+                const [thumbResult, originalResult] = await Promise.all([
+                    getSignedUrlAction(photo.thumbnail_path, "thumbnails"),
+                    getSignedUrlAction(photo.original_path, "photos"),
+                ]);
+
+                if (!thumbResult.url || !originalResult.url) {
+                    return null;
                 }
 
-                setLoadingUrls(
-                    (
-                        current
-                    ) => ({
-                        ...current,
-                        [photo.id]:
-                            true,
-                    })
-                )
+                const urls = {
+                    thumb: thumbResult.url,
+                    original: originalResult.url,
+                };
 
-                try {
-                    const [
-                        thumbResult,
-                        originalResult,
-                    ] =
-                        await Promise.all(
-                            [
-                                getSignedUrlAction(
-                                    photo.thumbnail_path,
-                                    'thumbnails'
-                                ),
-                                getSignedUrlAction(
-                                    photo.original_path,
-                                    'photos'
-                                ),
-                            ]
-                        )
+                setSignedUrls((current) => ({
+                    ...current,
+                    [photo.id]: urls,
+                }));
 
-                    if (
-                        thumbResult.url &&
-                        originalResult.url
-                    ) {
-                        const urls =
-                            {
-                                thumb:
-                                thumbResult.url,
-                                original:
-                                originalResult.url,
-                            }
+                return urls;
+            } finally {
+                signedUrlRequestsRef.current.delete(photo.id);
 
-                        setSignedUrls(
-                            (
-                                current
-                            ) => ({
-                                ...current,
-                                [photo.id]:
-                                urls,
-                            })
-                        )
-
-                        return urls
-                    }
-                } finally {
-                    setLoadingUrls(
-                        (
-                            current
-                        ) => ({
-                            ...current,
-                            [photo.id]:
-                                false,
-                        })
-                    )
-                }
-
-                return null
-            },
-            [signedUrls]
-        )
+                setLoadingUrls((current) => ({
+                    ...current,
+                    [photo.id]: false,
+                }));
+            }
+        },
+        [signedUrls]
+    );
 
     /*
      * Photo viewer
      */
-    const openModal =
-        async (
-            photo: Photo
-        ) => {
-            setSelectedPhoto(
-                photo
-            )
+    const openModal = async (photo: Photo) => {
+        setSelectedPhoto(photo);
 
-            await getSignedUrls(
-                photo
-            )
-        }
+        await getSignedUrls(photo);
+    };
 
-    const closeModal =
-        () => {
-            setSelectedPhoto(
-                null
-            )
-        }
+    const closeModal = () => {
+        setSelectedPhoto(null);
+    };
 
     /*
      * Update photo
      */
-    const handleUpdate =
-        async (
-            id: string,
-            update: PhotoUpdate
-        ) => {
-            setActionLoading(
-                (
-                    current
-                ) => ({
+    const handleUpdate = async (id: string, update: PhotoUpdate) => {
+        setActionLoading((current) => ({
+            ...current,
+            [id]: true,
+        }));
+
+        /*
+         * Optimistic update
+         */
+        setPhotos((current) =>
+            current.map((photo) =>
+                photo.id === id
+                    ? {
+                        ...photo,
+                        ...update,
+                    }
+                    : photo
+            )
+        );
+
+        setSelectedPhoto((current) =>
+            current?.id === id
+                ? {
                     ...current,
-                    [id]:
-                        true,
-                })
-            )
+                    ...update,
+                }
+                : current
+        );
 
-            /*
-             * Optimistic update
-             */
-            setPhotos(
-                (
-                    current
-                ) =>
-                    current.map(
-                        (
-                            photo
-                        ) =>
-                            photo.id ===
-                            id
-                                ? {
-                                    ...photo,
-                                    ...update,
-                                }
-                                : photo
+        try {
+            const result = await updatePhotoAction(id, weddingId,update);
+
+            if (!result.success) {
+                /*
+                 * Revert optimistic update
+                 */
+                setPhotos((current) =>
+                    current.map((photo) =>
+                        photo.id === id
+                            ? {
+                                ...photo,
+                                ...invertUpdate(photo, update),
+                            }
+                            : photo
                     )
-            )
+                );
 
-            setSelectedPhoto(
-                (
-                    current
-                ) =>
-                    current?.id ===
-                    id
+                setSelectedPhoto((current) =>
+                    current?.id === id
                         ? {
                             ...current,
-                            ...update,
+                            ...invertUpdate(current, update),
                         }
                         : current
-            )
-
-            try {
-                const result =
-                    await updatePhotoAction(
-                        id,
-                        update
-                    )
-
-                if (
-                    !result.success
-                ) {
-                    /*
-                     * Revert optimistic update
-                     */
-                    setPhotos(
-                        (
-                            current
-                        ) =>
-                            current.map(
-                                (
-                                    photo
-                                ) =>
-                                    photo.id ===
-                                    id
-                                        ? {
-                                            ...photo,
-                                            ...invertUpdate(
-                                                photo,
-                                                update
-                                            ),
-                                        }
-                                        : photo
-                            )
-                    )
-
-                    setSelectedPhoto(
-                        (
-                            current
-                        ) =>
-                            current?.id ===
-                            id
-                                ? {
-                                    ...current,
-                                    ...invertUpdate(
-                                        current,
-                                        update
-                                    ),
-                                }
-                                : current
-                    )
-                }
-
-                startTransition(
-                    () =>
-                        router.refresh()
-                )
-            } finally {
-                setActionLoading(
-                    (
-                        current
-                    ) => ({
-                        ...current,
-                        [id]:
-                            false,
-                    })
-                )
+                );
             }
+
+            startTransition(() => router.refresh());
+        } finally {
+            setActionLoading((current) => ({
+                ...current,
+                [id]: false,
+            }));
         }
+    };
 
     /*
      * Delete photo
      */
     /*
- * Delete photo
- */
-    const handleDelete =
-        (
-            id: string
-        ) => {
-            setPhotoToDelete(
-                id
-            )
+     * Delete photo
+     */
+    const handleDelete = (id: string) => {
+        setPhotoToDelete(id);
+    };
+
+    const confirmDeletePhoto = async () => {
+        if (!photoToDelete) {
+            return;
         }
 
-    const confirmDeletePhoto =
-        async () => {
-            if (
-                !photoToDelete
-            ) {
-                return
+        const id = photoToDelete;
+
+        setActionLoading((current) => ({
+            ...current,
+            [id]: true,
+        }));
+
+        try {
+            const result = await deletePhotoAction(id, weddingId);
+
+            if (!result.success) {
+                throw new Error("Delete failed");
             }
 
-            const id =
-                photoToDelete
+            setPhotos((current) => current.filter((photo) => photo.id !== id));
 
-            setActionLoading(
-                (
-                    current
-                ) => ({
-                    ...current,
-                    [id]:
-                        true,
-                })
-            )
+            setTotal((current) => Math.max(0, current - 1));
 
-            try {
-                const result =
-                    await deletePhotoAction(
-                        id,
-                        weddingId
-                    )
-
-                if (
-                    !result.success
-                ) {
-                    throw new Error(
-                        'Delete failed'
-                    )
-                }
-
-                setPhotos(
-                    (
-                        current
-                    ) =>
-                        current.filter(
-                            (
-                                photo
-                            ) =>
-                                photo.id !==
-                                id
-                        )
-                )
-
-                setTotal(
-                    (
-                        current
-                    ) =>
-                        Math.max(
-                            0,
-                            current - 1
-                        )
-                )
-
-                if (
-                    selectedPhoto?.id ===
-                    id
-                ) {
-                    closeModal()
-                }
-
-                toast.success(
-                    t(
-                        'notifications.photoDeleted'
-                    )
-                )
-
-                startTransition(
-                    () => {
-                        router.refresh()
-                    }
-                )
-            } catch (
-                deleteError
-                ) {
-                console.error(
-                    'Delete photo error:',
-                    deleteError
-                )
-
-                toast.error(
-                    t(
-                        'deleteFailed'
-                    )
-                )
-
-                /*
-                 * Important:
-                 * throw again so ConfirmationModal
-                 * does NOT close on failure.
-                 */
-                throw deleteError
-            } finally {
-                setActionLoading(
-                    (
-                        current
-                    ) => ({
-                        ...current,
-                        [id]:
-                            false,
-                    })
-                )
+            if (selectedPhoto?.id === id) {
+                closeModal();
             }
+
+            toast.success(t("notifications.photoDeleted"));
+
+            startTransition(() => {
+                router.refresh();
+            });
+        } catch (deleteError) {
+            console.error("Delete photo error:", deleteError);
+
+            toast.error(t("deleteFailed"));
+
+            /*
+             * Important:
+             * throw again so ConfirmationModal
+             * does NOT close on failure.
+             */
+            throw deleteError;
+        } finally {
+            setActionLoading((current) => ({
+                ...current,
+                [id]: false,
+            }));
         }
+    };
 
     /*
      * Download one photo
      */
-    const handleDownload =
-        async (
-            photo: Photo
-        ) => {
-            const urls =
-                await getSignedUrls(
-                    photo
-                )
+    const handleDownload = async (photo: Photo) => {
+        const urls = await getSignedUrls(photo);
 
-            if (!urls) {
-                return
-            }
-
-            const anchor =
-                document.createElement(
-                    'a'
-                )
-
-            anchor.href =
-                urls.original
-
-            anchor.download =
-                `wedding-photo-${photo.id.slice(
-                    0,
-                    8
-                )}.webp`
-
-            document.body.appendChild(
-                anchor
-            )
-
-            anchor.click()
-            anchor.remove()
+        if (!urls) {
+            return;
         }
+
+        const anchor = document.createElement("a");
+
+        anchor.href = urls.original;
+
+        anchor.download = `wedding-photo-${photo.id.slice(0, 8)}.webp`;
+
+        document.body.appendChild(anchor);
+
+        anchor.click();
+        anchor.remove();
+    };
 
     /*
      * Download ZIP
      */
-    const handleZipDownload =
-        async (
-            filter:
-                | 'all'
-                | 'favourites'
-        ) => {
-            setZipLoading(
-                filter
-            )
+    const handleZipDownload = async (filter: "all" | "favourites") => {
+        setZipLoading(filter);
 
-            try {
-                const url =
-                    `/api/admin/zip?weddingId=${weddingId}` +
-                    (filter ===
-                    'favourites'
-                        ? '&filter=favourites'
-                        : '')
+        try {
+            const url =
+                `/api/admin/zip?weddingId=${weddingId}` +
+                (filter === "favourites" ? "&filter=favourites" : "");
 
-                const response =
-                    await fetch(
-                        url
-                    )
+            const response = await fetch(url);
 
-                if (
-                    !response.ok
-                ) {
-                    toast.error(
-                        t(
-                            'failedToGenerateZip'
-                        )
-                    )
+            if (!response.ok) {
+                toast.error(t("failedToGenerateZip"));
 
-                    return
-                }
-
-                const blob =
-                    await response.blob()
-
-                const objectUrl =
-                    URL.createObjectURL(
-                        blob
-                    )
-
-                const date =
-                    new Date()
-                        .toISOString()
-                        .slice(
-                            0,
-                            10
-                        )
-
-                const anchor =
-                    document.createElement(
-                        'a'
-                    )
-
-                anchor.href =
-                    objectUrl
-
-                anchor.download =
-                    `wedding-photos-${filter}-${date}.zip`
-
-                document.body.appendChild(
-                    anchor
-                )
-
-                anchor.click()
-                anchor.remove()
-
-                URL.revokeObjectURL(
-                    objectUrl
-                )
-            } finally {
-                setZipLoading(
-                    null
-                )
+                return;
             }
+
+            const blob = await response.blob();
+
+            const objectUrl = URL.createObjectURL(blob);
+
+            const date = new Date().toISOString().slice(0, 10);
+
+            const anchor = document.createElement("a");
+
+            anchor.href = objectUrl;
+
+            anchor.download = `wedding-photos-${filter}-${date}.zip`;
+
+            document.body.appendChild(anchor);
+
+            anchor.click();
+            anchor.remove();
+
+            URL.revokeObjectURL(objectUrl);
+        } finally {
+            setZipLoading(null);
         }
+    };
 
     /*
      * Load more
      */
-    const handleLoadMore =
-        async () => {
-            if (
-                loadingMore ||
-                photos.length >=
-                total
-            ) {
-                return
-            }
-
-            setLoadingMore(
-                true
-            )
-
-            try {
-                const filters =
-                    activeFilter ===
-                    'favourites'
-                        ? {
-                            favourite:
-                                true,
-                        }
-                        : activeFilter ===
-                        'hidden'
-                            ? {
-                                hidden:
-                                    true,
-                            }
-                            : activeFilter ===
-                            'unapproved'
-                                ? {
-                                    approved:
-                                        false,
-                                }
-                                : undefined
-
-                const result =
-                    await getPhotosAction(
-                        weddingId,
-                        filters,
-                        PAGE_SIZE,
-                        photos.length
-                    )
-
-                if (
-                    result.photos
-                ) {
-                    setPhotos(
-                        (
-                            current
-                        ) => [
-                            ...current,
-                            ...result.photos,
-                        ]
-                    )
-
-                    if (
-                        result.total !==
-                        undefined
-                    ) {
-                        setTotal(
-                            result.total
-                        )
-                    }
-                }
-            } catch (
-                loadError
-                ) {
-                console.error(
-                    'Load more error:',
-                    loadError
-                )
-            } finally {
-                setLoadingMore(
-                    false
-                )
-            }
+    const handleLoadMore = async () => {
+        if (loadingMore || photos.length >= total) {
+            return;
         }
+
+        setLoadingMore(true);
+
+        try {
+            const filters =
+                activeFilter === "favourites"
+                    ? {
+                        favourite: true,
+                    }
+                    : activeFilter === "hidden"
+                        ? {
+                            hidden: true,
+                        }
+                        : activeFilter === "unapproved"
+                            ? {
+                                approved: false,
+                            }
+                            : undefined;
+
+            const result = await getPhotosAction(
+                weddingId,
+                filters,
+                PAGE_SIZE,
+                photos.length
+            );
+
+            if (result.photos) {
+                setPhotos((current) => [...current, ...result.photos]);
+
+                if (result.total !== undefined) {
+                    setTotal(result.total);
+                }
+            }
+        } catch (loadError) {
+            console.error("Load more error:", loadError);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
 
     /*
      * Gallery links
      */
-    const loadGalleryTokens =
-        useCallback(
-            async () => {
-                setLoadingTokens(
-                    true
-                )
+    const loadGalleryTokens = useCallback(async () => {
+        setLoadingTokens(true);
 
-                try {
-                    const result =
-                        await listGalleryTokensAction()
-
-                    setGalleryTokens(
-                        result.tokens ??
-                        []
-                    )
-                } finally {
-                    setLoadingTokens(
-                        false
-                    )
-                }
-            },
-            []
-        )
-
-    const openShareModal =
-        () => {
-            setShareOpen(
-                true
+        try {
+            const result = await listGalleryTokensAction(
+                weddingId
             )
 
-            setShareUrl(
-                null
-            )
-
-            setCopied(
-                false
-            )
-
-            setShowCreateForm(
-                false
-            )
-
-            void loadGalleryTokens()
+            setGalleryTokens(result.tokens ?? []);
+        } finally {
+            setLoadingTokens(false);
         }
+    }, []);
 
-    const closeShareModal =
-        () => {
-            setShareOpen(
-                false
-            )
+    const openShareModal = () => {
+        setShareOpen(true);
 
-            setShareUrl(
-                null
-            )
+        setShareUrl(null);
 
-            setCopied(
-                false
-            )
+        setCopied(false);
 
-            setShowCreateForm(
-                false
-            )
-        }
+        setShowCreateForm(false);
 
-    const handleCreateGalleryLink =
-        async () => {
-            setShareLoading(
-                true
-            )
+        void loadGalleryTokens();
+    };
 
-            try {
-                const result =
-                    await createGalleryTokenAction(
-                        {
-                            showMessages,
+    const closeShareModal = () => {
+        setShareOpen(false);
 
-                            expiresInDays:
+        setShareUrl(null);
+
+        setCopied(false);
+
+        setShowCreateForm(false);
+    };
+
+    const handleCreateGalleryLink = async () => {
+        setShareLoading(true);
+
+        try {
+            const result = await createGalleryTokenAction(
+                {
+                    weddingId,
+
+                    showMessages,
+
+                    expiresInDays:
+                        expiresInDays
+                            ? Number(
                                 expiresInDays
-                                    ? Number.parseInt(
-                                        expiresInDays,
-                                        10
-                                    )
-                                    : undefined,
+                            )
+                            : undefined,
 
-                            label:
-                                galleryLabel ||
-                                'Wedding Gallery',
+                    photoFilter,
 
-                            photoFilter,
-                        }
-                    )
-
-                if (
-                    result.url
-                ) {
-                    setShareUrl(
-                        result.url
-                    )
-
-                    await loadGalleryTokens()
-                } else {
-                    toast.error(
-                        result.error ??
-                        t(
-                            'failedToCreateLink'
-                        )
-                    )
+                    label:
+                    galleryLabel,
                 }
-            } finally {
-                setShareLoading(
-                    false
-                )
-            }
-        }
-
-    const handleCopy =
-        async () => {
-            if (
-                !shareUrl
-            ) {
-                return
-            }
-
-            await navigator.clipboard.writeText(
-                shareUrl
             )
 
-            setCopied(
-                true
-            )
+            if (result.url) {
+                setShareUrl(result.url);
 
-            window.setTimeout(
-                () => {
-                    setCopied(
-                        false
-                    )
-                },
-                2000
-            )
-        }
-
-    const handleDeleteToken =
-        (
-            id: string
-        ) => {
-            setGalleryTokenToDelete(
-                id
-            )
-        }
-
-    const confirmDeleteToken =
-        async () => {
-            if (
-                !galleryTokenToDelete
-            ) {
-                return
+                await loadGalleryTokens();
+            } else {
+                toast.error(result.error ?? t("failedToCreateLink"));
             }
-
-            try {
-                await deleteGalleryTokenAction(
-                    galleryTokenToDelete
-                )
-
-                await loadGalleryTokens()
-
-                toast.success(
-                    t(
-                        'notifications.galleryLinkDeleted'
-                    )
-                )
-            } catch (error) {
-                console.error(
-                    'Delete gallery link error:',
-                    error
-                )
-
-                toast.error(
-                    t(
-                        'notifications.galleryLinkDeleteFailed'
-                    )
-                )
-
-                throw error
-            }
+        } finally {
+            setShareLoading(false);
         }
+    };
+
+    const handleCopy = async () => {
+        if (!shareUrl) {
+            return;
+        }
+
+        await navigator.clipboard.writeText(shareUrl);
+
+        setCopied(true);
+
+        window.setTimeout(() => {
+            setCopied(false);
+        }, 2000);
+    };
+
+    const handleDeleteToken = (id: string) => {
+        setGalleryTokenToDelete(id);
+    };
+
+    const confirmDeleteToken = async () => {
+        if (!galleryTokenToDelete) {
+            return;
+        }
+
+        try {
+            await deleteGalleryTokenAction(galleryTokenToDelete,weddingId);
+
+            await loadGalleryTokens();
+
+            toast.success(t("notifications.galleryLinkDeleted"));
+        } catch (error) {
+            console.error("Delete gallery link error:", error);
+
+            toast.error(t("notifications.galleryLinkDeleteFailed"));
+
+            throw error;
+        }
+    };
 
     /*
      * Filters
      */
-    const handleFilterChange =
-        (
-            filter?: string
-        ) => {
-            const base =
-                role === 'admin'
-                    ? `/admin/weddings/${weddingId}/photos`
-                    : `/couple/weddings/${weddingId}/photos`
+    const handleFilterChange = (filter?: string) => {
+        const base =
+            role === "admin"
+                ? `/admin/weddings/${weddingId}/photos`
+                : `/couple/weddings/${weddingId}/photos`;
 
-            const url =
-                filter
-                    ? `${base}?filter=${filter}`
-                    : base
+        const url = filter ? `${base}?filter=${filter}` : base;
 
-            router.push(
-                url
-            )
-        }
+        router.push(url);
+    };
 
     /*
      * Viewer navigation
      */
-    const modalIndex =
-        photos.findIndex(
-            (
-                photo
-            ) =>
-                photo.id ===
-                selectedPhoto?.id
-        )
+    const modalIndex = photos.findIndex(
+        (photo) => photo.id === selectedPhoto?.id
+    );
 
-    const goPrev =
-        async () => {
-            if (
-                modalIndex <=
-                0
-            ) {
-                return
-            }
-
-            await openModal(
-                photos[
-                modalIndex -
-                1
-                    ]
-            )
+    const goPrev = async () => {
+        if (modalIndex <= 0) {
+            return;
         }
 
-    const goNext =
-        async () => {
-            if (
-                modalIndex >=
-                photos.length -
-                1
-            ) {
-                return
-            }
+        await openModal(photos[modalIndex - 1]);
+    };
 
-            await openModal(
-                photos[
-                modalIndex +
-                1
-                    ]
-            )
+    const goNext = async () => {
+        if (modalIndex >= photos.length - 1) {
+            return;
         }
+
+        await openModal(photos[modalIndex + 1]);
+    };
 
     return (
         <div
             className={cn(
-                'relative overflow-hidden bg-background',
-                role === 'admin'
-                    ? 'min-h-[calc(100vh-4rem)]'
-                    : 'min-h-screen'
+                "relative overflow-hidden bg-background",
+                role === "admin" ? "min-h-[calc(100vh-4rem)]" : "min-h-screen"
             )}
         >
             {/* Couple ambient only */}
-            {role ===
-                'couple' && (
-                    <div
-                        aria-hidden
-                        className="pointer-events-none absolute inset-0"
-                    >
-                        <div className="absolute left-1/2 top-[-320px] h-[680px] w-[920px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/20 blur-[150px]" />
-                    </div>
-                )}
+            {role === "couple" && (
+                <div aria-hidden className="pointer-events-none absolute inset-0">
+                    <div className="absolute left-1/2 top-[-320px] h-[680px] w-[920px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/20 blur-[150px]" />
+                </div>
+            )}
 
             {/* =====================================
                 COUPLE HEADER ONLY
             ===================================== */}
-            {role ===
-                'couple' && (
-                    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl">
-                        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-                            {/* Brand */}
-                            <Link
-                                href={`/couple/weddings/${weddingId}`}
-                                className="flex items-center gap-2.5"
-                            >
-                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
-                                    <Heart
-                                        className="h-3.5 w-3.5"
-                                        fill="currentColor"
-                                    />
-                                </div>
+            {role === "couple" && (
+                <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl">
+                    <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+                        {/* Brand */}
+                        <Link
+                            href={`/couple/weddings/${weddingId}`}
+                            className="flex items-center gap-2.5"
+                        >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
+                                <Heart className="h-3.5 w-3.5" fill="currentColor" />
+                            </div>
 
-                                <span className="font-serif text-xl tracking-tight text-foreground">
-                                Wedora
-                            </span>
+                            <span className="font-serif text-xl tracking-tight text-foreground">
+                Wedora
+              </span>
+                        </Link>
+
+                        <div className="flex items-center gap-1 sm:gap-2">
+                            <ThemeToggle />
+
+                            <Link
+                                href={`/couple/weddings/${weddingId}/seating`}
+                                aria-label={t("seating")}
+                                className="flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:px-4"
+                            >
+                                <Armchair className="h-3.5 w-3.5" strokeWidth={1.6} />
+
+                                <span className="hidden sm:inline">{t("seating")}</span>
                             </Link>
 
-                            <div className="flex items-center gap-1 sm:gap-2">
-                                <ThemeToggle />
+                            <button
+                                type="button"
+                                onClick={openShareModal}
+                                aria-label={t("shareGallery")}
+                                className="flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:px-4"
+                            >
+                                <Share2 className="h-3.5 w-3.5" strokeWidth={1.6} />
 
-                                <Link
-                                    href={`/couple/weddings/${weddingId}/seating`}
-                                    aria-label={t(
-                                        'seating'
-                                    )}
-                                    className="flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:px-4"
-                                >
-                                    <Armchair
-                                        className="h-3.5 w-3.5"
-                                        strokeWidth={
-                                            1.6
-                                        }
-                                    />
+                                <span className="hidden md:inline">{t("shareGallery")}</span>
+                            </button>
 
-                                    <span className="hidden sm:inline">
-                                    {t(
-                                        'seating'
-                                    )}
-                                </span>
-                                </Link>
+                            <ZipMenu
+                                zipLoading={zipLoading}
+                                onDownload={handleZipDownload}
+                                compact
+                            />
 
-                                <button
-                                    type="button"
-                                    onClick={
-                                        openShareModal
-                                    }
-                                    aria-label={t(
-                                        'shareGallery'
-                                    )}
-                                    className="flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:px-4"
-                                >
-                                    <Share2
-                                        className="h-3.5 w-3.5"
-                                        strokeWidth={
-                                            1.6
-                                        }
-                                    />
+                            <button
+                                type="button"
+                                onClick={() => void signOutAction()}
+                                aria-label={tc("logout")}
+                                className="flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-card text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:w-auto sm:px-3"
+                            >
+                                <LogOut className="h-3.5 w-3.5" strokeWidth={1.6} />
 
-                                    <span className="hidden md:inline">
-                                    {t(
-                                        'shareGallery'
-                                    )}
-                                </span>
-                                </button>
-
-                                <ZipMenu
-                                    zipLoading={
-                                        zipLoading
-                                    }
-                                    onDownload={
-                                        handleZipDownload
-                                    }
-                                    compact
-                                />
-
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        void signOutAction()
-                                    }
-                                    aria-label={tc(
-                                        'logout'
-                                    )}
-                                    className="flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-card text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:w-auto sm:px-3"
-                                >
-                                    <LogOut
-                                        className="h-3.5 w-3.5"
-                                        strokeWidth={
-                                            1.6
-                                        }
-                                    />
-
-                                    <span className="ml-2 hidden lg:inline">
-                                    {tc(
-                                        'logout'
-                                    )}
-                                </span>
-                                </button>
-                            </div>
+                                <span className="ml-2 hidden lg:inline">{tc("logout")}</span>
+                            </button>
                         </div>
-                    </header>
-                )}
+                    </div>
+                </header>
+            )}
 
             {/* =====================================
                 PAGE
@@ -1312,56 +755,37 @@ export function AdminDashboard({
                 {/* Heading */}
                 <div className="mb-8">
                     {/* Admin navigation */}
-                    {role ===
-                        'admin' && (
-                            <Link
-                                href={`/admin/weddings/${weddingId}`}
-                                className="mb-6 inline-flex items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-                            >
-                                <ArrowLeft
-                                    className="h-3.5 w-3.5"
-                                    strokeWidth={
-                                        1.6
-                                    }
-                                />
+                    {role === "admin" && (
+                        <Link
+                            href={`/admin/weddings/${weddingId}`}
+                            className="mb-6 inline-flex items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                            <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.6} />
 
-                                {t(
-                                    'backToWedding'
-                                )}
-                            </Link>
-                        )}
+                            {t("backToWedding")}
+                        </Link>
+                    )}
 
                     <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
                         <div>
-                            {role ===
-                                'admin' &&
-                                weddingName && (
-                                    <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.2em] text-[hsl(var(--primary))]">
-                                        {
-                                            weddingName
-                                        }
-                                    </p>
-                                )}
+                            {role === "admin" && weddingName && (
+                                <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.2em] text-[hsl(var(--primary))]">
+                                    {weddingName}
+                                </p>
+                            )}
 
                             <h1 className="font-serif text-4xl font-light tracking-[-0.025em] text-foreground sm:text-5xl">
-                                {t(
-                                    'title'
-                                )}
+                                {t("title")}
                             </h1>
 
-                            {role ===
-                            'admin' ? (
+                            {role === "admin" ? (
                                 <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-                                    {t(
-                                        'description'
-                                    )}
+                                    {t("description")}
                                 </p>
                             ) : (
                                 adminEmail && (
                                     <p className="mt-3 text-xs text-muted-foreground">
-                                        {
-                                            adminEmail
-                                        }
+                                        {adminEmail}
                                     </p>
                                 )
                             )}
@@ -1370,43 +794,30 @@ export function AdminDashboard({
                         <div className="flex flex-wrap items-center gap-2">
                             {/* Count */}
                             <div className="rounded-full border border-border/70 bg-card px-4 py-2.5 text-xs text-muted-foreground shadow-sm">
-                                {t(
-                                    'photoCount',
-                                    {
-                                        count:
-                                        total,
-                                    }
-                                )}
+                                {t("photoCount", {
+                                    count: total,
+                                })}
                             </div>
 
                             {/* Admin actions */}
-                            {role ===
-                                'admin' && (
-                                    <>
-                                        <button
-                                            type="button"
-                                            onClick={
-                                                openShareModal
-                                            }
-                                            className="btn-secondary justify-center"
-                                        >
-                                            <Share2 className="h-4 w-4" />
+                            {role === "admin" && (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={openShareModal}
+                                        className="btn-secondary justify-center"
+                                    >
+                                        <Share2 className="h-4 w-4" />
 
-                                            {t(
-                                                'shareGallery'
-                                            )}
-                                        </button>
+                                        {t("shareGallery")}
+                                    </button>
 
-                                        <ZipMenu
-                                            zipLoading={
-                                                zipLoading
-                                            }
-                                            onDownload={
-                                                handleZipDownload
-                                            }
-                                        />
-                                    </>
-                                )}
+                                    <ZipMenu
+                                        zipLoading={zipLoading}
+                                        onDownload={handleZipDownload}
+                                    />
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -1415,42 +826,25 @@ export function AdminDashboard({
                     FILTERS
                 ===================================== */}
                 <div className="mb-7 flex items-center gap-2 overflow-x-auto pb-1">
-                    {FILTERS.map(
-                        ({
-                             key,
-                             label,
-                         }) => {
-                            const active =
-                                activeFilter ===
-                                key ||
-                                (!activeFilter &&
-                                    !key)
+                    {FILTERS.map(({ key, label }) => {
+                        const active = activeFilter === key || (!activeFilter && !key);
 
-                            return (
-                                <button
-                                    key={
-                                        label
-                                    }
-                                    type="button"
-                                    onClick={() =>
-                                        handleFilterChange(
-                                            key
-                                        )
-                                    }
-                                    className={cn(
-                                        'shrink-0 rounded-full border px-4 py-2 text-[11px] font-medium transition-all',
-                                        active
-                                            ? 'border-foreground bg-foreground text-background shadow-sm'
-                                            : 'border-border/70 bg-card text-muted-foreground hover:border-foreground/15 hover:text-foreground'
-                                    )}
-                                >
-                                    {
-                                        label
-                                    }
-                                </button>
-                            )
-                        }
-                    )}
+                        return (
+                            <button
+                                key={label}
+                                type="button"
+                                onClick={() => handleFilterChange(key)}
+                                className={cn(
+                                    "shrink-0 rounded-full border px-4 py-2 text-[11px] font-medium transition-all",
+                                    active
+                                        ? "border-foreground bg-foreground text-background shadow-sm"
+                                        : "border-border/70 bg-card text-muted-foreground hover:border-foreground/15 hover:text-foreground"
+                                )}
+                            >
+                                {label}
+                            </button>
+                        );
+                    })}
                 </div>
 
                 {/* Error */}
@@ -1459,127 +853,73 @@ export function AdminDashboard({
                         role="alert"
                         className="mb-6 rounded-2xl border border-destructive/15 bg-destructive/[0.06] px-4 py-3.5"
                     >
-                        <p className="text-xs leading-5 text-destructive">
-                            {
-                                error
-                            }
-                        </p>
+                        <p className="text-xs leading-5 text-destructive">{error}</p>
                     </div>
                 )}
 
                 {/* Empty */}
-                {photos.length ===
-                    0 && (
-                        <div className="rounded-[2rem] border border-border/60 bg-card/70 px-6 py-20 text-center shadow-sm backdrop-blur">
-                            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-secondary">
-                                <Images
-                                    className="h-5 w-5 text-muted-foreground"
-                                    strokeWidth={
-                                        1.5
-                                    }
-                                />
-                            </div>
-
-                            <h2 className="font-serif text-2xl font-light text-foreground">
-                                {t(
-                                    'noPhotos'
-                                )}
-                            </h2>
-
-                            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
-                                {t(
-                                    'noPhotosMatchingFilter'
-                                )}
-                            </p>
+                {photos.length === 0 && (
+                    <div className="rounded-[2rem] border border-border/60 bg-card/70 px-6 py-20 text-center shadow-sm backdrop-blur">
+                        <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-secondary">
+                            <Images
+                                className="h-5 w-5 text-muted-foreground"
+                                strokeWidth={1.5}
+                            />
                         </div>
-                    )}
+
+                        <h2 className="font-serif text-2xl font-light text-foreground">
+                            {t("noPhotos")}
+                        </h2>
+
+                        <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
+                            {t("noPhotosMatchingFilter")}
+                        </p>
+                    </div>
+                )}
 
                 {/* Photos */}
-                {photos.length >
-                    0 && (
-                        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
-                            {photos.map(
-                                (
-                                    photo
-                                ) => (
-                                    <PhotoCard
-                                        key={
-                                            photo.id
-                                        }
-                                        photo={
-                                            photo
-                                        }
-                                        thumbnailUrl={
-                                            signedUrls[
-                                                photo
-                                                    .id
-                                                ]
-                                                ?.thumb
-                                        }
-                                        isLoadingUrl={
-                                            loadingUrls[
-                                                photo
-                                                    .id
-                                                ]
-                                        }
-                                        isActionLoading={
-                                            actionLoading[
-                                                photo
-                                                    .id
-                                                ]
-                                        }
-                                        onOpen={() =>
-                                            void openModal(
-                                                photo
-                                            )
-                                        }
-                                        onUpdate={
-                                            handleUpdate
-                                        }
-                                        onDelete={
-                                            handleDelete
-                                        }
-                                        onUrlNeeded={() =>
-                                            void getSignedUrls(
-                                                photo
-                                            )
-                                        }
-                                    />
-                                )
-                            )}
-                        </div>
-                    )}
+                {photos.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+                        {photos.map((photo,index) => (
+                            <PhotoCard
+                                key={photo.id}
+                                photo={photo}
+                                thumbnailUrl={signedUrls[photo.id]?.thumb}
+                                isLoadingUrl={loadingUrls[photo.id]}
+                                isActionLoading={actionLoading[photo.id]}
+                                onOpen={() => void openModal(photo)}
+                                onUpdate={handleUpdate}
+                                onDelete={handleDelete}
+                                onUrlNeeded={getSignedUrls}
+                                eager={
+                                    index === 0
+                                }
+                            />
+                        ))}
+                    </div>
+                )}
 
                 {/* Load more */}
-                {photos.length <
-                    total && (
-                        <div className="mt-12 flex justify-center">
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    void handleLoadMore()
-                                }
-                                disabled={
-                                    loadingMore
-                                }
-                                className="btn-secondary min-w-[180px] justify-center"
-                            >
-                                {loadingMore ? (
-                                    <>
-                                        <Loader2 className="h-4 w-4 animate-spin" />
+                {photos.length < total && (
+                    <div className="mt-12 flex justify-center">
+                        <button
+                            type="button"
+                            onClick={() => void handleLoadMore()}
+                            disabled={loadingMore}
+                            className="btn-secondary min-w-[180px] justify-center"
+                        >
+                            {loadingMore ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
 
-                                        {tc(
-                                            'loading'
-                                        )}
-                                    </>
-                                ) : (
-                                    t(
-                                        'loadMore'
-                                    )
-                                )}
-                            </button>
-                        </div>
-                    )}
+                                    {tc("loading")}
+                                </>
+                            ) : (
+                                t("loadMore")
+                            )}
+                        </button>
+                    </div>
+                )}
             </main>
 
             {/* =====================================
@@ -1587,54 +927,18 @@ export function AdminDashboard({
             ===================================== */}
             {selectedPhoto && (
                 <PhotoModal
-                    photo={
-                        selectedPhoto
-                    }
-                    urls={
-                        signedUrls[
-                            selectedPhoto
-                                .id
-                            ]
-                    }
-                    isLoadingUrl={
-                        loadingUrls[
-                            selectedPhoto
-                                .id
-                            ]
-                    }
-                    isActionLoading={
-                        actionLoading[
-                            selectedPhoto
-                                .id
-                            ]
-                    }
-                    hasPrev={
-                        modalIndex >
-                        0
-                    }
-                    hasNext={
-                        modalIndex <
-                        photos.length -
-                        1
-                    }
-                    onClose={
-                        closeModal
-                    }
-                    onPrev={() =>
-                        void goPrev()
-                    }
-                    onNext={() =>
-                        void goNext()
-                    }
-                    onUpdate={
-                        handleUpdate
-                    }
-                    onDelete={
-                        handleDelete
-                    }
-                    onDownload={
-                        handleDownload
-                    }
+                    photo={selectedPhoto}
+                    urls={signedUrls[selectedPhoto.id]}
+                    isLoadingUrl={loadingUrls[selectedPhoto.id]}
+                    isActionLoading={actionLoading[selectedPhoto.id]}
+                    hasPrev={modalIndex > 0}
+                    hasNext={modalIndex < photos.length - 1}
+                    onClose={closeModal}
+                    onPrev={() => void goPrev()}
+                    onNext={() => void goNext()}
+                    onUpdate={handleUpdate}
+                    onDelete={handleDelete}
+                    onDownload={handleDownload}
                 />
             )}
 
@@ -1643,141 +947,62 @@ export function AdminDashboard({
             ===================================== */}
             {shareOpen && (
                 <ShareGalleryModal
-                    shareUrl={
-                        shareUrl
-                    }
-                    setShareUrl={
-                        setShareUrl
-                    }
-                    onClose={
-                        closeShareModal
-                    }
-                    galleryTokens={
-                        galleryTokens
-                    }
-                    loadingTokens={
-                        loadingTokens
-                    }
-                    showCreateForm={
-                        showCreateForm
-                    }
-                    setShowCreateForm={
-                        setShowCreateForm
-                    }
-                    galleryLabel={
-                        galleryLabel
-                    }
-                    setGalleryLabel={
-                        setGalleryLabel
-                    }
-                    photoFilter={
-                        photoFilter
-                    }
-                    setPhotoFilter={
-                        setPhotoFilter
-                    }
-                    showMessages={
-                        showMessages
-                    }
-                    setShowMessages={
-                        setShowMessages
-                    }
-                    expiresInDays={
-                        expiresInDays
-                    }
-                    setExpiresInDays={
-                        setExpiresInDays
-                    }
-                    shareLoading={
-                        shareLoading
-                    }
-                    copied={
-                        copied
-                    }
-                    onCopy={() =>
-                        void handleCopy()
-                    }
-                    onCreate={() =>
-                        void handleCreateGalleryLink()
-                    }
-                    onDeleteToken={(
-                        id
-                    ) =>
-                        void handleDeleteToken(
-                            id
-                        )
-                    }
+                    shareUrl={shareUrl}
+                    setShareUrl={setShareUrl}
+                    onClose={closeShareModal}
+                    galleryTokens={galleryTokens}
+                    loadingTokens={loadingTokens}
+                    showCreateForm={showCreateForm}
+                    setShowCreateForm={setShowCreateForm}
+                    galleryLabel={galleryLabel}
+                    setGalleryLabel={setGalleryLabel}
+                    photoFilter={photoFilter}
+                    setPhotoFilter={setPhotoFilter}
+                    showMessages={showMessages}
+                    setShowMessages={setShowMessages}
+                    expiresInDays={expiresInDays}
+                    setExpiresInDays={setExpiresInDays}
+                    shareLoading={shareLoading}
+                    copied={copied}
+                    onCopy={() => void handleCopy()}
+                    onCreate={() => void handleCreateGalleryLink()}
+                    onDeleteToken={(id) => void handleDeleteToken(id)}
                 />
             )}
             <ConfirmationModal
-                open={
-                    photoToDelete !==
-                    null
-                }
-                onOpenChange={(
-                    open
-                ) => {
+                open={photoToDelete !== null}
+                onOpenChange={(open) => {
                     if (!open) {
-                        setPhotoToDelete(
-                            null
-                        )
+                        setPhotoToDelete(null);
                     }
                 }}
                 variant="destructive"
-                title={t(
-                    'confirmations.deletePhoto.title'
-                )}
-                description={t(
-                    'confirmations.deletePhoto.description'
-                )}
-                confirmLabel={t(
-                    'confirmations.deletePhoto.confirm'
-                )}
-                cancelLabel={tc(
-                    'cancel'
-                )}
-                onConfirm={
-                    confirmDeletePhoto
-                }
+                title={t("confirmations.deletePhoto.title")}
+                description={t("confirmations.deletePhoto.description")}
+                confirmLabel={t("confirmations.deletePhoto.confirm")}
+                cancelLabel={tc("cancel")}
+                onConfirm={confirmDeletePhoto}
             />
 
             {/* =====================================
     DELETE GALLERY LINK CONFIRMATION
 ===================================== */}
             <ConfirmationModal
-                open={
-                    galleryTokenToDelete !==
-                    null
-                }
-                onOpenChange={(
-                    open
-                ) => {
+                open={galleryTokenToDelete !== null}
+                onOpenChange={(open) => {
                     if (!open) {
-                        setGalleryTokenToDelete(
-                            null
-                        )
+                        setGalleryTokenToDelete(null);
                     }
                 }}
                 variant="destructive"
-                title={t(
-                    'confirmations.deleteGalleryLink.title'
-                )}
-                description={t(
-                    'confirmations.deleteGalleryLink.description'
-                )}
-                confirmLabel={t(
-                    'confirmations.deleteGalleryLink.confirm'
-                )}
-                cancelLabel={tc(
-                    'cancel'
-                )}
-                onConfirm={
-                    confirmDeleteToken
-                }
+                title={t("confirmations.deleteGalleryLink.title")}
+                description={t("confirmations.deleteGalleryLink.description")}
+                confirmLabel={t("confirmations.deleteGalleryLink.confirm")}
+                cancelLabel={tc("cancel")}
+                onConfirm={confirmDeleteToken}
             />
-
         </div>
-    )
+    );
 }
 
 /*
@@ -1790,79 +1015,36 @@ function ZipMenu({
                      onDownload,
                      compact = false,
                  }: {
-    zipLoading:
-        | 'all'
-        | 'favourites'
-        | null
-    onDownload: (
-        filter:
-            | 'all'
-            | 'favourites'
-    ) => Promise<void>
-    compact?: boolean
+    zipLoading: "all" | "favourites" | null;
+    onDownload: (filter: "all" | "favourites") => Promise<void>;
+    compact?: boolean;
 }) {
-    const t =
-        useTranslations(
-            'dashboard.photos'
-        )
+    const t = useTranslations("dashboard.photos");
 
-    const [
-        open,
-        setOpen,
-    ] =
-        useState(false)
+    const [open, setOpen] = useState(false);
 
     return (
         <div className="relative">
             <button
                 type="button"
-                disabled={
-                    zipLoading !==
-                    null
-                }
-                onClick={() =>
-                    setOpen(
-                        (
-                            current
-                        ) =>
-                            !current
-                    )
-                }
-                aria-label={t(
-                    'downloadZip'
-                )}
+                disabled={zipLoading !== null}
+                onClick={() => setOpen((current) => !current)}
+                aria-label={t("downloadZip")}
                 className={cn(
                     compact
-                        ? 'flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-50 sm:px-4'
-                        : 'btn-secondary justify-center disabled:opacity-50'
+                        ? "flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-50 sm:px-4"
+                        : "btn-secondary justify-center disabled:opacity-50"
                 )}
             >
                 {zipLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                    <ArchiveIcon
-                        className="h-4 w-4"
-                        strokeWidth={
-                            1.6
-                        }
-                    />
+                    <ArchiveIcon className="h-4 w-4" strokeWidth={1.6} />
                 )}
 
-                <span
-                    className={cn(
-                        compact
-                            ? 'hidden lg:inline'
-                            : 'hidden sm:inline'
-                    )}
-                >
-                    {zipLoading
-                        ? t(
-                            'preparingZip'
-                        )
-                        : t(
-                            'downloadZip'
-                        )}
-                </span>
+                <span className={cn(compact ? "hidden lg:inline" : "hidden sm:inline")}>
+          {zipLoading ? t("preparingZip") : t("downloadZip")}
+        </span>
             </button>
 
             {open && (
@@ -1872,66 +1054,44 @@ function ZipMenu({
                         type="button"
                         aria-label="Close download menu"
                         className="fixed inset-0 z-20 cursor-default"
-                        onClick={() =>
-                            setOpen(
-                                false
-                            )
-                        }
+                        onClick={() => setOpen(false)}
                     />
 
                     <div className="absolute right-0 top-full z-30 mt-2 w-52 overflow-hidden rounded-2xl border border-border/70 bg-card p-1.5 shadow-xl">
                         <button
                             type="button"
                             onClick={() => {
-                                setOpen(
-                                    false
-                                )
+                                setOpen(false);
 
-                                void onDownload(
-                                    'all'
-                                )
+                                void onDownload("all");
                             }}
-                            disabled={
-                                zipLoading !==
-                                null
-                            }
+                            disabled={zipLoading !== null}
                             className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs text-foreground transition-colors hover:bg-secondary"
                         >
                             <Download className="h-3.5 w-3.5 text-muted-foreground" />
 
-                            {t(
-                                'allPhotos'
-                            )}
+                            {t("allPhotos")}
                         </button>
 
                         <button
                             type="button"
                             onClick={() => {
-                                setOpen(
-                                    false
-                                )
+                                setOpen(false);
 
-                                void onDownload(
-                                    'favourites'
-                                )
+                                void onDownload("favourites");
                             }}
-                            disabled={
-                                zipLoading !==
-                                null
-                            }
+                            disabled={zipLoading !== null}
                             className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs text-foreground transition-colors hover:bg-secondary"
                         >
                             <Heart className="h-3.5 w-3.5 text-muted-foreground" />
 
-                            {t(
-                                'onlyFavourites'
-                            )}
+                            {t("onlyFavourites")}
                         </button>
                     </div>
                 </>
             )}
         </div>
-    )
+    );
 }
 
 /*
@@ -1948,120 +1108,90 @@ function PhotoCard({
                        onUpdate,
                        onDelete,
                        onUrlNeeded,
+    eager = false,
                    }: {
-    photo: Photo
-    thumbnailUrl?: string
-    isLoadingUrl?: boolean
-    isActionLoading?: boolean
-    onOpen: () => void
-    onUpdate: (
-        id: string,
-        update: PhotoUpdate
-    ) => void
-    onDelete: (
-        id: string
-    ) => void
-    onUrlNeeded: () => void
+    photo: Photo;
+    thumbnailUrl?: string;
+    isLoadingUrl?: boolean;
+    isActionLoading?: boolean;
+    onOpen: () => void;
+    onUpdate: (id: string, update: PhotoUpdate) => void;
+    onDelete: (id: string) => void;
+    onUrlNeeded: (photo: Photo) => void;
+    eager?: boolean
 }) {
-    const cardRef =
-        useRef<HTMLDivElement>(
-            null
-        )
+    const cardRef = useRef<HTMLDivElement>(null);
 
-    /*
-     * Load signed URLs as cards
-     * approach the viewport.
-     *
-     * Important for mobile where
-     * hover does not exist.
-     */
     useEffect(() => {
-        const element =
-            cardRef.current
+        const element = cardRef.current;
 
-        if (
-            !element ||
-            thumbnailUrl
-        ) {
-            return
+        if (!element || thumbnailUrl) {
+            return;
         }
 
-        if (
-            typeof IntersectionObserver ===
-            'undefined'
-        ) {
-            onUrlNeeded()
-            return
+        const requestUrl = () => {
+            onUrlNeeded(photo);
+        };
+
+        if (typeof IntersectionObserver === "undefined") {
+            requestUrl();
+            return;
         }
 
-        const observer =
-            new IntersectionObserver(
-                (
-                    entries
-                ) => {
-                    if (
-                        entries[0]
-                            ?.isIntersecting
-                    ) {
-                        onUrlNeeded()
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0]?.isIntersecting) {
+                    requestUrl();
 
-                        observer.disconnect()
-                    }
-                },
-                {
-                    rootMargin:
-                        '300px',
+                    observer.disconnect();
                 }
-            )
+            },
+            {
+                rootMargin: "300px",
+            }
+        );
 
-        observer.observe(
-            element
-        )
+        observer.observe(element);
 
-        return () =>
-            observer.disconnect()
-    }, [
-        thumbnailUrl,
-        onUrlNeeded,
-    ])
+        return () => {
+            observer.disconnect();
+        };
+    }, [photo, thumbnailUrl, onUrlNeeded]);
 
     return (
         <div
-            ref={
-                cardRef
-            }
+            ref={cardRef}
             className={cn(
-                'group relative aspect-[4/5] overflow-hidden rounded-[1.4rem] bg-muted',
-                photo.hidden &&
-                'opacity-50'
+                "group relative aspect-[4/5] overflow-hidden rounded-[1.4rem] bg-muted",
+                photo.hidden && "opacity-50"
             )}
-            onMouseEnter={
-                onUrlNeeded
-            }
+            onMouseEnter={() => {
+                onUrlNeeded(photo);
+            }}
         >
             {/* Photo */}
             {thumbnailUrl ? (
                 <Image
-                    src={
-                        thumbnailUrl
-                    }
-                    alt={
-                        photo.guest_name ??
-                        'Wedding photo'
-                    }
+                    src={thumbnailUrl}
+                    alt={photo.guest_name ?? "Wedding photo"}
                     fill
+                    loading={
+                        eager
+                            ? 'eager'
+                            : 'lazy'
+                    }
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
                     className="cursor-pointer object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
-                    onClick={
-                        onOpen
-                    }
+                    onClick={onOpen}
                 />
             ) : (
                 <button
                     type="button"
                     aria-label="Load photo"
-                    onClick={
-                        onUrlNeeded
+                    onClick={() =>
+                        onUrlNeeded(
+                            photo
+                        )
                     }
                     className="absolute inset-0 w-full bg-muted"
                 >
@@ -2078,9 +1208,7 @@ function PhotoCard({
                 <button
                     type="button"
                     aria-label="Open photo"
-                    onClick={
-                        onOpen
-                    }
+                    onClick={onOpen}
                     className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 opacity-0 transition-opacity duration-300 sm:group-hover:opacity-100"
                 />
             )}
@@ -2109,52 +1237,30 @@ function PhotoCard({
             {/* Quick actions */}
             <div className="absolute right-3 top-3 flex gap-1.5 opacity-100 transition-all duration-200 sm:-translate-y-1 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
                 <QuickActionBtn
-                    onClick={(
-                        event
-                    ) => {
-                        event.stopPropagation()
+                    onClick={(event) => {
+                        event.stopPropagation();
 
-                        onUpdate(
-                            photo.id,
-                            {
-                                favourite:
-                                    !photo.favourite,
-                            }
-                        )
+                        onUpdate(photo.id, {
+                            favourite: !photo.favourite,
+                        });
                     }}
-                    loading={
-                        isActionLoading
-                    }
-                    active={
-                        photo.favourite
-                    }
+                    loading={isActionLoading}
+                    active={photo.favourite}
                 >
                     <Heart
-                        className={cn(
-                            'h-3.5 w-3.5',
-                            photo.favourite &&
-                            'fill-current'
-                        )}
+                        className={cn("h-3.5 w-3.5", photo.favourite && "fill-current")}
                     />
                 </QuickActionBtn>
 
                 <QuickActionBtn
-                    onClick={(
-                        event
-                    ) => {
-                        event.stopPropagation()
+                    onClick={(event) => {
+                        event.stopPropagation();
 
-                        onUpdate(
-                            photo.id,
-                            {
-                                hidden:
-                                    !photo.hidden,
-                            }
-                        )
+                        onUpdate(photo.id, {
+                            hidden: !photo.hidden,
+                        });
                     }}
-                    loading={
-                        isActionLoading
-                    }
+                    loading={isActionLoading}
                 >
                     {photo.hidden ? (
                         <Eye className="h-3.5 w-3.5" />
@@ -2164,18 +1270,12 @@ function PhotoCard({
                 </QuickActionBtn>
 
                 <QuickActionBtn
-                    onClick={(
-                        event
-                    ) => {
-                        event.stopPropagation()
+                    onClick={(event) => {
+                        event.stopPropagation();
 
-                        onDelete(
-                            photo.id
-                        )
+                        onDelete(photo.id);
                     }}
-                    loading={
-                        isActionLoading
-                    }
+                    loading={isActionLoading}
                     danger
                 >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -2186,14 +1286,12 @@ function PhotoCard({
             {photo.guest_name && (
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 px-4 pb-4 opacity-100 transition-all duration-300 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
                     <p className="truncate text-left text-xs font-medium text-white drop-shadow">
-                        {
-                            photo.guest_name
-                        }
+                        {photo.guest_name}
                     </p>
                 </div>
             )}
         </div>
-    )
+    );
 }
 
 /*
@@ -2208,41 +1306,27 @@ function QuickActionBtn({
                             active,
                             danger,
                         }: {
-    children: ReactNode
-    onClick: (
-        event: MouseEvent<HTMLButtonElement>
-    ) => void
-    loading?: boolean
-    active?: boolean
-    danger?: boolean
+    children: ReactNode;
+    onClick: (event: MouseEvent<HTMLButtonElement>) => void;
+    loading?: boolean;
+    active?: boolean;
+    danger?: boolean;
 }) {
     return (
         <button
             type="button"
-            onClick={
-                onClick
-            }
-            disabled={
-                loading
-            }
+            onClick={onClick}
+            disabled={loading}
             className={cn(
-                'flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white backdrop-blur-md transition-colors disabled:opacity-50',
-                active &&
-                'bg-white text-black hover:bg-white/90',
-                !active &&
-                !danger &&
-                'hover:bg-white/20',
-                danger &&
-                'hover:bg-destructive/80 hover:text-white'
+                "flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white backdrop-blur-md transition-colors disabled:opacity-50",
+                active && "bg-white text-black hover:bg-white/90",
+                !active && !danger && "hover:bg-white/20",
+                danger && "hover:bg-destructive/80 hover:text-white"
             )}
         >
-            {loading ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-                children
-            )}
+            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : children}
         </button>
-    )
+    );
 }
 
 /*
@@ -2264,113 +1348,66 @@ function PhotoModal({
                         onDelete,
                         onDownload,
                     }: {
-    photo: Photo
+    photo: Photo;
     urls?: {
-        thumb: string
-        original: string
-    }
-    isLoadingUrl?: boolean
-    isActionLoading?: boolean
-    hasPrev: boolean
-    hasNext: boolean
-    onClose: () => void
-    onPrev: () => void
-    onNext: () => void
-    onUpdate: (
-        id: string,
-        update: PhotoUpdate
-    ) => void
-    onDelete: (
-        id: string
-    ) => void
-    onDownload: (
-        photo: Photo
-    ) => void
+        thumb: string;
+        original: string;
+    };
+    isLoadingUrl?: boolean;
+    isActionLoading?: boolean;
+    hasPrev: boolean;
+    hasNext: boolean;
+    onClose: () => void;
+    onPrev: () => void;
+    onNext: () => void;
+    onUpdate: (id: string, update: PhotoUpdate) => void;
+    onDelete: (id: string) => void;
+    onDownload: (photo: Photo) => void;
 }) {
-    const t =
-        useTranslations(
-            'dashboard.photos'
-        )
+    const t = useTranslations("dashboard.photos");
 
-    const locale =
-        useLocale()
+    const locale = useLocale();
 
     /*
      * Keyboard navigation
      */
     useEffect(() => {
-        const handleKeyDown =
-            (
-                event: KeyboardEvent
-            ) => {
-                if (
-                    event.key ===
-                    'Escape'
-                ) {
-                    onClose()
-                }
-
-                if (
-                    event.key ===
-                    'ArrowLeft' &&
-                    hasPrev
-                ) {
-                    onPrev()
-                }
-
-                if (
-                    event.key ===
-                    'ArrowRight' &&
-                    hasNext
-                ) {
-                    onNext()
-                }
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                onClose();
             }
 
-        window.addEventListener(
-            'keydown',
-            handleKeyDown
-        )
+            if (event.key === "ArrowLeft" && hasPrev) {
+                onPrev();
+            }
 
-        const previousOverflow =
-            document.body.style
-                .overflow
+            if (event.key === "ArrowRight" && hasNext) {
+                onNext();
+            }
+        };
 
-        document.body.style.overflow =
-            'hidden'
+        window.addEventListener("keydown", handleKeyDown);
+
+        const previousOverflow = document.body.style.overflow;
+
+        document.body.style.overflow = "hidden";
 
         return () => {
-            window.removeEventListener(
-                'keydown',
-                handleKeyDown
-            )
+            window.removeEventListener("keydown", handleKeyDown);
 
-            document.body.style.overflow =
-                previousOverflow
-        }
-    }, [
-        hasPrev,
-        hasNext,
-        onClose,
-        onPrev,
-        onNext,
-    ])
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [hasPrev, hasNext, onClose, onPrev, onNext]);
 
     return (
         <div
             className="fixed inset-0 z-50 flex bg-[#090909] text-white"
-            onClick={
-                onClose
-            }
+            onClick={onClose}
         >
             {/* Main viewer */}
             <div
                 className="relative min-w-0 flex-1"
-                onClick={(
-                    event
-                ) =>
-                    event.stopPropagation()
-                }
+                onClick={(event) => event.stopPropagation()}
             >
                 {/* Ambient */}
                 {urls?.original && (
@@ -2379,9 +1416,7 @@ function PhotoModal({
                         className="pointer-events-none absolute inset-0 opacity-20"
                     >
                         <Image
-                            src={
-                                urls.original
-                            }
+                            src={urls.original}
                             alt=""
                             fill
                             sizes="100vw"
@@ -2396,9 +1431,7 @@ function PhotoModal({
                 <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between p-4 sm:p-6">
                     <button
                         type="button"
-                        onClick={
-                            onClose
-                        }
+                        onClick={onClose}
                         aria-label="Close"
                         className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/25 text-white backdrop-blur-md transition-colors hover:bg-white/15 lg:hidden"
                     >
@@ -2407,14 +1440,8 @@ function PhotoModal({
 
                     <button
                         type="button"
-                        onClick={() =>
-                            onDownload(
-                                photo
-                            )
-                        }
-                        aria-label={t(
-                            'download'
-                        )}
+                        onClick={() => onDownload(photo)}
+                        aria-label={t("download")}
                         className="ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/25 text-white backdrop-blur-md transition-colors hover:bg-white/15"
                     >
                         <Download className="h-4 w-4" />
@@ -2425,16 +1452,9 @@ function PhotoModal({
                 <div className="relative flex h-full min-h-screen items-center justify-center px-3 pb-[310px] pt-16 lg:min-h-0 lg:pb-3 lg:pr-3 lg:pt-3">
                     {urls?.original ? (
                         <Image
-                            key={
-                                photo.id
-                            }
-                            src={
-                                urls.original
-                            }
-                            alt={
-                                photo.guest_name ??
-                                'Wedding photo'
-                            }
+                            key={photo.id}
+                            src={urls.original}
+                            alt={photo.guest_name ?? "Wedding photo"}
                             fill
                             priority
                             sizes="(max-width: 1024px) 100vw, 75vw"
@@ -2449,9 +1469,7 @@ function PhotoModal({
                     {hasPrev && (
                         <button
                             type="button"
-                            onClick={
-                                onPrev
-                            }
+                            onClick={onPrev}
                             aria-label="Previous photo"
                             className="absolute left-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/25 text-white backdrop-blur-md transition-colors hover:bg-white/15 sm:left-6"
                         >
@@ -2462,9 +1480,7 @@ function PhotoModal({
                     {hasNext && (
                         <button
                             type="button"
-                            onClick={
-                                onNext
-                            }
+                            onClick={onNext}
                             aria-label="Next photo"
                             className="absolute right-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/25 text-white backdrop-blur-md transition-colors hover:bg-white/15 lg:right-6"
                         >
@@ -2477,34 +1493,22 @@ function PhotoModal({
             {/* Details */}
             <aside
                 className="fixed inset-x-0 bottom-0 z-30 max-h-[48vh] overflow-y-auto rounded-t-[2rem] border-t border-border/70 bg-card p-6 text-foreground shadow-2xl lg:static lg:max-h-none lg:w-[340px] lg:shrink-0 lg:rounded-none lg:border-l lg:border-t-0 lg:p-7"
-                onClick={(
-                    event
-                ) =>
-                    event.stopPropagation()
-                }
+                onClick={(event) => event.stopPropagation()}
             >
                 <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
                         <h2 className="truncate font-serif text-2xl font-light tracking-tight">
-                            {photo.guest_name ??
-                                t(
-                                    'anonymousGuest'
-                                )}
+                            {photo.guest_name ?? t("anonymousGuest")}
                         </h2>
 
                         <p className="mt-1 text-xs text-muted-foreground">
-                            {formatDate(
-                                photo.created_at,
-                                locale
-                            )}
+                            {formatDate(photo.created_at, locale)}
                         </p>
                     </div>
 
                     <button
                         type="button"
-                        onClick={
-                            onClose
-                        }
+                        onClick={onClose}
                         aria-label="Close"
                         className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:flex"
                     >
@@ -2516,48 +1520,32 @@ function PhotoModal({
                 {photo.message && (
                     <div className="mt-6 rounded-2xl border border-border/60 bg-secondary/35 p-4">
                         <p className="text-sm leading-6 text-foreground/80">
-                            {
-                                photo.message
-                            }
+                            {photo.message}
                         </p>
                     </div>
                 )}
 
                 {/* Status */}
-                {(photo.favourite ||
-                    photo.hidden ||
-                    !photo.approved) && (
+                {(photo.favourite || photo.hidden || !photo.approved) && (
                     <div className="mt-5 flex flex-wrap gap-2">
                         {photo.favourite && (
                             <StatusBadge
-                                icon={
-                                    <Heart className="h-3 w-3 fill-current" />
-                                }
-                                label={t(
-                                    'favourites'
-                                )}
+                                icon={<Heart className="h-3 w-3 fill-current" />}
+                                label={t("favourites")}
                             />
                         )}
 
                         {photo.hidden && (
                             <StatusBadge
-                                icon={
-                                    <EyeOff className="h-3 w-3" />
-                                }
-                                label={t(
-                                    'hidden'
-                                )}
+                                icon={<EyeOff className="h-3 w-3" />}
+                                label={t("hidden")}
                             />
                         )}
 
                         {!photo.approved && (
                             <StatusBadge
-                                icon={
-                                    <XCircle className="h-3 w-3" />
-                                }
-                                label={t(
-                                    'unapproved'
-                                )}
+                                icon={<XCircle className="h-3 w-3" />}
+                                label={t("unapproved")}
                             />
                         )}
                     </div>
@@ -2569,56 +1557,28 @@ function PhotoModal({
                 <div className="space-y-1">
                     <ActionButton
                         onClick={() =>
-                            onUpdate(
-                                photo.id,
-                                {
-                                    favourite:
-                                        !photo.favourite,
-                                }
-                            )
+                            onUpdate(photo.id, {
+                                favourite: !photo.favourite,
+                            })
                         }
-                        loading={
-                            isActionLoading
-                        }
-                        active={
-                            photo.favourite
-                        }
+                        loading={isActionLoading}
+                        active={photo.favourite}
                         icon={
                             <Heart
-                                className={cn(
-                                    'h-4 w-4',
-                                    photo.favourite &&
-                                    'fill-current'
-                                )}
+                                className={cn("h-4 w-4", photo.favourite && "fill-current")}
                             />
                         }
-                        label={
-                            photo.favourite
-                                ? t(
-                                    'unfavourite'
-                                )
-                                : t(
-                                    'favourite'
-                                )
-                        }
+                        label={photo.favourite ? t("unfavourite") : t("favourite")}
                     />
 
                     <ActionButton
                         onClick={() =>
-                            onUpdate(
-                                photo.id,
-                                {
-                                    hidden:
-                                        !photo.hidden,
-                                }
-                            )
+                            onUpdate(photo.id, {
+                                hidden: !photo.hidden,
+                            })
                         }
-                        loading={
-                            isActionLoading
-                        }
-                        active={
-                            photo.hidden
-                        }
+                        loading={isActionLoading}
+                        active={photo.hidden}
                         icon={
                             photo.hidden ? (
                                 <Eye className="h-4 w-4" />
@@ -2626,33 +1586,17 @@ function PhotoModal({
                                 <EyeOff className="h-4 w-4" />
                             )
                         }
-                        label={
-                            photo.hidden
-                                ? t(
-                                    'show'
-                                )
-                                : t(
-                                    'hide'
-                                )
-                        }
+                        label={photo.hidden ? t("show") : t("hide")}
                     />
 
                     <ActionButton
                         onClick={() =>
-                            onUpdate(
-                                photo.id,
-                                {
-                                    approved:
-                                        !photo.approved,
-                                }
-                            )
+                            onUpdate(photo.id, {
+                                approved: !photo.approved,
+                            })
                         }
-                        loading={
-                            isActionLoading
-                        }
-                        active={
-                            !photo.approved
-                        }
+                        loading={isActionLoading}
+                        active={!photo.approved}
                         icon={
                             photo.approved ? (
                                 <XCircle className="h-4 w-4" />
@@ -2660,46 +1604,20 @@ function PhotoModal({
                                 <CheckCircle className="h-4 w-4" />
                             )
                         }
-                        label={
-                            photo.approved
-                                ? t(
-                                    'unapprove'
-                                )
-                                : t(
-                                    'approve'
-                                )
-                        }
+                        label={photo.approved ? t("unapprove") : t("approve")}
                     />
 
                     <ActionButton
-                        onClick={() =>
-                            onDownload(
-                                photo
-                            )
-                        }
-                        icon={
-                            <Download className="h-4 w-4" />
-                        }
-                        label={t(
-                            'download'
-                        )}
+                        onClick={() => onDownload(photo)}
+                        icon={<Download className="h-4 w-4" />}
+                        label={t("download")}
                     />
 
                     <ActionButton
-                        onClick={() =>
-                            onDelete(
-                                photo.id
-                            )
-                        }
-                        loading={
-                            isActionLoading
-                        }
-                        icon={
-                            <Trash2 className="h-4 w-4" />
-                        }
-                        label={t(
-                            'deletePermanently'
-                        )}
+                        onClick={() => onDelete(photo.id)}
+                        loading={isActionLoading}
+                        icon={<Trash2 className="h-4 w-4" />}
+                        label={t("deletePermanently")}
                         danger
                     />
                 </div>
@@ -2707,37 +1625,20 @@ function PhotoModal({
                 {/* Metadata */}
                 <div className="mt-6 border-t border-border/60 pt-5">
                     <div className="space-y-1 text-[10px] text-muted-foreground">
-                        {photo.width &&
-                            photo.height && (
-                                <p>
-                                    {
-                                        photo.width
-                                    }{' '}
-                                    ×{' '}
-                                    {
-                                        photo.height
-                                    }{' '}
-                                    px
-                                </p>
-                            )}
+                        {photo.width && photo.height && (
+                            <p>
+                                {photo.width} × {photo.height} px
+                            </p>
+                        )}
 
-                        {photo.file_size !=
-                            null && (
-                                <p>
-                                    {(
-                                        photo.file_size /
-                                        1024
-                                    ).toFixed(
-                                        0
-                                    )}{' '}
-                                    KB
-                                </p>
-                            )}
+                        {photo.file_size != null && (
+                            <p>{(photo.file_size / 1024).toFixed(0)} KB</p>
+                        )}
                     </div>
                 </div>
             </aside>
         </div>
-    )
+    );
 }
 
 /*
@@ -2745,20 +1646,14 @@ function PhotoModal({
  * STATUS BADGE
  * ============================================
  */
-function StatusBadge({
-                         icon,
-                         label,
-                     }: {
-    icon: ReactNode
-    label: string
-}) {
+function StatusBadge({ icon, label }: { icon: ReactNode; label: string }) {
     return (
         <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-[10px] font-medium text-muted-foreground">
-            {icon}
+      {icon}
 
             {label}
-        </span>
-    )
+    </span>
+    );
 }
 
 /*
@@ -2774,42 +1669,34 @@ function ActionButton({
                           danger,
                           active,
                       }: {
-    onClick: () => void
-    loading?: boolean
-    icon: ReactNode
-    label: string
-    danger?: boolean
-    active?: boolean
+    onClick: () => void;
+    loading?: boolean;
+    icon: ReactNode;
+    label: string;
+    danger?: boolean;
+    active?: boolean;
 }) {
     return (
         <button
             type="button"
-            onClick={
-                onClick
-            }
-            disabled={
-                loading
-            }
+            onClick={onClick}
+            disabled={loading}
             className={cn(
-                'flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium transition-colors disabled:opacity-50',
+                "flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium transition-colors disabled:opacity-50",
                 danger
-                    ? 'text-destructive hover:bg-destructive/[0.07]'
+                    ? "text-destructive hover:bg-destructive/[0.07]"
                     : active
-                        ? 'bg-secondary text-foreground'
-                        : 'text-foreground hover:bg-secondary'
+                        ? "bg-secondary text-foreground"
+                        : "text-foreground hover:bg-secondary"
             )}
         >
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center">
-                {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                    icon
-                )}
-            </span>
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center">
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : icon}
+      </span>
 
             {label}
         </button>
-    )
+    );
 }
 
 /*
@@ -2839,128 +1726,81 @@ function ShareGalleryModal({
                                onCreate,
                                onDeleteToken,
                            }: {
-    shareUrl: string | null
-    setShareUrl: (
-        value:
-            | string
-            | null
-    ) => void
-    onClose: () => void
-    galleryTokens: GalleryToken[]
-    loadingTokens: boolean
-    showCreateForm: boolean
-    setShowCreateForm: (
-        value: boolean
-    ) => void
-    galleryLabel: string
-    setGalleryLabel: (
-        value: string
-    ) => void
-    photoFilter: PhotoFilter
-    setPhotoFilter: (
-        value: PhotoFilter
-    ) => void
-    showMessages: boolean
-    setShowMessages: (
-        value: boolean
-    ) => void
-    expiresInDays: string
-    setExpiresInDays: (
-        value: string
-    ) => void
-    shareLoading: boolean
-    copied: boolean
-    onCopy: () => void
-    onCreate: () => void
-    onDeleteToken: (
-        id: string
-    ) => void
+    shareUrl: string | null;
+    setShareUrl: (value: string | null) => void;
+    onClose: () => void;
+    galleryTokens: GalleryToken[];
+    loadingTokens: boolean;
+    showCreateForm: boolean;
+    setShowCreateForm: (value: boolean) => void;
+    galleryLabel: string;
+    setGalleryLabel: (value: string) => void;
+    photoFilter: PhotoFilter;
+    setPhotoFilter: (value: PhotoFilter) => void;
+    showMessages: boolean;
+    setShowMessages: (value: boolean) => void;
+    expiresInDays: string;
+    setExpiresInDays: (value: string) => void;
+    shareLoading: boolean;
+    copied: boolean;
+    onCopy: () => void;
+    onCreate: () => void;
+    onDeleteToken: (id: string) => void;
 }) {
-    const t =
-        useTranslations(
-            'dashboard.photos'
-        )
+    const t = useTranslations("dashboard.photos");
 
     useEffect(() => {
-        const previousOverflow =
-            document.body.style
-                .overflow
+        const previousOverflow = document.body.style.overflow;
 
-        document.body.style.overflow =
-            'hidden'
+        document.body.style.overflow = "hidden";
 
-        const handleKeyDown =
-            (
-                event: KeyboardEvent
-            ) => {
-                if (
-                    event.key ===
-                    'Escape'
-                ) {
-                    onClose()
-                }
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                onClose();
             }
+        };
 
-        window.addEventListener(
-            'keydown',
-            handleKeyDown
-        )
+        window.addEventListener("keydown", handleKeyDown);
 
         return () => {
-            document.body.style.overflow =
-                previousOverflow
+            document.body.style.overflow = previousOverflow;
 
-            window.removeEventListener(
-                'keydown',
-                handleKeyDown
-            )
-        }
-    }, [onClose])
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [onClose]);
 
     const handleGalleryToken = (token: string) => {
-        const url = `${window.location.origin}/gallery/${token}`
+        const url = `${window.location.origin}/gallery/${token}`;
 
-        setShareUrl(url)
-    }
+        setShareUrl(url);
+    };
 
     return (
         <div
             className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 backdrop-blur-md sm:items-center sm:p-6"
-            onClick={
-                onClose
-            }
+            onClick={onClose}
         >
             <div
                 role="dialog"
                 aria-modal="true"
                 className="w-full max-w-md overflow-hidden rounded-t-[2rem] border border-border/70 bg-card shadow-2xl sm:rounded-[2rem]"
-                onClick={(
-                    event
-                ) =>
-                    event.stopPropagation()
-                }
+                onClick={(event) => event.stopPropagation()}
             >
                 {/* Header */}
                 <div className="flex items-start justify-between border-b border-border/60 px-6 py-6">
                     <div className="pr-6">
                         <h2 className="font-serif text-3xl font-light tracking-tight text-foreground">
-                            {t(
-                                'shareGallery'
-                            )}
+                            {t("shareGallery")}
                         </h2>
 
                         <p className="mt-2 max-w-xs text-xs leading-5 text-muted-foreground">
-                            {t(
-                                'shareGalleryDescription'
-                            )}
+                            {t("shareGalleryDescription")}
                         </p>
                     </div>
 
                     <button
                         type="button"
-                        onClick={
-                            onClose
-                        }
+                        onClick={onClose}
                         aria-label="Close"
                         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                     >
@@ -2978,111 +1818,75 @@ function ShareGalleryModal({
                                         <div className="flex justify-center py-12">
                                             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                                         </div>
-                                    ) : galleryTokens.length ===
-                                    0 ? (
+                                    ) : galleryTokens.length === 0 ? (
                                         <div className="py-8 text-center">
                                             <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-secondary">
                                                 <LinkIcon
                                                     className="h-4 w-4 text-muted-foreground"
-                                                    strokeWidth={
-                                                        1.5
-                                                    }
+                                                    strokeWidth={1.5}
                                                 />
                                             </div>
 
                                             <p className="text-sm text-muted-foreground">
-                                                {t(
-                                                    'noGalleryLinks'
-                                                )}
+                                                {t("noGalleryLinks")}
                                             </p>
                                         </div>
                                     ) : (
                                         <div className="space-y-2">
-                                            {galleryTokens.map(
-                                                (
-                                                    token
-                                                ) => (
-                                                    <div
-                                                        key={
-                                                            token.id
-                                                        }
-                                                        className="flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-background p-3.5"
-                                                    >
-                                                        <div className="min-w-0">
-                                                            <p className="truncate text-sm font-medium text-foreground">
-                                                                {token.label ??
-                                                                    'Wedding Gallery'}
-                                                            </p>
+                                            {galleryTokens.map((token) => (
+                                                <div
+                                                    key={token.id}
+                                                    className="flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-background p-3.5"
+                                                >
+                                                    <div className="min-w-0">
+                                                        <p className="truncate text-sm font-medium text-foreground">
+                                                            {token.label ?? "Wedding Gallery"}
+                                                        </p>
 
-                                                            <p className="mt-1 truncate text-[10px] text-muted-foreground">
-                                                                {token.expires_at
-                                                                    ? t(
-                                                                        'expires',
-                                                                        {
-                                                                            date: formatDate(
-                                                                                token.expires_at
-                                                                            ),
-                                                                        }
-                                                                    )
-                                                                    : t(
-                                                                        'neverExpires'
-                                                                    )}
+                                                        <p className="mt-1 truncate text-[10px] text-muted-foreground">
+                                                            {token.expires_at
+                                                                ? t("expires", {
+                                                                    date: formatDate(token.expires_at),
+                                                                })
+                                                                : t("neverExpires")}
 
-                                                                {token.photo_filter ===
-                                                                    'favourites' &&
-                                                                    ` · ${t(
-                                                                        'favouritesOnly'
-                                                                    )}`}
-                                                            </p>
-                                                        </div>
-
-                                                        <div className="flex shrink-0 gap-1">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    handleGalleryToken(token.token)
-                                                                }
-                                                                aria-label={t(
-                                                                    'copyLink'
-                                                                )}
-                                                                className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                                                            >
-                                                                <Copy className="h-3.5 w-3.5" />
-                                                            </button>
-
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    onDeleteToken(
-                                                                        token.id
-                                                                    )
-                                                                }
-                                                                aria-label="Delete"
-                                                                className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive"
-                                                            >
-                                                                <Trash2 className="h-3.5 w-3.5" />
-                                                            </button>
-                                                        </div>
+                                                            {token.photo_filter === "favourites" &&
+                                                                ` · ${t("favouritesOnly")}`}
+                                                        </p>
                                                     </div>
-                                                )
-                                            )}
+
+                                                    <div className="flex shrink-0 gap-1">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleGalleryToken(token.token)}
+                                                            aria-label={t("copyLink")}
+                                                            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                                                        >
+                                                            <Copy className="h-3.5 w-3.5" />
+                                                        </button>
+
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => onDeleteToken(token.id)}
+                                                            aria-label="Delete"
+                                                            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive"
+                                                        >
+                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
 
                                     <button
                                         type="button"
-                                        onClick={() =>
-                                            setShowCreateForm(
-                                                true
-                                            )
-                                        }
+                                        onClick={() => setShowCreateForm(true)}
                                         className="btn-primary w-full justify-center"
                                     >
                                         <LinkIcon className="h-4 w-4" />
 
-                                        {t(
-                                            'createNewGalleryLink'
-                                        )}
+                                        {t("createNewGalleryLink")}
                                     </button>
                                 </div>
                             ) : (
@@ -3092,98 +1896,59 @@ function ShareGalleryModal({
                                 <div className="space-y-5">
                                     {/* Name */}
                                     <div>
-                                        <label
-                                            htmlFor="gallery-label"
-                                            className="label-wedding"
-                                        >
-                                            {t(
-                                                'linkName'
-                                            )}
+                                        <label htmlFor="gallery-label" className="label-wedding">
+                                            {t("linkName")}
                                         </label>
 
                                         <input
                                             id="gallery-label"
                                             type="text"
-                                            value={
-                                                galleryLabel
-                                            }
-                                            onChange={(
-                                                event
-                                            ) =>
-                                                setGalleryLabel(
-                                                    event
-                                                        .target
-                                                        .value
-                                                )
-                                            }
-                                            placeholder={t(
-                                                'linkNamePlaceholder'
-                                            )}
+                                            value={galleryLabel}
+                                            onChange={(event) => setGalleryLabel(event.target.value)}
+                                            placeholder={t("linkNamePlaceholder")}
                                             className="input-wedding"
-                                            maxLength={
-                                                60
-                                            }
+                                            maxLength={60}
                                         />
                                     </div>
 
                                     {/* Photos */}
                                     <div>
-                                        <label className="label-wedding">
-                                            {t(
-                                                'whichPhotos'
-                                            )}
-                                        </label>
+                                        <label className="label-wedding">{t("whichPhotos")}</label>
 
                                         <div className="grid grid-cols-2 gap-2">
                                             <button
                                                 type="button"
-                                                onClick={() =>
-                                                    setPhotoFilter(
-                                                        'all'
-                                                    )
-                                                }
+                                                onClick={() => setPhotoFilter("all")}
                                                 className={cn(
-                                                    'flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-xs font-medium transition-all',
-                                                    photoFilter ===
-                                                    'all'
-                                                        ? 'border-foreground bg-foreground text-background'
-                                                        : 'border-border/70 bg-background text-muted-foreground hover:text-foreground'
+                                                    "flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-xs font-medium transition-all",
+                                                    photoFilter === "all"
+                                                        ? "border-foreground bg-foreground text-background"
+                                                        : "border-border/70 bg-background text-muted-foreground hover:text-foreground"
                                                 )}
                                             >
                                                 <Images className="h-4 w-4" />
 
-                                                {t(
-                                                    'allPhotos'
-                                                )}
+                                                {t("allPhotos")}
                                             </button>
 
                                             <button
                                                 type="button"
-                                                onClick={() =>
-                                                    setPhotoFilter(
-                                                        'favourites'
-                                                    )
-                                                }
+                                                onClick={() => setPhotoFilter("favourites")}
                                                 className={cn(
-                                                    'flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-xs font-medium transition-all',
-                                                    photoFilter ===
-                                                    'favourites'
-                                                        ? 'border-foreground bg-foreground text-background'
-                                                        : 'border-border/70 bg-background text-muted-foreground hover:text-foreground'
+                                                    "flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-xs font-medium transition-all",
+                                                    photoFilter === "favourites"
+                                                        ? "border-foreground bg-foreground text-background"
+                                                        : "border-border/70 bg-background text-muted-foreground hover:text-foreground"
                                                 )}
                                             >
                                                 <Heart className="h-4 w-4" />
 
-                                                {t(
-                                                    'onlyFavourites'
-                                                )}
+                                                {t("onlyFavourites")}
                                             </button>
                                         </div>
 
                                         <p className="mt-2 text-[10px] leading-4 text-muted-foreground">
-                                            {t(
-                                                'filterNote'
-                                            )}
+                                            {t("filterNote")}
                                         </p>
                                     </div>
 
@@ -3191,31 +1956,19 @@ function ShareGalleryModal({
                                     <label className="flex cursor-pointer items-start justify-between gap-4 rounded-2xl border border-border/60 bg-secondary/30 p-4">
                                         <div>
                                             <p className="text-sm font-medium text-foreground">
-                                                {t(
-                                                    'showMessagesTitle'
-                                                )}
+                                                {t("showMessagesTitle")}
                                             </p>
 
                                             <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                                                {t(
-                                                    'showMessagesDescription'
-                                                )}
+                                                {t("showMessagesDescription")}
                                             </p>
                                         </div>
 
                                         <input
                                             type="checkbox"
-                                            checked={
-                                                showMessages
-                                            }
-                                            onChange={(
-                                                event
-                                            ) =>
-                                                setShowMessages(
-                                                    event
-                                                        .target
-                                                        .checked
-                                                )
+                                            checked={showMessages}
+                                            onChange={(event) =>
+                                                setShowMessages(event.target.checked)
                                             }
                                             className="mt-1 h-4 w-4 shrink-0 accent-[hsl(var(--primary))]"
                                         />
@@ -3227,100 +1980,54 @@ function ShareGalleryModal({
                                             htmlFor="gallery-expiration"
                                             className="label-wedding"
                                         >
-                                            {t(
-                                                'linkExpiresAfter'
-                                            )}
+                                            {t("linkExpiresAfter")}
                                         </label>
 
                                         <select
                                             id="gallery-expiration"
-                                            value={
-                                                expiresInDays
-                                            }
-                                            onChange={(
-                                                event
-                                            ) =>
-                                                setExpiresInDays(
-                                                    event
-                                                        .target
-                                                        .value
-                                                )
-                                            }
+                                            value={expiresInDays}
+                                            onChange={(event) => setExpiresInDays(event.target.value)}
                                             className="input-wedding"
                                         >
-                                            <option value="">
-                                                {t(
-                                                    'never'
-                                                )}
-                                            </option>
+                                            <option value="">{t("never")}</option>
 
-                                            <option value="7">
-                                                {t(
-                                                    'days7'
-                                                )}
-                                            </option>
+                                            <option value="7">{t("days7")}</option>
 
-                                            <option value="30">
-                                                {t(
-                                                    'days30'
-                                                )}
-                                            </option>
+                                            <option value="30">{t("days30")}</option>
 
-                                            <option value="90">
-                                                {t(
-                                                    'days90'
-                                                )}
-                                            </option>
+                                            <option value="90">{t("days90")}</option>
 
-                                            <option value="365">
-                                                {t(
-                                                    'year1'
-                                                )}
-                                            </option>
+                                            <option value="365">{t("year1")}</option>
                                         </select>
                                     </div>
 
                                     <button
                                         type="button"
-                                        onClick={
-                                            onCreate
-                                        }
-                                        disabled={
-                                            shareLoading
-                                        }
+                                        onClick={onCreate}
+                                        disabled={shareLoading}
                                         className="btn-primary w-full justify-center"
                                     >
                                         {shareLoading ? (
                                             <>
                                                 <Loader2 className="h-4 w-4 animate-spin" />
 
-                                                {t(
-                                                    'creatingLink'
-                                                )}
+                                                {t("creatingLink")}
                                             </>
                                         ) : (
                                             <>
                                                 <LinkIcon className="h-4 w-4" />
 
-                                                {t(
-                                                    'createLink'
-                                                )}
+                                                {t("createLink")}
                                             </>
                                         )}
                                     </button>
 
                                     <button
                                         type="button"
-                                        onClick={() =>
-                                            setShowCreateForm(
-                                                false
-                                            )
-                                        }
+                                        onClick={() => setShowCreateForm(false)}
                                         className="w-full text-center text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
                                     >
-                                        {t(
-                                            'backToGalleryList'
-                                        )}
+                                        {t("backToGalleryList")}
                                     </button>
                                 </div>
                             )}
@@ -3332,53 +2039,40 @@ function ShareGalleryModal({
                         <div className="space-y-5">
                             <div className="rounded-2xl border border-border/60 bg-secondary/30 p-4">
                                 <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                                    {t(
-                                        'galleryLink'
-                                    )}
+                                    {t("galleryLink")}
                                 </p>
 
                                 <p className="mt-2 break-all font-mono text-xs leading-5 text-foreground">
-                                    {
-                                        shareUrl
-                                    }
+                                    {shareUrl}
                                 </p>
                             </div>
 
                             <div className="flex gap-2">
                                 <button
                                     type="button"
-                                    onClick={
-                                        onCopy
-                                    }
+                                    onClick={onCopy}
                                     className={cn(
-                                        'btn-primary flex-1 justify-center',
-                                        copied &&
-                                        'bg-foreground text-background hover:opacity-90'
+                                        "btn-primary flex-1 justify-center",
+                                        copied && "bg-foreground text-background hover:opacity-90"
                                     )}
                                 >
                                     {copied ? (
                                         <>
                                             <Check className="h-4 w-4" />
 
-                                            {t(
-                                                'linkCopied'
-                                            )}
+                                            {t("linkCopied")}
                                         </>
                                     ) : (
                                         <>
                                             <Copy className="h-4 w-4" />
 
-                                            {t(
-                                                'copyLink'
-                                            )}
+                                            {t("copyLink")}
                                         </>
                                     )}
                                 </button>
 
                                 <a
-                                    href={
-                                        shareUrl
-                                    }
+                                    href={shareUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label="Open gallery"
@@ -3391,24 +2085,18 @@ function ShareGalleryModal({
                             <button
                                 type="button"
                                 onClick={() => {
-                                    setShareUrl(
-                                        null
-                                    )
+                                    setShareUrl(null);
 
-                                    setShowCreateForm(
-                                        false
-                                    )
+                                    setShowCreateForm(false);
                                 }}
                                 className="w-full text-center text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
                             >
-                                {t(
-                                    'backToGalleryLinks'
-                                )}
+                                {t("backToGalleryLinks")}
                             </button>
                         </div>
                     )}
                 </div>
             </div>
         </div>
-    )
+    );
 }

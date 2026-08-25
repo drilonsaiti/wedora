@@ -39,7 +39,6 @@ export async function GET(request: NextRequest) {
         const {data: photos, error, count} = await supabase
             .from('photos')
             .select('id, guest_name, message, thumbnail_path, original_path, created_at, width, height', {count: 'exact'})
-            .eq('event_id', eventId)
             .eq('approved', true)
             .eq('hidden', false)
             .order('created_at', {ascending: true})
