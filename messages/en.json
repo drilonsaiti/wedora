@@ -683,6 +683,26 @@
         "description": "Your memory was received successfully. Sara & Drilon will cherish it.",
         "uploadAnother": "Share another photo",
         "backHome": "Back to home"
+      },
+      "errors": {
+        "invalidFileTitle": "Unsupported photo",
+        "invalidFile": "Choose a JPEG, PNG, WebP or HEIC image.",
+        "fileTooLargeTitle": "Photo is too large",
+        "fileTooLarge": "Choose an image smaller than 10 MB.",
+        "guestLimitTitle": "Upload limit reached",
+        "guestLimit": "You've reached the maximum number of photos allowed from this device.",
+        "weddingLimitTitle": "Gallery limit reached",
+        "weddingLimit": "This wedding has reached its photo upload limit.",
+        "rateLimitedTitle": "Too many uploads",
+        "rateLimited": "Please wait a moment before uploading another photo.",
+        "rateLimitedWithTime": "Please wait {seconds} seconds before trying again.",
+        "uploadDisabledTitle": "Uploads are closed",
+        "uploadDisabled": "Photo uploads are not currently available for this wedding.",
+        "unavailableTitle": "Upload unavailable",
+        "unavailable": "This wedding upload link is no longer available.",
+        "uploadFailedTitle": "Photo couldn't be uploaded",
+        "storageFailed": "We couldn't save the photo. Please try again.",
+        "temporaryFailure": "Something went wrong while saving your photo. Please try again shortly."
       }
     },
     "findSeat": {

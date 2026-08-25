@@ -1,418 +1,245 @@
-'use server'
+"use server";
 
-import {revalidatePath, revalidateTag} from 'next/cache'
-import {redirect} from 'next/navigation'
-import {createClient, createServiceClient} from '@/lib/supabase/server'
-import {photoUpdateSchema} from '@/schemas'
-import {PhotoUpdate} from '@/types/database'
+import { revalidatePath, revalidateTag } from "next/cache";
+import { redirect } from "next/navigation";
 
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import type { User } from "@supabase/supabase-js";
 
-async function requireAdmin() {
-    const supabase = await createClient()
-    const {
-        data: {user},
-    } = await supabase.auth.getUser()
+import { photoUpdateSchema } from "@/schemas";
+import type { PhotoUpdate } from "@/types/database";
 
-    console.log("requiredAdmin")
-    if (!user) redirect('/admin/login')
+type PhotoActorRole = "admin" | "owner" | "couple";
 
-    const {data: admin} = await supabase
-        .from('admins')
-        .select('id')
-        .eq('id', user.id)
-        .single()
+type PhotoActor = {
+    user: User;
+    supabase: ReturnType<typeof createServiceClient>;
+    isAdmin: boolean;
+    coupleWeddingId?: string;
+};
 
-    if (!admin) redirect('/admin/login')
-
-    // Try to find an owned wedding; platform admins may not own any.
-    const {data: wedding} = await supabase
-        .from('weddings')
-        .select('id')
-        .eq('owner_user_id', user.id)
-        .maybeSingle()
-
-    return {user, supabase: createServiceClient(), weddingId: wedding?.id ?? null}
-}
-
-async function requirePhotoReadAccess(
-    path: string,
-    bucket:
-        | 'photos'
-        | 'thumbnails'
-) {
-    const authClient =
-        await createClient()
+/*
+ * ============================================
+ * AUTH / ACCESS HELPERS
+ * ============================================
+ */
+async function getPhotoActor(): Promise<PhotoActor> {
+    const authClient = await createClient();
 
     const {
-        data: {
-            user,
-        },
-    } =
-        await authClient.auth.getUser()
+        data: { user },
+        error: authError,
+    } = await authClient.auth.getUser();
 
-    if (!user) {
-        throw new Error(
-            'Unauthorized'
-        )
+    if (authError || !user) {
+        throw new Error("Unauthorized");
     }
 
-    const serviceClient =
-        createServiceClient()
+    const supabase = createServiceClient();
 
-    /*
-     * Resolve the supplied storage path back to
-     * an actual photo record.
-     *
-     * This prevents somebody from requesting an
-     * arbitrary private storage path.
-     */
-    const photoQuery =
-        serviceClient
-            .from('photos')
-            .select(
-                'id, wedding_id'
-            )
-
-    const {
-        data: photo,
-        error: photoError,
-    } =
-        bucket ===
-        'thumbnails'
-            ? await photoQuery
-                .eq(
-                    'thumbnail_path',
-                    path
-                )
-                .maybeSingle()
-            : await photoQuery
-                .eq(
-                    'original_path',
-                    path
-                )
-                .maybeSingle()
-
-    if (
-        photoError ||
-        !photo
-    ) {
-        throw new Error(
-            'Photo not found'
-        )
-    }
-
-    /*
-     * ============================================
-     * COUPLE
-     * ============================================
-     *
-     * Couple may read photos belonging only to
-     * the wedding assigned to the account.
-     */
-    const appMetadata =
-        user.app_metadata as {
-            role?: string
-            wedding_id?: string
-        }
-
-    if (
-        appMetadata.role ===
-        'couple' &&
-        appMetadata.wedding_id ===
-        photo.wedding_id
-    ) {
-        return {
-            user,
-            supabase:
-            serviceClient,
-            weddingId:
-            photo.wedding_id,
-            role:
-                'couple' as const,
-        }
-    }
-
-    /*
-     * ============================================
-     * GLOBAL ADMIN
-     * ============================================
-     */
-    const {
-        data: admin,
-        error: adminError,
-    } =
-        await serviceClient
-            .from('admins')
-            .select('id')
-            .eq(
-                'id',
-                user.id
-            )
-            .maybeSingle()
+    const { data: admin, error: adminError } = await supabase
+        .from("admins")
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle();
 
     if (adminError) {
-        throw new Error(
-            adminError.message
-        )
+        console.error("Admin lookup failed:", adminError);
+
+        throw new Error("Failed to verify access");
     }
 
-    if (admin) {
-        return {
-            user,
-            supabase:
-            serviceClient,
-            weddingId:
-            photo.wedding_id,
-            role:
-                'admin' as const,
-        }
-    }
-
-    /*
-     * ============================================
-     * WEDDING OWNER
-     * ============================================
-     */
-    const {
-        data: ownedWedding,
-        error: ownerError,
-    } =
-        await serviceClient
-            .from('weddings')
-            .select('id')
-            .eq(
-                'id',
-                photo.wedding_id
-            )
-            .eq(
-                'owner_user_id',
-                user.id
-            )
-            .maybeSingle()
-
-    if (ownerError) {
-        throw new Error(
-            ownerError.message
-        )
-    }
-
-    if (!ownedWedding) {
-        throw new Error(
-            'Forbidden'
-        )
-    }
-
-    return {
-        user,
-        supabase:
-        serviceClient,
-        weddingId:
-        photo.wedding_id,
-        role:
-            'owner' as const,
-    }
-}
-
-async function requireWeddingPhotoManager(
-    weddingId: string
-) {
-    const authClient =
-        await createClient()
-
-    const {
-        data: {
-            user,
-        },
-    } =
-        await authClient.auth.getUser()
-
-    if (!user) {
-        throw new Error(
-            'Unauthorized'
-        )
-    }
-
-    const supabase =
-        createServiceClient()
-
-    /*
-     * ============================================
-     * GLOBAL ADMIN
-     * ============================================
-     */
-    const {
-        data: admin,
-        error: adminError,
-    } =
-        await supabase
-            .from('admins')
-            .select('id')
-            .eq(
-                'id',
-                user.id
-            )
-            .maybeSingle()
-
-    if (adminError) {
-        throw new Error(
-            adminError.message
-        )
-    }
-
-    if (admin) {
-        const {
-            data: wedding,
-            error: weddingError,
-        } =
-            await supabase
-                .from('weddings')
-                .select('id')
-                .eq(
-                    'id',
-                    weddingId
-                )
-                .maybeSingle()
-
-        if (
-            weddingError ||
-            !wedding
-        ) {
-            throw new Error(
-                'Wedding not found'
-            )
-        }
-
-        return {
-            user,
-            supabase,
-            role:
-                'admin' as const,
-            weddingId,
-        }
-    }
-
-    /*
-     * ============================================
-     * COUPLE
-     * ============================================
-     */
-    const appMetadata =
-        user.app_metadata as {
-            role?: string
-            wedding_id?: string
-        }
-
-    if (
-        appMetadata.role ===
-        'couple' &&
-        appMetadata.wedding_id ===
-        weddingId
-    ) {
-        /*
-         * Verify that couple access is still enabled.
-         */
-        const {
-            data: settings,
-            error: settingsError,
-        } =
-            await supabase
-                .from(
-                    'wedding_settings'
-                )
-                .select(
-                    'enable_couple_login'
-                )
-                .eq(
-                    'wedding_id',
-                    weddingId
-                )
-                .maybeSingle()
-
-        if (
-            settingsError ||
-            !settings
-                ?.enable_couple_login
-        ) {
-            throw new Error(
-                'Couple access disabled'
-            )
-        }
-
-        return {
-            user,
-            supabase,
-            role:
-                'couple' as const,
-            weddingId,
-        }
-    }
-
-    /*
-     * ============================================
-     * OWNER
-     * ============================================
-     */
-    const {
-        data: ownedWedding,
-        error: ownerError,
-    } =
-        await supabase
-            .from('weddings')
-            .select('id')
-            .eq(
-                'id',
-                weddingId
-            )
-            .eq(
-                'owner_user_id',
-                user.id
-            )
-            .maybeSingle()
-
-    if (ownerError) {
-        throw new Error(
-            ownerError.message
-        )
-    }
-
-    if (!ownedWedding) {
-        throw new Error(
-            'Forbidden'
-        )
-    }
+    const metadata = user.app_metadata as {
+        role?: string;
+        wedding_id?: string;
+    };
 
     return {
         user,
         supabase,
-        role:
-            'owner' as const,
-        weddingId,
-    }
+        isAdmin: Boolean(admin),
+        coupleWeddingId:
+            metadata.role === "couple" ? metadata.wedding_id : undefined,
+    };
 }
 
-async function requireWeddingAdmin() {
-    const context = await requireAdmin()
+async function requireWeddingPhotoAccess(
+    weddingId: string,
+    actor?: PhotoActor
+): Promise<
+    PhotoActor & {
+    weddingId: string;
+    role: PhotoActorRole;
+}
+> {
+    const context = actor ?? (await getPhotoActor());
 
-    const {data: wedding, error} = await context.supabase
-        .from('weddings')
-        .select('id')
-        .eq('owner_user_id', context.user.id)
-        .maybeSingle()
+    const { user, supabase } = context;
 
-    if (error) {
-        throw new Error(error.message)
+    const { data: wedding, error: weddingError } = await supabase
+        .from("weddings")
+        .select("id, owner_user_id")
+        .eq("id", weddingId)
+        .maybeSingle();
+
+    if (weddingError) {
+        console.error("Wedding access lookup failed:", weddingError);
+
+        throw new Error("Failed to verify wedding access");
     }
 
     if (!wedding) {
-        throw new Error('No wedding configured')
+        throw new Error("Wedding not found");
     }
 
-    return {
-        ...context,
-        weddingId: wedding.id,
+    /* Global admin */
+    if (context.isAdmin) {
+        return {
+            ...context,
+            weddingId,
+            role: "admin",
+        };
     }
+
+    /* Assigned couple */
+    if (context.coupleWeddingId === weddingId) {
+        const { data: settings, error: settingsError } = await supabase
+            .from("wedding_settings")
+            .select("enable_couple_login")
+            .eq("wedding_id", weddingId)
+            .maybeSingle();
+
+        if (settingsError) {
+            console.error("Couple settings lookup failed:", settingsError);
+
+            throw new Error("Failed to verify couple access");
+        }
+
+        if (!settings?.enable_couple_login) {
+            throw new Error("Couple access disabled");
+        }
+
+        return {
+            ...context,
+            weddingId,
+            role: "couple",
+        };
+    }
+
+    /* Wedding owner */
+    if (wedding.owner_user_id === user.id) {
+        return {
+            ...context,
+            weddingId,
+            role: "owner",
+        };
+    }
+
+    throw new Error("Forbidden");
 }
 
+async function requirePhotoAccess(
+    photoId: string,
+    expectedWeddingId?: string,
+    actor?: PhotoActor
+) {
+    const context = actor ?? (await getPhotoActor());
+
+    const { data: photo, error: photoError } = await context.supabase
+        .from("photos")
+        .select(
+            `
+                id,
+                wedding_id,
+                original_path,
+                thumbnail_path
+            `
+        )
+        .eq("id", photoId)
+        .maybeSingle();
+
+    if (photoError) {
+        console.error("Photo lookup failed:", photoError);
+
+        throw new Error("Failed to load photo");
+    }
+
+    if (!photo) {
+        throw new Error("Photo not found");
+    }
+
+    if (expectedWeddingId && photo.wedding_id !== expectedWeddingId) {
+        throw new Error("Photo does not belong to this wedding");
+    }
+
+    const access = await requireWeddingPhotoAccess(photo.wedding_id, context);
+
+    return {
+        ...access,
+        photo,
+    };
+}
+
+async function requirePhotoPathAccess(
+    path: string,
+    bucket: "photos" | "thumbnails"
+) {
+    const actor = await getPhotoActor();
+
+    let query = actor.supabase.from("photos").select(`
+                id,
+                wedding_id,
+                original_path,
+                thumbnail_path
+            `);
+
+    query =
+        bucket === "thumbnails"
+            ? query.eq("thumbnail_path", path)
+            : query.eq("original_path", path);
+
+    const { data: photo, error: photoError } = await query.maybeSingle();
+
+    if (photoError) {
+        console.error("Photo path lookup failed:", photoError);
+
+        throw new Error("Failed to load photo");
+    }
+
+    if (!photo) {
+        throw new Error("Photo not found");
+    }
+
+    const access = await requireWeddingPhotoAccess(photo.wedding_id, actor);
+
+    return {
+        ...access,
+        photo,
+    };
+}
+
+function revalidateWeddingPhotos(weddingId: string) {
+    /* Current public-gallery tag. */
+    revalidateTag("gallery-photos", "max");
+
+    /* Preferred wedding-scoped tag. */
+    revalidateTag(`gallery-wedding-${weddingId}`, "max");
+
+    /* Legacy compatibility while old caches disappear. */
+    revalidateTag(`gallery-photos-${weddingId}`, "max");
+
+    revalidatePath(`/admin/weddings/${weddingId}/photos`);
+
+    revalidatePath(`/couple/weddings/${weddingId}/photos`);
+
+    revalidatePath("/admin/photos");
+}
+
+/*
+ * ============================================
+ * PHOTO MUTATIONS
+ * ============================================
+ */
 export async function updatePhotoAction(
     id: string,
     weddingId: string,
@@ -434,7 +261,7 @@ export async function updatePhotoAction(
             };
         }
 
-        const { supabase } = await requireWeddingPhotoManager(weddingId);
+        const { supabase } = await requirePhotoAccess(id, weddingId);
 
         const { approved, hidden, favourite } = parsed.data;
 
@@ -461,9 +288,11 @@ export async function updatePhotoAction(
             .maybeSingle();
 
         if (error) {
+            console.error("Photo update failed:", error);
+
             return {
                 success: false,
-                error: error.message,
+                error: "Failed to update photo",
             };
         }
 
@@ -474,21 +303,13 @@ export async function updatePhotoAction(
             };
         }
 
-        /*
-         * Public gallery caches currently use
-         * the "gallery-photos" tag.
-         */
-        revalidateTag("gallery-photos", "max");
-
-        revalidatePath(`/admin/weddings/${weddingId}/photos`);
-
-        revalidatePath(`/couple/weddings/${weddingId}/photos`);
+        revalidateWeddingPhotos(weddingId);
 
         return {
             success: true,
         };
     } catch (error) {
-        console.error("Update photo error:", error);
+        console.error("Update photo action failed:", error);
 
         return {
             success: false,
@@ -497,50 +318,87 @@ export async function updatePhotoAction(
     }
 }
 
-
 export async function deletePhotoAction(
     id: string,
     weddingId: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{
+    success: boolean;
+    error?: string;
+}> {
     try {
-        const supabase = await createClient()
+        const { supabase, photo } = await requirePhotoAccess(id, weddingId);
 
-        const result = await supabase
-            .from('photos')
-            .select('original_path, thumbnail_path')
-            .eq('id', id)
-            .eq('wedding_id', weddingId)
-            .single()
+        /*
+         * Delete the DB row first.
+         *
+         * If Storage cleanup later fails, we only leave
+         * private orphan objects. We never leave a live DB
+         * row pointing at files that have already vanished.
+         */
+        const { data: deletedPhoto, error: dbError } = await supabase
+            .from("photos")
+            .delete()
+            .eq("id", id)
+            .eq("wedding_id", weddingId)
+            .select("id")
+            .maybeSingle();
 
-        const photo = result.data as {
-            original_path: string
-            thumbnail_path: string
-        } | null
+        if (dbError) {
+            console.error("Photo DB delete failed:", dbError);
 
-        if (result.error || !photo) {
-            return {success: false, error: 'Photo not found'}
+            return {
+                success: false,
+                error: "Failed to delete photo",
+            };
         }
 
-        const serviceSupabase = createServiceClient()
-        await serviceSupabase.storage.from('photos').remove([photo.original_path])
-        await serviceSupabase.storage.from('thumbnails').remove([photo.thumbnail_path])
+        if (!deletedPhoto) {
+            return {
+                success: false,
+                error: "Photo not found",
+            };
+        }
 
-        const {error: dbError} = await supabase
-            .from('photos')
-            .delete()
-            .eq('id', id)
+        const [originalCleanup, thumbnailCleanup] = await Promise.all([
+            supabase.storage.from("photos").remove([photo.original_path]),
 
-        if (dbError) return {success: false, error: dbError.message}
+            supabase.storage.from("thumbnails").remove([photo.thumbnail_path]),
+        ]);
 
-        revalidateTag(`gallery-photos-${weddingId}`, 'max')
-        revalidatePath(`/admin/weddings/${weddingId}/photos`)
-        revalidatePath(`/couple/weddings/${weddingId}/photos`)
-        return {success: true}
-    } catch {
-        return {success: false, error: 'Unexpected error'}
+        if (originalCleanup.error || thumbnailCleanup.error) {
+            /*
+             * DB delete already succeeded. The user-facing
+             * delete is complete; log orphan cleanup failures
+             * instead of pretending the photo still exists.
+             */
+            console.error("Photo storage cleanup incomplete:", {
+                original: originalCleanup.error,
+                thumbnail: thumbnailCleanup.error,
+                photoId: id,
+                weddingId,
+            });
+        }
+
+        revalidateWeddingPhotos(weddingId);
+
+        return {
+            success: true,
+        };
+    } catch (error) {
+        console.error("Delete photo action failed:", error);
+
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Unexpected error",
+        };
     }
 }
 
+/*
+ * ============================================
+ * SIGNED URLS
+ * ============================================
+ */
 export async function getSignedUrlAction(
     path: string,
     bucket: "photos" | "thumbnails"
@@ -549,15 +407,17 @@ export async function getSignedUrlAction(
     error?: string;
 }> {
     try {
-        const { supabase } = await requirePhotoReadAccess(path, bucket);
+        const { supabase } = await requirePhotoPathAccess(path, bucket);
 
         const { data, error } = await supabase.storage
             .from(bucket)
             .createSignedUrl(path, 3600);
 
         if (error) {
+            console.error("Signed URL creation failed:", error);
+
             return {
-                error: error.message,
+                error: "Failed to generate URL",
             };
         }
 
@@ -565,7 +425,7 @@ export async function getSignedUrlAction(
             url: data.signedUrl,
         };
     } catch (error) {
-        console.error("Signed URL error:", error);
+        console.error("Signed URL action failed:", error);
 
         return {
             error: "Failed to generate URL",
@@ -573,371 +433,425 @@ export async function getSignedUrlAction(
     }
 }
 
-
-// Returns signed URLs for all visible photos — used by gallery token creation
-export async function getBatchSignedUrlsAction(
-    photoIds: string[]
-): Promise<{ urls: Record<string, { thumb: string; original: string }>; error?: string }> {
+export async function getPhotoSignedUrlsAction(photoId: string): Promise<{
+    urls?: {
+        thumb: string;
+        original: string;
+    };
+    error?: string;
+}> {
     try {
-        await requireAdmin()
-        const supabase = createServiceClient()
+        const { supabase, photo } = await requirePhotoAccess(photoId);
 
-        const result = await supabase
-            .from('photos')
-            .select('id, original_path, thumbnail_path')
-            .in('id', photoIds)
+        const [thumbResult, originalResult] = await Promise.all([
+            supabase.storage
+                .from("thumbnails")
+                .createSignedUrl(photo.thumbnail_path, 3600),
 
-        const photos = result.data as Array<{
-            id: string
-            original_path: string
-            thumbnail_path: string
-        }> | null
+            supabase.storage
+                .from("photos")
+                .createSignedUrl(photo.original_path, 3600),
+        ]);
 
-        if (result.error || !photos) {
-            return {urls: {}, error: result.error?.message}
+        if (thumbResult.error || originalResult.error) {
+            console.error("Photo signed URL creation failed:", {
+                thumbnail: thumbResult.error,
+                original: originalResult.error,
+                photoId,
+            });
+
+            return {
+                error: "Failed to generate URLs",
+            };
         }
 
-        const urls: Record<string, { thumb: string; original: string }> = {}
+        return {
+            urls: {
+                thumb: thumbResult.data.signedUrl,
+                original: originalResult.data.signedUrl,
+            },
+        };
+    } catch (error) {
+        console.error("Photo signed URLs action failed:", error);
 
-        await Promise.all(
-            photos.map(async (p) => {
-                const [thumbRes, origRes] = await Promise.all([
-                    supabase.storage.from('thumbnails').createSignedUrl(p.thumbnail_path, 3600),
-                    supabase.storage.from('photos').createSignedUrl(p.original_path, 3600),
-                ])
-
-                if (thumbRes.data && origRes.data) {
-                    urls[p.id] = {
-                        thumb: thumbRes.data.signedUrl,
-                        original: origRes.data.signedUrl,
-                    }
-                }
-            })
-        )
-
-        return {urls}
-    } catch {
-        return {urls: {}, error: 'Unexpected error'}
+        return {
+            error: "Failed to generate URLs",
+        };
     }
 }
 
+/*
+ * Retained for compatibility with any existing caller.
+ * Every requested photo is now authorized before URLs are
+ * signed, so this is no longer an admin-only shortcut.
+ */
+export async function getBatchSignedUrlsAction(photoIds: string[]): Promise<{
+    urls: Record<
+        string,
+        {
+            thumb: string;
+            original: string;
+        }
+    >;
+    error?: string;
+}> {
+    try {
+        const uniqueIds = Array.from(new Set(photoIds.filter(Boolean)));
+
+        if (uniqueIds.length === 0) {
+            return {
+                urls: {},
+            };
+        }
+
+        if (uniqueIds.length > 100) {
+            return {
+                urls: {},
+                error: "Too many photos requested",
+            };
+        }
+
+        const actor = await getPhotoActor();
+
+        const { data: photos, error: photoError } = await actor.supabase
+            .from("photos")
+            .select(
+                `
+                    id,
+                    wedding_id,
+                    original_path,
+                    thumbnail_path
+                `
+            )
+            .in("id", uniqueIds);
+
+        if (photoError) {
+            console.error("Batch photo lookup failed:", photoError);
+
+            return {
+                urls: {},
+                error: "Failed to load photos",
+            };
+        }
+
+        if (!photos || photos.length !== uniqueIds.length) {
+            return {
+                urls: {},
+                error: "One or more photos were not found",
+            };
+        }
+
+        const weddingIds = Array.from(
+            new Set(photos.map((photo) => photo.wedding_id))
+        );
+
+        await Promise.all(
+            weddingIds.map((weddingId) => requireWeddingPhotoAccess(weddingId, actor))
+        );
+
+        const thumbPaths = photos.map((photo) => photo.thumbnail_path);
+
+        const originalPaths = photos.map((photo) => photo.original_path);
+
+        const [thumbResult, originalResult] = await Promise.all([
+            actor.supabase.storage
+                .from("thumbnails")
+                .createSignedUrls(thumbPaths, 3600),
+
+            actor.supabase.storage
+                .from("photos")
+                .createSignedUrls(originalPaths, 3600),
+        ]);
+
+        if (thumbResult.error || originalResult.error) {
+            console.error("Batch signed URL creation failed:", {
+                thumbnails: thumbResult.error,
+                originals: originalResult.error,
+            });
+
+            return {
+                urls: {},
+                error: "Failed to generate URLs",
+            };
+        }
+
+        const thumbByPath = new Map(
+            (thumbResult.data ?? []).map((item) => [item.path, item.signedUrl])
+        );
+
+        const originalByPath = new Map(
+            (originalResult.data ?? []).map((item) => [item.path, item.signedUrl])
+        );
+
+        const urls: Record<
+            string,
+            {
+                thumb: string;
+                original: string;
+            }
+        > = {};
+
+        for (const photo of photos) {
+            const thumb = thumbByPath.get(photo.thumbnail_path);
+
+            const original = originalByPath.get(photo.original_path);
+
+            if (thumb && original) {
+                urls[photo.id] = {
+                    thumb,
+                    original,
+                };
+            }
+        }
+
+        return {
+            urls,
+        };
+    } catch (error) {
+        console.error("Batch signed URL action failed:", error);
+
+        return {
+            urls: {},
+            error: error instanceof Error ? error.message : "Unexpected error",
+        };
+    }
+}
+
+/*
+ * ============================================
+ * PHOTO LISTING
+ * ============================================
+ */
 export async function getPhotosAction(
     weddingId: string | null,
     filters?: {
-        favourite?: boolean
-        hidden?: boolean
-        approved?: boolean
+        favourite?: boolean;
+        hidden?: boolean;
+        approved?: boolean;
     },
     limit?: number,
     offset?: number
 ) {
     try {
-        const supabase = await createClient() // jo requireWeddingAdmin() — page-t tashmë verifikuan identitetin
-
         if (!weddingId) {
-            return {photos: [], total: 0, error: undefined}
+            return {
+                photos: [],
+                total: 0,
+                error: undefined,
+            };
         }
+
+        const { supabase } = await requireWeddingPhotoAccess(weddingId);
 
         let query = supabase
-            .from('photos')
-            .select('*', {count: 'exact'})
-            .eq('wedding_id', weddingId)
-            .order('created_at', {ascending: false})
+            .from("photos")
+            .select("*", {
+                count: "exact",
+            })
+            .eq("wedding_id", weddingId)
+            .order("created_at", {
+                ascending: false,
+            });
 
-        if (filters?.favourite !== undefined) query = query.eq('favourite', filters.favourite)
-        if (filters?.hidden !== undefined) query = query.eq('hidden', filters.hidden)
-        if (filters?.approved !== undefined) query = query.eq('approved', filters.approved)
+        if (filters?.favourite !== undefined) {
+            query = query.eq("favourite", filters.favourite);
+        }
+
+        if (filters?.hidden !== undefined) {
+            query = query.eq("hidden", filters.hidden);
+        }
+
+        if (filters?.approved !== undefined) {
+            query = query.eq("approved", filters.approved);
+        }
 
         if (limit !== undefined) {
-            const from = offset ?? 0
-            const to = from + limit - 1
-            query = query.range(from, to)
+            const from = Math.max(0, offset ?? 0);
+
+            const safeLimit = Math.min(Math.max(1, limit), 100);
+
+            query = query.range(from, from + safeLimit - 1);
         }
 
-        const {data, error, count} = await query
+        const { data, error, count } = await query;
 
         if (error) {
-            return {photos: [], total: 0, error: error.message}
+            console.error("Photo listing failed:", error);
+
+            return {
+                photos: [],
+                total: 0,
+                error: "Failed to load photos",
+            };
         }
 
-        return {photos: data ?? [], total: count ?? 0}
+        return {
+            photos: data ?? [],
+            total: count ?? 0,
+        };
     } catch (error) {
+        console.error("Get photos action failed:", error);
+
         return {
             photos: [],
             total: 0,
-            error: error instanceof Error ? error.message : 'Unexpected error',
-        }
+            error: error instanceof Error ? error.message : "Unexpected error",
+        };
     }
 }
 
-// ============================================================
-// GALLERY TOKEN
-// ============================================================
-
+/*
+ * ============================================
+ * GALLERY TOKENS
+ * ============================================
+ */
 export interface GalleryTokenOptions {
-    weddingId: string
-    eventId?: string
-    label?: string
-    showMessages?: boolean
-    expiresInDays?: number
-    photoFilter?:
-        | 'all'
-        | 'favourites'
+    weddingId: string;
+    eventId?: string;
+    label?: string;
+    showMessages?: boolean;
+    expiresInDays?: number;
+    photoFilter?: "all" | "favourites";
 }
 
 export async function createGalleryTokenAction(
     opts: GalleryTokenOptions
 ): Promise<{
-    token?: string
-    url?: string
-    error?: string
+    token?: string;
+    url?: string;
+    error?: string;
 }> {
     try {
-        const {
-            user,
-            supabase,
-            weddingId,
-        } =
-            await requireWeddingPhotoManager(
-                opts.weddingId
-            )
+        const { user, supabase, weddingId } = await requireWeddingPhotoAccess(
+            opts.weddingId
+        );
 
-        let eventId =
-            opts.eventId
+        let eventId = opts.eventId;
 
-        /*
-         * If an event was supplied, verify that it
-         * actually belongs to this wedding.
-         */
         if (eventId) {
-            const {
-                data: event,
-                error: eventError,
-            } =
-                await supabase
-                    .from('events')
-                    .select('id')
-                    .eq(
-                        'id',
-                        eventId
-                    )
-                    .eq(
-                        'wedding_id',
-                        weddingId
-                    )
-                    .maybeSingle()
+            const { data: event, error: eventError } = await supabase
+                .from("events")
+                .select("id")
+                .eq("id", eventId)
+                .eq("wedding_id", weddingId)
+                .maybeSingle();
 
-            if (
-                eventError ||
-                !event
-            ) {
+            if (eventError || !event) {
                 return {
-                    error:
-                        'Invalid event',
-                }
+                    error: "Invalid event",
+                };
             }
         } else {
-            /*
-             * No event explicitly supplied.
-             * Find the wedding's event.
-             */
-            const {
-                data: event,
-                error: eventError,
-            } =
-                await supabase
-                    .from('events')
-                    .select('id')
-                    .eq(
-                        'wedding_id',
-                        weddingId
-                    )
-                    .order(
-                        'created_at',
-                        {
-                            ascending:
-                                true,
-                        }
-                    )
-                    .limit(1)
-                    .maybeSingle()
-
-            if (
-                eventError ||
-                !event
-            ) {
-                return {
-                    error:
-                        'No event found for this wedding',
-                }
-            }
-
-            eventId =
-                event.id
-        }
-
-        const expiresAt =
-            opts.expiresInDays
-                ? new Date(
-                    Date.now() +
-                    opts.expiresInDays *
-                    86_400_000
-                ).toISOString()
-                : null
-
-        const {
-            data,
-            error,
-        } =
-            await supabase
-                .from(
-                    'gallery_tokens'
-                )
-                .insert({
-                    event_id:
-                    eventId,
-
-                    label:
-                        opts.label ??
-                        null,
-
-                    show_messages:
-                        opts.showMessages ??
-                        true,
-
-                    expires_at:
-                    expiresAt,
-
-                    created_by:
-                    user.id,
-
-                    photo_filter:
-                        opts.photoFilter ??
-                        'all',
-
-                    wedding_id:
-                    weddingId,
+            const { data: event, error: eventError } = await supabase
+                .from("events")
+                .select("id")
+                .eq("wedding_id", weddingId)
+                .order("created_at", {
+                    ascending: true,
                 })
-                .select(
-                    'token'
-                )
-                .single()
+                .limit(1)
+                .maybeSingle();
 
-        if (
-            error ||
-            !data
-        ) {
-            return {
-                error:
-                    error?.message ??
-                    'Failed to create token',
+            if (eventError || !event) {
+                return {
+                    error: "No event found for this wedding",
+                };
             }
+
+            eventId = event.id;
         }
 
-        const appUrl =
-            process.env
-                .NEXT_PUBLIC_APP_URL ??
-            ''
+        const expiresAt = opts.expiresInDays
+            ? new Date(Date.now() + opts.expiresInDays * 86_400_000).toISOString()
+            : null;
+
+        const { data, error } = await supabase
+            .from("gallery_tokens")
+            .insert({
+                event_id: eventId,
+                label: opts.label ?? null,
+                show_messages: opts.showMessages ?? true,
+                expires_at: expiresAt,
+                created_by: user.id,
+                photo_filter: opts.photoFilter ?? "all",
+                wedding_id: weddingId,
+            })
+            .select("token")
+            .single();
+
+        if (error || !data) {
+            console.error("Gallery token creation failed:", error);
+
+            return {
+                error: "Failed to create gallery link",
+            };
+        }
+
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
 
         return {
-            token:
-            data.token,
-
-            url:
-                `${appUrl}/gallery/${data.token}`,
-        }
-    } catch (
-        error
-        ) {
-        console.error(
-            'Create gallery token error:',
-            error
-        )
+            token: data.token,
+            url: `${appUrl}/gallery/${data.token}`,
+        };
+    } catch (error) {
+        console.error("Create gallery token action failed:", error);
 
         return {
-            error:
-                error instanceof
-                Error
-                    ? error.message
-                    : 'Unexpected error',
-        }
+            error: error instanceof Error ? error.message : "Unexpected error",
+        };
     }
 }
 
-export async function listGalleryTokensAction(
-    weddingId: string
-): Promise<{
+export async function listGalleryTokensAction(weddingId: string): Promise<{
     tokens: Array<{
-        id: string
-        token: string
-        label: string | null
-        expires_at:
-            | string
-            | null
-        created_at: string
-        photo_filter: string
-    }>
-    error?: string
+        id: string;
+        token: string;
+        label: string | null;
+        expires_at: string | null;
+        created_at: string;
+        photo_filter: string;
+    }>;
+    error?: string;
 }> {
     try {
-        const {
-            supabase,
-        } =
-            await requireWeddingPhotoManager(
-                weddingId
-            )
+        const { supabase } = await requireWeddingPhotoAccess(weddingId);
 
-        const {
-            data,
-            error,
-        } =
-            await supabase
-                .from(
-                    'gallery_tokens'
-                )
-                .select(`
+        const { data, error } = await supabase
+            .from("gallery_tokens")
+            .select(
+                `
                     id,
                     token,
                     label,
                     expires_at,
                     created_at,
                     photo_filter
-                `)
-                .eq(
-                    'wedding_id',
-                    weddingId
-                )
-                .order(
-                    'created_at',
-                    {
-                        ascending:
-                            false,
-                    }
-                )
+                `
+            )
+            .eq("wedding_id", weddingId)
+            .order("created_at", {
+                ascending: false,
+            });
 
         if (error) {
+            console.error("Gallery token listing failed:", error);
+
             return {
                 tokens: [],
-                error:
-                error.message,
-            }
+                error: "Failed to load gallery links",
+            };
         }
 
         return {
-            tokens:
-                data ?? [],
-        }
-    } catch (
-        error
-        ) {
+            tokens: data ?? [],
+        };
+    } catch (error) {
+        console.error("List gallery tokens action failed:", error);
+
         return {
             tokens: [],
-            error:
-                error instanceof
-                Error
-                    ? error.message
-                    : 'Unexpected error',
-        }
+            error: error instanceof Error ? error.message : "Unexpected error",
+        };
     }
 }
 
@@ -945,109 +859,163 @@ export async function deleteGalleryTokenAction(
     id: string,
     weddingId: string
 ): Promise<{
-    success: boolean
-    error?: string
+    success: boolean;
+    error?: string;
 }> {
     try {
-        const {
-            supabase,
-        } =
-            await requireWeddingPhotoManager(
-                weddingId
-            )
+        const { supabase } = await requireWeddingPhotoAccess(weddingId);
 
-        const {
-            error,
-        } =
-            await supabase
-                .from(
-                    'gallery_tokens'
-                )
-                .delete()
-                .eq(
-                    'id',
-                    id
-                )
-                .eq(
-                    'wedding_id',
-                    weddingId
-                )
+        const { data: tokenRecord, error: tokenLookupError } = await supabase
+            .from("gallery_tokens")
+            .select("id, token")
+            .eq("id", id)
+            .eq("wedding_id", weddingId)
+            .maybeSingle();
+
+        if (tokenLookupError) {
+            console.error("Gallery token lookup failed:", tokenLookupError);
+
+            return {
+                success: false,
+                error: "Failed to delete gallery link",
+            };
+        }
+
+        if (!tokenRecord) {
+            return {
+                success: false,
+                error: "Gallery link not found",
+            };
+        }
+
+        const { data: deletedToken, error } = await supabase
+            .from("gallery_tokens")
+            .delete()
+            .eq("id", id)
+            .eq("wedding_id", weddingId)
+            .select("id")
+            .maybeSingle();
 
         if (error) {
+            console.error("Gallery token delete failed:", error);
+
             return {
-                success:
-                    false,
-                error:
-                error.message,
-            }
+                success: false,
+                error: "Failed to delete gallery link",
+            };
         }
 
-        revalidateTag(
-            `gallery-photos-${weddingId}`,
-            'max'
-        )
+        if (!deletedToken) {
+            return {
+                success: false,
+                error: "Gallery link not found",
+            };
+        }
 
-        revalidatePath(
-            `/admin/weddings/${weddingId}/photos`
-        )
+        revalidateTag(`gallery-${tokenRecord.token}`, "max");
 
-        revalidatePath(
-            `/couple/weddings/${weddingId}/photos`
-        )
+        revalidateWeddingPhotos(weddingId);
 
         return {
-            success:
-                true,
-        }
-    } catch (
-        error
-        ) {
+            success: true,
+        };
+    } catch (error) {
+        console.error("Delete gallery token action failed:", error);
+
         return {
-            success:
-                false,
-            error:
-                error instanceof
-                Error
-                    ? error.message
-                    : 'Unexpected error',
-        }
+            success: false,
+            error: error instanceof Error ? error.message : "Unexpected error",
+        };
     }
 }
 
-export async function signOutAction() {
-    const supabase = await createClient()
-    await supabase.auth.signOut()
-    redirect('/admin/login')
+/*
+ * ============================================
+ * SESSION
+ * ============================================
+ */
+export async function signOutAction(destination: "admin" | "couple" = "admin") {
+    const supabase = await createClient();
+
+    await supabase.auth.signOut();
+
+    redirect(destination === "couple" ? "/couple/login" : "/admin/login");
 }
 
+/*
+ * ============================================
+ * ADMIN DASHBOARD STATS
+ * ============================================
+ *
+ * Kept separate from the photo-management access layer.
+ * Existing RLS continues to determine which weddings a
+ * non-global-admin account can see here.
+ */
 export async function getAdminDashboardStats() {
-    const supabase = await createClient()
-    const {data: {user}} = await supabase.auth.getUser()
-    if (!user) return null
+    const supabase = await createClient();
 
-    const {data: weddings} = await supabase
-        .from('weddings')
-        .select('id, groom_name, bride_name, slug, created_at')
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        return null;
+    }
+
+    const { data: weddings } = await supabase.from("weddings").select(`
+                id,
+                groom_name,
+                bride_name,
+                slug,
+                created_at
+            `);
 
     if (!weddings || weddings.length === 0) {
-        return {weddings: [], totalGuests: 0, totalPhotos: 0, pendingPhotos: 0}
+        return {
+            weddings: [],
+            totalGuests: 0,
+            totalPhotos: 0,
+            pendingPhotos: 0,
+        };
     }
 
-    const weddingIds = weddings.map((w) => w.id)
+    const weddingIds = weddings.map((wedding) => wedding.id);
 
-    const [{count: totalGuests}, {count: totalPhotos}, {count: pendingPhotos}] = await Promise.all([
-        supabase.from('guests').select('id', {count: 'exact', head: true}).in('wedding_id', weddingIds),
-        supabase.from('photos').select('id', {count: 'exact', head: true}).in('wedding_id', weddingIds),
-        supabase.from('photos').select('id', {
-            count: 'exact',
-            head: true
-        }).in('wedding_id', weddingIds).eq('approved', false),
-    ])
+    const [
+        { count: totalGuests },
+        { count: totalPhotos },
+        { count: pendingPhotos },
+    ] = await Promise.all([
+        supabase
+            .from("guests")
+            .select("id", {
+                count: "exact",
+                head: true,
+            })
+            .in("wedding_id", weddingIds),
+
+        supabase
+            .from("photos")
+            .select("id", {
+                count: "exact",
+                head: true,
+            })
+            .in("wedding_id", weddingIds),
+
+        supabase
+            .from("photos")
+            .select("id", {
+                count: "exact",
+                head: true,
+            })
+            .in("wedding_id", weddingIds)
+            .eq("approved", false),
+    ]);
 
     return {
         weddings,
         totalGuests: totalGuests ?? 0,
         totalPhotos: totalPhotos ?? 0,
         pendingPhotos: pendingPhotos ?? 0,
-    }
+    };
 }

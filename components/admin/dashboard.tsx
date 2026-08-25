@@ -41,6 +41,7 @@ import {
     deleteGalleryTokenAction,
     deletePhotoAction,
     getPhotosAction,
+    getPhotoSignedUrlsAction,
     getSignedUrlAction,
     listGalleryTokensAction,
     signOutAction,
@@ -233,26 +234,16 @@ export function AdminDashboard({
             }));
 
             try {
-                const [thumbResult, originalResult] = await Promise.all([
-                    getSignedUrlAction(photo.thumbnail_path, "thumbnails"),
-                    getSignedUrlAction(photo.original_path, "photos"),
-                ]);
+                const result = await getPhotoSignedUrlsAction(photo.id);
 
-                if (!thumbResult.url || !originalResult.url) {
-                    return null;
+                if (result.urls) {
+                    setSignedUrls((current) => ({
+                        ...current,
+                        [photo.id]: result.urls!,
+                    }));
+
+                    return result.urls;
                 }
-
-                const urls = {
-                    thumb: thumbResult.url,
-                    original: originalResult.url,
-                };
-
-                setSignedUrls((current) => ({
-                    ...current,
-                    [photo.id]: urls,
-                }));
-
-                return urls;
             } finally {
                 signedUrlRequestsRef.current.delete(photo.id);
 
@@ -311,7 +302,7 @@ export function AdminDashboard({
         );
 
         try {
-            const result = await updatePhotoAction(id, weddingId,update);
+            const result = await updatePhotoAction(id, weddingId, update);
 
             if (!result.success) {
                 /*
@@ -526,9 +517,7 @@ export function AdminDashboard({
         setLoadingTokens(true);
 
         try {
-            const result = await listGalleryTokensAction(
-                weddingId
-            )
+            const result = await listGalleryTokensAction(weddingId);
 
             setGalleryTokens(result.tokens ?? []);
         } finally {
@@ -562,25 +551,17 @@ export function AdminDashboard({
         setShareLoading(true);
 
         try {
-            const result = await createGalleryTokenAction(
-                {
-                    weddingId,
+            const result = await createGalleryTokenAction({
+                weddingId,
 
-                    showMessages,
+                showMessages,
 
-                    expiresInDays:
-                        expiresInDays
-                            ? Number(
-                                expiresInDays
-                            )
-                            : undefined,
+                expiresInDays: expiresInDays ? Number(expiresInDays) : undefined,
 
-                    photoFilter,
+                photoFilter,
 
-                    label:
-                    galleryLabel,
-                }
-            )
+                label: galleryLabel,
+            });
 
             if (result.url) {
                 setShareUrl(result.url);
@@ -618,7 +599,7 @@ export function AdminDashboard({
         }
 
         try {
-            await deleteGalleryTokenAction(galleryTokenToDelete,weddingId);
+            await deleteGalleryTokenAction(galleryTokenToDelete, weddingId);
 
             await loadGalleryTokens();
 
@@ -735,7 +716,7 @@ export function AdminDashboard({
 
                             <button
                                 type="button"
-                                onClick={() => void signOutAction()}
+                                onClick={() => void signOutAction(role)}
                                 aria-label={tc("logout")}
                                 className="flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-card text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:w-auto sm:px-3"
                             >
@@ -880,7 +861,7 @@ export function AdminDashboard({
                 {/* Photos */}
                 {photos.length > 0 && (
                     <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
-                        {photos.map((photo,index) => (
+                        {photos.map((photo, index) => (
                             <PhotoCard
                                 key={photo.id}
                                 photo={photo}
@@ -891,9 +872,7 @@ export function AdminDashboard({
                                 onUpdate={handleUpdate}
                                 onDelete={handleDelete}
                                 onUrlNeeded={getSignedUrls}
-                                eager={
-                                    index === 0
-                                }
+                                eager={index === 0}
                             />
                         ))}
                     </div>
@@ -1108,7 +1087,7 @@ function PhotoCard({
                        onUpdate,
                        onDelete,
                        onUrlNeeded,
-    eager = false,
+                       eager = false,
                    }: {
     photo: Photo;
     thumbnailUrl?: string;
@@ -1118,7 +1097,7 @@ function PhotoCard({
     onUpdate: (id: string, update: PhotoUpdate) => void;
     onDelete: (id: string) => void;
     onUrlNeeded: (photo: Photo) => void;
-    eager?: boolean
+    eager?: boolean;
 }) {
     const cardRef = useRef<HTMLDivElement>(null);
 
@@ -1175,11 +1154,7 @@ function PhotoCard({
                     src={thumbnailUrl}
                     alt={photo.guest_name ?? "Wedding photo"}
                     fill
-                    loading={
-                        eager
-                            ? 'eager'
-                            : 'lazy'
-                    }
+                    loading={eager ? "eager" : "lazy"}
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
                     className="cursor-pointer object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
                     onClick={onOpen}
@@ -1188,11 +1163,7 @@ function PhotoCard({
                 <button
                     type="button"
                     aria-label="Load photo"
-                    onClick={() =>
-                        onUrlNeeded(
-                            photo
-                        )
-                    }
+                    onClick={() => onUrlNeeded(photo)}
                     className="absolute inset-0 w-full bg-muted"
                 >
                     <div className="absolute inset-0 shimmer" />
