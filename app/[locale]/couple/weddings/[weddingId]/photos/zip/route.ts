@@ -1,59 +1,36 @@
-import {NextResponse} from 'next/server'
-import {createClient, createServiceClient} from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from "next/server";
 
-// GET will attempt a streamed ZIP for small albums; for large ones it should queue a job.
-// For now, we return 202 for large sets and 501 for unimplemented streaming to keep the route stable.
+export const dynamic = "force-dynamic";
+
 export async function GET(
-    _req: Request,
-    {params}: { params: Promise<{ weddingId: string }> }
+    request: NextRequest,
+    {
+        params,
+    }: {
+        params: Promise<{
+            weddingId: string;
+        }>;
+    }
 ) {
-    const {weddingId} = await params
+    const { weddingId } = await params;
 
-    const supabaseClient = await createClient()
-    const {data: {user}} = await supabaseClient.auth.getUser()
-    if (!user) return NextResponse.json({error: 'Unauthorized'}, {status: 401})
+    /*
+     * Compatibility route only.
+     *
+     * All authorization and ZIP generation now live
+     * in the canonical /api/admin/zip route.
+     */
+    const source = new URL(request.url);
 
-    const {data: admin} = await supabaseClient
-        .from('admins')
-        .select('id')
-        .eq('id', user.id)
-        .single()
+    const target = new URL("/api/admin/zip", request.url);
 
-    if (!admin) return NextResponse.json({error: 'Forbidden'}, {status: 403})
+    target.searchParams.set("weddingId", weddingId);
 
-    // Ensure the wedding belongs to the current couple user
-    const appMetadata = user.app_metadata as { role?: string; wedding_id?: string }
-    if (appMetadata.role === 'couple' && appMetadata.wedding_id !== weddingId) {
-        return NextResponse.json({error: 'Forbidden'}, {status: 403})
+    const filter = source.searchParams.get("filter");
+
+    if (filter) {
+        target.searchParams.set("filter", filter);
     }
 
-    const {data: wedding} = await supabaseClient
-        .from('weddings')
-        .select('id')
-        .eq('id', weddingId)
-        .maybeSingle()
-
-    if (!wedding) return NextResponse.json({error: 'Not found'}, {status: 404})
-
-    const supabase = createServiceClient()
-    const {count, error} = await supabase
-        .from('photos')
-        .select('id', {count: 'exact', head: true})
-        .eq('wedding_id', wedding.id)
-
-    if (error) return NextResponse.json({error: error.message}, {status: 500})
-
-    // Heuristic threshold: if > 120 photos, likely to exceed Hobby 10s — queue instead
-    if ((count ?? 0) > 120) {
-        return NextResponse.json({
-            status: 'queued-required',
-            message: 'Album too large for synchronous ZIP on Hobby plan. Please use queued export.',
-        }, {status: 202})
-    }
-
-    // Placeholder until streaming archiver is implemented
-    return NextResponse.json({
-        status: 'not-implemented',
-        message: 'Streaming ZIP not implemented yet in this branch.',
-    }, {status: 501})
+    return NextResponse.redirect(target, 307);
 }

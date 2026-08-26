@@ -2,6 +2,7 @@
 <project version="4">
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/supabase/migrations/20260825_photo_upload_hardening.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/supabase/migrations/20260826_photo_zip_exports.sql" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/supabase/schema-additions.sql" dialect="GenericSQL" />
   </component>
 </project>

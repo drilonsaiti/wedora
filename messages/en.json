@@ -39,48 +39,36 @@
     "rememberMe": "Remember me",
     "signIn": "Sign in",
     "createAccount": "Create account",
-
     "privateAccess": "Private access",
     "adminPortal": "Admin Portal",
     "adminLoginDescription": "Sign in to manage weddings, guests, seating and shared photos.",
-
     "invalidCredentials": "Invalid email or password",
     "accessDenied": "Access denied. This account is not an admin.",
     "authentication": "Authentication",
-
     "checkEmail": "Check your email",
     "resetLinkSent": "We've sent a password reset link to your email address.",
     "backToLogin": "Back to Login",
-
     "forgotPasswordTitle": "Forgot password?",
     "forgotPasswordDescription": "Enter your email address and we'll send you a link to reset your password.",
-
     "sendResetLink": "Send Reset Link",
     "sendingLink": "Sending link...",
     "unexpectedError": "An unexpected error occurred",
-
     "emailPlaceholder": "you@example.com",
     "sendLink": "Send Link",
-
     "newPasswordTitle": "Set your new password",
     "newPasswordDescription": "Choose a secure new password for your Wedora account.",
     "newPassword": "New password",
     "confirmPassword": "Confirm password",
-
     "passwordMinLength": "Password must be at least 8 characters",
     "passwordsDoNotMatch": "Passwords do not match",
-
     "passwordChangedEyebrow": "Password updated",
     "passwordChanged": "Password changed",
     "redirectingToLogin": "Redirecting you to the login page...",
-
     "saving": "Saving…",
     "changePassword": "Change Password",
-
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "loginEyebrow": "Login",
-
     "forgotPassword": {
       "title": "Forgot password?",
       "eyebrow": "Forgot password?",
@@ -96,176 +84,135 @@
       "resetLinkSent": "We've sent a password reset link to your email address.",
       "unexpectedError": "An unexpected error occurred"
     },
-
     "passwordPlaceholder": "••••••••",
     "invalidEmail": "Please enter a valid email address."
   },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome back",
-
     "overview": "Overview",
     "overviewDescription": "Manage weddings, guests, seating and shared photos from one place.",
-
     "noWeddings": "You don't have any weddings yet",
     "noWeddingsDescription": "Create your first wedding to get started",
-
     "createWedding": "Create Wedding",
     "createWeddingDescription": "Set up a new wedding, couple access and guest features.",
-
     "viewAllWeddings": "View all weddings",
     "viewAll": "View all",
-
     "activeWeddings": "Active weddings",
     "totalGuests": "Total guests",
     "photoCountLabel": "Photos",
     "pendingPhotos": "Pending photos",
-
     "newPhotos": "{count} new",
     "pendingPhotosDescription": "New guest photos are waiting for your review.",
     "reviewPhotos": "Review photos",
-
     "weddings": "Weddings",
     "recentWeddings": "Recent weddings",
-
     "seating": "Seating",
-
     "management": "Management",
     "quickActions": "Quick actions",
-
     "manageWeddings": "Manage Weddings",
     "manageWeddingsDescription": "View, edit and manage all weddings.",
-
     "atAGlance": "At a glance",
-
     "weddingCreated": "Wedding created!",
     "saveCredentials": "Save these login details — password won't be shown again",
     "noAccountCreated": "No account was created — check the provided emails.",
     "failedToCreateAccount": "Failed to create/reset account for: {emails}",
     "continueToDashboard": "Continue to Dashboard",
-
     "createYourWedding": "Create your wedding",
     "accountsWillBeCreated": "Login accounts will be automatically created for the couple",
-
     "publicUrl": "Public URL",
     "themeColor": "Theme Color",
     "preview": "Preview",
     "activeFunctions": "Active Functions",
-
     "findSeat": "Find Seat",
     "findSeatDescription": "Guests search for their name and see their table",
-
     "photoUpload": "Photo Upload",
     "photoUploadDescription": "Guests upload photos from the wedding",
-
     "totalPhotoLimit": "Total Photo Limit",
     "photoLimitPerGuest": "Photo Limit per Guest",
     "noLimit": "No limit",
     "leaveEmptyForNoLimit": "Leave empty for no limit",
     "howManyPhotosPerGuest": "How many photos allowed per person",
-
     "creating": "Creating...",
     "photosLabel": "Photos",
     "photos": {
       "title": "Photos",
       "description": "Review, organise and share photos uploaded for this wedding.",
       "backToWedding": "Back to wedding",
-
       "allPhotos": "All photos",
       "favourites": "Favourites",
       "hidden": "Hidden",
       "unapproved": "Unapproved",
-
       "loadingPhotos": "Loading photos...",
       "loadMore": "Load More",
-
       "noPhotos": "No photos found matching this filter",
       "noPhotosMatchingFilter": "Try another filter or wait for guests to upload photos.",
-
       "confirmDelete": "Are you sure you want to delete this photo?",
       "deleteFailed": "Failed to delete photo",
-
       "shareGallery": "Share Gallery",
       "shareGalleryTitle": "Share Gallery",
       "shareGalleryDescription": "Create a shareable link for the couple, family or guests.",
-
       "downloadZip": "Download ZIP",
       "downloadFavourites": "Download Favourites",
       "onlyFavourites": "Only Favourites",
       "preparingZip": "Preparing...",
       "failedToGenerateZip": "Failed to generate ZIP. Please try again.",
-
       "approve": "Approve",
       "unapprove": "Unapprove",
       "favourite": "Favourite",
       "unfavourite": "Unfavourite",
       "hide": "Hide",
       "show": "Show",
-
       "guest": "Guest",
       "anonymousGuest": "Anonymous Guest",
       "date": "Date",
       "message": "Message",
       "close": "Close",
-
       "photoCount": "{count} photos",
       "seating": "Seating",
-
       "download": "Download",
       "deletePermanently": "Delete permanently",
-
       "copyLink": "Copy link",
       "linkCopied": "Copied!",
-
       "expires": "Expires: {date}",
       "neverExpires": "Never expires",
       "deleteLink": "Delete link",
-
       "createLink": "Create link",
       "creatingLink": "Creating link...",
-
       "galleryLabel": "Gallery Label",
       "photoFilter": "Photo Filter",
-
       "expiresIn": "Expires in (days)",
       "optional": "optional",
       "create": "Create",
       "back": "Back",
-
       "showMessages": "Show guest messages in gallery",
       "manageShareLinks": "Manage shared links",
-
       "linkExpiresAfter": "Link expires after",
       "never": "Never",
       "days7": "7 days",
       "days30": "30 days",
       "days90": "90 days",
       "year1": "1 year",
-
       "backToGalleryList": "Back to gallery list",
       "backToGalleryLinks": "Back to gallery links",
-
       "galleryLink": "Gallery link",
       "shareWithCouple": "Share this link with the couple or guests",
-
       "whichPhotos": "Which photos?",
       "filterNote": "Only approved photos guests agreed to share publicly are ever included — this just narrows within that set.",
-
       "showMessagesTitle": "Show guest messages",
       "showMessagesDescription": "Include guest names and messages in the shared gallery.",
-
       "noGalleryLinks": "No gallery links yet.",
       "createNewGalleryLink": "Create New Gallery Link",
-
       "linkName": "Link name",
       "linkNamePlaceholder": "e.g. Ceremony, Reception, Family Only",
-
       "favouritesOnly": "Favourites only",
-
       "deleteGalleryLinkConfirm": "Delete this gallery link? It will stop working immediately.",
       "failedToCreateLink": "Failed to create link",
+      "galleryLinksLoadFailed": "Gallery links couldn't be loaded.",
+      "retry": "Try again",
+      "copyingLink": "Copying…",
 
-      "confirmations": {
+        "confirmations": {
         "deletePhoto": {
           "title": "Delete photo?",
           "description": "This photo will be permanently deleted and cannot be recovered.",
@@ -276,6 +223,30 @@
           "description": "This shared gallery link will stop working immediately.",
           "confirm": "Delete link"
         }
+      },
+      "notifications": {
+        "photoDeleted": "Photo deleted",
+        "galleryLinkDeleted": "Gallery link deleted",
+        "photoApproved": "Photo approved",
+        "photoUnapproved": "Photo moved back to pending",
+        "photoHidden": "Photo hidden",
+        "photoShown": "Photo visible again",
+        "photoFavourited": "Photo added to favourites",
+        "photoUnfavourited": "Photo removed from favourites",
+        "photoUpdateFailed": "The photo could not be updated. Your changes were reverted.",
+        "photoDeleteFailed": "The photo could not be deleted. Nothing was changed.",
+        "galleryLinkCreated": "Gallery link created",
+        "galleryLinkCopied": "Gallery link copied",
+        "galleryLinkCopyFailed": "The gallery link couldn't be copied. Please try again.",
+        "galleryLinkDeleteFailed": "The gallery link couldn't be deleted. Nothing was changed.",
+        "photoDownloaded": "Photo download started",
+        "photoDownloadFailed": "The photo couldn't be downloaded. Please try again.",
+        "zipDownloaded": "Photo archive download started",
+        "zipDownloadFailed": "The photo archive couldn't be prepared. Please try again.",
+        "zipQueued": "Large album queued. We’ll prepare {count} photos in the background.",
+        "zipReady": "Your photo archive is ready. Download started.",
+        "zipExportFailed": "The photo archive could not be generated. Please try again.",
+        "zipExportTimedOut": "The archive is still being prepared. Try the download again in a moment."
       }
     }
   },
@@ -283,83 +254,59 @@
     "title": "Guest Seating",
     "description": "Manage guests, tables and the venue layout for this wedding.",
     "backToWeddings": "Back to weddings",
-
     "loadingDesigner": "Loading seating designer...",
-
     "print": "Print List",
     "printTitle": "Guest List by Tables",
-
     "guests": "Guests",
     "tables": "Tables",
     "photos": "Photos",
     "designerLabel": "Designer",
-
     "searchGuests": "Search guests...",
-
     "addGuest": "Add Guest",
     "addTable": "Add Table",
     "addNewGuest": "Add New Guest",
     "addNewTable": "Add New Table",
-
     "editGuest": "Edit Guest",
     "editTable": "Edit Table",
-
     "total": "Total",
     "seated": "Seated",
     "unseated": "Unseated",
-
     "noGuests": "No guests found",
     "noTables": "No tables created yet",
     "noTablesCreated": "No tables created yet.",
-
     "confirmDeleteGuest": "Are you sure you want to delete this guest?",
     "deleteGuestFailed": "Failed to delete guest",
-
     "confirmDeleteTable": "Are you sure you want to delete this table? All assigned guests will be unseated.",
     "deleteTableFailed": "Failed to delete table",
-
     "table": "Table",
     "tableNumber": "Table {number}",
     "occupied": "Occupied",
     "seats": "Seats",
-
     "edit": "Edit",
     "delete": "Delete",
-
     "firstName": "First Name",
     "firstNamePlaceholder": "e.g. John",
-
     "lastName": "Last Name",
     "lastNamePlaceholder": "e.g. Smith",
-
     "assignTableOptional": "Assign table (Optional)",
     "tableOption": "Table {number} ({seats} seats)",
-
     "updateGuest": "Update Guest",
-
     "tableShape": "Table shape",
     "shapeRound": "Round",
     "shapeSquare": "Square",
     "shapeRectangle": "Rectangle",
-
     "tableNumberLabel": "Table number",
     "tableNumberPlaceholder": "e.g. 1",
-
     "seatsPlaceholder": "e.g. 8",
-
     "seatDistribution": "Seat distribution by side",
     "top": "Top",
     "bottom": "Bottom",
     "left": "Left",
     "right": "Right",
-
     "assignedSeats": "{assigned} / {total} seats assigned",
-
     "tableLabelOptional": "Label (optional)",
     "tableLabelPlaceholder": "e.g. Saiti Family",
-
     "updateTable": "Update table",
-
     "venuePresets": {
       "entrance": "Entrance",
       "pool": "Pool",
@@ -368,7 +315,6 @@
       "bar": "Bar",
       "toilet": "Restroom"
     },
-
     "confirmations": {
       "deleteGuest": {
         "title": "Delete guest?",
@@ -404,7 +350,6 @@
       "galleryLinkDeleted": "Gallery link deleted",
       "galleryLinkDeleteFailed": "The gallery link could not be deleted"
     },
-
     "designer": {
       "unassignedGuests": "Unassigned guests ({count})",
       "searchGuests": "Search by name...",
@@ -426,7 +371,6 @@
       "addElementFailed": "The venue element could not be added.",
       "deleteElementFailed": "The venue element could not be deleted."
     },
-
     "venueEditor": {
       "eyebrow": "Venue designer",
       "title": "Add venue element",
@@ -441,13 +385,11 @@
       "color": "Color",
       "create": "Create element",
       "deleteElement": "Delete {name}",
-
       "shapes": {
         "circle": "Circle",
         "square": "Square",
         "rectangle": "Rectangle"
       },
-
       "colors": {
         "blue": "Blue",
         "rose": "Rose",
@@ -463,85 +405,59 @@
   "weddings": {
     "title": "Weddings",
     "newWedding": "New Wedding",
-
     "backToDashboard": "Back to dashboard",
-
     "noWeddings": "You don't have any weddings yet",
     "noWeddingsDescription": "Create your first wedding to get started",
     "createFirstWedding": "Create First Wedding",
-
     "groom": "Groom",
     "bride": "Bride",
-
     "create": "Create Wedding",
-
     "groomName": "Groom's Name",
     "brideName": "Bride's Name",
-
     "groomEmail": "Groom Email",
     "brideEmail": "Bride Email",
-
     "date": "Wedding Date",
     "location": "Location",
-
     "emri": "Name",
-
     "settings": "Settings",
     "openWedding": "Open wedding",
-
     "status": "Status",
-
     "searchPlaceholder": "Search weddings...",
     "clearSearch": "Clear search",
     "noWeddingFound": "No wedding found for “{query}”",
     "weddingCount": "{count, plural, =1 {# wedding} other {# weddings}}",
-      "moreActions": "More actions",
-      "manageSeating": "Manage seating",
-      "managePhotos": "Manage photos",
-
+    "moreActions": "More actions",
+    "manageSeating": "Manage seating",
+    "managePhotos": "Manage photos",
     "settingsPage": {
       "eyebrow": "Wedding settings",
       "title": "Settings",
       "description": "Manage the wedding details, couple access, theme and active guest features.",
-
       "backToWedding": "Back to wedding",
-
       "coupleDetails": "Couple details",
       "accounts": "Couple accounts",
       "weddingDetails": "Wedding details",
-
       "groomEmail": "Groom email",
       "brideEmail": "Bride email",
-
       "emailNotice": "Changing an email here does not change the email address of an existing login account.",
-
       "publicUrl": "Public URL",
-
       "theme": "Wedding theme",
       "preview": "Preview",
       "themePreviewDescription": "Preview of the selected wedding colour.",
-
       "features": "Guest features",
-
       "findSeat": "Find seat",
       "findSeatDescription": "Allow guests to search for their assigned table.",
-
       "photoUpload": "Photo upload",
       "photoUploadDescription": "Allow guests to upload photos from the wedding.",
-
       "newCredentials": "New login credentials",
       "newCredentialsDescription": "New or reset couple accounts were created. Save these passwords now because they will not be shown again.",
-
       "failedAccounts": "Account creation or reset failed for: {emails}",
-
       "saving": "Saving...",
       "saved": "Saved",
       "saveChanges": "Save changes",
       "saveFailed": "The wedding settings could not be saved.",
       "copyPassword": "Copy password",
-
       "customColor": "Or choose a custom color",
-
       "colorPresets": {
         "rose": "Rose",
         "ocean": "Ocean",
@@ -550,7 +466,6 @@
         "terracotta": "Terracotta",
         "burgundy": "Burgundy"
       },
-
       "notifications": {
         "created": "Wedding created",
         "updated": "Wedding updated",
@@ -589,7 +504,6 @@
     "maxPhotosPerGuest": "Maximum photos per guest cannot exceed 100",
     "maxRetentionDays": "Photo retention cannot exceed 3650 days",
     "seatsMismatch": "The number of seats on each side must equal the total number of seats"
-
   },
   "wedding": {
     "welcome": "You are invited to celebrate with us",
@@ -598,12 +512,12 @@
     "takePhoto": "Take a photo",
     "uploadFromGallery": "Upload from gallery",
     "addMessage": "Add a message",
-      "clearSearch": "Clear search",
-      "noResultsFor": "We couldn't find “{query}” in the guest list.",
-      "yourSeat": "Your seat",
-      "seat": "Seat",
-      "venueMapDescription": "Follow the highlighted route from the entrance to your table.",
-      "mapInteractionHint": "Drag or scroll the map to explore the venue.",
+    "clearSearch": "Clear search",
+    "noResultsFor": "We couldn't find “{query}” in the guest list.",
+    "yourSeat": "Your seat",
+    "seat": "Seat",
+    "venueMapDescription": "Follow the highlighted route from the entrance to your table.",
+    "mapInteractionHint": "Drag or scroll the map to explore the venue.",
     "home": {
       "invitation": "You are invited to celebrate with us",
       "photoDescription": "Help us preserve every beautiful moment of this special day. Share your photos and messages with the couple.",
@@ -643,7 +557,6 @@
       "selectMethod": "Choose how you want to add the photo",
       "camera": "Camera",
       "gallery": "Gallery",
-
       "normal": "Normal",
       "grayscale": "Grayscale",
       "sepia": "Sepia",
@@ -653,30 +566,22 @@
       "dramatic": "Dramatic",
       "soft": "Soft",
       "filters": "Filters",
-
       "flipNormal": "Normal view",
       "flipRotate": "Rotate",
-
       "yourName": "Your name (optional)",
       "yourNamePlaceholder": "e.g. Emma & Tom",
-
       "message": "Message (optional)",
       "messagePlaceholder": "Share a wish or memory...",
-
       "isPublicLabel": "Photos are private and only seen by the couple. If you check this box, the photo may also appear in the public gallery.",
-
       "optimizing": "Optimizing your photo...",
       "uploading": "Uploading...",
       "uploadFailed": "Upload failed",
       "somethingWentWrong": "Something went wrong. Please try again.",
       "sendPhoto": "Send photo",
       "selectPhotoFirst": "Please select a photo first",
-
       "preview": "Photo preview",
-
       "removePhoto": "Remove photo",
       "flipPhoto": "Flip photo",
-
       "success": {
         "title": "Thank You!",
         "subtitle": "Your photo was shared successfully",
@@ -709,23 +614,18 @@
       "title": "Find Your Seat",
       "weddingOf": "The wedding of {bride} & {groom}",
       "hint": "Search your name and see your seat on the map",
-
       "searchLabel": "Guest search",
       "searchPlaceholder": "Search your name...",
       "searchHelper": "Enter at least two letters of your first or last name.",
       "clearSearch": "Clear search",
-
       "resultsLabel": "Guests",
       "noResultsTitle": "Guest not found",
-
       "table": "Table {number}",
       "tableSeat": "Table {number} · Seat {seat}",
       "noTable": "Not assigned to a table yet",
       "viewSeat": "View seat",
-
       "noResults": "We couldn't find \"{query}\" in our guest list.",
       "keepTyping": "Keep typing to find your seat...",
-
       "madeWithWedora": "Made with Wedora"
     }
   },
@@ -951,7 +851,6 @@
     "description": "The page you're looking for doesn't exist, has moved, or is no longer available.",
     "home": "Back to Wedora",
     "back": "Return to home",
-
     "admin": {
       "eyebrow": "Page not found",
       "title": "We couldn't find this admin page.",
@@ -971,7 +870,6 @@
       "reference": "Error reference"
     }
   },
-
   "adminSettings": {
     "eyebrow": "Admin",
     "title": "Settings",

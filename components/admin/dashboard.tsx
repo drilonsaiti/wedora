@@ -42,14 +42,13 @@ import {
     deletePhotoAction,
     getPhotosAction,
     getPhotoSignedUrlsAction,
-    getSignedUrlAction,
     listGalleryTokensAction,
     signOutAction,
     updatePhotoAction,
 } from "@/actions/admin";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Link, useRouter } from "@/lib/navigation";
-import { cn, formatDate, invertUpdate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import type { Photo } from "@/types/database";
 import { toast } from "sonner";
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
@@ -82,7 +81,56 @@ type PhotoUpdate = {
 
 type PhotoFilter = "all" | "favourites";
 
+type QueuedZipResponse = {
+    status: "queued" | "processing";
+    exportId: string;
+    photoCount: number;
+    statusUrl: string;
+    retryAfterSeconds?: number;
+};
+
+type QueuedZipStatusResponse = {
+    status: "queued" | "processing" | "ready" | "failed";
+    photoCount?: number;
+    retryAfterSeconds?: number;
+    downloadUrl?: string;
+    filename?: string;
+    errorCode?: string;
+};
+
 const PAGE_SIZE = 50;
+const ZIP_POLL_TIMEOUT_MS = 10 * 60 * 1000;
+
+function sleep(ms: number) {
+    return new Promise<void>((resolve) => {
+        window.setTimeout(resolve, ms);
+    });
+}
+
+function startUrlDownload(url: string) {
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.rel = "noopener";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+}
+
+function matchesActivePhotoFilter(photo: Photo, activeFilter?: string) {
+    if (activeFilter === "favourites") {
+        return photo.favourite;
+    }
+
+    if (activeFilter === "hidden") {
+        return photo.hidden;
+    }
+
+    if (activeFilter === "unapproved") {
+        return !photo.approved;
+    }
+
+    return true;
+}
 
 export function AdminDashboard({
                                    initialPhotos,
@@ -165,6 +213,10 @@ export function AdminDashboard({
         null
     );
 
+    const [downloadLoading, setDownloadLoading] = useState<
+        Record<string, boolean>
+    >({});
+
     /*
      * Gallery sharing
      */
@@ -178,9 +230,21 @@ export function AdminDashboard({
 
     const [loadingTokens, setLoadingTokens] = useState(false);
 
+    const [galleryTokensError, setGalleryTokensError] = useState(false);
+
+    const [galleryTokenDeleteLoading, setGalleryTokenDeleteLoading] = useState<
+        string | null
+    >(null);
+
     const [showCreateForm, setShowCreateForm] = useState(false);
 
     const [copied, setCopied] = useState(false);
+
+    const [copying, setCopying] = useState(false);
+
+    const [copyingTokenId, setCopyingTokenId] = useState<string | null>(null);
+
+    const [copiedTokenId, setCopiedTokenId] = useState<string | null>(null);
 
     const [showMessages, setShowMessages] = useState(true);
 
@@ -270,66 +334,179 @@ export function AdminDashboard({
     };
 
     /*
-     * Update photo
+     * ============================================
+     * PHOTO MUTATIONS
+     * ============================================
+     *
+     * All photo mutations use the same pattern:
+     *
+     * 1. snapshot current UI state
+     * 2. apply optimistic state
+     * 3. run the server action
+     * 4. keep state + toast on success
+     * 5. restore the exact snapshot + toast on failure
      */
+
+    const showPhotoMutationSuccess = (update: PhotoUpdate) => {
+        if (update.approved !== undefined) {
+            toast.success(
+                t(
+                    update.approved
+                        ? "notifications.photoApproved"
+                        : "notifications.photoUnapproved"
+                )
+            );
+
+            return;
+        }
+
+        if (update.hidden !== undefined) {
+            toast.success(
+                t(
+                    update.hidden
+                        ? "notifications.photoHidden"
+                        : "notifications.photoShown"
+                )
+            );
+
+            return;
+        }
+
+        if (update.favourite !== undefined) {
+            toast.success(
+                t(
+                    update.favourite
+                        ? "notifications.photoFavourited"
+                        : "notifications.photoUnfavourited"
+                )
+            );
+        }
+    };
+
     const handleUpdate = async (id: string, update: PhotoUpdate) => {
+        if (actionLoading[id]) {
+            return;
+        }
+
+        const previousIndex = photos.findIndex((photo) => photo.id === id);
+
+        if (previousIndex === -1) {
+            toast.error(t("notifications.photoUpdateFailed"));
+
+            return;
+        }
+
+        const previousPhoto = photos[previousIndex];
+
+        if (!previousPhoto) {
+            toast.error(t("notifications.photoUpdateFailed"));
+
+            return;
+        }
+
+        const nextPhoto: Photo = {
+            ...previousPhoto,
+            ...update,
+        };
+
+        const remainsVisible = matchesActivePhotoFilter(nextPhoto, activeFilter);
+
+        const wasSelected = selectedPhoto?.id === id;
+
         setActionLoading((current) => ({
             ...current,
             [id]: true,
         }));
 
         /*
-         * Optimistic update
+         * Optimistically update the card.
+         *
+         * If the mutation makes the photo no longer
+         * match the current filter, remove it from the
+         * visible list immediately.
          */
         setPhotos((current) =>
-            current.map((photo) =>
-                photo.id === id
-                    ? {
-                        ...photo,
-                        ...update,
-                    }
-                    : photo
-            )
+            current.flatMap((photo) => {
+                if (photo.id !== id) {
+                    return [photo];
+                }
+
+                const updatedPhoto: Photo = {
+                    ...photo,
+                    ...update,
+                };
+
+                return matchesActivePhotoFilter(updatedPhoto, activeFilter)
+                    ? [updatedPhoto]
+                    : [];
+            })
         );
 
-        setSelectedPhoto((current) =>
-            current?.id === id
-                ? {
-                    ...current,
-                    ...update,
-                }
-                : current
-        );
+        if (!remainsVisible) {
+            setTotal((current) => Math.max(0, current - 1));
+        }
+
+        setSelectedPhoto((current) => {
+            if (current?.id !== id) {
+                return current;
+            }
+
+            /*
+             * A photo leaving the active filtered
+             * list also leaves the viewer.
+             */
+            if (!remainsVisible) {
+                return null;
+            }
+
+            return {
+                ...current,
+                ...update,
+            };
+        });
 
         try {
             const result = await updatePhotoAction(id, weddingId, update);
 
             if (!result.success) {
-                /*
-                 * Revert optimistic update
-                 */
-                setPhotos((current) =>
-                    current.map((photo) =>
-                        photo.id === id
-                            ? {
-                                ...photo,
-                                ...invertUpdate(photo, update),
-                            }
-                            : photo
-                    )
-                );
-
-                setSelectedPhoto((current) =>
-                    current?.id === id
-                        ? {
-                            ...current,
-                            ...invertUpdate(current, update),
-                        }
-                        : current
-                );
+                throw new Error(result.error ?? "Photo update failed");
             }
 
-            startTransition(() => router.refresh());
+            showPhotoMutationSuccess(update);
+
+            startTransition(() => {
+                router.refresh();
+            });
+        } catch (mutationError) {
+            console.error("Photo update error:", mutationError);
+
+            /*
+             * Restore exactly the photo that existed
+             * before the optimistic mutation.
+             */
+            setPhotos((current) => {
+                const withoutPhoto = current.filter((photo) => photo.id !== id);
+
+                const restored = [...withoutPhoto];
+
+                restored.splice(
+                    Math.min(previousIndex, restored.length),
+                    0,
+                    previousPhoto
+                );
+
+                return restored;
+            });
+
+            if (!remainsVisible) {
+                setTotal((current) => current + 1);
+            }
+
+            if (wasSelected) {
+                setSelectedPhoto(previousPhoto);
+            }
+
+            toast.error(t("notifications.photoUpdateFailed"));
         } finally {
             setActionLoading((current) => ({
                 ...current,
@@ -339,12 +516,13 @@ export function AdminDashboard({
     };
 
     /*
-     * Delete photo
-     */
-    /*
-     * Delete photo
+     * Delete starts with the confirmation modal.
      */
     const handleDelete = (id: string) => {
+        if (actionLoading[id]) {
+            return;
+        }
+
         setPhotoToDelete(id);
     };
 
@@ -355,25 +533,57 @@ export function AdminDashboard({
 
         const id = photoToDelete;
 
+        if (actionLoading[id]) {
+            return;
+        }
+
+        const previousIndex = photos.findIndex((photo) => photo.id === id);
+
+        const previousPhoto = previousIndex >= 0 ? photos[previousIndex] : null;
+
+        if (!previousPhoto) {
+            toast.error(t("notifications.photoDeleteFailed"));
+
+            throw new Error("Photo not found in client state");
+        }
+
+        const wasSelected = selectedPhoto?.id === id;
+
         setActionLoading((current) => ({
             ...current,
             [id]: true,
         }));
 
+        /*
+         * Optimistic delete.
+         */
+        setPhotos((current) => current.filter((photo) => photo.id !== id));
+
+        setTotal((current) => Math.max(0, current - 1));
+
+        if (wasSelected) {
+            setSelectedPhoto(null);
+        }
+
         try {
             const result = await deletePhotoAction(id, weddingId);
 
             if (!result.success) {
-                throw new Error("Delete failed");
+                throw new Error(result.error ?? "Photo delete failed");
             }
 
-            setPhotos((current) => current.filter((photo) => photo.id !== id));
+            /*
+             * Clear any now-unused signed URL state.
+             */
+            setSignedUrls((current) => {
+                const next = {
+                    ...current,
+                };
 
-            setTotal((current) => Math.max(0, current - 1));
+                delete next[id];
 
-            if (selectedPhoto?.id === id) {
-                closeModal();
-            }
+                return next;
+            });
 
             toast.success(t("notifications.photoDeleted"));
 
@@ -383,12 +593,35 @@ export function AdminDashboard({
         } catch (deleteError) {
             console.error("Delete photo error:", deleteError);
 
-            toast.error(t("deleteFailed"));
+            /*
+             * Roll back the optimistic deletion.
+             */
+            setPhotos((current) => {
+                if (current.some((photo) => photo.id === id)) {
+                    return current;
+                }
+
+                const restored = [...current];
+
+                restored.splice(
+                    Math.min(previousIndex, restored.length),
+                    0,
+                    previousPhoto
+                );
+
+                return restored;
+            });
+
+            setTotal((current) => current + 1);
+
+            if (wasSelected) {
+                setSelectedPhoto(previousPhoto);
+            }
+
+            toast.error(t("notifications.photoDeleteFailed"));
 
             /*
-             * Important:
-             * throw again so ConfirmationModal
-             * does NOT close on failure.
+             * Keep ConfirmationModal open on failure.
              */
             throw deleteError;
         } finally {
@@ -400,31 +633,130 @@ export function AdminDashboard({
     };
 
     /*
+     * Download helpers
+     */
+    const saveBlob = useCallback((blob: Blob, filename: string) => {
+        const objectUrl = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+
+        anchor.href = objectUrl;
+        anchor.download = filename;
+
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+
+        /*
+         * Delay revocation slightly so browsers have time
+         * to consume the object URL after the click.
+         */
+        window.setTimeout(() => {
+            URL.revokeObjectURL(objectUrl);
+        }, 1000);
+    }, []);
+
+    /*
      * Download one photo
      */
     const handleDownload = async (photo: Photo) => {
-        const urls = await getSignedUrls(photo);
-
-        if (!urls) {
+        if (downloadLoading[photo.id]) {
             return;
         }
 
-        const anchor = document.createElement("a");
+        setDownloadLoading((current) => ({
+            ...current,
+            [photo.id]: true,
+        }));
 
-        anchor.href = urls.original;
+        try {
+            const urls = await getSignedUrls(photo);
 
-        anchor.download = `wedding-photo-${photo.id.slice(0, 8)}.webp`;
+            if (!urls?.original) {
+                throw new Error("Signed photo URL unavailable");
+            }
 
-        document.body.appendChild(anchor);
+            const response = await fetch(urls.original, {
+                cache: "no-store",
+            });
 
-        anchor.click();
-        anchor.remove();
+            if (!response.ok) {
+                throw new Error(`Photo download failed with ${response.status}`);
+            }
+
+            const blob = await response.blob();
+
+            if (blob.size === 0) {
+                throw new Error("Downloaded photo was empty");
+            }
+
+            saveBlob(blob, `wedding-photo-${photo.id.slice(0, 8)}.webp`);
+
+            toast.success(t("notifications.photoDownloaded"));
+        } catch (downloadError) {
+            console.error("Photo download error:", downloadError);
+
+            toast.error(t("notifications.photoDownloadFailed"));
+        } finally {
+            setDownloadLoading((current) => ({
+                ...current,
+                [photo.id]: false,
+            }));
+        }
     };
 
     /*
      * Download ZIP
      */
+    const waitForQueuedZip = async (
+        statusUrl: string
+    ): Promise<QueuedZipStatusResponse> => {
+        const startedAt = Date.now();
+
+        while (Date.now() - startedAt < ZIP_POLL_TIMEOUT_MS) {
+            const response = await fetch(statusUrl, {
+                cache: "no-store",
+            });
+
+            const payload = (await response
+                .json()
+                .catch(() => null)) as QueuedZipStatusResponse | null;
+
+            if (!response.ok) {
+                throw new Error(
+                    `ZIP status failed with ${response.status}: ${
+                        payload?.errorCode ?? "unknown"
+                    }`
+                );
+            }
+
+            if (!payload) {
+                throw new Error("Invalid ZIP status response");
+            }
+
+            if (payload.status === "ready") {
+                return payload;
+            }
+
+            if (payload.status === "failed") {
+                throw new Error(`Queued ZIP failed: ${payload.errorCode ?? "unknown"}`);
+            }
+
+            const retrySeconds = Math.min(
+                10,
+                Math.max(2, payload.retryAfterSeconds ?? 2)
+            );
+
+            await sleep(retrySeconds * 1000);
+        }
+
+        throw new Error("ZIP export polling timed out");
+    };
+
     const handleZipDownload = async (filter: "all" | "favourites") => {
+        if (zipLoading) {
+            return;
+        }
+
         setZipLoading(filter);
 
         try {
@@ -432,32 +764,90 @@ export function AdminDashboard({
                 `/api/admin/zip?weddingId=${weddingId}` +
                 (filter === "favourites" ? "&filter=favourites" : "");
 
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                cache: "no-store",
+            });
 
-            if (!response.ok) {
-                toast.error(t("failedToGenerateZip"));
+            /*
+             * Large album: the server created/reused a queued export.
+             */
+            if (response.status === 202) {
+                const queued = (await response.json()) as QueuedZipResponse;
+
+                if (!queued.exportId || !queued.statusUrl) {
+                    throw new Error("Invalid queued ZIP response");
+                }
+
+                toast.info(
+                    t("notifications.zipQueued", {
+                        count: queued.photoCount,
+                    })
+                );
+
+                let ready: QueuedZipStatusResponse;
+
+                try {
+                    ready = await waitForQueuedZip(queued.statusUrl);
+                } catch (queueError) {
+                    if (
+                        queueError instanceof Error &&
+                        queueError.message === "ZIP export polling timed out"
+                    ) {
+                        toast.error(t("notifications.zipExportTimedOut"));
+
+                        return;
+                    }
+
+                    throw queueError;
+                }
+
+                if (!ready.downloadUrl) {
+                    throw new Error("Queued ZIP is ready without a download URL");
+                }
+
+                startUrlDownload(ready.downloadUrl);
+
+                toast.success(t("notifications.zipReady"));
 
                 return;
             }
 
+            if (!response.ok) {
+                const detail = await response.json().catch(() => null);
+
+                throw new Error(
+                    `ZIP generation failed with ${response.status}: ${
+                        detail?.code ?? "unknown"
+                    }`
+                );
+            }
+
+            /*
+             * Small album: immediate ZIP stream.
+             */
             const blob = await response.blob();
 
-            const objectUrl = URL.createObjectURL(blob);
+            if (blob.size === 0) {
+                throw new Error("Generated ZIP was empty");
+            }
 
             const date = new Date().toISOString().slice(0, 10);
 
-            const anchor = document.createElement("a");
+            saveBlob(blob, `wedding-photos-${filter}-${date}.zip`);
 
-            anchor.href = objectUrl;
+            toast.success(t("notifications.zipDownloaded"));
+        } catch (zipError) {
+            console.error("ZIP download error:", zipError);
 
-            anchor.download = `wedding-photos-${filter}-${date}.zip`;
+            const queuedFailure =
+                zipError instanceof Error &&
+                zipError.message.startsWith("Queued ZIP failed:");
 
-            document.body.appendChild(anchor);
-
-            anchor.click();
-            anchor.remove();
-
-            URL.revokeObjectURL(objectUrl);
+            toast.error(
+                queuedFailure
+                    ? t("notifications.zipExportFailed")
+                    : t("notifications.zipDownloadFailed")
+            );
         } finally {
             setZipLoading(null);
         }
@@ -515,101 +905,232 @@ export function AdminDashboard({
      */
     const loadGalleryTokens = useCallback(async () => {
         setLoadingTokens(true);
+        setGalleryTokensError(false);
 
         try {
             const result = await listGalleryTokensAction(weddingId);
 
+            if (result.error) {
+                throw new Error(result.error);
+            }
+
             setGalleryTokens(result.tokens ?? []);
+
+            return true;
+        } catch (loadError) {
+            console.error("Load gallery links error:", loadError);
+
+            setGalleryTokensError(true);
+
+            return false;
         } finally {
             setLoadingTokens(false);
         }
-    }, []);
+    }, [weddingId]);
 
     const openShareModal = () => {
         setShareOpen(true);
-
         setShareUrl(null);
-
         setCopied(false);
-
+        setCopiedTokenId(null);
+        setGalleryTokensError(false);
         setShowCreateForm(false);
 
         void loadGalleryTokens();
     };
 
     const closeShareModal = () => {
+        if (shareLoading || galleryTokenDeleteLoading) {
+            return;
+        }
+
         setShareOpen(false);
-
         setShareUrl(null);
-
         setCopied(false);
-
+        setCopiedTokenId(null);
         setShowCreateForm(false);
     };
 
     const handleCreateGalleryLink = async () => {
+        if (shareLoading) {
+            return;
+        }
+
         setShareLoading(true);
 
         try {
             const result = await createGalleryTokenAction({
                 weddingId,
-
                 showMessages,
-
                 expiresInDays: expiresInDays ? Number(expiresInDays) : undefined,
-
                 photoFilter,
-
-                label: galleryLabel,
+                label: galleryLabel.trim() || "Wedding Gallery",
             });
 
-            if (result.url) {
-                setShareUrl(result.url);
-
-                await loadGalleryTokens();
-            } else {
-                toast.error(result.error ?? t("failedToCreateLink"));
+            if (!result.url) {
+                throw new Error(result.error ?? "Failed to create gallery link");
             }
+
+            setShareUrl(result.url);
+            setCopied(false);
+
+            toast.success(t("notifications.galleryLinkCreated"));
+
+            /*
+             * Refresh the list in the background so the newly
+             * created link is available when the user goes back.
+             */
+            void loadGalleryTokens();
+        } catch (createError) {
+            console.error("Create gallery link error:", createError);
+
+            toast.error(t("notifications.galleryLinkCreateFailed"));
         } finally {
             setShareLoading(false);
         }
     };
 
+    const copyTextToClipboard = useCallback(async (value: string) => {
+        if (navigator.clipboard?.writeText) {
+            try {
+                await navigator.clipboard.writeText(value);
+                return;
+            } catch (clipboardError) {
+                console.warn(
+                    "Clipboard API unavailable, using fallback:",
+                    clipboardError
+                );
+            }
+        }
+
+        /*
+         * Fallback for older browsers, denied clipboard
+         * permissions, and non-secure local contexts.
+         */
+        const textarea = document.createElement("textarea");
+
+        textarea.value = value;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        textarea.style.opacity = "0";
+
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        let copiedSuccessfully = false;
+
+        try {
+            copiedSuccessfully = document.execCommand("copy");
+        } finally {
+            textarea.remove();
+        }
+
+        if (!copiedSuccessfully) {
+            throw new Error("Clipboard copy failed");
+        }
+    }, []);
+
     const handleCopy = async () => {
-        if (!shareUrl) {
+        if (!shareUrl || copying) {
             return;
         }
 
-        await navigator.clipboard.writeText(shareUrl);
+        setCopying(true);
 
-        setCopied(true);
+        try {
+            await copyTextToClipboard(shareUrl);
 
-        window.setTimeout(() => {
-            setCopied(false);
-        }, 2000);
+            setCopied(true);
+
+            toast.success(t("notifications.galleryLinkCopied"));
+
+            window.setTimeout(() => {
+                setCopied(false);
+            }, 2000);
+        } catch (copyError) {
+            console.error("Copy gallery link error:", copyError);
+
+            toast.error(t("notifications.galleryLinkCopyFailed"));
+        } finally {
+            setCopying(false);
+        }
+    };
+
+    const handleCopyExistingToken = async (token: GalleryToken) => {
+        if (copying || copyingTokenId) {
+            return;
+        }
+
+        setCopyingTokenId(token.id);
+
+        try {
+            const url = `${window.location.origin}/gallery/${token.token}`;
+
+            await copyTextToClipboard(url);
+
+            setCopiedTokenId(token.id);
+
+            toast.success(t("notifications.galleryLinkCopied"));
+
+            window.setTimeout(() => {
+                setCopiedTokenId((current) => (current === token.id ? null : current));
+            }, 2000);
+        } catch (copyError) {
+            console.error("Copy existing gallery link error:", copyError);
+
+            toast.error(t("notifications.galleryLinkCopyFailed"));
+        } finally {
+            setCopyingTokenId(null);
+        }
     };
 
     const handleDeleteToken = (id: string) => {
+        if (galleryTokenDeleteLoading) {
+            return;
+        }
+
         setGalleryTokenToDelete(id);
     };
 
     const confirmDeleteToken = async () => {
-        if (!galleryTokenToDelete) {
+        if (!galleryTokenToDelete || galleryTokenDeleteLoading) {
             return;
         }
 
-        try {
-            await deleteGalleryTokenAction(galleryTokenToDelete, weddingId);
+        const id = galleryTokenToDelete;
+        const previousTokens = galleryTokens;
 
-            await loadGalleryTokens();
+        setGalleryTokenDeleteLoading(id);
+
+        /*
+         * Optimistically remove the link. Roll back if the
+         * server rejects the mutation.
+         */
+        setGalleryTokens((current) => current.filter((token) => token.id !== id));
+
+        try {
+            const result = await deleteGalleryTokenAction(id, weddingId);
+
+            if (!result.success) {
+                throw new Error(result.error ?? "Delete gallery link failed");
+            }
 
             toast.success(t("notifications.galleryLinkDeleted"));
-        } catch (error) {
-            console.error("Delete gallery link error:", error);
+        } catch (deleteError) {
+            console.error("Delete gallery link error:", deleteError);
+
+            setGalleryTokens(previousTokens);
 
             toast.error(t("notifications.galleryLinkDeleteFailed"));
 
-            throw error;
+            /*
+             * Keep ConfirmationModal open on failure.
+             */
+            throw deleteError;
+        } finally {
+            setGalleryTokenDeleteLoading(null);
         }
     };
 
@@ -910,6 +1431,7 @@ export function AdminDashboard({
                     urls={signedUrls[selectedPhoto.id]}
                     isLoadingUrl={loadingUrls[selectedPhoto.id]}
                     isActionLoading={actionLoading[selectedPhoto.id]}
+                    isDownloadLoading={downloadLoading[selectedPhoto.id]}
                     hasPrev={modalIndex > 0}
                     hasNext={modalIndex < photos.length - 1}
                     onClose={closeModal}
@@ -931,6 +1453,7 @@ export function AdminDashboard({
                     onClose={closeShareModal}
                     galleryTokens={galleryTokens}
                     loadingTokens={loadingTokens}
+                    galleryTokensError={galleryTokensError}
                     showCreateForm={showCreateForm}
                     setShowCreateForm={setShowCreateForm}
                     galleryLabel={galleryLabel}
@@ -943,9 +1466,15 @@ export function AdminDashboard({
                     setExpiresInDays={setExpiresInDays}
                     shareLoading={shareLoading}
                     copied={copied}
+                    copying={copying}
+                    copyingTokenId={copyingTokenId}
+                    copiedTokenId={copiedTokenId}
+                    deletingTokenId={galleryTokenDeleteLoading}
                     onCopy={() => void handleCopy()}
+                    onCopyToken={(token) => void handleCopyExistingToken(token)}
+                    onRetryTokens={() => void loadGalleryTokens()}
                     onCreate={() => void handleCreateGalleryLink()}
-                    onDeleteToken={(id) => void handleDeleteToken(id)}
+                    onDeleteToken={handleDeleteToken}
                 />
             )}
             <ConfirmationModal
@@ -960,6 +1489,7 @@ export function AdminDashboard({
                 description={t("confirmations.deletePhoto.description")}
                 confirmLabel={t("confirmations.deletePhoto.confirm")}
                 cancelLabel={tc("cancel")}
+                loading={photoToDelete ? Boolean(actionLoading[photoToDelete]) : false}
                 onConfirm={confirmDeletePhoto}
             />
 
@@ -978,6 +1508,7 @@ export function AdminDashboard({
                 description={t("confirmations.deleteGalleryLink.description")}
                 confirmLabel={t("confirmations.deleteGalleryLink.confirm")}
                 cancelLabel={tc("cancel")}
+                loading={galleryTokenDeleteLoading !== null}
                 onConfirm={confirmDeleteToken}
             />
         </div>
@@ -1310,6 +1841,7 @@ function PhotoModal({
                         urls,
                         isLoadingUrl,
                         isActionLoading,
+                        isDownloadLoading,
                         hasPrev,
                         hasNext,
                         onClose,
@@ -1326,6 +1858,7 @@ function PhotoModal({
     };
     isLoadingUrl?: boolean;
     isActionLoading?: boolean;
+    isDownloadLoading?: boolean;
     hasPrev: boolean;
     hasNext: boolean;
     onClose: () => void;
@@ -1412,10 +1945,15 @@ function PhotoModal({
                     <button
                         type="button"
                         onClick={() => onDownload(photo)}
+                        disabled={isDownloadLoading}
                         aria-label={t("download")}
-                        className="ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/25 text-white backdrop-blur-md transition-colors hover:bg-white/15"
+                        className="ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/25 text-white backdrop-blur-md transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        <Download className="h-4 w-4" />
+                        {isDownloadLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <Download className="h-4 w-4" />
+                        )}
                     </button>
                 </div>
 
@@ -1580,6 +2118,7 @@ function PhotoModal({
 
                     <ActionButton
                         onClick={() => onDownload(photo)}
+                        loading={isDownloadLoading}
                         icon={<Download className="h-4 w-4" />}
                         label={t("download")}
                     />
@@ -1681,6 +2220,7 @@ function ShareGalleryModal({
                                onClose,
                                galleryTokens,
                                loadingTokens,
+                               galleryTokensError,
                                showCreateForm,
                                setShowCreateForm,
                                galleryLabel,
@@ -1693,7 +2233,13 @@ function ShareGalleryModal({
                                setExpiresInDays,
                                shareLoading,
                                copied,
+                               copying,
+                               copyingTokenId,
+                               copiedTokenId,
+                               deletingTokenId,
                                onCopy,
+                               onCopyToken,
+                               onRetryTokens,
                                onCreate,
                                onDeleteToken,
                            }: {
@@ -1702,6 +2248,7 @@ function ShareGalleryModal({
     onClose: () => void;
     galleryTokens: GalleryToken[];
     loadingTokens: boolean;
+    galleryTokensError: boolean;
     showCreateForm: boolean;
     setShowCreateForm: (value: boolean) => void;
     galleryLabel: string;
@@ -1714,7 +2261,13 @@ function ShareGalleryModal({
     setExpiresInDays: (value: string) => void;
     shareLoading: boolean;
     copied: boolean;
+    copying: boolean;
+    copyingTokenId: string | null;
+    copiedTokenId: string | null;
+    deletingTokenId: string | null;
     onCopy: () => void;
+    onCopyToken: (token: GalleryToken) => void;
+    onRetryTokens: () => void;
     onCreate: () => void;
     onDeleteToken: (id: string) => void;
 }) {
@@ -1726,7 +2279,7 @@ function ShareGalleryModal({
         document.body.style.overflow = "hidden";
 
         const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === "Escape") {
+            if (event.key === "Escape" && !shareLoading && !deletingTokenId) {
                 onClose();
             }
         };
@@ -1738,18 +2291,16 @@ function ShareGalleryModal({
 
             window.removeEventListener("keydown", handleKeyDown);
         };
-    }, [onClose]);
-
-    const handleGalleryToken = (token: string) => {
-        const url = `${window.location.origin}/gallery/${token}`;
-
-        setShareUrl(url);
-    };
+    }, [onClose, shareLoading, deletingTokenId]);
 
     return (
         <div
             className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 backdrop-blur-md sm:items-center sm:p-6"
-            onClick={onClose}
+            onClick={() => {
+                if (!shareLoading && !deletingTokenId) {
+                    onClose();
+                }
+            }}
         >
             <div
                 role="dialog"
@@ -1772,8 +2323,9 @@ function ShareGalleryModal({
                     <button
                         type="button"
                         onClick={onClose}
+                        disabled={shareLoading || deletingTokenId !== null}
                         aria-label="Close"
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <X className="h-4 w-4" />
                     </button>
@@ -1788,6 +2340,20 @@ function ShareGalleryModal({
                                     {loadingTokens ? (
                                         <div className="flex justify-center py-12">
                                             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                                        </div>
+                                    ) : galleryTokensError ? (
+                                        <div className="rounded-2xl border border-destructive/15 bg-destructive/[0.05] px-5 py-7 text-center">
+                                            <p className="text-sm font-medium text-foreground">
+                                                {t("galleryLinksLoadFailed")}
+                                            </p>
+
+                                            <button
+                                                type="button"
+                                                onClick={onRetryTokens}
+                                                className="mt-4 inline-flex items-center justify-center rounded-full border border-border/70 bg-card px-4 py-2 text-xs font-medium text-foreground transition-colors hover:bg-secondary"
+                                            >
+                                                {t("retry")}
+                                            </button>
                                         </div>
                                     ) : galleryTokens.length === 0 ? (
                                         <div className="py-8 text-center">
@@ -1829,20 +2395,42 @@ function ShareGalleryModal({
                                                     <div className="flex shrink-0 gap-1">
                                                         <button
                                                             type="button"
-                                                            onClick={() => handleGalleryToken(token.token)}
+                                                            onClick={() => onCopyToken(token)}
+                                                            disabled={
+                                                                copying ||
+                                                                copyingTokenId !== null ||
+                                                                deletingTokenId !== null
+                                                            }
                                                             aria-label={t("copyLink")}
-                                                            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                                                            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                                                         >
-                                                            <Copy className="h-3.5 w-3.5" />
+                                                            {copyingTokenId === token.id ? (
+                                                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                            ) : copiedTokenId === token.id ? (
+                                                                <Check className="h-3.5 w-3.5" />
+                                                            ) : (
+                                                                <Copy className="h-3.5 w-3.5" />
+                                                            )}
                                                         </button>
 
                                                         <button
                                                             type="button"
                                                             onClick={() => onDeleteToken(token.id)}
-                                                            aria-label="Delete"
-                                                            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive"
+                                                            disabled={
+                                                                deletingTokenId !== null ||
+                                                                copying ||
+                                                                copyingTokenId !== null
+                                                            }
+                                                            aria-label={t(
+                                                                "confirmations.deleteGalleryLink.confirm"
+                                                            )}
+                                                            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive disabled:cursor-not-allowed disabled:opacity-50"
                                                         >
-                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                            {deletingTokenId === token.id ? (
+                                                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                            ) : (
+                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                            )}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -2022,12 +2610,19 @@ function ShareGalleryModal({
                                 <button
                                     type="button"
                                     onClick={onCopy}
+                                    disabled={copying}
                                     className={cn(
-                                        "btn-primary flex-1 justify-center",
+                                        "btn-primary flex-1 justify-center disabled:cursor-not-allowed disabled:opacity-60",
                                         copied && "bg-foreground text-background hover:opacity-90"
                                     )}
                                 >
-                                    {copied ? (
+                                    {copying ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+
+                                            {t("copyingLink")}
+                                        </>
+                                    ) : copied ? (
                                         <>
                                             <Check className="h-4 w-4" />
 

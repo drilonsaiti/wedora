@@ -1,49 +1,36 @@
-import {NextResponse} from 'next/server'
-import {createClient, createServiceClient} from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(
-    _req: Request,
-    {params}: { params: Promise<{ weddingId: string }> }
+    request: NextRequest,
+    {
+        params,
+    }: {
+        params: Promise<{
+            weddingId: string;
+        }>;
+    }
 ) {
-    const {weddingId} = await params
+    const { weddingId } = await params;
 
-    const supabaseClient = await createClient()
-    const {data: {user}} = await supabaseClient.auth.getUser()
-    if (!user) return NextResponse.json({error: 'Unauthorized'}, {status: 401})
+    /*
+     * Compatibility route only.
+     *
+     * All authorization and ZIP generation now live
+     * in the canonical /api/admin/zip route.
+     */
+    const source = new URL(request.url);
 
-    const {data: admin} = await supabaseClient
-        .from('admins')
-        .select('id')
-        .eq('id', user.id)
-        .single()
+    const target = new URL("/api/admin/zip", request.url);
 
-    if (!admin) return NextResponse.json({error: 'Forbidden'}, {status: 403})
+    target.searchParams.set("weddingId", weddingId);
 
-    const {data: wedding} = await supabaseClient
-        .from('weddings')
-        .select('id')
-        .eq('id', weddingId)                                     // ← use unwrapped value
-        .maybeSingle()
+    const filter = source.searchParams.get("filter");
 
-    if (!wedding) return NextResponse.json({error: 'Not found'}, {status: 404})
-
-    const supabase = createServiceClient()
-    const {count, error} = await supabase
-        .from('photos')
-        .select('id', {count: 'exact', head: true})
-        .eq('wedding_id', wedding.id)
-
-    if (error) return NextResponse.json({error: error.message}, {status: 500})
-
-    if ((count ?? 0) > 120) {
-        return NextResponse.json({
-            status: 'queued-required',
-            message: 'Album too large for synchronous ZIP on Hobby plan. Please use queued export.',
-        }, {status: 202})
+    if (filter) {
+        target.searchParams.set("filter", filter);
     }
 
-    return NextResponse.json({
-        status: 'not-implemented',
-        message: 'Streaming ZIP not implemented yet in this branch.',
-    }, {status: 501})
+    return NextResponse.redirect(target, 307);
 }
