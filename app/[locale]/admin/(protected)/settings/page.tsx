@@ -1,15 +1,9 @@
-import {
-    LogOut,
-    MonitorCog,
-    Settings2,
-    ShieldCheck,
-    UserRound,
-} from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
-import { redirect } from 'next/navigation'
+import {LogOut, MonitorCog, Settings2, ShieldCheck, UserRound,} from 'lucide-react'
+import {getTranslations} from 'next-intl/server'
+import {redirect} from 'next/navigation'
 
-import { ThemeToggle } from '@/components/theme-toggle'
-import { createClient } from '@/lib/supabase/server'
+import {ThemeToggle} from '@/components/theme-toggle'
+import {createClient} from '@/lib/supabase/server'
 
 export default async function AdminSettingsPage() {
     const t =
@@ -43,7 +37,8 @@ export default async function AdminSettingsPage() {
                 HEADER
             ===================================== */}
             <section className="mb-8">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--accent))] text-[hsl(var(--primary))]">
+                <div
+                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--accent))] text-[hsl(var(--primary))]">
                     <Settings2
                         className="h-4.5 w-4.5"
                         strokeWidth={1.6}
@@ -75,7 +70,8 @@ export default async function AdminSettingsPage() {
                 ===================================== */}
                 <section className="card-wedding overflow-hidden">
                     <div className="flex items-start gap-4 border-b border-border/60 px-5 py-5 sm:px-6">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
+                        <div
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
                             <UserRound
                                 className="h-4 w-4"
                                 strokeWidth={1.6}
@@ -107,14 +103,16 @@ export default async function AdminSettingsPage() {
                                 </p>
                             </div>
 
-                            <div className="flex min-h-11 items-center rounded-xl border border-border/70 bg-secondary/25 px-4">
+                            <div
+                                className="flex min-h-11 items-center rounded-xl border border-border/70 bg-secondary/25 px-4">
                                 <p className="truncate text-sm text-foreground">
                                     {email}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="mt-5 grid gap-5 border-t border-border/60 pt-5 sm:grid-cols-[180px_minmax(0,1fr)] sm:items-center">
+                        <div
+                            className="mt-5 grid gap-5 border-t border-border/60 pt-5 sm:grid-cols-[180px_minmax(0,1fr)] sm:items-center">
                             <div>
                                 <p className="label-wedding mb-0">
                                     {t(
@@ -124,7 +122,8 @@ export default async function AdminSettingsPage() {
                             </div>
 
                             <div>
-                                <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-foreground">
+                                <span
+                                    className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-foreground">
                                     <ShieldCheck
                                         className="h-3.5 w-3.5 text-[hsl(var(--primary))]"
                                         strokeWidth={1.7}
@@ -144,7 +143,8 @@ export default async function AdminSettingsPage() {
                 ===================================== */}
                 <section className="card-wedding overflow-hidden">
                     <div className="flex items-start gap-4 border-b border-border/60 px-5 py-5 sm:px-6">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
+                        <div
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
                             <MonitorCog
                                 className="h-4 w-4"
                                 strokeWidth={1.6}
@@ -166,7 +166,8 @@ export default async function AdminSettingsPage() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                    <div
+                        className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                         <div>
                             <p className="text-sm font-medium text-foreground">
                                 {t(
@@ -181,7 +182,7 @@ export default async function AdminSettingsPage() {
                             </p>
                         </div>
 
-                        <ThemeToggle />
+                        <ThemeToggle/>
                     </div>
                 </section>
 
@@ -190,7 +191,8 @@ export default async function AdminSettingsPage() {
                 ===================================== */}
                 <section className="card-wedding overflow-hidden">
                     <div className="flex items-start gap-4 px-5 py-5 sm:px-6">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
+                        <div
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
                             <ShieldCheck
                                 className="h-4 w-4"
                                 strokeWidth={1.6}

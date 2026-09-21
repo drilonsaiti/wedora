@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,7 @@ export async function GET(
         }>;
     }
 ) {
-    const { weddingId } = await params;
+    const {weddingId} = await params;
 
     /*
      * Compatibility route only.

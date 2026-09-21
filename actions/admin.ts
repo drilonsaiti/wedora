@@ -1,13 +1,13 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
-import { redirect } from "next/navigation";
+import {revalidatePath, revalidateTag} from "next/cache";
+import {redirect} from "next/navigation";
 
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import type { User } from "@supabase/supabase-js";
+import {createClient, createServiceClient} from "@/lib/supabase/server";
+import type {User} from "@supabase/supabase-js";
 
-import { photoUpdateSchema } from "@/schemas";
-import type { PhotoUpdate } from "@/types/database";
+import {photoUpdateSchema} from "@/schemas";
+import type {PhotoUpdate} from "@/types/database";
 
 type PhotoActorRole = "admin" | "owner" | "couple";
 
@@ -27,7 +27,7 @@ async function getPhotoActor(): Promise<PhotoActor> {
     const authClient = await createClient();
 
     const {
-        data: { user },
+        data: {user},
         error: authError,
     } = await authClient.auth.getUser();
 
@@ -37,7 +37,7 @@ async function getPhotoActor(): Promise<PhotoActor> {
 
     const supabase = createServiceClient();
 
-    const { data: admin, error: adminError } = await supabase
+    const {data: admin, error: adminError} = await supabase
         .from("admins")
         .select("id")
         .eq("id", user.id)
@@ -74,9 +74,9 @@ async function requireWeddingPhotoAccess(
 > {
     const context = actor ?? (await getPhotoActor());
 
-    const { user, supabase } = context;
+    const {user, supabase} = context;
 
-    const { data: wedding, error: weddingError } = await supabase
+    const {data: wedding, error: weddingError} = await supabase
         .from("weddings")
         .select("id, owner_user_id")
         .eq("id", weddingId)
@@ -103,7 +103,7 @@ async function requireWeddingPhotoAccess(
 
     /* Assigned couple */
     if (context.coupleWeddingId === weddingId) {
-        const { data: settings, error: settingsError } = await supabase
+        const {data: settings, error: settingsError} = await supabase
             .from("wedding_settings")
             .select("enable_couple_login")
             .eq("wedding_id", weddingId)
@@ -145,7 +145,7 @@ async function requirePhotoAccess(
 ) {
     const context = actor ?? (await getPhotoActor());
 
-    const { data: photo, error: photoError } = await context.supabase
+    const {data: photo, error: photoError} = await context.supabase
         .from("photos")
         .select(
             `
@@ -198,7 +198,7 @@ async function requirePhotoPathAccess(
             ? query.eq("thumbnail_path", path)
             : query.eq("original_path", path);
 
-    const { data: photo, error: photoError } = await query.maybeSingle();
+    const {data: photo, error: photoError} = await query.maybeSingle();
 
     if (photoError) {
         console.error("Photo path lookup failed:", photoError);
@@ -261,9 +261,9 @@ export async function updatePhotoAction(
             };
         }
 
-        const { supabase } = await requirePhotoAccess(id, weddingId);
+        const {supabase} = await requirePhotoAccess(id, weddingId);
 
-        const { approved, hidden, favourite } = parsed.data;
+        const {approved, hidden, favourite} = parsed.data;
 
         const payload: PhotoUpdate = {};
 
@@ -279,7 +279,7 @@ export async function updatePhotoAction(
             payload.favourite = favourite;
         }
 
-        const { data: updatedPhoto, error } = await supabase
+        const {data: updatedPhoto, error} = await supabase
             .from("photos")
             .update(payload)
             .eq("id", id)
@@ -326,7 +326,7 @@ export async function deletePhotoAction(
     error?: string;
 }> {
     try {
-        const { supabase, photo } = await requirePhotoAccess(id, weddingId);
+        const {supabase, photo} = await requirePhotoAccess(id, weddingId);
 
         /*
          * Delete the DB row first.
@@ -335,7 +335,7 @@ export async function deletePhotoAction(
          * private orphan objects. We never leave a live DB
          * row pointing at files that have already vanished.
          */
-        const { data: deletedPhoto, error: dbError } = await supabase
+        const {data: deletedPhoto, error: dbError} = await supabase
             .from("photos")
             .delete()
             .eq("id", id)
@@ -407,9 +407,9 @@ export async function getSignedUrlAction(
     error?: string;
 }> {
     try {
-        const { supabase } = await requirePhotoPathAccess(path, bucket);
+        const {supabase} = await requirePhotoPathAccess(path, bucket);
 
-        const { data, error } = await supabase.storage
+        const {data, error} = await supabase.storage
             .from(bucket)
             .createSignedUrl(path, 3600);
 
@@ -441,7 +441,7 @@ export async function getPhotoSignedUrlsAction(photoId: string): Promise<{
     error?: string;
 }> {
     try {
-        const { supabase, photo } = await requirePhotoAccess(photoId);
+        const {supabase, photo} = await requirePhotoAccess(photoId);
 
         const [thumbResult, originalResult] = await Promise.all([
             supabase.storage
@@ -513,7 +513,7 @@ export async function getBatchSignedUrlsAction(photoIds: string[]): Promise<{
 
         const actor = await getPhotoActor();
 
-        const { data: photos, error: photoError } = await actor.supabase
+        const {data: photos, error: photoError} = await actor.supabase
             .from("photos")
             .select(
                 `
@@ -641,7 +641,7 @@ export async function getPhotosAction(
             };
         }
 
-        const { supabase } = await requireWeddingPhotoAccess(weddingId);
+        const {supabase} = await requireWeddingPhotoAccess(weddingId);
 
         let query = supabase
             .from("photos")
@@ -673,7 +673,7 @@ export async function getPhotosAction(
             query = query.range(from, from + safeLimit - 1);
         }
 
-        const { data, error, count } = await query;
+        const {data, error, count} = await query;
 
         if (error) {
             console.error("Photo listing failed:", error);
@@ -722,14 +722,14 @@ export async function createGalleryTokenAction(
     error?: string;
 }> {
     try {
-        const { user, supabase, weddingId } = await requireWeddingPhotoAccess(
+        const {user, supabase, weddingId} = await requireWeddingPhotoAccess(
             opts.weddingId
         );
 
         let eventId = opts.eventId;
 
         if (eventId) {
-            const { data: event, error: eventError } = await supabase
+            const {data: event, error: eventError} = await supabase
                 .from("events")
                 .select("id")
                 .eq("id", eventId)
@@ -742,7 +742,7 @@ export async function createGalleryTokenAction(
                 };
             }
         } else {
-            const { data: event, error: eventError } = await supabase
+            const {data: event, error: eventError} = await supabase
                 .from("events")
                 .select("id")
                 .eq("wedding_id", weddingId)
@@ -765,7 +765,7 @@ export async function createGalleryTokenAction(
             ? new Date(Date.now() + opts.expiresInDays * 86_400_000).toISOString()
             : null;
 
-        const { data, error } = await supabase
+        const {data, error} = await supabase
             .from("gallery_tokens")
             .insert({
                 event_id: eventId,
@@ -814,9 +814,9 @@ export async function listGalleryTokensAction(weddingId: string): Promise<{
     error?: string;
 }> {
     try {
-        const { supabase } = await requireWeddingPhotoAccess(weddingId);
+        const {supabase} = await requireWeddingPhotoAccess(weddingId);
 
-        const { data, error } = await supabase
+        const {data, error} = await supabase
             .from("gallery_tokens")
             .select(
                 `
@@ -863,9 +863,9 @@ export async function deleteGalleryTokenAction(
     error?: string;
 }> {
     try {
-        const { supabase } = await requireWeddingPhotoAccess(weddingId);
+        const {supabase} = await requireWeddingPhotoAccess(weddingId);
 
-        const { data: tokenRecord, error: tokenLookupError } = await supabase
+        const {data: tokenRecord, error: tokenLookupError} = await supabase
             .from("gallery_tokens")
             .select("id, token")
             .eq("id", id)
@@ -888,7 +888,7 @@ export async function deleteGalleryTokenAction(
             };
         }
 
-        const { data: deletedToken, error } = await supabase
+        const {data: deletedToken, error} = await supabase
             .from("gallery_tokens")
             .delete()
             .eq("id", id)
@@ -955,14 +955,14 @@ export async function getAdminDashboardStats() {
     const supabase = await createClient();
 
     const {
-        data: { user },
+        data: {user},
     } = await supabase.auth.getUser();
 
     if (!user) {
         return null;
     }
 
-    const { data: weddings } = await supabase.from("weddings").select(`
+    const {data: weddings} = await supabase.from("weddings").select(`
                 id,
                 groom_name,
                 bride_name,
@@ -982,9 +982,9 @@ export async function getAdminDashboardStats() {
     const weddingIds = weddings.map((wedding) => wedding.id);
 
     const [
-        { count: totalGuests },
-        { count: totalPhotos },
-        { count: pendingPhotos },
+        {count: totalGuests},
+        {count: totalPhotos},
+        {count: pendingPhotos},
     ] = await Promise.all([
         supabase
             .from("guests")

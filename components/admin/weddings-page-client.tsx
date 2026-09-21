@@ -1,38 +1,17 @@
 'use client'
 
-import {
-    useMemo,
-    useState,
-} from 'react'
+import {useMemo, useState,} from 'react'
 
-import {
-    ArrowLeft,
-    ArrowRight,
-    CalendarDays,
-    Heart,
-    Plus,
-    Search,
-    X,
-} from 'lucide-react'
-import {
-    useLocale,
-    useTranslations,
-} from 'next-intl'
+import {ArrowLeft, ArrowRight, CalendarDays, Heart, Plus, Search, X,} from 'lucide-react'
+import {useLocale, useTranslations,} from 'next-intl'
 
-import { CreateWeddingForm } from '@/components/admin/create-wedding-form'
-import { EditWeddingForm } from '@/components/admin/edit-wedding-form'
-import { WeddingRowActions } from '@/components/admin/wedding-row-actions'
-import { Modal } from '@/components/ui/modal'
-import {
-    Link,
-    useRouter,
-} from '@/lib/navigation'
-import {
-    getWeddingStatus,
-    WEDDING_STATUS_COLORS,
-    WEDDING_STATUS_LABELS,
-} from '@/lib/wedding-status'
-import { cn } from '@/lib/utils'
+import {CreateWeddingForm} from '@/components/admin/create-wedding-form'
+import {EditWeddingForm} from '@/components/admin/edit-wedding-form'
+import {WeddingRowActions} from '@/components/admin/wedding-row-actions'
+import {Modal} from '@/components/ui/modal'
+import {Link, useRouter,} from '@/lib/navigation'
+import {getWeddingStatus, WEDDING_STATUS_COLORS, WEDDING_STATUS_LABELS,} from '@/lib/wedding-status'
+import {cn} from '@/lib/utils'
 import {toast} from "sonner";
 
 export type WeddingSettings = {
@@ -239,7 +218,7 @@ export function WeddingsPageClient({
                         }
                         className="btn-primary justify-center"
                     >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-4 w-4"/>
 
                         {t(
                             'newWedding'
@@ -253,8 +232,10 @@ export function WeddingsPageClient({
             ===================================== */}
             {weddings.length ===
             0 ? (
-                <section className="rounded-[2rem] border border-border/70 bg-card/80 px-6 py-20 text-center shadow-sm backdrop-blur">
-                    <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[hsl(var(--accent))]">
+                <section
+                    className="rounded-[2rem] border border-border/70 bg-card/80 px-6 py-20 text-center shadow-sm backdrop-blur">
+                    <div
+                        className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[hsl(var(--accent))]">
                         <Heart
                             className="h-6 w-6 text-[hsl(var(--primary))]"
                             strokeWidth={
@@ -284,7 +265,7 @@ export function WeddingsPageClient({
                         }
                         className="btn-primary mt-7 inline-flex"
                     >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-4 w-4"/>
 
                         {t(
                             'createFirstWedding'
@@ -338,7 +319,7 @@ export function WeddingsPageClient({
                                     )}
                                     className="absolute right-2.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                                 >
-                                    <X className="h-3.5 w-3.5" />
+                                    <X className="h-3.5 w-3.5"/>
                                 </button>
                             )}
                         </div>
@@ -347,9 +328,11 @@ export function WeddingsPageClient({
                     {/* =====================================
                         LIST
                     ===================================== */}
-                    <section className="overflow-hidden rounded-[2rem] border border-border/70 bg-card/80 shadow-sm backdrop-blur">
+                    <section
+                        className="overflow-hidden rounded-[2rem] border border-border/70 bg-card/80 shadow-sm backdrop-blur">
                         {/* Desktop labels */}
-                        <div className="hidden grid-cols-[minmax(0,1fr)_180px_120px_72px] gap-4 border-b border-border/60 bg-secondary/20 px-6 py-3 lg:grid">
+                        <div
+                            className="hidden grid-cols-[minmax(0,1fr)_180px_120px_72px] gap-4 border-b border-border/60 bg-secondary/20 px-6 py-3 lg:grid">
                             <span className="text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
                                 {t(
                                     'title'
@@ -368,7 +351,7 @@ export function WeddingsPageClient({
                                 )}
                             </span>
 
-                            <span />
+                            <span/>
                         </div>
 
                         {filteredWeddings.length >
@@ -405,7 +388,8 @@ export function WeddingsPageClient({
                             </div>
                         ) : (
                             <div className="px-6 py-16 text-center">
-                                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-secondary">
+                                <div
+                                    className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-secondary">
                                     <Search
                                         className="h-4 w-4 text-muted-foreground"
                                         strokeWidth={
@@ -571,13 +555,15 @@ function WeddingListRow({
         `${groom[0] ?? ''}${bride[0] ?? ''}`.toUpperCase()
 
     return (
-        <div className="group grid gap-4 px-5 py-5 transition-colors hover:bg-secondary/20 sm:px-6 lg:grid-cols-[minmax(0,1fr)_180px_120px_72px] lg:items-center">
+        <div
+            className="group grid gap-4 px-5 py-5 transition-colors hover:bg-secondary/20 sm:px-6 lg:grid-cols-[minmax(0,1fr)_180px_120px_72px] lg:items-center">
             {/* Wedding */}
             <Link
                 href={`/admin/weddings/${wedding.id}`}
                 className="flex min-w-0 items-center gap-4"
             >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))] text-[11px] font-medium tracking-wide text-[hsl(var(--primary))]">
+                <div
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))] text-[11px] font-medium tracking-wide text-[hsl(var(--primary))]">
                     {
                         initials
                     }
@@ -600,7 +586,7 @@ function WeddingListRow({
 
             {/* Date */}
             <div className="flex items-center gap-2 text-xs text-muted-foreground lg:block">
-                <CalendarDays className="h-3.5 w-3.5 lg:hidden" />
+                <CalendarDays className="h-3.5 w-3.5 lg:hidden"/>
 
                 {wedding.wedding_date
                     ? formatWeddingDate(
@@ -648,7 +634,7 @@ function WeddingListRow({
                     )}
                     className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-all hover:bg-foreground hover:text-background"
                 >
-                    <ArrowRight className="h-3.5 w-3.5" />
+                    <ArrowRight className="h-3.5 w-3.5"/>
                 </Link>
             </div>
         </div>

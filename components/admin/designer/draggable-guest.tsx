@@ -1,11 +1,11 @@
 'use client'
 
-import { memo } from 'react'
+import {memo} from 'react'
 
-import { useDraggable } from '@dnd-kit/core'
+import {useDraggable} from '@dnd-kit/core'
 
-import { GuestAvatar } from '@/components/guest-avatar'
-import { cn } from '@/lib/utils'
+import {GuestAvatar} from '@/components/guest-avatar'
+import {cn} from '@/lib/utils'
 
 interface DraggableGuestProps {
     guest: {

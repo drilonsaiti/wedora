@@ -1,8 +1,9 @@
-import type { ComponentProps } from 'react'
+import type {ComponentProps} from 'react'
 
-import { cn } from '@/lib/utils'
+import {cn} from '@/lib/utils'
 
-interface SkeletonProps extends ComponentProps<'div'> {}
+interface SkeletonProps extends ComponentProps<'div'> {
+}
 
 export function Skeleton({
                              className,

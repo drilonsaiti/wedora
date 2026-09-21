@@ -1,13 +1,9 @@
-import { NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
+import {NextResponse} from "next/server";
+import {revalidateTag} from "next/cache";
 
-import {
-    enforceRsvpRateLimit,
-    resolveRsvpApiActor,
-    RsvpApiError,
-} from "@/lib/rsvp-auth";
-import { normalizeGuestName } from "@/lib/utils";
-import { rsvpLookupSchema, rsvpUpdateSchema } from "@/schemas";
+import {enforceRsvpRateLimit, resolveRsvpApiActor, RsvpApiError,} from "@/lib/rsvp-auth";
+import {normalizeGuestName} from "@/lib/utils";
+import {rsvpLookupSchema, rsvpUpdateSchema} from "@/schemas";
 
 export const dynamic = "force-dynamic";
 
@@ -44,13 +40,13 @@ function jsonError(
     retryAfterSeconds?: number
 ) {
     return NextResponse.json(
-        { error: message, code },
+        {error: message, code},
         {
             status,
             headers: {
                 "Cache-Control": "no-store",
                 ...(retryAfterSeconds
-                    ? { "Retry-After": String(retryAfterSeconds) }
+                    ? {"Retry-After": String(retryAfterSeconds)}
                     : {}),
             },
         }
@@ -89,7 +85,7 @@ async function findGuestByName(
     | { status: "not_found" }
     | { status: "ambiguous"; count: number }
 > {
-    const { data, error } = await service
+    const {data, error} = await service
         .from("guests")
         .select(
             "id, first_name, last_name, rsvp_status, rsvp_party_size, rsvp_note, rsvp_responded_at"
@@ -110,14 +106,14 @@ async function findGuestByName(
     );
 
     if (matches.length === 0) {
-        return { status: "not_found" };
+        return {status: "not_found"};
     }
 
     if (matches.length > 1) {
-        return { status: "ambiguous", count: matches.length };
+        return {status: "ambiguous", count: matches.length};
     }
 
-    return { status: "found", guest: matches[0] as GuestRow };
+    return {status: "found", guest: matches[0] as GuestRow};
 }
 
 /*
@@ -128,7 +124,7 @@ async function findGuestByName(
  */
 export async function GET(request: Request) {
     try {
-        const { searchParams } = new URL(request.url);
+        const {searchParams} = new URL(request.url);
 
         const parsed = rsvpLookupSchema.safeParse({
             weddingSlug: searchParams.get("weddingSlug"),
@@ -174,8 +170,8 @@ export async function GET(request: Request) {
         }
 
         return NextResponse.json(
-            { guest: serializeGuest(result.guest) },
-            { headers: { "Cache-Control": "no-store" } }
+            {guest: serializeGuest(result.guest)},
+            {headers: {"Cache-Control": "no-store"}}
         );
     } catch (error) {
         return handleError(error);
@@ -243,7 +239,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const { data: updated, error: updateError } = await actor.service
+        const {data: updated, error: updateError} = await actor.service
             .from("guests")
             .update({
                 rsvp_status: parsed.data.status,
@@ -273,8 +269,8 @@ export async function POST(request: Request) {
         }
 
         return NextResponse.json(
-            { guest: serializeGuest(updated as GuestRow) },
-            { headers: { "Cache-Control": "no-store" } }
+            {guest: serializeGuest(updated as GuestRow)},
+            {headers: {"Cache-Control": "no-store"}}
         );
     } catch (error) {
         return handleError(error);

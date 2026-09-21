@@ -1,13 +1,10 @@
 'use client'
 
-import {
-    motion,
-    useReducedMotion,
-} from 'framer-motion'
-import { useTranslations } from 'next-intl'
+import {motion, useReducedMotion,} from 'framer-motion'
+import {useTranslations} from 'next-intl'
 
-import { cn } from '@/lib/utils'
-import type { Table } from '@/types/seating'
+import {cn} from '@/lib/utils'
+import type {Table} from '@/types/seating'
 
 interface StaticTableProps {
     table: Table

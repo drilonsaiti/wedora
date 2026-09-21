@@ -1,24 +1,17 @@
 "use client";
 
-import {
-    type KeyboardEvent,
-    type ReactNode,
-    useEffect,
-    useId,
-    useRef,
-    useState,
-    useSyncExternalStore,
-} from "react";
+import {type KeyboardEvent, type ReactNode, useEffect, useId, useRef, useState, useSyncExternalStore,} from "react";
 
-import { AlertTriangle, Loader2 } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { createPortal } from "react-dom";
+import {AlertTriangle, Loader2} from "lucide-react";
+import {AnimatePresence, motion, useReducedMotion} from "framer-motion";
+import {createPortal} from "react-dom";
 
-import { cn } from "@/lib/utils";
+import {cn} from "@/lib/utils";
 
 type ConfirmationVariant = "default" | "destructive";
 
-const emptySubscribe = () => () => {};
+const emptySubscribe = () => () => {
+};
 
 interface ConfirmationModalProps {
     open: boolean;
@@ -341,7 +334,7 @@ export function ConfirmationModal({
                                     : "border-border/70 bg-secondary/60 text-foreground",
                             )}
                         >
-                            {icon ?? <AlertTriangle className="h-5 w-5" strokeWidth={1.6} />}
+                            {icon ?? <AlertTriangle className="h-5 w-5" strokeWidth={1.6}/>}
                         </div>
 
                         {/* =================================
@@ -398,7 +391,7 @@ export function ConfirmationModal({
                                 )}
                             >
                                 {loading && (
-                                    <Loader2 aria-hidden className="h-4 w-4 animate-spin" />
+                                    <Loader2 aria-hidden className="h-4 w-4 animate-spin"/>
                                 )}
 
                                 {confirmLabel}

@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import {useEffect, useSyncExternalStore} from "react";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Armchair, MapPin, X } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { createPortal } from "react-dom";
+import {AnimatePresence, motion, useReducedMotion} from "framer-motion";
+import {Armchair, MapPin, X} from "lucide-react";
+import {useTranslations} from "next-intl";
+import {createPortal} from "react-dom";
 
-import { VenueMap } from "@/components/venue-map";
-import type { GuestWithTable, Table, VenueElement } from "@/types/seating";
+import {VenueMap} from "@/components/venue-map";
+import type {GuestWithTable, Table, VenueElement} from "@/types/seating";
 
 interface GuestResultModalProps {
     guest: GuestWithTable | null;
@@ -17,7 +17,8 @@ interface GuestResultModalProps {
     venueElements: VenueElement[];
 }
 
-const emptySubscribe = () => () => {};
+const emptySubscribe = () => () => {
+};
 
 export function GuestResultModal({
                                      guest,
@@ -125,7 +126,8 @@ export function GuestResultModal({
                         {/* =====================================
                             HEADER
                         ===================================== */}
-                        <header className="relative shrink-0 border-b border-border/60 px-5 py-5 text-center sm:px-8 sm:py-6">
+                        <header
+                            className="relative shrink-0 border-b border-border/60 px-5 py-5 text-center sm:px-8 sm:py-6">
                             <button
                                 type="button"
                                 onClick={onClose}
@@ -141,7 +143,7 @@ export function GuestResultModal({
                                     sm:right-6
                                 "
                             >
-                                <X className="h-4 w-4" />
+                                <X className="h-4 w-4"/>
                             </button>
 
                             <p className="mb-1.5 text-[9px] font-medium uppercase tracking-[0.22em] text-[hsl(var(--primary))]">
@@ -157,15 +159,19 @@ export function GuestResultModal({
                         </header>
 
                         {guest.tables ? (
-                            <div className="min-h-0 flex-1 overflow-y-auto lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:overflow-hidden">
+                            <div
+                                className="min-h-0 flex-1 overflow-y-auto lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:overflow-hidden">
                                 {/* =================================
                                     ASSIGNMENT
                                 ================================= */}
-                                <section className="border-b border-border/60 bg-secondary/15 px-5 py-4 sm:px-6 sm:py-5 lg:border-b-0 lg:border-r lg:p-6">
+                                <section
+                                    className="border-b border-border/60 bg-secondary/15 px-5 py-4 sm:px-6 sm:py-5 lg:border-b-0 lg:border-r lg:p-6">
                                     <div className="lg:flex lg:h-full lg:flex-col">
                                         {/* Mobile: compact answer */}
-                                        <div className="flex items-center gap-3 rounded-2xl border border-border/70 bg-background px-4 py-3.5 lg:hidden">
-                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                                        <div
+                                            className="flex items-center gap-3 rounded-2xl border border-border/70 bg-background px-4 py-3.5 lg:hidden">
+                                            <div
+                                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
                                                 <Armchair
                                                     className="h-4 w-4 text-[hsl(var(--primary))]"
                                                     strokeWidth={1.6}
@@ -186,7 +192,7 @@ export function GuestResultModal({
 
                                             {seatNumber != null && (
                                                 <>
-                                                    <div className="h-8 w-px bg-border/70" />
+                                                    <div className="h-8 w-px bg-border/70"/>
 
                                                     <div className="shrink-0 text-right">
                                                         <p className="text-[9px] font-medium uppercase tracking-[0.17em] text-muted-foreground">
@@ -249,7 +255,8 @@ export function GuestResultModal({
                                             </p>
                                         </div>
 
-                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                                        <div
+                                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
                                             <MapPin
                                                 className="h-4 w-4 text-[hsl(var(--primary))]"
                                                 strokeWidth={1.6}
@@ -272,9 +279,12 @@ export function GuestResultModal({
                             /* =================================
                                                             NO TABLE
                                                         ================================= */
-                            <section className="flex flex-1 items-center justify-center overflow-y-auto px-5 py-8 sm:px-8">
-                                <div className="w-full max-w-md rounded-[1.5rem] border border-border/60 bg-secondary/25 px-6 py-10 text-center">
-                                    <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                            <section
+                                className="flex flex-1 items-center justify-center overflow-y-auto px-5 py-8 sm:px-8">
+                                <div
+                                    className="w-full max-w-md rounded-[1.5rem] border border-border/60 bg-secondary/25 px-6 py-10 text-center">
+                                    <div
+                                        className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
                                         <Armchair
                                             className="h-5 w-5 text-[hsl(var(--primary))]"
                                             strokeWidth={1.5}

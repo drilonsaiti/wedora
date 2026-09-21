@@ -1,11 +1,7 @@
-import {
-    Clock3,
-    Heart,
-    Link2Off,
-} from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
+import {Clock3, Heart, Link2Off,} from 'lucide-react'
+import {getTranslations} from 'next-intl/server'
 
-import { Link } from '@/lib/navigation'
+import {Link} from '@/lib/navigation'
 
 type GalleryUnavailableReason =
     | 'invalid'
@@ -33,15 +29,18 @@ export async function GalleryUnavailable({
             : Link2Off
 
     return (
-        <main className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-background px-4 py-12 sm:px-6">
+        <main
+            className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-background px-4 py-12 sm:px-6">
             {/* Ambient background */}
             <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0 overflow-hidden"
             >
-                <div className="absolute left-1/2 top-[-260px] h-[600px] w-[820px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/30 blur-[150px]" />
+                <div
+                    className="absolute left-1/2 top-[-260px] h-[600px] w-[820px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/30 blur-[150px]"/>
 
-                <div className="absolute bottom-[-240px] right-[-180px] h-[440px] w-[440px] rounded-full bg-[hsl(var(--gold))]/[0.07] blur-[130px]" />
+                <div
+                    className="absolute bottom-[-240px] right-[-180px] h-[440px] w-[440px] rounded-full bg-[hsl(var(--gold))]/[0.07] blur-[130px]"/>
             </div>
 
             <div className="relative z-10 w-full max-w-xl">
@@ -51,7 +50,8 @@ export async function GalleryUnavailable({
                         href="/"
                         className="inline-flex items-center gap-2.5"
                     >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
+                        <div
+                            className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
                             <Heart
                                 className="h-3.5 w-3.5"
                                 fill="currentColor"
@@ -66,7 +66,8 @@ export async function GalleryUnavailable({
 
                 {/* State */}
                 <section className="card-wedding px-6 py-10 text-center sm:px-10 sm:py-12">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-border/70 bg-secondary/70 text-muted-foreground">
+                    <div
+                        className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-border/70 bg-secondary/70 text-muted-foreground">
                         <Icon
                             className="h-6 w-6"
                             strokeWidth={
@@ -99,7 +100,8 @@ export async function GalleryUnavailable({
                         )}
                     </p>
 
-                    <div className="mx-auto mt-7 max-w-sm rounded-2xl border border-border/60 bg-secondary/30 px-5 py-4">
+                    <div
+                        className="mx-auto mt-7 max-w-sm rounded-2xl border border-border/60 bg-secondary/30 px-5 py-4">
                         <p className="text-xs leading-5 text-muted-foreground">
                             {t(
                                 'contact'

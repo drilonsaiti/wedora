@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type {ReactNode} from 'react'
 
 import {redirect} from '@/lib/navigation'
 import {createClient} from '@/lib/supabase/server'

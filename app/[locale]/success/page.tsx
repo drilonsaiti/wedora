@@ -1,28 +1,26 @@
 'use client'
 
-import {
-    ArrowLeft,
-    Camera,
-    Check,
-    Heart,
-} from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import {ArrowLeft, Camera, Check, Heart,} from 'lucide-react'
+import {useTranslations} from 'next-intl'
 
-import { Link } from '@/lib/navigation'
+import {Link} from '@/lib/navigation'
 
 export default function SuccessPage() {
     const t = useTranslations('wedding')
 
     return (
-        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-6 py-16">
+        <main
+            className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-6 py-16">
             {/* Ambient background */}
             <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0"
             >
-                <div className="absolute left-1/2 top-1/3 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[hsl(var(--blush))]/30 blur-[120px]" />
+                <div
+                    className="absolute left-1/2 top-1/3 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[hsl(var(--blush))]/30 blur-[120px]"/>
 
-                <div className="absolute bottom-[-180px] right-[-120px] h-[400px] w-[400px] rounded-full bg-[hsl(var(--gold))]/10 blur-[120px]" />
+                <div
+                    className="absolute bottom-[-180px] right-[-120px] h-[400px] w-[400px] rounded-full bg-[hsl(var(--gold))]/10 blur-[120px]"/>
             </div>
 
             <section className="relative z-10 mx-auto w-full max-w-lg text-center">
@@ -43,7 +41,8 @@ export default function SuccessPage() {
                 </Link>
 
                 {/* Success state */}
-                <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-2xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))] shadow-sm">
+                <div
+                    className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-2xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))] shadow-sm">
                     <Check
                         className="h-7 w-7 text-[hsl(var(--primary))]"
                         strokeWidth={1.7}
@@ -65,7 +64,8 @@ export default function SuccessPage() {
                 {/* Confirmation card */}
                 <div className="mt-9 rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur">
                     <div className="flex items-center gap-3 text-left">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                        <div
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
                             <Camera
                                 className="h-4 w-4 text-[hsl(var(--primary))]"
                                 strokeWidth={1.6}
@@ -90,7 +90,7 @@ export default function SuccessPage() {
                         href="/upload"
                         className="btn-primary w-full justify-center"
                     >
-                        <Camera className="h-4 w-4" />
+                        <Camera className="h-4 w-4"/>
 
                         {t('upload.success.uploadAnother')}
                     </Link>
@@ -99,7 +99,7 @@ export default function SuccessPage() {
                         href="/"
                         className="btn-secondary w-full justify-center"
                     >
-                        <ArrowLeft className="h-4 w-4" />
+                        <ArrowLeft className="h-4 w-4"/>
 
                         {t('upload.success.backHome')}
                     </Link>

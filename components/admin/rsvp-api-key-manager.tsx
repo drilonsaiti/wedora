@@ -1,15 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Copy, KeyRound, Loader2, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import {useEffect, useState} from "react";
+import {Copy, KeyRound, Loader2, Trash2} from "lucide-react";
+import {toast} from "sonner";
 
-import { Button } from "@/components/ui/button";
-import {
-    createRsvpApiKeyAction,
-    listRsvpApiKeysAction,
-    revokeRsvpApiKeyAction,
-} from "@/actions/rsvp";
+import {Button} from "@/components/ui/button";
+import {createRsvpApiKeyAction, listRsvpApiKeysAction, revokeRsvpApiKeyAction,} from "@/actions/rsvp";
 
 interface RsvpApiKeyRow {
     id: string;
@@ -114,7 +110,7 @@ export function RsvpApiKeyManager({
 
             setKeys((current) =>
                 current.map((key) =>
-                    key.id === id ? { ...key, revokedAt: new Date().toISOString() } : key,
+                    key.id === id ? {...key, revokedAt: new Date().toISOString()} : key,
                 ),
             );
 
@@ -139,7 +135,7 @@ export function RsvpApiKeyManager({
         <section className="rounded-[1.5rem] border border-border/70 bg-card/85 p-5 shadow-sm sm:p-6">
             <div className="flex items-center gap-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-foreground">
-                    <KeyRound className="h-4 w-4" strokeWidth={1.7} />
+                    <KeyRound className="h-4 w-4" strokeWidth={1.7}/>
                 </div>
 
                 <div>
@@ -196,7 +192,7 @@ export function RsvpApiKeyManager({
                             onClick={() => void copyToClipboard(newKey)}
                             aria-label="Copy API key"
                         >
-                            <Copy className="h-3.5 w-3.5" />
+                            <Copy className="h-3.5 w-3.5"/>
                         </Button>
                     </div>
                 </div>
@@ -218,9 +214,9 @@ export function RsvpApiKeyManager({
                     disabled={creating}
                 >
                     {creating ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        <Loader2 className="h-3.5 w-3.5 animate-spin"/>
                     ) : (
-                        <KeyRound className="h-3.5 w-3.5" />
+                        <KeyRound className="h-3.5 w-3.5"/>
                     )}
                     Create key
                 </Button>
@@ -264,9 +260,9 @@ export function RsvpApiKeyManager({
                             aria-label="Revoke API key"
                         >
                             {revokingId === key.id ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                <Loader2 className="h-3.5 w-3.5 animate-spin"/>
                             ) : (
-                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                <Trash2 className="h-3.5 w-3.5 text-destructive"/>
                             )}
                         </Button>
                     </div>

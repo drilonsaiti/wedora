@@ -1,19 +1,10 @@
 'use client'
 
-import type { CSSProperties } from 'react'
+import type {CSSProperties} from 'react'
 
-import {
-    CircleCheck,
-    Info,
-    Loader2,
-    OctagonX,
-    TriangleAlert,
-} from 'lucide-react'
-import { useTheme } from 'next-themes'
-import {
-    Toaster as Sonner,
-    type ToasterProps,
-} from 'sonner'
+import {CircleCheck, Info, Loader2, OctagonX, TriangleAlert,} from 'lucide-react'
+import {useTheme} from 'next-themes'
+import {Toaster as Sonner, type ToasterProps,} from 'sonner'
 
 export function Toaster(
     props: ToasterProps
@@ -37,23 +28,23 @@ export function Toaster(
             className="toaster group"
             icons={{
                 success: (
-                    <CircleCheck className="h-4 w-4 text-[hsl(var(--primary))]" />
+                    <CircleCheck className="h-4 w-4 text-[hsl(var(--primary))]"/>
                 ),
 
                 info: (
-                    <Info className="h-4 w-4 text-muted-foreground" />
+                    <Info className="h-4 w-4 text-muted-foreground"/>
                 ),
 
                 warning: (
-                    <TriangleAlert className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    <TriangleAlert className="h-4 w-4 text-amber-600 dark:text-amber-400"/>
                 ),
 
                 error: (
-                    <OctagonX className="h-4 w-4 text-destructive" />
+                    <OctagonX className="h-4 w-4 text-destructive"/>
                 ),
 
                 loading: (
-                    <Loader2 className="h-4 w-4 animate-spin text-[hsl(var(--primary))]" />
+                    <Loader2 className="h-4 w-4 animate-spin text-[hsl(var(--primary))]"/>
                 ),
             }}
             toastOptions={{

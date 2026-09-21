@@ -1,5 +1,5 @@
-import { Camera, LayoutGrid, MapPin, Palette } from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
+import {Camera, LayoutGrid, MapPin, Palette} from 'lucide-react'
+import {getTranslations} from 'next-intl/server'
 import {SectionHeading} from "@/components/ui/SectionHeading";
 
 const BENEFITS = [
@@ -25,10 +25,11 @@ const BENEFITS = [
     },
 ] as const
 
-function FeatureDecoration({ type }: { type: string }) {
+function FeatureDecoration({type}: { type: string }) {
     if (type === 'seat') {
         return (
-            <div className="absolute bottom-[-45px] right-[-15px] w-[55%] min-w-[260px] rounded-[1.7rem] border border-border/70 bg-background p-4 shadow-xl transition-transform duration-500 group-hover:-translate-y-2">
+            <div
+                className="absolute bottom-[-45px] right-[-15px] w-[55%] min-w-[260px] rounded-[1.7rem] border border-border/70 bg-background p-4 shadow-xl transition-transform duration-500 group-hover:-translate-y-2">
                 <p className="mb-3 text-[9px] uppercase tracking-widest text-muted-foreground">
                     Find your seat
                 </p>
@@ -49,7 +50,7 @@ function FeatureDecoration({ type }: { type: string }) {
                             </p>
                         </div>
 
-                        <MapPin className="h-4 w-4 text-[hsl(var(--primary))]" />
+                        <MapPin className="h-4 w-4 text-[hsl(var(--primary))]"/>
                     </div>
                 </div>
             </div>
@@ -58,7 +59,8 @@ function FeatureDecoration({ type }: { type: string }) {
 
     if (type === 'guests') {
         return (
-            <div className="absolute bottom-[-25px] right-[-20px] grid w-[55%] grid-cols-2 gap-2 rotate-[-4deg] opacity-90">
+            <div
+                className="absolute bottom-[-25px] right-[-20px] grid w-[55%] grid-cols-2 gap-2 rotate-[-4deg] opacity-90">
                 {[1, 2, 3, 4].map((item) => (
                     <div
                         key={item}
@@ -87,7 +89,8 @@ function FeatureDecoration({ type }: { type: string }) {
     }
 
     return (
-        <div className="absolute bottom-[-50px] right-[-20px] h-[220px] w-[220px] rounded-full border-[35px] border-[hsl(var(--accent))] opacity-80 transition-transform duration-500 group-hover:scale-110" />
+        <div
+            className="absolute bottom-[-50px] right-[-20px] h-[220px] w-[220px] rounded-full border-[35px] border-[hsl(var(--accent))] opacity-80 transition-transform duration-500 group-hover:scale-110"/>
     )
 }
 
@@ -104,13 +107,14 @@ export async function FeaturesSection() {
                 />
 
                 <div className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-12">
-                    {BENEFITS.map(({ id, icon: Icon, className }) => (
+                    {BENEFITS.map(({id, icon: Icon, className}) => (
                         <article
                             key={id}
                             className={`group relative min-h-[340px] overflow-hidden rounded-[2rem] border border-border/70 bg-card p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl md:p-9 ${className}`}
                         >
                             <div className="relative z-10 max-w-md">
-                                <div className="mb-7 flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                                <div
+                                    className="mb-7 flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
                                     <Icon
                                         className="h-5 w-5 text-[hsl(var(--primary))]"
                                         strokeWidth={1.5}
@@ -126,7 +130,7 @@ export async function FeaturesSection() {
                                 </p>
                             </div>
 
-                            <FeatureDecoration type={id} />
+                            <FeatureDecoration type={id}/>
                         </article>
                     ))}
                 </div>

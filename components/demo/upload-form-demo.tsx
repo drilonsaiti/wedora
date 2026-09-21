@@ -1,33 +1,16 @@
 'use client'
 
-import {
-    useCallback,
-    useEffect,
-    useRef,
-    useState,
-} from 'react'
+import {useCallback, useEffect, useRef, useState,} from 'react'
 
-import {
-    ArrowLeftRight,
-    Camera,
-    Check,
-    ImageIcon,
-    Loader2,
-    Upload,
-    X,
-} from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import {ArrowLeftRight, Camera, Check, ImageIcon, Loader2, Upload, X,} from 'lucide-react'
+import {useTranslations} from 'next-intl'
+import {useForm} from 'react-hook-form'
+import {zodResolver} from '@hookform/resolvers/zod'
 import imageCompression from 'browser-image-compression'
 import loadImage from 'blueimp-load-image'
 
-import {
-    fileSchema,
-    uploadFormSchema,
-    type UploadFormValues,
-} from '@/schemas'
-import { cn, formatBytes } from '@/lib/utils'
+import {fileSchema, uploadFormSchema, type UploadFormValues,} from '@/schemas'
+import {cn, formatBytes} from '@/lib/utils'
 
 type UploadState =
     | 'idle'
@@ -104,7 +87,7 @@ export function UploadFormDemo() {
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: {errors},
         reset,
     } = useForm<UploadFormValues>({
         resolver: zodResolver(
@@ -398,7 +381,8 @@ export function UploadFormDemo() {
     if (uploadState === 'done') {
         return (
             <div className="py-7 text-center sm:py-9">
-                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]">
+                <div
+                    className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]">
                     <Check
                         className="h-6 w-6 text-[hsl(var(--primary))]"
                         strokeWidth={
@@ -426,7 +410,7 @@ export function UploadFormDemo() {
                     }
                     className="btn-secondary mt-7 w-full justify-center"
                 >
-                    <Camera className="h-4 w-4" />
+                    <Camera className="h-4 w-4"/>
 
                     {t(
                         'success.tryAgain'
@@ -447,7 +431,8 @@ export function UploadFormDemo() {
             {!selectedFile ? (
                 <div>
                     <div className="text-center">
-                        <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                        <div
+                            className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
                             <ImageIcon
                                 className="h-5 w-5 text-[hsl(var(--primary))]"
                                 strokeWidth={
@@ -471,7 +456,8 @@ export function UploadFormDemo() {
                                 }
                                 className="group flex min-h-[112px] flex-col items-center justify-center gap-3 rounded-2xl border border-border/70 bg-background px-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[hsl(var(--primary))]/25 hover:shadow-sm"
                             >
-                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--accent))] transition-transform duration-200 group-hover:scale-105">
+                                <div
+                                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--accent))] transition-transform duration-200 group-hover:scale-105">
                                     <Camera
                                         className="h-4 w-4 text-[hsl(var(--primary))]"
                                         strokeWidth={
@@ -494,7 +480,8 @@ export function UploadFormDemo() {
                                 }
                                 className="group flex min-h-[112px] flex-col items-center justify-center gap-3 rounded-2xl border border-border/70 bg-background px-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[hsl(var(--primary))]/25 hover:shadow-sm"
                             >
-                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--accent))] transition-transform duration-200 group-hover:scale-105">
+                                <div
+                                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--accent))] transition-transform duration-200 group-hover:scale-105">
                                     <Upload
                                         className="h-4 w-4 text-[hsl(var(--primary))]"
                                         strokeWidth={
@@ -540,7 +527,8 @@ export function UploadFormDemo() {
                         />
 
                         {/* Subtle overlay */}
-                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
+                        <div
+                            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20"/>
 
                         {!isLoading && (
                             <>
@@ -553,7 +541,7 @@ export function UploadFormDemo() {
                                     aria-label="Remove photo"
                                     className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/35 text-white backdrop-blur-md transition hover:bg-black/55"
                                 >
-                                    <X className="h-4 w-4" />
+                                    <X className="h-4 w-4"/>
                                 </button>
 
                                 {/* Flip */}
@@ -564,7 +552,7 @@ export function UploadFormDemo() {
                                     }
                                     className="absolute left-3 top-3 flex h-9 items-center gap-1.5 rounded-full border border-white/10 bg-black/35 px-3 text-[10px] font-medium text-white backdrop-blur-md transition hover:bg-black/55"
                                 >
-                                    <ArrowLeftRight className="h-3.5 w-3.5" />
+                                    <ArrowLeftRight className="h-3.5 w-3.5"/>
 
                                     {isFlipped
                                         ? t(
@@ -578,7 +566,8 @@ export function UploadFormDemo() {
                         )}
 
                         {/* File size */}
-                        <div className="absolute bottom-3 left-3 rounded-full border border-white/10 bg-black/35 px-2.5 py-1.5 text-[9px] font-medium tracking-wide text-white/80 backdrop-blur-md">
+                        <div
+                            className="absolute bottom-3 left-3 rounded-full border border-white/10 bg-black/35 px-2.5 py-1.5 text-[9px] font-medium tracking-wide text-white/80 backdrop-blur-md">
                             {formatBytes(
                                 selectedFile.size
                             )}
@@ -812,7 +801,7 @@ export function UploadFormDemo() {
             >
                 {isLoading ? (
                     <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin"/>
 
                         {uploadState ===
                         'compressing'
@@ -825,7 +814,7 @@ export function UploadFormDemo() {
                     </>
                 ) : (
                     <>
-                        <Upload className="h-4 w-4" />
+                        <Upload className="h-4 w-4"/>
 
                         {t('submit')}
                     </>

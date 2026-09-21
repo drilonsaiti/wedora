@@ -1,12 +1,8 @@
-import { redirect } from 'next/navigation'
+import {redirect} from 'next/navigation'
 
-import {
-    getGuests,
-    getTables,
-    getVenueElements,
-} from '@/actions/seating'
-import { CoupleSeatingView } from '@/components/couple/couple-seating-view'
-import { createClient } from '@/lib/supabase/server'
+import {getGuests, getTables, getVenueElements,} from '@/actions/seating'
+import {CoupleSeatingView} from '@/components/couple/couple-seating-view'
+import {createClient} from '@/lib/supabase/server'
 
 type Props = {
     params: Promise<{
@@ -19,11 +15,11 @@ export const dynamic = 'force-dynamic'
 export default async function CoupleSeatingPage({
                                                     params,
                                                 }: Props) {
-    const { weddingId } = await params
+    const {weddingId} = await params
     const supabase = await createClient()
 
     const {
-        data: { user },
+        data: {user},
     } = await supabase.auth.getUser()
 
     if (!user) {
@@ -44,7 +40,7 @@ export default async function CoupleSeatingPage({
         redirect('/couple/login')
     }
 
-    const { data: settings } =
+    const {data: settings} =
         await supabase
             .from('wedding_settings')
             .select(

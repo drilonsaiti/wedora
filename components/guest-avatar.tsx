@@ -1,5 +1,5 @@
-import { memo } from 'react'
-import { cn } from '@/lib/utils'
+import {memo} from 'react'
+import {cn} from '@/lib/utils'
 
 interface GuestAvatarProps {
     initials: string
@@ -37,7 +37,7 @@ const colorMap: Record<string, string> = {
 }
 
 export const GuestAvatar = memo(
-    ({ initials, className, size = 'md' }: GuestAvatarProps) => {
+    ({initials, className, size = 'md'}: GuestAvatarProps) => {
         const firstLetter = initials.charAt(0).toUpperCase()
 
         const colors =

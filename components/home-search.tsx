@@ -1,28 +1,14 @@
 'use client'
 
-import {
-    useMemo,
-    useState,
-} from 'react'
+import {useMemo, useState,} from 'react'
 
-import {
-    ArrowRight,
-    Search,
-    X,
-} from 'lucide-react'
-import {
-    AnimatePresence,
-    motion,
-} from 'framer-motion'
-import { useTranslations } from 'next-intl'
+import {ArrowRight, Search, X,} from 'lucide-react'
+import {AnimatePresence, motion,} from 'framer-motion'
+import {useTranslations} from 'next-intl'
 
-import { GuestAvatar } from '@/components/guest-avatar'
-import { GuestResultModal } from '@/components/guest-result-modal'
-import type {
-    GuestWithTable,
-    Table,
-    VenueElement,
-} from '@/types/seating'
+import {GuestAvatar} from '@/components/guest-avatar'
+import {GuestResultModal} from '@/components/guest-result-modal'
+import type {GuestWithTable, Table, VenueElement,} from '@/types/seating'
 
 interface HomeSearchProps {
     guests: GuestWithTable[]
@@ -173,7 +159,7 @@ export function HomeSearch({
                         )}
                         className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                     >
-                        <X className="h-3.5 w-3.5" />
+                        <X className="h-3.5 w-3.5"/>
                     </button>
                 )}
             </div>
@@ -289,7 +275,8 @@ export function HomeSearch({
                                                     </p>
                                                 </div>
 
-                                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-all group-hover:bg-foreground group-hover:text-background">
+                                                <div
+                                                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-all group-hover:bg-foreground group-hover:text-background">
                                                     <ArrowRight
                                                         className="h-4 w-4"
                                                         strokeWidth={

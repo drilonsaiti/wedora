@@ -1,35 +1,17 @@
 'use client'
 
-import {
-    useEffect,
-    useState,
-} from 'react'
+import {useEffect, useState,} from 'react'
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import {
-    Circle,
-    Loader2,
-    Minus,
-    Plus,
-    RectangleHorizontal,
-    Square,
-    type LucideIcon,
-} from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import {zodResolver} from '@hookform/resolvers/zod'
+import {Circle, Loader2, type LucideIcon, Minus, Plus, RectangleHorizontal, Square,} from 'lucide-react'
+import {useTranslations} from 'next-intl'
 import {useForm, useWatch} from 'react-hook-form'
 
-import {
-    addTable,
-    updateTable,
-} from '@/actions/seating'
-import { distributeSeatsEvenly } from '@/lib/seat-generator'
-import { cn } from '@/lib/utils'
-import { getValidationMessage } from '@/lib/validation'
-import {
-    type SeatSides,
-    type TableFormValues,
-    tableSchema,
-} from '@/schemas'
+import {addTable, updateTable,} from '@/actions/seating'
+import {distributeSeatsEvenly} from '@/lib/seat-generator'
+import {cn} from '@/lib/utils'
+import {getValidationMessage} from '@/lib/validation'
+import {type SeatSides, type TableFormValues, tableSchema,} from '@/schemas'
 
 interface TableFormProps {
     initialValues?: Partial<TableFormValues> & {
@@ -72,7 +54,8 @@ function SideStepper({
                 {label}
             </span>
 
-            <div className="flex h-8 items-center overflow-hidden rounded-xl border border-border/70 bg-background shadow-sm">
+            <div
+                className="flex h-8 items-center overflow-hidden rounded-xl border border-border/70 bg-background shadow-sm">
                 <button
                     type="button"
                     onClick={() =>
@@ -642,8 +625,9 @@ export function TableForm({
                         </div>
 
                         {/* Visual table layout */}
-                        <div className="mx-auto grid max-w-[270px] grid-cols-[1fr_auto_1fr] grid-rows-[auto_1fr_auto] items-center justify-items-center gap-x-3 gap-y-4">
-                            <div />
+                        <div
+                            className="mx-auto grid max-w-[270px] grid-cols-[1fr_auto_1fr] grid-rows-[auto_1fr_auto] items-center justify-items-center gap-x-3 gap-y-4">
+                            <div/>
 
                             <SideStepper
                                 label={t(
@@ -663,7 +647,7 @@ export function TableForm({
                                 }
                             />
 
-                            <div />
+                            <div/>
 
                             <SideStepper
                                 label={t(
@@ -717,7 +701,7 @@ export function TableForm({
                                 }
                             />
 
-                            <div />
+                            <div/>
 
                             <SideStepper
                                 label={t(
@@ -737,7 +721,7 @@ export function TableForm({
                                 }
                             />
 
-                            <div />
+                            <div/>
                         </div>
 
                         {seatSidesError && (
@@ -829,7 +813,7 @@ export function TableForm({
                 >
                     {loading ? (
                         <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader2 className="h-4 w-4 animate-spin"/>
 
                             {tc(
                                 'saving'

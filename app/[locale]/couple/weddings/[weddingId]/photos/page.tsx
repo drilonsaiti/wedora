@@ -1,8 +1,8 @@
-import { redirect } from "next/navigation";
+import {redirect} from "next/navigation";
 
-import { getPhotosAction } from "@/actions/admin";
-import { AdminDashboard } from "@/components/admin/dashboard";
-import { createClient } from "@/lib/supabase/server";
+import {getPhotosAction} from "@/actions/admin";
+import {AdminDashboard} from "@/components/admin/dashboard";
+import {createClient} from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -20,10 +20,10 @@ export default async function CoupleWeddingPhotosPage({
                                                           searchParams,
                                                       }: Props) {
     const supabase = await createClient();
-    const { weddingId } = await params;
+    const {weddingId} = await params;
 
     const {
-        data: { user },
+        data: {user},
     } = await supabase.auth.getUser();
 
     if (!user) {
@@ -39,7 +39,7 @@ export default async function CoupleWeddingPhotosPage({
         redirect("/couple/login");
     }
 
-    const { data: settings } = await supabase
+    const {data: settings} = await supabase
         .from("wedding_settings")
         .select("enable_couple_login")
         .eq("wedding_id", weddingId)
@@ -49,15 +49,15 @@ export default async function CoupleWeddingPhotosPage({
         redirect("/couple/login");
     }
 
-    const { filter } = await searchParams;
+    const {filter} = await searchParams;
 
     const filters =
         filter === "favourites"
-            ? { favourite: true }
+            ? {favourite: true}
             : filter === "hidden"
-                ? { hidden: true }
+                ? {hidden: true}
                 : filter === "unapproved"
-                    ? { approved: false }
+                    ? {approved: false}
                     : undefined;
 
     const photoResult = await getPhotosAction(weddingId, filters, 50, 0);

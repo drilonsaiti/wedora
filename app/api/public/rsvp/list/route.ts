@@ -1,10 +1,6 @@
-import { NextResponse } from "next/server";
+import {NextResponse} from "next/server";
 
-import {
-    enforceRsvpRateLimit,
-    resolveRsvpApiActor,
-    RsvpApiError,
-} from "@/lib/rsvp-auth";
+import {enforceRsvpRateLimit, resolveRsvpApiActor, RsvpApiError,} from "@/lib/rsvp-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -20,13 +16,13 @@ function jsonError(
     retryAfterSeconds?: number
 ) {
     return NextResponse.json(
-        { error: message, code },
+        {error: message, code},
         {
             status,
             headers: {
                 "Cache-Control": "no-store",
                 ...(retryAfterSeconds
-                    ? { "Retry-After": String(retryAfterSeconds) }
+                    ? {"Retry-After": String(retryAfterSeconds)}
                     : {}),
             },
         }
@@ -43,7 +39,7 @@ function jsonError(
  */
 export async function GET(request: Request) {
     try {
-        const { searchParams } = new URL(request.url);
+        const {searchParams} = new URL(request.url);
 
         const weddingSlug = searchParams.get("weddingSlug");
         const statusFilter = searchParams.get("status");
@@ -76,11 +72,11 @@ export async function GET(request: Request) {
             .from("guests")
             .select(
                 "id, first_name, last_name, rsvp_status, rsvp_party_size, rsvp_note, rsvp_responded_at",
-                { count: "exact" }
+                {count: "exact"}
             )
             .eq("wedding_id", actor.wedding.id)
-            .order("last_name", { ascending: true })
-            .order("first_name", { ascending: true })
+            .order("last_name", {ascending: true})
+            .order("first_name", {ascending: true})
             .range(offset, offset + limit - 1);
 
         if (statusFilter) {
@@ -90,7 +86,7 @@ export async function GET(request: Request) {
             );
         }
 
-        const { data, error, count } = await query;
+        const {data, error, count} = await query;
 
         if (error) {
             console.error("RSVP list query failed:", error);
@@ -113,7 +109,7 @@ export async function GET(request: Request) {
                 limit,
                 offset,
             },
-            { headers: { "Cache-Control": "no-store" } }
+            {headers: {"Cache-Control": "no-store"}}
         );
     } catch (error) {
         if (error instanceof RsvpApiError) {

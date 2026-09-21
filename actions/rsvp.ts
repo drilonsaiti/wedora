@@ -1,16 +1,12 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
-import { redirect } from "next/navigation";
-import type { User } from "@supabase/supabase-js";
+import {revalidateTag} from "next/cache";
+import {redirect} from "next/navigation";
+import type {User} from "@supabase/supabase-js";
 
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { generateRsvpApiKey } from "@/lib/rsvp-auth";
-import {
-    rsvpApiKeyLabelSchema,
-    rsvpManualUpdateSchema,
-    type RsvpManualUpdateInput,
-} from "@/schemas";
+import {createClient, createServiceClient} from "@/lib/supabase/server";
+import {generateRsvpApiKey} from "@/lib/rsvp-auth";
+import {rsvpApiKeyLabelSchema, type RsvpManualUpdateInput, rsvpManualUpdateSchema,} from "@/schemas";
 
 /*
  * ============================================
@@ -26,7 +22,7 @@ async function requireActor() {
     const authClient = await createClient();
 
     const {
-        data: { user },
+        data: {user},
     } = await authClient.auth.getUser();
 
     if (!user) {
@@ -35,7 +31,7 @@ async function requireActor() {
 
     const serviceClient = createServiceClient();
 
-    const { data: admin, error: adminError } = await serviceClient
+    const {data: admin, error: adminError} = await serviceClient
         .from("admins")
         .select("id")
         .eq("id", user.id)
@@ -57,7 +53,7 @@ async function requireWeddingAccess(
     weddingId: string,
     actor?: Awaited<ReturnType<typeof requireActor>>
 ) {
-    const { user, role } = actor ?? (await requireActor());
+    const {user, role} = actor ?? (await requireActor());
 
     const supabase = createServiceClient();
 
@@ -70,7 +66,7 @@ async function requireWeddingAccess(
         query = query.eq("owner_user_id", user.id);
     }
 
-    const { data: wedding, error } = await query.maybeSingle();
+    const {data: wedding, error} = await query.maybeSingle();
 
     if (error) {
         throw new Error(error.message);
@@ -84,7 +80,7 @@ async function requireWeddingAccess(
         throw new Error("Wedding not found");
     }
 
-    return { user, role, supabase, weddingId: wedding.id };
+    return {user, role, supabase, weddingId: wedding.id};
 }
 
 /*
@@ -112,19 +108,19 @@ export async function createRsvpApiKeyAction(
     error?: string;
 }> {
     try {
-        const parsed = rsvpApiKeyLabelSchema.safeParse({ label });
+        const parsed = rsvpApiKeyLabelSchema.safeParse({label});
 
         if (!parsed.success) {
-            return { success: false, error: "Invalid input" };
+            return {success: false, error: "Invalid input"};
         }
 
-        const { supabase, user, weddingId: id } = await requireWeddingAccess(
+        const {supabase, user, weddingId: id} = await requireWeddingAccess(
             weddingId
         );
 
-        const { raw, prefix, hash } = generateRsvpApiKey();
+        const {raw, prefix, hash} = generateRsvpApiKey();
 
-        const { data, error } = await supabase
+        const {data, error} = await supabase
             .from("wedding_rsvp_api_keys")
             .insert({
                 wedding_id: id,
@@ -139,7 +135,7 @@ export async function createRsvpApiKeyAction(
         if (error || !data) {
             console.error("RSVP API key creation failed:", error);
 
-            return { success: false, error: "Failed to create API key" };
+            return {success: false, error: "Failed to create API key"};
         }
 
         revalidateTag(`rsvp-keys-${id}`, "max");
@@ -176,20 +172,20 @@ export async function listRsvpApiKeysAction(weddingId: string): Promise<{
     error?: string;
 }> {
     try {
-        const { supabase, weddingId: id } = await requireWeddingAccess(
+        const {supabase, weddingId: id} = await requireWeddingAccess(
             weddingId
         );
 
-        const { data, error } = await supabase
+        const {data, error} = await supabase
             .from("wedding_rsvp_api_keys")
             .select("id, key_prefix, label, created_at, last_used_at, revoked_at")
             .eq("wedding_id", id)
-            .order("created_at", { ascending: false });
+            .order("created_at", {ascending: false});
 
         if (error) {
             console.error("RSVP API key listing failed:", error);
 
-            return { keys: [], error: "Failed to load API keys" };
+            return {keys: [], error: "Failed to load API keys"};
         }
 
         return {
@@ -217,13 +213,13 @@ export async function revokeRsvpApiKeyAction(
     keyId: string
 ): Promise<{ success: boolean; error?: string }> {
     try {
-        const { supabase, weddingId: id } = await requireWeddingAccess(
+        const {supabase, weddingId: id} = await requireWeddingAccess(
             weddingId
         );
 
-        const { data, error } = await supabase
+        const {data, error} = await supabase
             .from("wedding_rsvp_api_keys")
-            .update({ revoked_at: new Date().toISOString() })
+            .update({revoked_at: new Date().toISOString()})
             .eq("id", keyId)
             .eq("wedding_id", id)
             .select("id")
@@ -232,16 +228,16 @@ export async function revokeRsvpApiKeyAction(
         if (error) {
             console.error("RSVP API key revoke failed:", error);
 
-            return { success: false, error: "Failed to revoke API key" };
+            return {success: false, error: "Failed to revoke API key"};
         }
 
         if (!data) {
-            return { success: false, error: "API key not found" };
+            return {success: false, error: "API key not found"};
         }
 
         revalidateTag(`rsvp-keys-${id}`, "max");
 
-        return { success: true };
+        return {success: true};
     } catch (error) {
         console.error("Revoke RSVP API key action failed:", error);
 
@@ -274,11 +270,11 @@ export async function updateGuestRsvpAction(
             };
         }
 
-        const { supabase, weddingId: id } = await requireWeddingAccess(
+        const {supabase, weddingId: id} = await requireWeddingAccess(
             weddingId
         );
 
-        const { data, error } = await supabase
+        const {data, error} = await supabase
             .from("guests")
             .update({
                 rsvp_status: parsed.data.status,
@@ -296,16 +292,16 @@ export async function updateGuestRsvpAction(
         if (error) {
             console.error("Manual RSVP update failed:", error);
 
-            return { success: false, error: "Failed to update RSVP" };
+            return {success: false, error: "Failed to update RSVP"};
         }
 
         if (!data) {
-            return { success: false, error: "Guest not found" };
+            return {success: false, error: "Guest not found"};
         }
 
         revalidateTag(`guests-${id}`, "max");
 
-        return { success: true };
+        return {success: true};
     } catch (error) {
         console.error("Update guest RSVP action failed:", error);
 

@@ -1,24 +1,12 @@
 'use client'
 
-import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react'
+import {useCallback, useEffect, useMemo, useRef, useState,} from 'react'
 
-import {
-    motion,
-    useReducedMotion,
-} from 'framer-motion'
+import {motion, useReducedMotion,} from 'framer-motion'
 
-import { StaticTable } from '@/components/static-table'
-import { StaticVenueElement } from '@/components/static-venue-element'
-import type {
-    Table,
-    VenueElement,
-} from '@/types/seating'
+import {StaticTable} from '@/components/static-table'
+import {StaticVenueElement} from '@/components/static-venue-element'
+import type {Table, VenueElement,} from '@/types/seating'
 
 interface VenueMapProps {
     tables: Table[]
@@ -527,7 +515,7 @@ export function VenueMap({
                 aria-hidden
                 className="pointer-events-none sticky left-0 top-0 z-20 h-0 w-full"
             >
-                <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-card/70 to-transparent" />
+                <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-card/70 to-transparent"/>
             </div>
 
             {/* Scaled canvas */}

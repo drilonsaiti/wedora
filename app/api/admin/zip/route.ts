@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { Zip, ZipPassThrough } from "fflate";
+import {NextRequest, NextResponse} from "next/server";
+import {Zip, ZipPassThrough} from "fflate";
 
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import {createClient, createServiceClient} from "@/lib/supabase/server";
 
 // Node runtime is required for the ZIP stream.
 export const runtime = "nodejs";
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     const authClient = await createClient();
 
     const {
-        data: { user },
+        data: {user},
         error: authError,
     } = await authClient.auth.getUser();
 
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
      * INPUT
      * ============================================
      */
-    const { searchParams } = new URL(request.url);
+    const {searchParams} = new URL(request.url);
 
     const weddingId = searchParams.get("weddingId");
 
@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
             appMetadata.role === "couple" &&
             appMetadata.wedding_id === wedding.id
         ) {
-            const { data: settings, error: settingsError } = await service
+            const {data: settings, error: settingsError} = await service
                 .from("wedding_settings")
                 .select("enable_couple_login")
                 .eq("wedding_id", wedding.id)
@@ -227,7 +227,7 @@ export async function GET(request: NextRequest) {
         query = query.eq("favourite", true);
     }
 
-    const { data, error: photoQueryError } = await query;
+    const {data, error: photoQueryError} = await query;
 
     if (photoQueryError) {
         console.error("ZIP photo query error:", photoQueryError);
@@ -260,7 +260,7 @@ export async function GET(request: NextRequest) {
      */
     const downloadPhoto = async (photo: PhotoRow): Promise<Uint8Array | null> => {
         try {
-            const { data: blob, error: storageError } = await service.storage
+            const {data: blob, error: storageError} = await service.storage
                 .from("photos")
                 .download(photo.original_path);
 

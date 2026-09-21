@@ -1,15 +1,11 @@
 'use client'
 
-import { useEffect } from 'react'
+import {useEffect} from 'react'
 
-import {
-    AlertCircle,
-    LayoutDashboard,
-    RefreshCw,
-} from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import {AlertCircle, LayoutDashboard, RefreshCw,} from 'lucide-react'
+import {useTranslations} from 'next-intl'
 
-import { Link } from '@/lib/navigation'
+import {Link} from '@/lib/navigation'
 
 interface AdminErrorProps {
     error: Error & {
@@ -32,7 +28,8 @@ export default function AdminError({
     }, [error])
 
     return (
-        <main className="relative flex min-h-[calc(100dvh-80px)] items-center justify-center overflow-hidden px-4 py-12 sm:px-6">
+        <main
+            className="relative flex min-h-[calc(100dvh-80px)] items-center justify-center overflow-hidden px-4 py-12 sm:px-6">
             {/* =====================================
                 AMBIENT BACKGROUND
             ===================================== */}
@@ -40,7 +37,8 @@ export default function AdminError({
                 aria-hidden
                 className="pointer-events-none absolute inset-0 overflow-hidden"
             >
-                <div className="absolute left-1/2 top-[-260px] h-[520px] w-[680px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/20 blur-[140px]" />
+                <div
+                    className="absolute left-1/2 top-[-260px] h-[520px] w-[680px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/20 blur-[140px]"/>
             </div>
 
             {/* =====================================
@@ -49,7 +47,8 @@ export default function AdminError({
             <div className="relative z-10 w-full max-w-xl">
                 <div className="card-wedding px-6 py-10 text-center sm:px-10 sm:py-12">
                     {/* Icon */}
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-destructive/15 bg-destructive/[0.05] text-destructive">
+                    <div
+                        className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-destructive/15 bg-destructive/[0.05] text-destructive">
                         <AlertCircle
                             className="h-6 w-6"
                             strokeWidth={1.5}

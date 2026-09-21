@@ -1,19 +1,10 @@
-import {
-    ArrowRight,
-    Armchair,
-    Camera,
-    Heart,
-    Images,
-    LayoutDashboard,
-    Plus,
-    Users,
-} from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
+import {Armchair, ArrowRight, Camera, Heart, Images, LayoutDashboard, Plus, Users,} from 'lucide-react'
+import {getTranslations} from 'next-intl/server'
 
-import { getAdminDashboardStats } from '@/actions/admin'
-import { CreateWeddingModalTrigger } from '@/components/admin/create-wedding-modal-trigger'
-import { Link } from '@/lib/navigation'
-import { createClient } from '@/lib/supabase/server'
+import {getAdminDashboardStats} from '@/actions/admin'
+import {CreateWeddingModalTrigger} from '@/components/admin/create-wedding-modal-trigger'
+import {Link} from '@/lib/navigation'
+import {createClient} from '@/lib/supabase/server'
 
 export default async function AdminDashboardPage() {
     const [
@@ -37,7 +28,7 @@ export default async function AdminDashboardPage() {
         await createClient()
 
     const {
-        data: { user },
+        data: {user},
     } =
         await supabase.auth.getUser()
 
@@ -52,9 +43,11 @@ export default async function AdminDashboardPage() {
         stats.weddings.length === 0
     ) {
         return (
-            <main className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl items-center justify-center px-4 py-12 sm:px-6">
+            <main
+                className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl items-center justify-center px-4 py-12 sm:px-6">
                 <div className="w-full max-w-xl text-center">
-                    <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-[hsl(var(--primary))]/10 bg-[hsl(var(--accent))]">
+                    <div
+                        className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-[hsl(var(--primary))]/10 bg-[hsl(var(--accent))]">
                         <Heart
                             className="h-6 w-6 text-[hsl(var(--primary))]"
                             strokeWidth={
@@ -86,7 +79,7 @@ export default async function AdminDashboardPage() {
                         }
                         className="btn-primary mt-8 inline-flex"
                     >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-4 w-4"/>
 
                         {t(
                             'createWedding'
@@ -140,7 +133,7 @@ export default async function AdminDashboardPage() {
                             'viewAllWeddings'
                         )}
 
-                        <ArrowRight className="h-4 w-4" />
+                        <ArrowRight className="h-4 w-4"/>
                     </Link>
 
                     {/* CREATE → MODAL */}
@@ -150,7 +143,7 @@ export default async function AdminDashboardPage() {
                         }
                         className="btn-primary justify-center"
                     >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-4 w-4"/>
 
                         {t(
                             'createWedding'
@@ -214,9 +207,11 @@ export default async function AdminDashboardPage() {
             ======================================== */}
             {stats.pendingPhotos >
                 0 && (
-                    <section className="mt-6 rounded-[1.5rem] border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]/55 p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
+                    <section
+                        className="mt-6 rounded-[1.5rem] border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]/55 p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
                         <div className="flex items-start gap-4">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-background">
+                            <div
+                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-background">
                                 <Images
                                     className="h-4 w-4 text-[hsl(var(--primary))]"
                                     strokeWidth={
@@ -252,7 +247,7 @@ export default async function AdminDashboardPage() {
                                 'reviewPhotos'
                             )}
 
-                            <ArrowRight className="h-3.5 w-3.5" />
+                            <ArrowRight className="h-3.5 w-3.5"/>
                         </Link>
                     </section>
                 )}
@@ -288,11 +283,12 @@ export default async function AdminDashboardPage() {
                                 'viewAll'
                             )}
 
-                            <ArrowRight className="h-3.5 w-3.5" />
+                            <ArrowRight className="h-3.5 w-3.5"/>
                         </Link>
                     </div>
 
-                    <div className="overflow-hidden rounded-[2rem] border border-border/70 bg-card/80 shadow-sm backdrop-blur">
+                    <div
+                        className="overflow-hidden rounded-[2rem] border border-border/70 bg-card/80 shadow-sm backdrop-blur">
                         <div className="divide-y divide-border/60">
                             {stats.weddings
                                 .slice(
@@ -316,7 +312,8 @@ export default async function AdminDashboardPage() {
                                                 className="min-w-0 flex-1"
                                             >
                                                 <div className="flex items-center gap-4">
-                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                                                    <div
+                                                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
                                                         <span className="font-serif text-sm text-[hsl(var(--primary))]">
                                                             {String(
                                                                 index +
@@ -398,7 +395,7 @@ export default async function AdminDashboardPage() {
                                                     aria-label="Open"
                                                     className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground transition group-hover:bg-foreground group-hover:text-background"
                                                 >
-                                                    <ArrowRight className="h-4 w-4" />
+                                                    <ArrowRight className="h-4 w-4"/>
                                                 </Link>
                                             </div>
                                         </div>
@@ -416,7 +413,7 @@ export default async function AdminDashboardPage() {
                                     'viewAllWeddings'
                                 )}
 
-                                <ArrowRight className="h-3.5 w-3.5" />
+                                <ArrowRight className="h-3.5 w-3.5"/>
                             </Link>
                         </div>
                     </div>
@@ -450,7 +447,8 @@ export default async function AdminDashboardPage() {
                                 }
                                 className="group flex w-full items-center gap-4 rounded-[1.4rem] p-4 text-left transition-colors hover:bg-secondary/50"
                             >
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-muted-foreground transition-colors group-hover:bg-foreground group-hover:text-background">
+                                <div
+                                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-muted-foreground transition-colors group-hover:bg-foreground group-hover:text-background">
                                     <Plus
                                         className="h-4 w-4"
                                         strokeWidth={
@@ -473,7 +471,8 @@ export default async function AdminDashboardPage() {
                                     </p>
                                 </div>
 
-                                <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+                                <ArrowRight
+                                    className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground"/>
                             </CreateWeddingModalTrigger>
 
                             <QuickAction
@@ -582,7 +581,7 @@ function StatCard({
 
                 {attention &&
                     value > 0 && (
-                        <span className="h-2 w-2 rounded-full bg-[hsl(var(--primary))]" />
+                        <span className="h-2 w-2 rounded-full bg-[hsl(var(--primary))]"/>
                     )}
             </div>
 
@@ -616,7 +615,8 @@ function QuickAction({
             href={href}
             className="group flex items-center gap-4 rounded-[1.4rem] p-4 transition-colors hover:bg-secondary/50"
         >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-muted-foreground transition-colors group-hover:bg-foreground group-hover:text-background">
+            <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-muted-foreground transition-colors group-hover:bg-foreground group-hover:text-background">
                 <Icon
                     className="h-4 w-4"
                     strokeWidth={
@@ -635,7 +635,8 @@ function QuickAction({
                 </p>
             </div>
 
-            <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+            <ArrowRight
+                className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground"/>
         </Link>
     )
 }
@@ -656,7 +657,7 @@ function DashboardSummaryRow({
         <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2.5">
                 {attention && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--primary))]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--primary))]"/>
                 )}
 
                 <span className="text-xs text-muted-foreground">

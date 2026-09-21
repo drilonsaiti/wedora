@@ -1,10 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 
-import {
-    authorizePhotoZipWedding,
-    getPhotoZipActor,
-    PhotoZipHttpError,
-} from "@/lib/photo-zip-auth";
+import {authorizePhotoZipWedding, getPhotoZipActor, PhotoZipHttpError,} from "@/lib/photo-zip-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,7 +44,7 @@ export async function GET(
     }
 ) {
     try {
-        const { exportId } = await params;
+        const {exportId} = await params;
 
         const actor = await getPhotoZipActor();
 
@@ -58,7 +54,7 @@ export async function GET(
          */
         const queueDb = actor.service as any;
 
-        const { data, error } = await queueDb
+        const {data, error} = await queueDb
             .from("photo_zip_exports")
             .select(
                 `
@@ -89,7 +85,7 @@ export async function GET(
 
         const job = data as ExportRow;
 
-        const { service } = await authorizePhotoZipWedding(actor, job.wedding_id);
+        const {service} = await authorizePhotoZipWedding(actor, job.wedding_id);
 
         if (new Date(job.expires_at).getTime() <= Date.now()) {
             return NextResponse.json(
@@ -156,7 +152,7 @@ export async function GET(
 
         const filename = `wedding-photos-${label}-${date}.zip`;
 
-        const { data: signed, error: signError } = await service.storage
+        const {data: signed, error: signError} = await service.storage
             .from("photo-exports")
             .createSignedUrl(job.storage_path, 300, {
                 download: filename,

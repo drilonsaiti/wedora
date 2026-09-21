@@ -1,19 +1,12 @@
 "use client";
 
-import {
-    Armchair,
-    Heart,
-    Images,
-    LayoutGrid,
-    LogOut,
-    Users,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
+import {Armchair, Heart, Images, LayoutGrid, LogOut, Users,} from "lucide-react";
+import {useTranslations} from "next-intl";
 
-import { signOutAction } from "@/actions/admin";
-import { VenueMap } from "@/components/venue-map";
-import { Link } from "@/lib/navigation";
-import type { GuestWithTable, Table, VenueElement } from "@/types/seating";
+import {signOutAction} from "@/actions/admin";
+import {VenueMap} from "@/components/venue-map";
+import {Link} from "@/lib/navigation";
+import type {GuestWithTable, Table, VenueElement} from "@/types/seating";
 
 interface CoupleSeatingViewProps {
     guests: GuestWithTable[];
@@ -41,7 +34,8 @@ export function CoupleSeatingView({
         <div className="relative min-h-screen overflow-hidden bg-background">
             {/* Ambient background */}
             <div aria-hidden className="pointer-events-none absolute inset-0">
-                <div className="absolute left-1/2 top-[-320px] h-[650px] w-[900px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/20 blur-[150px]" />
+                <div
+                    className="absolute left-1/2 top-[-320px] h-[650px] w-[900px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/20 blur-[150px]"/>
             </div>
 
             {/* HEADER */}
@@ -52,8 +46,9 @@ export function CoupleSeatingView({
                         href={`/couple/weddings/${weddingId}`}
                         className="flex items-center gap-2.5"
                     >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
-                            <Heart className="h-3.5 w-3.5" fill="currentColor" />
+                        <div
+                            className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
+                            <Heart className="h-3.5 w-3.5" fill="currentColor"/>
                         </div>
 
                         <span className="font-serif text-xl tracking-tight text-foreground">
@@ -67,7 +62,7 @@ export function CoupleSeatingView({
                             href={`/couple/weddings/${weddingId}/photos`}
                             className="hidden h-9 items-center gap-2 rounded-full px-4 text-xs font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground sm:flex"
                         >
-                            <Images className="h-3.5 w-3.5" strokeWidth={1.6} />
+                            <Images className="h-3.5 w-3.5" strokeWidth={1.6}/>
 
                             {t("photos")}
                         </Link>
@@ -77,7 +72,7 @@ export function CoupleSeatingView({
                             onClick={() => void signOutAction("couple")}
                             className="flex h-9 items-center gap-2 rounded-full border border-border/70 bg-card px-3.5 text-xs font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
                         >
-                            <LogOut className="h-3.5 w-3.5" strokeWidth={1.6} />
+                            <LogOut className="h-3.5 w-3.5" strokeWidth={1.6}/>
 
                             <span className="hidden sm:inline">{t("logout")}</span>
                         </button>
@@ -107,7 +102,7 @@ export function CoupleSeatingView({
                         href={`/couple/weddings/${weddingId}/photos`}
                         className="btn-secondary w-full justify-center sm:w-auto md:hidden"
                     >
-                        <Images className="h-4 w-4" />
+                        <Images className="h-4 w-4"/>
 
                         {t("photos")}
                     </Link>
@@ -141,7 +136,8 @@ export function CoupleSeatingView({
                 </section>
 
                 {/* Seating progress */}
-                <section className="mb-6 rounded-[1.5rem] border border-border/70 bg-card/80 p-5 shadow-sm backdrop-blur">
+                <section
+                    className="mb-6 rounded-[1.5rem] border border-border/70 bg-card/80 p-5 shadow-sm backdrop-blur">
                     <div className="mb-3 flex items-center justify-between gap-4">
                         <div>
                             <p className="text-xs font-medium text-foreground">
@@ -172,7 +168,8 @@ export function CoupleSeatingView({
                 </section>
 
                 {/* Venue Map */}
-                <section className="overflow-hidden rounded-[2rem] border border-border/70 bg-card/85 shadow-sm backdrop-blur">
+                <section
+                    className="overflow-hidden rounded-[2rem] border border-border/70 bg-card/85 shadow-sm backdrop-blur">
                     <div className="flex items-center justify-between border-b border-border/60 px-5 py-5 sm:px-7">
                         <div>
                             <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
@@ -220,7 +217,8 @@ export function CoupleSeatingView({
                         </div>
                     </div>
 
-                    <div className="overflow-hidden rounded-[2rem] border border-border/70 bg-card/80 shadow-sm backdrop-blur">
+                    <div
+                        className="overflow-hidden rounded-[2rem] border border-border/70 bg-card/80 shadow-sm backdrop-blur">
                         {guests.length > 0 ? (
                             <div className="divide-y divide-border/60">
                                 {guests.map((guest) => (
@@ -300,9 +298,11 @@ function GuestRow({
     const seated = Boolean(guest.table_id);
 
     return (
-        <div className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-secondary/30 sm:px-6">
+        <div
+            className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-secondary/30 sm:px-6">
             <div className="flex min-w-0 items-center gap-3.5">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-[11px] font-medium uppercase text-foreground">
+                <div
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-[11px] font-medium uppercase text-foreground">
                     {guest.initials ??
                         `${guest.first_name?.[0] ?? ""}${guest.last_name?.[0] ?? ""}`}
                 </div>

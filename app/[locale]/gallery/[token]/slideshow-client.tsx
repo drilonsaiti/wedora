@@ -1,28 +1,25 @@
 'use client'
 
-import {
-    useCallback,
-    useEffect,
-    useRef,
-    useState,
-} from 'react'
+import {useCallback, useEffect, useRef, useState,} from 'react'
 
 import Image from 'next/image'
 import {
     ChevronLeft,
     ChevronRight,
     Grid3X3,
-    Heart, ImageIcon, ImageOff,
+    Heart,
+    ImageIcon,
+    ImageOff,
     Loader2,
     Maximize2,
     Pause,
     Play,
     X,
 } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import {useTranslations} from 'next-intl'
 
-import { getGalleryPhotosAction } from '@/actions/gallery'
-import { cn } from '@/lib/utils'
+import {getGalleryPhotosAction} from '@/actions/gallery'
+import {cn} from '@/lib/utils'
 
 interface GalleryPhoto {
     id: string
@@ -278,14 +275,16 @@ export function GallerySlideshow({
                     aria-hidden
                     className="pointer-events-none absolute inset-0"
                 >
-                    <div className="absolute left-1/2 top-[-220px] h-[520px] w-[720px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/25 blur-[130px]" />
+                    <div
+                        className="absolute left-1/2 top-[-220px] h-[520px] w-[720px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/25 blur-[130px]"/>
                 </div>
 
                 <div className="relative mx-auto max-w-6xl">
                     {/* Brand */}
                     <div className="mb-14 flex items-center justify-center">
                         <div className="inline-flex items-center gap-2.5">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white">
+                            <div
+                                className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white">
                                 <Heart
                                     className="h-3.5 w-3.5"
                                     fill="currentColor"
@@ -315,7 +314,8 @@ export function GallerySlideshow({
                     {/* View controls */}
                     {photos.length > 0 && (
                         <div className="mt-8 flex justify-center">
-                            <div className="inline-flex rounded-full border border-border/70 bg-card/80 p-1 shadow-sm backdrop-blur">
+                            <div
+                                className="inline-flex rounded-full border border-border/70 bg-card/80 p-1 shadow-sm backdrop-blur">
                                 <button
                                     type="button"
                                     onClick={() =>
@@ -335,7 +335,7 @@ export function GallerySlideshow({
                                             : 'text-muted-foreground hover:text-foreground'
                                     )}
                                 >
-                                    <Grid3X3 className="h-3.5 w-3.5" />
+                                    <Grid3X3 className="h-3.5 w-3.5"/>
 
                                     {t(
                                         'grid'
@@ -361,7 +361,7 @@ export function GallerySlideshow({
                                             : 'text-muted-foreground hover:text-foreground'
                                     )}
                                 >
-                                    <Play className="h-3.5 w-3.5" />
+                                    <Play className="h-3.5 w-3.5"/>
 
                                     {t(
                                         'slideshow'
@@ -420,18 +420,22 @@ export function GallerySlideshow({
                                 )}
                             </div>
                         ) : (
-                            <div className="mx-auto flex min-h-[420px] max-w-xl items-center justify-center py-8 sm:py-12">
-                                <div className="relative w-full overflow-hidden rounded-[2rem] border border-border/70 bg-card px-6 py-12 text-center shadow-sm sm:px-10 sm:py-14">
+                            <div
+                                className="mx-auto flex min-h-[420px] max-w-xl items-center justify-center py-8 sm:py-12">
+                                <div
+                                    className="relative w-full overflow-hidden rounded-[2rem] border border-border/70 bg-card px-6 py-12 text-center shadow-sm sm:px-10 sm:py-14">
                                     {/* Subtle ambient glow */}
                                     <div
                                         aria-hidden
                                         className="pointer-events-none absolute inset-0 overflow-hidden"
                                     >
-                                        <div className="absolute left-1/2 top-[-180px] h-[320px] w-[420px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/25 blur-[100px]" />
+                                        <div
+                                            className="absolute left-1/2 top-[-180px] h-[320px] w-[420px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/25 blur-[100px]"/>
                                     </div>
 
                                     <div className="relative">
-                                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-border/70 bg-secondary/60 text-muted-foreground">
+                                        <div
+                                            className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-border/70 bg-secondary/60 text-muted-foreground">
                                             <ImageIcon
                                                 className="h-6 w-6"
                                                 strokeWidth={
@@ -477,7 +481,7 @@ export function GallerySlideshow({
                                 >
                                     {loadingMore ? (
                                         <>
-                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            <Loader2 className="h-4 w-4 animate-spin"/>
 
                                             {t(
                                                 'loading'
@@ -505,9 +509,10 @@ export function GallerySlideshow({
                             aria-hidden
                             className="pointer-events-none absolute inset-0"
                         >
-                            <div className="absolute inset-0 bg-[#090909]" />
+                            <div className="absolute inset-0 bg-[#090909]"/>
 
-                            <div className="absolute left-1/2 top-[-20%] h-[65%] w-[80%] -translate-x-1/2 rounded-full bg-white/[0.035] blur-[120px]" />
+                            <div
+                                className="absolute left-1/2 top-[-20%] h-[65%] w-[80%] -translate-x-1/2 rounded-full bg-white/[0.035] blur-[120px]"/>
                         </div>
 
                         {/* TOP BAR */}
@@ -522,12 +527,13 @@ export function GallerySlideshow({
                                     'closeSlideshow'
                                 )}
                             >
-                                <X className="h-4 w-4" />
+                                <X className="h-4 w-4"/>
                             </ViewerButton>
 
                             {/* Counter */}
                             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                                <span className="rounded-full border border-white/10 bg-black/15 px-3 py-1.5 text-[10px] font-medium tracking-[0.1em] text-white/70 backdrop-blur-md">
+                                <span
+                                    className="rounded-full border border-white/10 bg-black/15 px-3 py-1.5 text-[10px] font-medium tracking-[0.1em] text-white/70 backdrop-blur-md">
                                     {t(
                                         'photoCounter',
                                         {
@@ -556,12 +562,13 @@ export function GallerySlideshow({
                                         )
                                 }
                             >
-                                <Maximize2 className="h-4 w-4" />
+                                <Maximize2 className="h-4 w-4"/>
                             </ViewerButton>
                         </div>
 
                         {/* IMAGE */}
-                        <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center px-3 pb-28 sm:px-14 sm:pb-32">
+                        <div
+                            className="relative z-10 flex min-h-0 flex-1 items-center justify-center px-3 pb-28 sm:px-14 sm:pb-32">
                             <div className="relative h-full w-full">
                                 <GalleryViewerImage
                                     key={currentPhoto.id}
@@ -595,7 +602,7 @@ export function GallerySlideshow({
                                     )}
                                     className="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/20 text-white backdrop-blur-md transition hover:bg-white/15 sm:left-6 sm:h-12 sm:w-12"
                                 >
-                                    <ChevronLeft className="h-5 w-5" />
+                                    <ChevronLeft className="h-5 w-5"/>
                                 </button>
                             )}
 
@@ -611,13 +618,14 @@ export function GallerySlideshow({
                                     )}
                                     className="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/20 text-white backdrop-blur-md transition hover:bg-white/15 sm:right-6 sm:h-12 sm:w-12"
                                 >
-                                    <ChevronRight className="h-5 w-5" />
+                                    <ChevronRight className="h-5 w-5"/>
                                 </button>
                             )}
                         </div>
 
                         {/* BOTTOM INFO */}
-                        <div className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black via-black/80 to-transparent px-5 pb-6 pt-20 sm:px-8 sm:pb-8">
+                        <div
+                            className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black via-black/80 to-transparent px-5 pb-6 pt-20 sm:px-8 sm:pb-8">
                             <div className="mx-auto flex max-w-3xl items-end justify-between gap-6">
 
                                 {/* Caption */}
@@ -664,9 +672,9 @@ export function GallerySlideshow({
                                         className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white backdrop-blur-md transition duration-200 hover:bg-white/20"
                                     >
                                         {isPlaying ? (
-                                            <Pause className="h-4.5 w-4.5" />
+                                            <Pause className="h-4.5 w-4.5"/>
                                         ) : (
-                                            <Play className="h-4.5 w-4.5 translate-x-px" />
+                                            <Play className="h-4.5 w-4.5 translate-x-px"/>
                                         )}
                                     </button>
                                 )}
@@ -833,8 +841,10 @@ function GalleryImage({
                     }
                 />
             ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-secondary/60 px-4 text-center">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/70 bg-card/70 text-muted-foreground">
+                <div
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-secondary/60 px-4 text-center">
+                    <div
+                        className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/70 bg-card/70 text-muted-foreground">
                         <ImageOff
                             className="h-4.5 w-4.5"
                             strokeWidth={
@@ -853,10 +863,12 @@ function GalleryImage({
 
             {!unavailable && (
                 <>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    <div
+                        className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"/>
 
                     {photo.guest_name && (
-                        <div className="absolute inset-x-0 bottom-0 translate-y-2 px-4 pb-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                        <div
+                            className="absolute inset-x-0 bottom-0 translate-y-2 px-4 pb-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                             <p className="truncate text-left text-xs font-medium text-white">
                                 {
                                     photo.guest_name
@@ -958,7 +970,8 @@ function GalleryViewerImage({
         return (
             <div className="absolute inset-0 flex items-center justify-center px-6">
                 <div className="max-w-sm text-center">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-white/50">
+                    <div
+                        className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-white/50">
                         <ImageOff
                             className="h-6 w-6"
                             strokeWidth={

@@ -1,10 +1,7 @@
-import { WeddingsPageClient } from '@/components/admin/weddings-page-client'
-import type {
-    WeddingRow,
-    WeddingSettings,
-} from '@/components/admin/weddings-page-client'
-import { redirect } from '@/lib/navigation'
-import { createClient } from '@/lib/supabase/server'
+import type {WeddingRow, WeddingSettings,} from '@/components/admin/weddings-page-client'
+import {WeddingsPageClient} from '@/components/admin/weddings-page-client'
+import {redirect} from '@/lib/navigation'
+import {createClient} from '@/lib/supabase/server'
 
 export const dynamic =
     'force-dynamic'
@@ -39,14 +36,14 @@ type RawWedding = {
 export default async function AdminWeddingsListPage({
                                                         params,
                                                     }: Props) {
-    const { locale } =
+    const {locale} =
         await params
 
     const supabase =
         await createClient()
 
     const {
-        data: { user },
+        data: {user},
     } =
         await supabase.auth.getUser()
 
@@ -59,7 +56,7 @@ export default async function AdminWeddingsListPage({
         return null
     }
 
-    const { data: admin } =
+    const {data: admin} =
         await supabase
             .from('admins')
             .select('id')

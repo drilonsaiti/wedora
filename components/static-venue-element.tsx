@@ -1,15 +1,10 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
+import {useTranslations} from 'next-intl'
 
-import {
-    VENUE_COLORS,
-    VENUE_ICONS,
-    type VenueColorKey,
-    type VenueIconKey,
-} from '@/lib/venue-icons'
-import { cn } from '@/lib/utils'
-import type { VenueElement } from '@/types/seating'
+import {VENUE_COLORS, VENUE_ICONS, type VenueColorKey, type VenueIconKey,} from '@/lib/venue-icons'
+import {cn} from '@/lib/utils'
+import type {VenueElement} from '@/types/seating'
 
 const SHAPE_CLASSES = {
     circle: 'rounded-full',

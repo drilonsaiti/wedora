@@ -1,14 +1,11 @@
 'use client'
 
-import {
-    type ReactNode,
-    useState,
-} from 'react'
+import {type ReactNode, useState,} from 'react'
 
-import { CreateWeddingForm } from '@/components/admin/create-wedding-form'
-import { Modal } from '@/components/ui/modal'
-import { useRouter } from '@/lib/navigation'
-import { cn } from '@/lib/utils'
+import {CreateWeddingForm} from '@/components/admin/create-wedding-form'
+import {Modal} from '@/components/ui/modal'
+import {useRouter} from '@/lib/navigation'
+import {cn} from '@/lib/utils'
 
 interface CreateWeddingModalTriggerProps {
     adminEmail: string

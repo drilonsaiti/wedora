@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 
 import {
     AlertCircle,
@@ -13,21 +13,21 @@ import {
     ImageIcon,
     Images,
     Loader2,
+    type LucideIcon,
     MessageSquare,
     Upload,
     User,
     X,
-    type LucideIcon,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import {useTranslations} from "next-intl";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
 import imageCompression from "browser-image-compression";
 import loadImage from "blueimp-load-image";
 
-import { uploadPhotoAction, type UploadPhotoErrorCode } from "@/actions/upload";
-import { fileSchema, uploadFormSchema, type UploadFormValues } from "@/schemas";
-import { cn, formatBytes, getOrCreateSessionId } from "@/lib/utils";
+import {uploadPhotoAction, type UploadPhotoErrorCode} from "@/actions/upload";
+import {fileSchema, uploadFormSchema, type UploadFormValues} from "@/schemas";
+import {cn, formatBytes, getOrCreateSessionId} from "@/lib/utils";
 
 interface UploadFormProps {
     eventId: string;
@@ -315,7 +315,7 @@ type UploadFailure = {
     retryAfterSeconds?: number;
 };
 
-export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: UploadFormProps) {
+export function UploadForm({eventId, maxPhotosPerGuest, maxFileSizeMb,}: UploadFormProps) {
     const t = useTranslations("wedding.upload");
 
     const tv = useTranslations("validation");
@@ -402,7 +402,7 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: {errors},
     } = useForm<UploadFormValues>({
         resolver: zodResolver(uploadFormSchema),
 
@@ -547,7 +547,7 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
                 setPreview(URL.createObjectURL(file));
             }
         },
-        [t,maxFileBytes]
+        [t, maxFileBytes]
     );
 
     /*
@@ -706,7 +706,8 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
             ===================================== */}
             {maxPhotosPerGuest != null && (
                 <div className="flex justify-center">
-          <span className="rounded-full border border-border/60 bg-card/70 px-3.5 py-1.5 text-[10px] font-medium text-muted-foreground">
+          <span
+              className="rounded-full border border-border/60 bg-card/70 px-3.5 py-1.5 text-[10px] font-medium text-muted-foreground">
             {t("maxPhotos", {
                 count: maxPhotosPerGuest,
             })}
@@ -719,8 +720,10 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
             ===================================== */}
             {!selectedFile ? (
                 <div className="space-y-3">
-                    <section className="rounded-[2rem] border border-dashed border-border bg-card/70 p-5 shadow-sm sm:p-6">
-                        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[hsl(var(--accent))]">
+                    <section
+                        className="rounded-[2rem] border border-dashed border-border bg-card/70 p-5 shadow-sm sm:p-6">
+                        <div
+                            className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[hsl(var(--accent))]">
                             <ImageIcon
                                 className="h-6 w-6 text-[hsl(var(--primary))]"
                                 strokeWidth={1.5}
@@ -741,8 +744,9 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
                                 onClick={() => cameraRef.current?.click()}
                                 className="group flex min-h-[108px] flex-col items-center justify-center gap-3 rounded-2xl border border-border/70 bg-background px-4 py-4 text-center transition-all hover:-translate-y-0.5 hover:border-foreground/15 hover:bg-secondary/30 hover:shadow-sm disabled:pointer-events-none disabled:opacity-50"
                             >
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-muted-foreground transition-colors group-hover:text-foreground">
-                                    <Camera className="h-4.5 w-4.5" strokeWidth={1.6} />
+                                <div
+                                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-muted-foreground transition-colors group-hover:text-foreground">
+                                    <Camera className="h-4.5 w-4.5" strokeWidth={1.6}/>
                                 </div>
 
                                 <span className="text-xs font-medium text-foreground">
@@ -757,8 +761,9 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
                                 onClick={() => galleryRef.current?.click()}
                                 className="group flex min-h-[108px] flex-col items-center justify-center gap-3 rounded-2xl border border-border/70 bg-background px-4 py-4 text-center transition-all hover:-translate-y-0.5 hover:border-foreground/15 hover:bg-secondary/30 hover:shadow-sm disabled:pointer-events-none disabled:opacity-50"
                             >
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-muted-foreground transition-colors group-hover:text-foreground">
-                                    <Upload className="h-4.5 w-4.5" strokeWidth={1.6} />
+                                <div
+                                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-muted-foreground transition-colors group-hover:text-foreground">
+                                    <Upload className="h-4.5 w-4.5" strokeWidth={1.6}/>
                                 </div>
 
                                 <span className="text-xs font-medium text-foreground">
@@ -784,7 +789,8 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
                     {/* =================================
                         PREVIEW
                     ================================= */}
-                    <div className="relative aspect-square overflow-hidden rounded-[2rem] border border-border/60 bg-muted shadow-sm">
+                    <div
+                        className="relative aspect-square overflow-hidden rounded-[2rem] border border-border/60 bg-muted shadow-sm">
                         {preview && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -814,7 +820,7 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
                                     aria-label={t("flipPhoto")}
                                     className="absolute left-3 top-3 flex h-9 items-center gap-2 rounded-full border border-white/10 bg-black/35 px-3 text-[11px] font-medium text-white backdrop-blur-md transition-colors hover:bg-black/55"
                                 >
-                                    <ArrowLeftRight className="h-3.5 w-3.5" strokeWidth={1.7} />
+                                    <ArrowLeftRight className="h-3.5 w-3.5" strokeWidth={1.7}/>
 
                                     {isFlipped ? t("flipNormal") : t("flipRotate")}
                                 </button>
@@ -826,13 +832,14 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
                                     aria-label={t("removePhoto")}
                                     className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/35 text-white backdrop-blur-md transition-colors hover:bg-black/55"
                                 >
-                                    <X className="h-4 w-4" />
+                                    <X className="h-4 w-4"/>
                                 </button>
                             </>
                         )}
 
                         {/* File size */}
-                        <div className="absolute bottom-3 left-3 rounded-full border border-white/10 bg-black/35 px-3 py-1.5 text-[10px] font-medium text-white backdrop-blur-md">
+                        <div
+                            className="absolute bottom-3 left-3 rounded-full border border-white/10 bg-black/35 px-3 py-1.5 text-[10px] font-medium text-white backdrop-blur-md">
                             {formatBytes(selectedFile.size)}
                         </div>
                     </div>
@@ -908,7 +915,7 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
                 {/* Name */}
                 <div>
                     <label htmlFor="guest-name" className="label-wedding">
-                        <User className="mr-1 inline h-3 w-3" />
+                        <User className="mr-1 inline h-3 w-3"/>
 
                         {t("yourName")}
                     </label>
@@ -933,7 +940,7 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
                 {/* Message */}
                 <div>
                     <label htmlFor="guest-message" className="label-wedding">
-                        <MessageSquare className="mr-1 inline h-3 w-3" />
+                        <MessageSquare className="mr-1 inline h-3 w-3"/>
 
                         {t("message")}
                     </label>
@@ -962,8 +969,9 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
                     htmlFor="isPublic"
                     className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border/70 bg-secondary/25 p-4 transition-colors hover:bg-secondary/40"
                 >
-                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-card text-muted-foreground">
-                        <Eye className="h-3.5 w-3.5" strokeWidth={1.6} />
+                    <div
+                        className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-card text-muted-foreground">
+                        <Eye className="h-3.5 w-3.5" strokeWidth={1.6}/>
                     </div>
 
                     <span className="min-w-0 flex-1 text-xs leading-5 text-muted-foreground">
@@ -1001,7 +1009,7 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
                     </div>
 
                     <div className="flex items-center justify-center gap-2">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground"/>
 
                         <p className="text-xs text-muted-foreground">
                             {currentProgressLabel}
@@ -1013,7 +1021,7 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
             {/* =====================================
                 SERVER ERROR
             ===================================== */}
-            {uploadFailure && <UploadFailureMessage failure={uploadFailure} />}
+            {uploadFailure && <UploadFailureMessage failure={uploadFailure}/>}
 
             {/* =====================================
                 SUBMIT
@@ -1025,19 +1033,19 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
             >
                 {isLoading ? (
                     <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin"/>
 
                         {currentProgressLabel}
                     </>
                 ) : uploadState === "done" ? (
                     <>
-                        <Check className="h-4 w-4" />
+                        <Check className="h-4 w-4"/>
 
                         {t("success.title")}
                     </>
                 ) : (
                     <>
-                        <Upload className="h-4 w-4" />
+                        <Upload className="h-4 w-4"/>
 
                         {t("sendPhoto")}
                     </>
@@ -1047,7 +1055,7 @@ export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: Upload
     );
 }
 
-function UploadFailureMessage({ failure }: { failure: UploadFailure }) {
+function UploadFailureMessage({failure}: { failure: UploadFailure }) {
     const t = useTranslations("wedding.upload.errors");
 
     const config = {
@@ -1123,7 +1131,7 @@ function UploadFailureMessage({ failure }: { failure: UploadFailure }) {
         }
     >;
 
-    const { icon: Icon, title, description } = config[failure.code];
+    const {icon: Icon, title, description} = config[failure.code];
 
     return (
         <div
@@ -1131,8 +1139,9 @@ function UploadFailureMessage({ failure }: { failure: UploadFailure }) {
             className="rounded-2xl border border-destructive/15 bg-destructive/[0.055] p-4"
         >
             <div className="flex gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
-                    <Icon className="h-4 w-4" strokeWidth={1.7} />
+                <div
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
+                    <Icon className="h-4 w-4" strokeWidth={1.7}/>
                 </div>
 
                 <div className="min-w-0 pt-0.5">

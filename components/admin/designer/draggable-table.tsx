@@ -1,20 +1,13 @@
 'use client'
 
-import { memo } from 'react'
+import {memo} from 'react'
 
-import {
-    useDraggable,
-    useDroppable,
-} from '@dnd-kit/core'
-import { useTranslations } from 'next-intl'
+import {useDraggable, useDroppable,} from '@dnd-kit/core'
+import {useTranslations} from 'next-intl'
 
-import { DraggableGuest } from './draggable-guest'
-import { cn } from '@/lib/utils'
-import type {
-    Guest,
-    Table,
-    TableSeat,
-} from '@/types/seating'
+import {DraggableGuest} from './draggable-guest'
+import {cn} from '@/lib/utils'
+import type {Guest, Table, TableSeat,} from '@/types/seating'
 
 interface DraggableTableProps {
     table: Table
@@ -220,7 +213,8 @@ export const DraggableTable =
                     </span>
 
                     {table.label && (
-                        <span className="mt-1 block max-w-[110px] truncate px-1 text-[9px] font-medium text-muted-foreground">
+                        <span
+                            className="mt-1 block max-w-[110px] truncate px-1 text-[9px] font-medium text-muted-foreground">
                             {
                                 table.label
                             }

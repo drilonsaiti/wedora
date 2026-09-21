@@ -34,11 +34,16 @@
 
 begin;
 
-drop policy if exists "Public can read guests" on public.guests;
-drop policy if exists "Public can read tables" on public.tables;
-drop policy if exists "public_read_table_seats" on public.table_seats;
-drop policy if exists "Public can read venue elements" on public.venue_elements;
-drop policy if exists "Public can read active events" on public.events;
+drop
+policy if exists "Public can read guests" on public.guests;
+drop
+policy if exists "Public can read tables" on public.tables;
+drop
+policy if exists "public_read_table_seats" on public.table_seats;
+drop
+policy if exists "Public can read venue elements" on public.venue_elements;
+drop
+policy if exists "Public can read active events" on public.events;
 
 -- Belt-and-braces: explicitly revoke from `anon` only. `anon` has no
 -- legitimate direct access to any of these five tables in this app

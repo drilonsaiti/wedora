@@ -211,7 +211,6 @@
       "galleryLinksLoadFailed": "Gallery links couldn't be loaded.",
       "retry": "Try again",
       "copyingLink": "Copying…",
-
       "confirmations": {
         "deletePhoto": {
           "title": "Delete photo?",
@@ -647,7 +646,6 @@
     "perWedding": "per wedding",
     "included": "What's included",
     "choosePlan": "Choose {plan}",
-
     "plans": {
       "basic": {
         "eyebrow": "Essential",
@@ -665,7 +663,6 @@
         "description": "No limits, for larger weddings"
       }
     },
-
     "features": {
       "basic": {
         "findSeat": "Find My Seat",
@@ -692,7 +689,6 @@
         "publicGallery": "Shareable gallery (public link)"
       }
     },
-
     "customPlan": {
       "text": "Didn't find what you're looking for?",
       "contact": "Contact us",

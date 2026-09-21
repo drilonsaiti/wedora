@@ -1,18 +1,12 @@
 'use client'
 
-import { useDraggable } from '@dnd-kit/core'
-import { X } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import {useDraggable} from '@dnd-kit/core'
+import {X} from 'lucide-react'
+import {useTranslations} from 'next-intl'
 
-import {
-    VENUE_COLORS,
-    VENUE_ICONS,
-    VENUE_PRESETS,
-    type VenueColorKey,
-    type VenueIconKey,
-} from '@/lib/venue-icons'
-import { cn } from '@/lib/utils'
-import type { VenueElement } from '@/types/seating'
+import {VENUE_COLORS, VENUE_ICONS, VENUE_PRESETS, type VenueColorKey, type VenueIconKey,} from '@/lib/venue-icons'
+import {cn} from '@/lib/utils'
+import type {VenueElement} from '@/types/seating'
 
 interface DraggableVenueElementProps {
     element: VenueElement
@@ -258,7 +252,8 @@ export function DraggableVenueElement({
             {/* =====================================
                 CONTENT
             ===================================== */}
-            <div className="pointer-events-none flex h-full w-full flex-col items-center justify-center overflow-hidden">
+            <div
+                className="pointer-events-none flex h-full w-full flex-col items-center justify-center overflow-hidden">
                 <div
                     className={cn(
                         'flex items-center justify-center rounded-full bg-background/55 backdrop-blur-sm',

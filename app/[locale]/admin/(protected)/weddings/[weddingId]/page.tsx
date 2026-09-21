@@ -1,7 +1,7 @@
-import { getGuests, getTables, getVenueElements } from '@/actions/seating'
-import { SeatingManagement } from '@/components/admin/seating-management'
-import { redirect } from '@/lib/navigation'
-import { createClient } from '@/lib/supabase/server'
+import {getGuests, getTables, getVenueElements} from '@/actions/seating'
+import {SeatingManagement} from '@/components/admin/seating-management'
+import {redirect} from '@/lib/navigation'
+import {createClient} from '@/lib/supabase/server'
 import {notFound} from "next/navigation";
 
 type Props = {
@@ -22,7 +22,7 @@ export default async function WeddingDashboardPage({
     const supabase = await createClient()
 
     const {
-        data: { user },
+        data: {user},
     } = await supabase.auth.getUser()
 
     if (!user) {
@@ -38,7 +38,7 @@ export default async function WeddingDashboardPage({
      * Layout already protects the admin area,
      * but keep this additional check for safety.
      */
-    const { data: admin } = await supabase
+    const {data: admin} = await supabase
         .from('admins')
         .select('id')
         .eq('id', user.id)
@@ -57,7 +57,7 @@ export default async function WeddingDashboardPage({
      * Load wedding context as well.
      * We use the names in the page heading.
      */
-    const { data: wedding } = await supabase
+    const {data: wedding} = await supabase
         .from('weddings')
         .select(`
             id,

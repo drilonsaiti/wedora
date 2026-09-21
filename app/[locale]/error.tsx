@@ -1,15 +1,11 @@
 'use client'
 
-import { useEffect } from 'react'
+import {useEffect} from 'react'
 
-import {
-    AlertCircle,
-    Heart,
-    RefreshCw,
-} from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import {AlertCircle, Heart, RefreshCw,} from 'lucide-react'
+import {useTranslations} from 'next-intl'
 
-import { Link } from '@/lib/navigation'
+import {Link} from '@/lib/navigation'
 
 interface PublicErrorProps {
     error: Error & {
@@ -41,9 +37,11 @@ export default function PublicError({
                 aria-hidden
                 className="pointer-events-none absolute inset-0 overflow-hidden"
             >
-                <div className="absolute left-1/2 top-[-240px] h-[560px] w-[760px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/30 blur-[140px]" />
+                <div
+                    className="absolute left-1/2 top-[-240px] h-[560px] w-[760px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/30 blur-[140px]"/>
 
-                <div className="absolute bottom-[-220px] right-[-180px] h-[420px] w-[420px] rounded-full bg-[hsl(var(--gold))]/8 blur-[130px]" />
+                <div
+                    className="absolute bottom-[-220px] right-[-180px] h-[420px] w-[420px] rounded-full bg-[hsl(var(--gold))]/8 blur-[130px]"/>
             </div>
 
             <div className="relative z-10 w-full max-w-xl">
@@ -53,7 +51,8 @@ export default function PublicError({
                         href="/"
                         className="inline-flex items-center gap-2.5"
                     >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
+                        <div
+                            className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
                             <Heart
                                 className="h-3.5 w-3.5"
                                 fill="currentColor"
@@ -68,7 +67,8 @@ export default function PublicError({
 
                 {/* Error card */}
                 <section className="card-wedding px-6 py-10 text-center sm:px-10 sm:py-12">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-destructive/15 bg-destructive/[0.05] text-destructive">
+                    <div
+                        className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-destructive/15 bg-destructive/[0.05] text-destructive">
                         <AlertCircle
                             className="h-6 w-6"
                             strokeWidth={1.5}

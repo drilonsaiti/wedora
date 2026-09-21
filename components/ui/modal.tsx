@@ -1,13 +1,10 @@
 'use client'
 
-import {
-    type ReactNode,
-    useEffect,
-} from 'react'
+import {type ReactNode, useEffect,} from 'react'
 
-import { X } from 'lucide-react'
+import {X} from 'lucide-react'
 
-import { cn } from '@/lib/utils'
+import {cn} from '@/lib/utils'
 
 interface ModalProps {
     open: boolean
@@ -88,7 +85,7 @@ export function Modal({
                         aria-label="Close"
                         className="absolute right-5 top-5 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-card/80 text-muted-foreground backdrop-blur transition-colors hover:bg-secondary hover:text-foreground"
                     >
-                        <X className="h-4 w-4" />
+                        <X className="h-4 w-4"/>
                     </button>
 
                     <div className="max-h-[90vh] overflow-y-auto p-6 sm:p-8">

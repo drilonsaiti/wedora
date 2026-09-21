@@ -1,8 +1,8 @@
-import { Check, X } from 'lucide-react'
+import {Check, X} from 'lucide-react'
 import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import {getTranslations} from 'next-intl/server'
 
-import { cn } from '@/lib/utils'
+import {cn} from '@/lib/utils'
 
 interface PricingPlan {
     id: 'basic' | 'standard' | 'premium'
@@ -96,7 +96,8 @@ export async function PricingSection() {
                         )}
                     >
                         {plan.featured && (
-                            <span className="absolute right-6 top-6 rounded-full bg-[hsl(var(--accent))] px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--primary))]">
+                            <span
+                                className="absolute right-6 top-6 rounded-full bg-[hsl(var(--accent))] px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--primary))]">
                                 {t('mostPopular')}
                             </span>
                         )}
@@ -150,9 +151,9 @@ export async function PricingSection() {
                                             )}
                                         >
                                             {included ? (
-                                                <Check className="h-3 w-3" />
+                                                <Check className="h-3 w-3"/>
                                             ) : (
-                                                <X className="h-3 w-3" />
+                                                <X className="h-3 w-3"/>
                                             )}
                                         </span>
 

@@ -5,7 +5,7 @@ import {cn} from '@/lib/utils'
 import {ThemeProvider} from '@/contexts/theme-provider'
 import {NextIntlClientProvider} from 'next-intl';
 import {getMessages, getTranslations} from 'next-intl/server';
-import {locales, type Locale} from '@/lib/i18n';
+import {locales} from '@/lib/i18n';
 import {notFound} from 'next/navigation';
 import {Toaster} from "sonner";
 
@@ -26,10 +26,10 @@ const jost = Jost({
     display: 'swap',
 })
 
-export async function generateMetadata({params}: {params: {locale: string}}): Promise<Metadata> {
+export async function generateMetadata({params}: { params: { locale: string } }): Promise<Metadata> {
     const {locale} = await params;
     const t = await getTranslations({locale, namespace: 'common'});
-    
+
     return {
         title: 'Wedding Photos',
         description: 'Share your wedding memories',
@@ -39,9 +39,9 @@ export async function generateMetadata({params}: {params: {locale: string}}): Pr
 }
 
 export default async function RootLayout({
-                                       children,
-                                       params
-                                   }: {
+                                             children,
+                                             params
+                                         }: {
     children: React.ReactNode;
     params: Promise<{
         locale: string
@@ -68,7 +68,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
                 {children}
-                <Toaster />
+                <Toaster/>
             </ThemeProvider>
         </NextIntlClientProvider>
         </body>

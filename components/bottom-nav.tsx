@@ -1,18 +1,11 @@
 'use client'
 
-import {
-    Armchair,
-    Camera,
-    Home,
-} from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import {Armchair, Camera, Home,} from 'lucide-react'
+import {useTranslations} from 'next-intl'
 
-import { ThemeToggle } from '@/components/theme-toggle'
-import {
-    Link,
-    usePathname,
-} from '@/lib/navigation'
-import { cn } from '@/lib/utils'
+import {ThemeToggle} from '@/components/theme-toggle'
+import {Link, usePathname,} from '@/lib/navigation'
+import {cn} from '@/lib/utils'
 
 interface BottomNavProps {
     slug: string
@@ -183,7 +176,8 @@ export function BottomNav({
                                         />
                                     </div>
 
-                                    <span className="max-w-full truncate text-[8px] font-medium uppercase tracking-[0.12em] sm:text-[9px]">
+                                    <span
+                                        className="max-w-full truncate text-[8px] font-medium uppercase tracking-[0.12em] sm:text-[9px]">
                                         {
                                             item.label
                                         }
@@ -196,7 +190,7 @@ export function BottomNav({
 
                 {/* Theme */}
                 <div className="ml-1 flex shrink-0 items-center border-l border-border/60 pl-2">
-                    <ThemeToggle className="h-8 w-8 border-0 bg-transparent shadow-none hover:bg-secondary" />
+                    <ThemeToggle className="h-8 w-8 border-0 bg-transparent shadow-none hover:bg-secondary"/>
                 </div>
             </div>
         </nav>

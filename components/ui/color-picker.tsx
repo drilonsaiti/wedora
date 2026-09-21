@@ -1,13 +1,10 @@
 'use client'
 
-import { Check } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import {Check} from 'lucide-react'
+import {useTranslations} from 'next-intl'
 
-import {
-    WEDDING_COLOR_PRESETS,
-    type WeddingColorPresetId,
-} from '@/lib/theme'
-import { cn } from '@/lib/utils'
+import {WEDDING_COLOR_PRESETS, type WeddingColorPresetId,} from '@/lib/theme'
+import {cn} from '@/lib/utils'
 
 interface ColorPickerProps {
     value: number

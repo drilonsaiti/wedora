@@ -1,25 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import {useState} from 'react'
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import {
-    ChevronDown,
-    Loader2,
-} from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useForm } from 'react-hook-form'
+import {zodResolver} from '@hookform/resolvers/zod'
+import {ChevronDown, Loader2,} from 'lucide-react'
+import {useTranslations} from 'next-intl'
+import {useForm} from 'react-hook-form'
 
-import {
-    addGuest,
-    updateGuest,
-} from '@/actions/seating'
-import { getValidationMessage } from '@/lib/validation'
-import {
-    type GuestFormValues,
-    guestSchema,
-} from '@/schemas'
-import type { Table } from '@/types/seating'
+import {addGuest, updateGuest,} from '@/actions/seating'
+import {getValidationMessage} from '@/lib/validation'
+import {type GuestFormValues, guestSchema,} from '@/schemas'
+import type {Table} from '@/types/seating'
 
 interface GuestFormProps {
     weddingId: string
@@ -32,7 +23,7 @@ interface GuestFormProps {
 }
 
 export function GuestForm({
-    weddingId,
+                              weddingId,
                               initialValues,
                               tables,
                               onSuccess,
@@ -373,7 +364,7 @@ export function GuestForm({
                 >
                     {loading ? (
                         <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader2 className="h-4 w-4 animate-spin"/>
 
                             {tc(
                                 'saving'

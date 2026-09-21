@@ -1,32 +1,14 @@
 'use client'
 
-import {
-    useMemo,
-    useRef,
-    useState,
-} from 'react'
+import {useMemo, useRef, useState,} from 'react'
 
-import {
-    ArrowRight,
-    Armchair,
-    Heart,
-    MapPin,
-    Search,
-    X,
-} from 'lucide-react'
-import {
-    motion,
-    useReducedMotion,
-} from 'framer-motion'
-import { useTranslations } from 'next-intl'
+import {Armchair, ArrowRight, Heart, MapPin, Search, X,} from 'lucide-react'
+import {motion, useReducedMotion,} from 'framer-motion'
+import {useTranslations} from 'next-intl'
 
-import { GuestAvatar } from '@/components/guest-avatar'
-import { GuestResultModal } from '@/components/guest-result-modal'
-import type {
-    GuestWithTable,
-    Table,
-    VenueElement,
-} from '@/types/seating'
+import {GuestAvatar} from '@/components/guest-avatar'
+import {GuestResultModal} from '@/components/guest-result-modal'
+import type {GuestWithTable, Table, VenueElement,} from '@/types/seating'
 
 interface FindSeatClientProps {
     guests: GuestWithTable[]
@@ -162,9 +144,11 @@ export function FindSeatClient({
                 aria-hidden
                 className="pointer-events-none absolute inset-0"
             >
-                <div className="absolute left-1/2 top-[-240px] h-[600px] w-[760px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/30 blur-[140px]" />
+                <div
+                    className="absolute left-1/2 top-[-240px] h-[600px] w-[760px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/30 blur-[140px]"/>
 
-                <div className="absolute bottom-[-220px] right-[-180px] h-[420px] w-[420px] rounded-full bg-[hsl(var(--gold))]/8 blur-[130px]" />
+                <div
+                    className="absolute bottom-[-220px] right-[-180px] h-[420px] w-[420px] rounded-full bg-[hsl(var(--gold))]/8 blur-[130px]"/>
             </div>
 
             <main className="relative z-10 mx-auto w-full max-w-xl px-5 pt-8 sm:px-6 sm:pt-10">
@@ -173,7 +157,8 @@ export function FindSeatClient({
                 ===================================== */}
                 <div className="mb-10 flex justify-center sm:mb-12">
                     <div className="inline-flex items-center gap-2.5">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
+                        <div
+                            className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
                             <Heart
                                 className="h-3.5 w-3.5"
                                 fill="currentColor"
@@ -193,7 +178,8 @@ export function FindSeatClient({
                     HEADER
                 ===================================== */}
                 <header className="text-center">
-                    <div className="mb-5 inline-flex max-w-full items-center gap-2 rounded-full border border-border/70 bg-card/70 px-3.5 py-2 shadow-sm backdrop-blur">
+                    <div
+                        className="mb-5 inline-flex max-w-full items-center gap-2 rounded-full border border-border/70 bg-card/70 px-3.5 py-2 shadow-sm backdrop-blur">
                         <MapPin
                             className="h-3.5 w-3.5 shrink-0 text-[hsl(var(--primary))]"
                             strokeWidth={
@@ -201,7 +187,8 @@ export function FindSeatClient({
                             }
                         />
 
-                        <span className="truncate text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground sm:tracking-[0.22em]">
+                        <span
+                            className="truncate text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground sm:tracking-[0.22em]">
                             {t(
                                 'weddingOf',
                                 {
@@ -230,7 +217,8 @@ export function FindSeatClient({
                 {/* =====================================
                     SEARCH
                 ===================================== */}
-                <section className="mt-8 rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-sm backdrop-blur sm:mt-9 sm:p-6">
+                <section
+                    className="mt-8 rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-sm backdrop-blur sm:mt-9 sm:p-6">
                     <label
                         htmlFor="guest-search"
                         className="label-wedding mb-3"
@@ -293,7 +281,7 @@ export function FindSeatClient({
                                     )}
                                     className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
                                 >
-                                    <X className="h-3.5 w-3.5" />
+                                    <X className="h-3.5 w-3.5"/>
                                 </button>
                             )}
                     </div>
@@ -426,7 +414,8 @@ export function FindSeatClient({
                                                 }
                                             </h3>
 
-                                            <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                            <div
+                                                className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
                                                 <Armchair
                                                     aria-hidden
                                                     className="h-3.5 w-3.5 shrink-0 text-[hsl(var(--primary))]"
@@ -471,7 +460,8 @@ export function FindSeatClient({
                                             </div>
                                         </div>
 
-                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors duration-200 group-hover:bg-foreground group-hover:text-background">
+                                        <div
+                                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors duration-200 group-hover:bg-foreground group-hover:text-background">
                                             <ArrowRight
                                                 aria-hidden
                                                 className="h-4 w-4"
@@ -517,7 +507,8 @@ export function FindSeatClient({
                                 }}
                                 className="rounded-[1.5rem] border border-border/60 bg-card/65 px-6 py-10 text-center"
                             >
-                                <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
+                                <div
+                                    className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
                                     <Search
                                         aria-hidden
                                         className="h-4 w-4 text-muted-foreground"

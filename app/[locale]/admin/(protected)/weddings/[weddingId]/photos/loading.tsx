@@ -1,6 +1,6 @@
-import { getTranslations } from 'next-intl/server'
+import {getTranslations} from 'next-intl/server'
 
-import { Skeleton } from '@/components/ui/skeleton'
+import {Skeleton} from '@/components/ui/skeleton'
 
 export default async function PhotosLoading() {
     const t = await getTranslations('common')
@@ -20,30 +20,31 @@ export default async function PhotosLoading() {
             {/* =====================================
                 BACK
             ===================================== */}
-            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-32"/>
 
             {/* =====================================
                 HEADER
             ===================================== */}
             <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <Skeleton className="h-3 w-20 rounded-full" />
+                    <Skeleton className="h-3 w-20 rounded-full"/>
 
-                    <Skeleton className="mt-3 h-10 w-44 rounded-xl sm:h-12 sm:w-52" />
+                    <Skeleton className="mt-3 h-10 w-44 rounded-xl sm:h-12 sm:w-52"/>
 
-                    <Skeleton className="mt-3 h-4 w-full max-w-[380px]" />
+                    <Skeleton className="mt-3 h-4 w-full max-w-[380px]"/>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                    <Skeleton className="h-10 w-32 rounded-full" />
-                    <Skeleton className="h-10 w-32 rounded-full" />
+                    <Skeleton className="h-10 w-32 rounded-full"/>
+                    <Skeleton className="h-10 w-32 rounded-full"/>
                 </div>
             </div>
 
             {/* =====================================
                 FILTERS
             ===================================== */}
-            <div className="mt-8 flex flex-col gap-3 border-b border-border/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
+            <div
+                className="mt-8 flex flex-col gap-3 border-b border-border/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex gap-1 overflow-hidden rounded-2xl border border-border/70 bg-card p-1">
                     {Array.from({
                         length: 4,
@@ -60,8 +61,8 @@ export default async function PhotosLoading() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <Skeleton className="h-8 w-24 rounded-full" />
-                    <Skeleton className="h-8 w-20 rounded-full" />
+                    <Skeleton className="h-8 w-24 rounded-full"/>
+                    <Skeleton className="h-8 w-20 rounded-full"/>
                 </div>
             </div>
 
@@ -95,14 +96,14 @@ export default async function PhotosLoading() {
                             {/* Metadata */}
                             <div className="p-3">
                                 <div className="flex items-center gap-2">
-                                    <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
+                                    <Skeleton className="h-7 w-7 shrink-0 rounded-full"/>
 
                                     <div className="min-w-0 flex-1 space-y-1.5">
-                                        <Skeleton className="h-3 w-20" />
-                                        <Skeleton className="h-2.5 w-14" />
+                                        <Skeleton className="h-3 w-20"/>
+                                        <Skeleton className="h-2.5 w-14"/>
                                     </div>
 
-                                    <Skeleton className="h-7 w-7 rounded-lg" />
+                                    <Skeleton className="h-7 w-7 rounded-lg"/>
                                 </div>
                             </div>
                         </div>
@@ -114,7 +115,7 @@ export default async function PhotosLoading() {
                 LOAD MORE
             ===================================== */}
             <div className="mt-8 flex justify-center">
-                <Skeleton className="h-10 w-32 rounded-full" />
+                <Skeleton className="h-10 w-32 rounded-full"/>
             </div>
         </div>
     )

@@ -1,26 +1,12 @@
 'use server'
 
-import {
-    revalidatePath,
-    revalidateTag,
-    unstable_cache,
-} from 'next/cache'
-import { redirect } from 'next/navigation'
+import {revalidatePath, revalidateTag, unstable_cache,} from 'next/cache'
+import {redirect} from 'next/navigation'
 
-import {
-    createClient,
-    createServiceClient,
-} from '@/lib/supabase/server'
-import { generateSeatPositions } from '@/lib/seat-generator'
-import {
-    guestSchema,
-    type SeatSides,
-    tableSchema,
-} from '@/schemas'
-import type {
-    Table,
-    VenueElement,
-} from '@/types/seating'
+import {createClient, createServiceClient,} from '@/lib/supabase/server'
+import {generateSeatPositions} from '@/lib/seat-generator'
+import {guestSchema, type SeatSides, tableSchema,} from '@/schemas'
+import type {Table, VenueElement,} from '@/types/seating'
 
 function generateInitials(
     firstName: string,
@@ -1821,6 +1807,7 @@ export async function deleteVenueElement(
         'max'
     )
 }
+
 export async function getVenueElements(
     weddingId: string
 ) {

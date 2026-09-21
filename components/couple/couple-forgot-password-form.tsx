@@ -1,24 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import {useState} from 'react'
 
-import {
-    AlertCircle,
-    ArrowLeft,
-    Check,
-    Loader2,
-    Mail,
-} from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import {AlertCircle, ArrowLeft, Check, Loader2, Mail,} from 'lucide-react'
+import {useTranslations} from 'next-intl'
+import {useForm} from 'react-hook-form'
+import {zodResolver} from '@hookform/resolvers/zod'
 
-import { createClient } from '@/lib/supabase/client'
-import { Link } from '@/lib/navigation'
-import {
-    forgotPasswordSchema,
-    type ForgotPasswordValues,
-} from '@/schemas'
+import {createClient} from '@/lib/supabase/client'
+import {Link} from '@/lib/navigation'
+import {forgotPasswordSchema, type ForgotPasswordValues,} from '@/schemas'
 
 export function CoupleForgotPasswordForm() {
     const t = useTranslations(
@@ -37,7 +28,7 @@ export function CoupleForgotPasswordForm() {
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: {errors},
     } = useForm<ForgotPasswordValues>({
         resolver: zodResolver(
             forgotPasswordSchema
@@ -54,7 +45,7 @@ export function CoupleForgotPasswordForm() {
             const supabase =
                 await createClient()
 
-            const { error: resetError } =
+            const {error: resetError} =
                 await supabase.auth.resetPasswordForEmail(
                     values.email,
                     {
@@ -85,7 +76,8 @@ export function CoupleForgotPasswordForm() {
     if (success) {
         return (
             <div className="py-3 text-center">
-                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]">
+                <div
+                    className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]">
                     <Check
                         className="h-6 w-6 text-[hsl(var(--primary))]"
                         strokeWidth={1.7}
@@ -114,7 +106,7 @@ export function CoupleForgotPasswordForm() {
                     href="/couple/login"
                     className="btn-secondary mt-7 w-full justify-center"
                 >
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="h-4 w-4"/>
 
                     {t(
                         'backToLogin'
@@ -177,7 +169,7 @@ export function CoupleForgotPasswordForm() {
                     role="alert"
                     className="flex items-start gap-3 rounded-2xl border border-destructive/15 bg-destructive/[0.06] px-4 py-3.5"
                 >
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive"/>
 
                     <p className="text-xs leading-5 text-destructive">
                         {error}
@@ -193,13 +185,13 @@ export function CoupleForgotPasswordForm() {
             >
                 {loading ? (
                     <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin"/>
 
                         {t('sending')}
                     </>
                 ) : (
                     <>
-                        <Mail className="h-4 w-4" />
+                        <Mail className="h-4 w-4"/>
 
                         {t(
                             'sendLink'
@@ -213,7 +205,7 @@ export function CoupleForgotPasswordForm() {
                 href="/couple/login"
                 className="group flex items-center justify-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-                <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+                <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5"/>
 
                 {t('backToLogin')}
             </Link>

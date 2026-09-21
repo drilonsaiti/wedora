@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {useEffect} from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import {usePathname} from "next/navigation";
 
 interface GlobalErrorProps {
     error: Error & {
@@ -113,9 +113,11 @@ export default function GlobalError({
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 overflow-hidden"
             >
-                <div className="absolute left-1/2 top-[-260px] h-[560px] w-[760px] -translate-x-1/2 rounded-full bg-[#ead5dc]/50 blur-[150px]" />
+                <div
+                    className="absolute left-1/2 top-[-260px] h-[560px] w-[760px] -translate-x-1/2 rounded-full bg-[#ead5dc]/50 blur-[150px]"/>
 
-                <div className="absolute bottom-[-220px] right-[-180px] h-[420px] w-[420px] rounded-full bg-[#d6bd82]/10 blur-[130px]" />
+                <div
+                    className="absolute bottom-[-220px] right-[-180px] h-[420px] w-[420px] rounded-full bg-[#d6bd82]/10 blur-[130px]"/>
             </div>
 
             <div className="relative z-10 w-full max-w-xl">
@@ -127,14 +129,16 @@ export default function GlobalError({
                         href="/"
                         className="inline-flex items-center gap-2.5 text-[#231f1c] no-underline"
                     >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#9a4b62] text-white shadow-sm">
+                <span
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-[#9a4b62] text-white shadow-sm">
                   <svg
                       aria-hidden="true"
                       viewBox="0 0 24 24"
                       fill="currentColor"
                       className="h-3.5 w-3.5"
                   >
-                    <path d="M12 21s-6.716-4.35-9.428-8.11C.163 9.55 1.41 5.24 5.15 4.25c2.15-.57 4.2.25 5.4 1.88L12 8.09l1.45-1.96c1.2-1.63 3.25-2.45 5.4-1.88 3.74.99 4.987 5.3 2.578 8.64C18.716 16.65 12 21 12 21Z" />
+                    <path
+                        d="M12 21s-6.716-4.35-9.428-8.11C.163 9.55 1.41 5.24 5.15 4.25c2.15-.57 4.2.25 5.4 1.88L12 8.09l1.45-1.96c1.2-1.63 3.25-2.45 5.4-1.88 3.74.99 4.987 5.3 2.578 8.64C18.716 16.65 12 21 12 21Z"/>
                   </svg>
                 </span>
 
@@ -147,9 +151,11 @@ export default function GlobalError({
                 {/* =================================
                             ERROR CARD
                         ================================= */}
-                <section className="rounded-[2rem] border border-[#e7e0d9] bg-[#fffdfb]/95 px-6 py-10 text-center shadow-[0_20px_60px_rgba(35,31,28,0.08)] backdrop-blur sm:px-10 sm:py-12">
+                <section
+                    className="rounded-[2rem] border border-[#e7e0d9] bg-[#fffdfb]/95 px-6 py-10 text-center shadow-[0_20px_60px_rgba(35,31,28,0.08)] backdrop-blur sm:px-10 sm:py-12">
                     {/* Icon */}
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-[#d84c4c]/15 bg-[#d84c4c]/[0.06] text-[#c53c3c]">
+                    <div
+                        className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-[#d84c4c]/15 bg-[#d84c4c]/[0.06] text-[#c53c3c]">
                         <svg
                             aria-hidden="true"
                             viewBox="0 0 24 24"
@@ -160,11 +166,11 @@ export default function GlobalError({
                             strokeLinejoin="round"
                             className="h-6 w-6"
                         >
-                            <circle cx="12" cy="12" r="9" />
+                            <circle cx="12" cy="12" r="9"/>
 
-                            <path d="M12 8v5" />
+                            <path d="M12 8v5"/>
 
-                            <path d="M12 16.5h.01" />
+                            <path d="M12 16.5h.01"/>
                         </svg>
                     </div>
 
@@ -199,12 +205,12 @@ export default function GlobalError({
                                 strokeLinejoin="round"
                                 className="h-4 w-4"
                             >
-                                <path d="M20 6v5h-5" />
-                                <path d="M4 18v-5h5" />
+                                <path d="M20 6v5h-5"/>
+                                <path d="M4 18v-5h5"/>
 
-                                <path d="M6.1 9a7 7 0 0 1 11.4-2.4L20 11" />
+                                <path d="M6.1 9a7 7 0 0 1 11.4-2.4L20 11"/>
 
-                                <path d="M17.9 15a7 7 0 0 1-11.4 2.4L4 13" />
+                                <path d="M17.9 15a7 7 0 0 1-11.4 2.4L4 13"/>
                             </svg>
 
                             {t.retry}

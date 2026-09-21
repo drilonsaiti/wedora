@@ -646,7 +646,6 @@
     "perWedding": "për dasmë",
     "included": "Çfarë përfshihet",
     "choosePlan": "Zgjidh {plan}",
-
     "plans": {
       "basic": {
         "eyebrow": "Thelbësore",
@@ -664,7 +663,6 @@
         "description": "Pa kufizime, për dasma më të mëdha"
       }
     },
-
     "features": {
       "basic": {
         "findSeat": "Gjej vendin tim",
@@ -691,7 +689,6 @@
         "publicGallery": "Galeri e shpërndashme (link publik)"
       }
     },
-
     "customPlan": {
       "text": "Nuk gjete atë që kërkon?",
       "contact": "Na kontakto",

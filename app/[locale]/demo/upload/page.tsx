@@ -1,8 +1,8 @@
-import { Camera, Heart } from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
+import {Camera, Heart} from 'lucide-react'
+import {getTranslations} from 'next-intl/server'
 
-import { UploadFormDemo } from '@/components/demo/upload-form-demo'
-import { BottomNav } from '@/components/bottom-nav'
+import {UploadFormDemo} from '@/components/demo/upload-form-demo'
+import {BottomNav} from '@/components/bottom-nav'
 
 export default async function DemoUploadPage() {
     const t = await getTranslations('wedding.upload')
@@ -14,16 +14,19 @@ export default async function DemoUploadPage() {
                 aria-hidden
                 className="pointer-events-none absolute inset-0"
             >
-                <div className="absolute left-1/2 top-[-220px] h-[560px] w-[720px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/30 blur-[140px]" />
+                <div
+                    className="absolute left-1/2 top-[-220px] h-[560px] w-[720px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/30 blur-[140px]"/>
 
-                <div className="absolute bottom-[-220px] right-[-180px] h-[420px] w-[420px] rounded-full bg-[hsl(var(--gold))]/8 blur-[130px]" />
+                <div
+                    className="absolute bottom-[-220px] right-[-180px] h-[420px] w-[420px] rounded-full bg-[hsl(var(--gold))]/8 blur-[130px]"/>
             </div>
 
             <div className="relative z-10 mx-auto w-full max-w-xl">
                 {/* Brand */}
                 <div className="mb-12 flex justify-center">
                     <div className="inline-flex items-center gap-2.5">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
+                        <div
+                            className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
                             <Heart
                                 className="h-3.5 w-3.5"
                                 fill="currentColor"
@@ -38,7 +41,8 @@ export default async function DemoUploadPage() {
 
                 {/* Header */}
                 <header className="mb-9 text-center">
-                    <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/70 px-3.5 py-2 shadow-sm backdrop-blur">
+                    <div
+                        className="mb-5 inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/70 px-3.5 py-2 shadow-sm backdrop-blur">
                         <Camera
                             className="h-3.5 w-3.5 text-[hsl(var(--primary))]"
                             strokeWidth={1.6}
@@ -59,8 +63,9 @@ export default async function DemoUploadPage() {
                 </header>
 
                 {/* Upload experience */}
-                <section className="rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-sm backdrop-blur sm:p-7">
-                    <UploadFormDemo />
+                <section
+                    className="rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-sm backdrop-blur sm:p-7">
+                    <UploadFormDemo/>
                 </section>
 
                 {/* Footer */}

@@ -1,20 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import {useState} from "react";
 
-import { Check, Plus } from "lucide-react";
-import { useTranslations } from "next-intl";
+import {Check, Plus} from "lucide-react";
+import {useTranslations} from "next-intl";
 
-import { Modal } from "@/components/ui/modal";
-import {
-    VENUE_COLORS,
-    VENUE_ICONS,
-    VENUE_PRESETS,
-    type VenueColorKey,
-    type VenueIconKey,
-} from "@/lib/venue-icons";
-import { cn } from "@/lib/utils";
-import type { VenueElementShape } from "@/types/seating";
+import {Modal} from "@/components/ui/modal";
+import {VENUE_COLORS, VENUE_ICONS, VENUE_PRESETS, type VenueColorKey, type VenueIconKey,} from "@/lib/venue-icons";
+import {cn} from "@/lib/utils";
+import type {VenueElementShape} from "@/types/seating";
 
 interface VenueElementModalProps {
     open: boolean;
@@ -161,8 +155,9 @@ export function VenueElementModal({
                                         VENUE_COLORS[preset.color],
                                     )}
                                 >
-                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-background/60 backdrop-blur-sm">
-                                        <Icon className="h-4 w-4" strokeWidth={1.6} />
+                                    <div
+                                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-background/60 backdrop-blur-sm">
+                                        <Icon className="h-4 w-4" strokeWidth={1.6}/>
                                     </div>
 
                                     <span className="min-w-0 text-xs font-medium">
@@ -176,13 +171,13 @@ export function VenueElementModal({
 
                 {/* Divider */}
                 <div className="relative flex items-center gap-3">
-                    <div className="h-px flex-1 bg-border/60" />
+                    <div className="h-px flex-1 bg-border/60"/>
 
                     <span className="text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
             {t("orCustom")}
           </span>
 
-                    <div className="h-px flex-1 bg-border/60" />
+                    <div className="h-px flex-1 bg-border/60"/>
                 </div>
 
                 {/* =====================================
@@ -245,11 +240,12 @@ export function VenueElementModal({
                                                 : "border-border/70 bg-background text-muted-foreground hover:bg-secondary hover:text-foreground",
                                         )}
                                     >
-                                        <Icon className="h-4 w-4" strokeWidth={1.6} />
+                                        <Icon className="h-4 w-4" strokeWidth={1.6}/>
 
                                         {active && (
-                                            <span className="absolute right-1 top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-background text-foreground">
-                        <Check className="h-2.5 w-2.5" strokeWidth={2.3} />
+                                            <span
+                                                className="absolute right-1 top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-background text-foreground">
+                        <Check className="h-2.5 w-2.5" strokeWidth={2.3}/>
                       </span>
                                         )}
                                     </button>
@@ -283,7 +279,7 @@ export function VenueElementModal({
                                                 : "border-border/70 bg-background text-muted-foreground hover:bg-secondary/40 hover:text-foreground",
                                         )}
                                     >
-                                        <ShapePreview shape={item} active={active} />
+                                        <ShapePreview shape={item} active={active}/>
 
                                         <span className="text-[10px] font-medium">
                       {t(`shapes.${item}`)}
@@ -349,7 +345,7 @@ export function VenueElementModal({
                         disabled={!label.trim()}
                         className="btn-primary w-full justify-center disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-4 w-4"/>
 
                         {t("create")}
                     </button>

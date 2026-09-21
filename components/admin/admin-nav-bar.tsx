@@ -1,27 +1,19 @@
 "use client";
 
-import {
-    CalendarDays,
-    Heart,
-    LayoutDashboard,
-    LogOut,
-    Menu,
-    Settings,
-    X,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
+import {CalendarDays, Heart, LayoutDashboard, LogOut, Menu, Settings, X,} from "lucide-react";
+import {useTranslations} from "next-intl";
+import {useState} from "react";
 
-import { signOutAction } from "@/actions/admin";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { Link, usePathname } from "@/lib/navigation";
-import { cn } from "@/lib/utils";
+import {signOutAction} from "@/actions/admin";
+import {ThemeToggle} from "@/components/theme-toggle";
+import {Link, usePathname} from "@/lib/navigation";
+import {cn} from "@/lib/utils";
 
 interface AdminNavBarProps {
     adminEmail: string;
 }
 
-export function AdminNavBar({ adminEmail }: AdminNavBarProps) {
+export function AdminNavBar({adminEmail}: AdminNavBarProps) {
     const t = useTranslations("adminNav");
 
     const tc = useTranslations("common");
@@ -66,15 +58,17 @@ export function AdminNavBar({ adminEmail }: AdminNavBarProps) {
                     className="flex shrink-0 items-center gap-2.5"
                     onClick={() => setMobileOpen(false)}
                 >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
-                        <Heart className="h-3.5 w-3.5" fill="currentColor" />
+                    <div
+                        className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
+                        <Heart className="h-3.5 w-3.5" fill="currentColor"/>
                     </div>
 
                     <span className="font-serif text-xl tracking-tight text-foreground">
             Wedora
           </span>
 
-                    <span className="hidden rounded-full border border-border/70 bg-card px-2 py-1 text-[8px] font-medium uppercase tracking-[0.15em] text-muted-foreground sm:inline-flex">
+                    <span
+                        className="hidden rounded-full border border-border/70 bg-card px-2 py-1 text-[8px] font-medium uppercase tracking-[0.15em] text-muted-foreground sm:inline-flex">
             Admin
           </span>
                 </Link>
@@ -86,7 +80,7 @@ export function AdminNavBar({ adminEmail }: AdminNavBarProps) {
                     aria-label={t("navigation")}
                     className="ml-5 hidden items-center gap-1 md:flex"
                 >
-                    {navItems.map(({ href, label, icon: Icon, active }) => (
+                    {navItems.map(({href, label, icon: Icon, active}) => (
                         <Link
                             key={href}
                             href={href}
@@ -99,7 +93,7 @@ export function AdminNavBar({ adminEmail }: AdminNavBarProps) {
                                     : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                             )}
                         >
-                            <Icon className="h-3.5 w-3.5" strokeWidth={1.6} />
+                            <Icon className="h-3.5 w-3.5" strokeWidth={1.6}/>
 
                             {label}
                         </Link>
@@ -116,7 +110,7 @@ export function AdminNavBar({ adminEmail }: AdminNavBarProps) {
                         </p>
                     </div>
 
-                    <ThemeToggle />
+                    <ThemeToggle/>
 
                     <button
                         type="button"
@@ -125,7 +119,7 @@ export function AdminNavBar({ adminEmail }: AdminNavBarProps) {
                         title={tc("logout")}
                         className="hidden h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground md:flex"
                     >
-                        <LogOut className="h-4 w-4" strokeWidth={1.6} />
+                        <LogOut className="h-4 w-4" strokeWidth={1.6}/>
                     </button>
 
                     {/* Mobile menu */}
@@ -137,9 +131,9 @@ export function AdminNavBar({ adminEmail }: AdminNavBarProps) {
                         className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground md:hidden"
                     >
                         {mobileOpen ? (
-                            <X className="h-4 w-4" strokeWidth={1.6} />
+                            <X className="h-4 w-4" strokeWidth={1.6}/>
                         ) : (
-                            <Menu className="h-4 w-4" strokeWidth={1.6} />
+                            <Menu className="h-4 w-4" strokeWidth={1.6}/>
                         )}
                     </button>
                 </div>
@@ -154,7 +148,7 @@ export function AdminNavBar({ adminEmail }: AdminNavBarProps) {
                         aria-label={t("navigation")}
                         className="mx-auto max-w-7xl space-y-1"
                     >
-                        {navItems.map(({ href, label, icon: Icon, active }) => (
+                        {navItems.map(({href, label, icon: Icon, active}) => (
                             <Link
                                 key={href}
                                 href={href}
@@ -168,13 +162,13 @@ export function AdminNavBar({ adminEmail }: AdminNavBarProps) {
                                         : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                                 )}
                             >
-                                <Icon className="h-4 w-4" strokeWidth={1.6} />
+                                <Icon className="h-4 w-4" strokeWidth={1.6}/>
 
                                 {label}
                             </Link>
                         ))}
 
-                        <div className="my-2 h-px bg-border/60" />
+                        <div className="my-2 h-px bg-border/60"/>
 
                         <div className="px-3.5 py-2">
                             <p className="text-[9px] font-medium uppercase tracking-[0.15em] text-muted-foreground/70">
@@ -191,7 +185,7 @@ export function AdminNavBar({ adminEmail }: AdminNavBarProps) {
                             onClick={() => void signOutAction()}
                             className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3.5 text-left text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                         >
-                            <LogOut className="h-4 w-4" strokeWidth={1.6} />
+                            <LogOut className="h-4 w-4" strokeWidth={1.6}/>
 
                             {tc("logout")}
                         </button>

@@ -1,13 +1,9 @@
-import { notFound } from 'next/navigation'
+import {notFound} from 'next/navigation'
 
-import { BottomNav } from '@/components/bottom-nav'
-import { FindSeatClient } from '@/components/find-seat-client'
-import {
-    getGuests,
-    getTables,
-    getVenueElements,
-} from '@/actions/seating'
-import { getWeddingBySlug } from '@/actions/wedding'
+import {BottomNav} from '@/components/bottom-nav'
+import {FindSeatClient} from '@/components/find-seat-client'
+import {getGuests, getTables, getVenueElements,} from '@/actions/seating'
+import {getWeddingBySlug} from '@/actions/wedding'
 
 const DEMO_WEDDING_SLUG = 'sara-drilon'
 const DEMO_NAV_SLUG = 'demo'

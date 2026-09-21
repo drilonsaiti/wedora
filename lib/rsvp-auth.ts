@@ -1,6 +1,6 @@
-import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import {createHash, randomBytes, timingSafeEqual} from "node:crypto";
 
-import { createServiceClient } from "@/lib/supabase/server";
+import {createServiceClient} from "@/lib/supabase/server";
 
 /*
  * ============================================================
@@ -123,7 +123,7 @@ function extractRawApiKey(request: Request): string {
     }
 
     try {
-        const { searchParams } = new URL(request.url);
+        const {searchParams} = new URL(request.url);
         const fromQuery = searchParams.get("api_key")?.trim();
 
         if (fromQuery) {
@@ -174,7 +174,7 @@ export async function resolveRsvpApiActor(
 
     const service = createServiceClient();
 
-    const { data: wedding, error: weddingError } = await service
+    const {data: wedding, error: weddingError} = await service
         .from("weddings")
         .select("id, slug")
         .eq("slug", weddingSlug.trim())
@@ -197,7 +197,7 @@ export async function resolveRsvpApiActor(
     const prefix = rawKey.slice(0, KEY_PREFIX_LENGTH);
     const providedHash = hashRsvpApiKey(rawKey);
 
-    const { data: apiKey, error: keyError } = await service
+    const {data: apiKey, error: keyError} = await service
         .from("wedding_rsvp_api_keys")
         .select("id, wedding_id, key_hash, revoked_at")
         .eq("wedding_id", wedding.id)
@@ -229,7 +229,7 @@ export async function resolveRsvpApiActor(
     // Best-effort bookkeeping; never block the request on this.
     void service
         .from("wedding_rsvp_api_keys")
-        .update({ last_used_at: new Date().toISOString() })
+        .update({last_used_at: new Date().toISOString()})
         .eq("id", apiKey.id)
         .then(undefined, (error) => {
             console.error("RSVP API key last_used_at update failed:", error);
@@ -266,7 +266,7 @@ export async function enforceRsvpRateLimit(
         ): Promise<{ data: T | null; error: { message: string } | null }>;
     };
 
-    const { data, error } = await rpc.rpc<number | number[]>(
+    const {data, error} = await rpc.rpc<number | number[]>(
         "consume_rsvp_rate_bucket",
         {
             p_wedding_id: weddingId,

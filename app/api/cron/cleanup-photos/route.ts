@@ -1,6 +1,6 @@
-import { timingSafeEqual } from 'node:crypto'
-import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import {timingSafeEqual} from 'node:crypto'
+import {NextResponse} from 'next/server'
+import {createServiceClient} from '@/lib/supabase/server'
 
 function safeEqual(left: string, right: string) {
     const leftBuffer = Buffer.from(left)
@@ -16,22 +16,22 @@ export async function GET(request: Request) {
     // secret was not configured for this deployment.
     if (!cronSecret) {
         console.error('CRON_SECRET is not configured; refusing request')
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        return NextResponse.json({error: 'Unauthorized'}, {status: 401})
     }
 
     const authHeader = request.headers.get('authorization') ?? ''
     if (!safeEqual(authHeader, `Bearer ${cronSecret}`)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        return NextResponse.json({error: 'Unauthorized'}, {status: 401})
     }
 
     const supabase = createServiceClient()
 
-    const { data: weddings, error: weddingsError } = await supabase
+    const {data: weddings, error: weddingsError} = await supabase
         .from('weddings')
         .select('id, wedding_date, wedding_settings(photo_retention_days)')
 
     if (weddingsError) {
-        return NextResponse.json({ error: weddingsError.message }, { status: 500 })
+        return NextResponse.json({error: weddingsError.message}, {status: 500})
     }
 
     const now = new Date()
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
 
         if (now < expiryDate) continue
 
-        const { data: photos, error: photosError } = await supabase
+        const {data: photos, error: photosError} = await supabase
             .from('photos')
             .select('id, original_path, thumbnail_path')
             .eq('wedding_id', wedding.id)
@@ -60,18 +60,18 @@ export async function GET(request: Request) {
         await supabase.storage.from('photos').remove(originalPaths)
         await supabase.storage.from('thumbnails').remove(thumbnailPaths)
 
-        const { error: deleteError } = await supabase
+        const {error: deleteError} = await supabase
             .from('photos')
             .delete()
             .eq('wedding_id', wedding.id)
 
         if (deleteError) {
-            results.push({ weddingId: wedding.id, deletedCount: 0, error: deleteError.message })
+            results.push({weddingId: wedding.id, deletedCount: 0, error: deleteError.message})
             continue
         }
 
         totalDeleted += photos.length
-        results.push({ weddingId: wedding.id, deletedCount: photos.length })
+        results.push({weddingId: wedding.id, deletedCount: photos.length})
     }
 
     return NextResponse.json({

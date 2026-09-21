@@ -1,21 +1,22 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import {useSyncExternalStore} from "react";
 
-import { Moon, Sun } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
+import {Moon, Sun} from "lucide-react";
+import {useTranslations} from "next-intl";
+import {useTheme} from "next-themes";
 
-import { cn } from "@/lib/utils";
+import {cn} from "@/lib/utils";
 
 interface ThemeToggleProps {
     className?: string;
 }
 
-const emptySubscribe = () => () => {};
+const emptySubscribe = () => () => {
+};
 
-export function ThemeToggle({ className }: ThemeToggleProps) {
-    const { resolvedTheme, setTheme } = useTheme();
+export function ThemeToggle({className}: ThemeToggleProps) {
+    const {resolvedTheme, setTheme} = useTheme();
 
     const t = useTranslations("common");
 
@@ -56,9 +57,9 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
             )}
         >
             {isDark ? (
-                <Sun className="h-3.5 w-3.5" strokeWidth={1.7} />
+                <Sun className="h-3.5 w-3.5" strokeWidth={1.7}/>
             ) : (
-                <Moon className="h-3.5 w-3.5" strokeWidth={1.7} />
+                <Moon className="h-3.5 w-3.5" strokeWidth={1.7}/>
             )}
         </button>
     );

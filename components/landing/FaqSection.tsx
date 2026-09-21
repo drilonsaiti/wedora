@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server'
+import {getTranslations} from 'next-intl/server'
 import {SectionHeading} from "@/components/ui/SectionHeading";
 
 
@@ -20,10 +20,12 @@ export async function FaqSection() {
                 <div className="mt-12 divide-y divide-border">
                     {FAQ_ITEMS.map((item) => (
                         <details key={item} className="group py-5">
-                            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
+                            <summary
+                                className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
                                 {t(`faq.items.${item}.question`)}
 
-                                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition group-open:rotate-45">
+                                <span
+                                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition group-open:rotate-45">
                                     +
                                 </span>
                             </summary>

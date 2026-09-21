@@ -1,15 +1,15 @@
-import { timingSafeEqual } from "node:crypto";
-import { createReadStream, createWriteStream } from "node:fs";
-import { mkdtemp, rm, stat } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { Readable } from "node:stream";
-import { once } from "node:events";
+import {timingSafeEqual} from "node:crypto";
+import {createReadStream, createWriteStream} from "node:fs";
+import {mkdtemp, rm, stat} from "node:fs/promises";
+import {tmpdir} from "node:os";
+import {join} from "node:path";
+import {Readable} from "node:stream";
+import {once} from "node:events";
 
-import { NextRequest, NextResponse } from "next/server";
-import { Zip, ZipPassThrough } from "fflate";
+import {NextRequest, NextResponse} from "next/server";
+import {Zip, ZipPassThrough} from "fflate";
 
-import { createServiceClient } from "@/lib/supabase/server";
+import {createServiceClient} from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -83,7 +83,7 @@ async function cleanupExpiredExports(
 ) {
     const queueDb = service as any;
 
-    const { data, error } = await queueDb
+    const {data, error} = await queueDb
         .from("photo_zip_exports")
         .select("id, storage_path")
         .eq("status", "ready")
@@ -117,7 +117,7 @@ async function downloadPhoto(
     photo: PhotoRow
 ) {
     try {
-        const { data: blob, error } = await service.storage
+        const {data: blob, error} = await service.storage
             .from("photos")
             .download(photo.original_path);
 
@@ -308,7 +308,7 @@ async function processOneJob() {
 
     const queueDb = service as any;
 
-    const { data, error: claimError } = await queueDb.rpc(
+    const {data, error: claimError} = await queueDb.rpc(
         "claim_photo_zip_export"
     );
 
@@ -351,7 +351,7 @@ async function processOneJob() {
             query = query.eq("favourite", true);
         }
 
-        const { data: photoData, error: photoError } = await query;
+        const {data: photoData, error: photoError} = await query;
 
         if (photoError) {
             throw new Error(`Photo query failed: ${photoError.message}`);
@@ -407,7 +407,7 @@ async function processOneJob() {
 
         await uploadArchive(archive.filePath, storagePath);
 
-        const { error: readyError } = await queueDb
+        const {error: readyError} = await queueDb
             .from("photo_zip_exports")
             .update({
                 status: "ready",

@@ -1,39 +1,15 @@
 'use client'
 
-import {
-    useState,
-} from 'react'
+import {useState,} from 'react'
 
-import {
-    AlertCircle,
-    Eye,
-    EyeOff,
-    Loader2,
-    Lock,
-    LogIn,
-    Mail,
-} from 'lucide-react'
-import {
-    useTranslations,
-} from 'next-intl'
-import {
-    useForm,
-} from 'react-hook-form'
-import {
-    zodResolver,
-} from '@hookform/resolvers/zod'
+import {AlertCircle, Eye, EyeOff, Loader2, Lock, LogIn, Mail,} from 'lucide-react'
+import {useTranslations,} from 'next-intl'
+import {useForm,} from 'react-hook-form'
+import {zodResolver,} from '@hookform/resolvers/zod'
 
-import {
-    Link,
-    useRouter,
-} from '@/lib/navigation'
-import {
-    createClient,
-} from '@/lib/supabase/client'
-import {
-    adminLoginSchema,
-    type AdminLoginValues,
-} from '@/schemas'
+import {Link, useRouter,} from '@/lib/navigation'
+import {createClient,} from '@/lib/supabase/client'
+import {adminLoginSchema, type AdminLoginValues,} from '@/schemas'
 
 export function AdminLoginForm() {
     const router =
@@ -330,7 +306,7 @@ export function AdminLoginForm() {
                     role="alert"
                     className="flex items-start gap-3 rounded-2xl border border-destructive/15 bg-destructive/[0.06] px-4 py-3.5"
                 >
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive"/>
 
                     <p className="text-xs leading-5 text-destructive">
                         {error}
@@ -348,7 +324,7 @@ export function AdminLoginForm() {
             >
                 {loading ? (
                     <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin"/>
 
                         {tc(
                             'loading'
@@ -356,7 +332,7 @@ export function AdminLoginForm() {
                     </>
                 ) : (
                     <>
-                        <LogIn className="h-4 w-4" />
+                        <LogIn className="h-4 w-4"/>
 
                         {t(
                             'signIn'

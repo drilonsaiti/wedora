@@ -1,25 +1,12 @@
-import { notFound } from 'next/navigation'
-import {
-    Camera,
-    Heart,
-    Image as ImageIcon,
-    MapPin,
-    Sparkles,
-} from 'lucide-react'
-import {
-    getLocale,
-    getTranslations,
-} from 'next-intl/server'
+import {notFound} from 'next/navigation'
+import {Camera, Heart, Image as ImageIcon, MapPin, Sparkles,} from 'lucide-react'
+import {getLocale, getTranslations,} from 'next-intl/server'
 
-import { BottomNav } from '@/components/bottom-nav'
-import { HomeSearch } from '@/components/home-search'
-import {
-    getGuests,
-    getTables,
-    getVenueElements,
-} from '@/actions/seating'
-import { getWeddingBySlug } from '@/actions/wedding'
-import { Link } from '@/lib/navigation'
+import {BottomNav} from '@/components/bottom-nav'
+import {HomeSearch} from '@/components/home-search'
+import {getGuests, getTables, getVenueElements,} from '@/actions/seating'
+import {getWeddingBySlug} from '@/actions/wedding'
+import {Link} from '@/lib/navigation'
 
 const DEMO_WEDDING_SLUG = 'sara-drilon'
 const DEMO_NAV_SLUG = 'demo'
@@ -71,16 +58,19 @@ export default async function DemoHomePage() {
                 aria-hidden
                 className="pointer-events-none absolute inset-0"
             >
-                <div className="absolute left-1/2 top-[-220px] h-[600px] w-[760px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/30 blur-[140px]" />
+                <div
+                    className="absolute left-1/2 top-[-220px] h-[600px] w-[760px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/30 blur-[140px]"/>
 
-                <div className="absolute bottom-[-220px] right-[-180px] h-[440px] w-[440px] rounded-full bg-[hsl(var(--gold))]/8 blur-[130px]" />
+                <div
+                    className="absolute bottom-[-220px] right-[-180px] h-[440px] w-[440px] rounded-full bg-[hsl(var(--gold))]/8 blur-[130px]"/>
             </div>
 
             <div className="relative z-10 mx-auto w-full max-w-xl">
                 {/* Wedora brand */}
                 <div className="mb-14 flex justify-center">
                     <div className="inline-flex items-center gap-2.5">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
+                        <div
+                            className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
                             <Heart
                                 className="h-3.5 w-3.5"
                                 fill="currentColor"
@@ -95,8 +85,9 @@ export default async function DemoHomePage() {
 
                 {/* Wedding introduction */}
                 <section className="text-center">
-                    <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/70 px-3.5 py-2 shadow-sm backdrop-blur">
-                        <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--gold))]" />
+                    <div
+                        className="mb-5 inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/70 px-3.5 py-2 shadow-sm backdrop-blur">
+                        <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--gold))]"/>
 
                         <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
                             {t(
@@ -125,9 +116,11 @@ export default async function DemoHomePage() {
                 {/* Main experience */}
                 <div className="mt-12 space-y-6">
                     {settings?.enable_find_seat && (
-                        <section className="rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-sm backdrop-blur sm:p-7">
+                        <section
+                            className="rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-sm backdrop-blur sm:p-7">
                             <div className="mb-5 flex items-center gap-3">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                                <div
+                                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
                                     <MapPin
                                         className="h-4 w-4 text-[hsl(var(--primary))]"
                                         strokeWidth={
@@ -166,9 +159,11 @@ export default async function DemoHomePage() {
                     )}
 
                     {settings?.enable_photo_upload && (
-                        <section className="overflow-hidden rounded-[2rem] border border-border/70 bg-card/85 shadow-sm backdrop-blur">
+                        <section
+                            className="overflow-hidden rounded-[2rem] border border-border/70 bg-card/85 shadow-sm backdrop-blur">
                             <div className="p-6 sm:p-7">
-                                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                                <div
+                                    className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
                                     <Camera
                                         className="h-5 w-5 text-[hsl(var(--primary))]"
                                         strokeWidth={
@@ -193,7 +188,7 @@ export default async function DemoHomePage() {
                                     href={`/${DEMO_NAV_SLUG}/upload`}
                                     className="btn-primary mt-6 w-full justify-center"
                                 >
-                                    <Camera className="h-4 w-4" />
+                                    <Camera className="h-4 w-4"/>
 
                                     {t(
                                         'home.sharePhoto'
@@ -265,7 +260,8 @@ function ExperienceFeature({
     label: string
 }) {
     return (
-        <div className="flex min-h-[92px] flex-col items-center justify-center gap-2 border-r border-border/50 px-2 text-center last:border-r-0">
+        <div
+            className="flex min-h-[92px] flex-col items-center justify-center gap-2 border-r border-border/50 px-2 text-center last:border-r-0">
             <Icon
                 className="h-4 w-4 text-[hsl(var(--primary))]"
                 strokeWidth={1.5}

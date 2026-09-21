@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
+import {ArrowRight} from 'lucide-react'
+import {getTranslations} from 'next-intl/server'
 
 const STEPS = ['create', 'organise', 'share'] as const
 
@@ -60,7 +60,7 @@ export async function HowItWorksSection() {
                             className="group mt-8 inline-flex items-center gap-2 text-sm font-medium"
                         >
                             {t('howItWorks.cta')}
-                            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1"/>
                         </Link>
                     </div>
                 </div>

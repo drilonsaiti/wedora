@@ -1,6 +1,6 @@
-import { getTranslations } from 'next-intl/server'
+import {getTranslations} from 'next-intl/server'
 
-import { Skeleton } from '@/components/ui/skeleton'
+import {Skeleton} from '@/components/ui/skeleton'
 
 export default async function DashboardLoading() {
     const t = await getTranslations('common')
@@ -22,14 +22,14 @@ export default async function DashboardLoading() {
             ===================================== */}
             <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                 <div className="space-y-3">
-                    <Skeleton className="h-3 w-20 rounded-full" />
+                    <Skeleton className="h-3 w-20 rounded-full"/>
 
-                    <Skeleton className="h-10 w-52 rounded-xl sm:h-12 sm:w-64" />
+                    <Skeleton className="h-10 w-52 rounded-xl sm:h-12 sm:w-64"/>
 
-                    <Skeleton className="h-4 w-full max-w-[340px]" />
+                    <Skeleton className="h-4 w-full max-w-[340px]"/>
                 </div>
 
-                <Skeleton className="h-11 w-40 rounded-full" />
+                <Skeleton className="h-11 w-40 rounded-full"/>
             </div>
 
             {/* =====================================
@@ -45,14 +45,14 @@ export default async function DashboardLoading() {
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div className="space-y-3">
-                                <Skeleton className="h-3 w-24" />
-                                <Skeleton className="h-8 w-16 rounded-lg" />
+                                <Skeleton className="h-3 w-24"/>
+                                <Skeleton className="h-8 w-16 rounded-lg"/>
                             </div>
 
-                            <Skeleton className="h-10 w-10 rounded-xl" />
+                            <Skeleton className="h-10 w-10 rounded-xl"/>
                         </div>
 
-                        <Skeleton className="mt-5 h-3 w-28" />
+                        <Skeleton className="mt-5 h-3 w-28"/>
                     </div>
                 ))}
             </div>
@@ -63,13 +63,14 @@ export default async function DashboardLoading() {
             <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
                 {/* Recent weddings */}
                 <section className="card-wedding overflow-hidden">
-                    <div className="flex items-center justify-between gap-4 border-b border-border/60 px-5 py-5 sm:px-6">
+                    <div
+                        className="flex items-center justify-between gap-4 border-b border-border/60 px-5 py-5 sm:px-6">
                         <div className="space-y-2">
-                            <Skeleton className="h-5 w-36" />
-                            <Skeleton className="h-3 w-52" />
+                            <Skeleton className="h-5 w-36"/>
+                            <Skeleton className="h-3 w-52"/>
                         </div>
 
-                        <Skeleton className="h-8 w-20 rounded-full" />
+                        <Skeleton className="h-8 w-20 rounded-full"/>
                     </div>
 
                     <div className="divide-y divide-border/60">
@@ -81,7 +82,7 @@ export default async function DashboardLoading() {
                                 className="flex items-center gap-4 px-5 py-5 sm:px-6"
                             >
                                 {/* Date */}
-                                <Skeleton className="h-12 w-12 shrink-0 rounded-xl" />
+                                <Skeleton className="h-12 w-12 shrink-0 rounded-xl"/>
 
                                 {/* Wedding */}
                                 <div className="min-w-0 flex-1 space-y-2">
@@ -94,16 +95,16 @@ export default async function DashboardLoading() {
                                     />
 
                                     <div className="flex gap-2">
-                                        <Skeleton className="h-3 w-20" />
-                                        <Skeleton className="h-3 w-16" />
+                                        <Skeleton className="h-3 w-20"/>
+                                        <Skeleton className="h-3 w-16"/>
                                     </div>
                                 </div>
 
                                 {/* Status */}
-                                <Skeleton className="hidden h-7 w-20 rounded-full sm:block" />
+                                <Skeleton className="hidden h-7 w-20 rounded-full sm:block"/>
 
                                 {/* Action */}
-                                <Skeleton className="h-9 w-9 shrink-0 rounded-xl" />
+                                <Skeleton className="h-9 w-9 shrink-0 rounded-xl"/>
                             </div>
                         ))}
                     </div>
@@ -112,8 +113,8 @@ export default async function DashboardLoading() {
                 {/* Quick actions */}
                 <aside className="card-wedding p-5 sm:p-6">
                     <div className="space-y-2">
-                        <Skeleton className="h-5 w-28" />
-                        <Skeleton className="h-3 w-44" />
+                        <Skeleton className="h-5 w-28"/>
+                        <Skeleton className="h-3 w-44"/>
                     </div>
 
                     <div className="mt-5 space-y-3">
@@ -124,7 +125,7 @@ export default async function DashboardLoading() {
                                 key={index}
                                 className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background p-3.5"
                             >
-                                <Skeleton className="h-10 w-10 shrink-0 rounded-xl" />
+                                <Skeleton className="h-10 w-10 shrink-0 rounded-xl"/>
 
                                 <div className="min-w-0 flex-1 space-y-2">
                                     <Skeleton
@@ -135,10 +136,10 @@ export default async function DashboardLoading() {
                                         }
                                     />
 
-                                    <Skeleton className="h-3 w-full max-w-[180px]" />
+                                    <Skeleton className="h-3 w-full max-w-[180px]"/>
                                 </div>
 
-                                <Skeleton className="h-4 w-4 shrink-0 rounded-md" />
+                                <Skeleton className="h-4 w-4 shrink-0 rounded-md"/>
                             </div>
                         ))}
                     </div>
@@ -151,13 +152,13 @@ export default async function DashboardLoading() {
             <section className="mt-6 card-wedding p-5 sm:p-6">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                     <div className="space-y-2">
-                        <Skeleton className="h-5 w-24" />
-                        <Skeleton className="h-3 w-56" />
+                        <Skeleton className="h-5 w-24"/>
+                        <Skeleton className="h-3 w-56"/>
                     </div>
 
                     <div className="flex gap-2">
-                        <Skeleton className="h-8 w-24 rounded-full" />
-                        <Skeleton className="h-8 w-20 rounded-full" />
+                        <Skeleton className="h-8 w-24 rounded-full"/>
+                        <Skeleton className="h-8 w-20 rounded-full"/>
                     </div>
                 </div>
 
@@ -169,8 +170,8 @@ export default async function DashboardLoading() {
                             key={index}
                             className="rounded-2xl bg-secondary/35 p-4"
                         >
-                            <Skeleton className="h-3 w-20" />
-                            <Skeleton className="mt-3 h-6 w-12 rounded-md" />
+                            <Skeleton className="h-3 w-20"/>
+                            <Skeleton className="mt-3 h-6 w-12 rounded-md"/>
                         </div>
                     ))}
                 </div>

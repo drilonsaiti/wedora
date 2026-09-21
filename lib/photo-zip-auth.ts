@@ -1,6 +1,6 @@
-import type { User } from "@supabase/supabase-js";
+import type {User} from "@supabase/supabase-js";
 
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import {createClient, createServiceClient} from "@/lib/supabase/server";
 
 export type PhotoZipRole = "admin" | "owner" | "couple";
 
@@ -20,7 +20,7 @@ export async function getPhotoZipActor() {
     const authClient = await createClient();
 
     const {
-        data: { user },
+        data: {user},
         error,
     } = await authClient.auth.getUser();
 
@@ -41,7 +41,7 @@ export async function authorizePhotoZipWedding(
     },
     weddingId: string
 ) {
-    const { user, service } = actor;
+    const {user, service} = actor;
 
     const [adminResult, weddingResult] = await Promise.all([
         service.from("admins").select("id").eq("id", user.id).maybeSingle(),
@@ -99,7 +99,7 @@ export async function authorizePhotoZipWedding(
             appMetadata.role === "couple" &&
             appMetadata.wedding_id === wedding.id
         ) {
-            const { data: settings, error: settingsError } = await service
+            const {data: settings, error: settingsError} = await service
                 .from("wedding_settings")
                 .select("enable_couple_login")
                 .eq("wedding_id", wedding.id)

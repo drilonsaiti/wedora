@@ -1,24 +1,14 @@
 'use client'
 
-import {
-    useEffect,
-    useLayoutEffect,
-    useRef,
-    useState,
-} from 'react'
+import {useEffect, useLayoutEffect, useRef, useState,} from 'react'
 
-import { createPortal } from 'react-dom'
+import {createPortal} from 'react-dom'
 
-import {
-    Armchair,
-    Images,
-    MoreHorizontal,
-    Settings2,
-} from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import {Armchair, Images, MoreHorizontal, Settings2,} from 'lucide-react'
+import {useTranslations} from 'next-intl'
 
-import { Link } from '@/lib/navigation'
-import { cn } from '@/lib/utils'
+import {Link} from '@/lib/navigation'
+import {cn} from '@/lib/utils'
 
 interface WeddingRowActionsProps {
     weddingId: string
@@ -292,7 +282,8 @@ export function WeddingRowActions({
                             }
                             className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground transition-colors hover:bg-secondary"
                         >
-                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground transition-colors group-hover:bg-background group-hover:text-foreground">
+                            <div
+                                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground transition-colors group-hover:bg-background group-hover:text-foreground">
                                 <Armchair
                                     className="h-3.5 w-3.5"
                                     strokeWidth={1.6}
@@ -315,7 +306,8 @@ export function WeddingRowActions({
                             }
                             className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground transition-colors hover:bg-secondary"
                         >
-                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground transition-colors group-hover:bg-background group-hover:text-foreground">
+                            <div
+                                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground transition-colors group-hover:bg-background group-hover:text-foreground">
                                 <Images
                                     className="h-3.5 w-3.5"
                                     strokeWidth={1.6}
@@ -331,7 +323,7 @@ export function WeddingRowActions({
 
                         {/* Divider */}
                         {onEdit && (
-                            <div className="my-1 h-px bg-border/60" />
+                            <div className="my-1 h-px bg-border/60"/>
                         )}
 
                         {/* Settings → modal */}
@@ -345,7 +337,8 @@ export function WeddingRowActions({
                                 }}
                                 className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-secondary"
                             >
-                                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground transition-colors group-hover:bg-background group-hover:text-foreground">
+                                <div
+                                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground transition-colors group-hover:bg-background group-hover:text-foreground">
                                     <Settings2
                                         className="h-3.5 w-3.5"
                                         strokeWidth={1.6}

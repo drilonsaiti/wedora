@@ -1,6 +1,6 @@
 "use client";
 
-import { type CSSProperties, type ReactNode, useEffect, useState } from "react";
+import {type CSSProperties, type ReactNode, useEffect, useState} from "react";
 
 import {
     ArrowLeft,
@@ -17,16 +17,16 @@ import {
     ShieldCheck,
     Users,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useForm, useWatch } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import {useTranslations} from "next-intl";
+import {useForm, useWatch} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
 
-import { updateWedding } from "@/actions/wedding";
-import { ColorPicker } from "@/components/ui/color-picker";
-import { Link } from "@/lib/navigation";
-import { generateWeddingTheme } from "@/lib/theme";
-import { cn } from "@/lib/utils";
-import { editWeddingSchema, type EditWeddingInput } from "@/schemas";
+import {updateWedding} from "@/actions/wedding";
+import {ColorPicker} from "@/components/ui/color-picker";
+import {Link} from "@/lib/navigation";
+import {generateWeddingTheme} from "@/lib/theme";
+import {cn} from "@/lib/utils";
+import {type EditWeddingInput, editWeddingSchema} from "@/schemas";
 
 interface WeddingSettings {
     theme_color?: string | null;
@@ -127,7 +127,7 @@ export function EditWeddingForm({
         handleSubmit,
         control,
         setValue,
-        formState: { errors, isSubmitting },
+        formState: {errors, isSubmitting},
     } = useForm<EditWeddingInput>({
         resolver: zodResolver(editWeddingSchema),
 
@@ -250,7 +250,7 @@ export function EditWeddingForm({
                     href={`/admin/weddings/${wedding.id}`}
                     className="mb-6 inline-flex items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
-                    <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.6} />
+                    <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.6}/>
 
                     {t("backToWedding")}
                 </Link>
@@ -486,10 +486,11 @@ export function EditWeddingForm({
                     NEW CREDENTIALS
                 ===================================== */}
                 {newCredentials && newCredentials.length > 0 && (
-                    <section className="rounded-[1.5rem] border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]/45 p-5">
+                    <section
+                        className="rounded-[1.5rem] border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]/45 p-5">
                         <div className="mb-5">
                             <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-background">
-                                <Check className="h-4 w-4 text-[hsl(var(--primary))]" />
+                                <Check className="h-4 w-4 text-[hsl(var(--primary))]"/>
                             </div>
 
                             <h2 className="text-sm font-medium text-foreground">
@@ -518,7 +519,8 @@ export function EditWeddingForm({
                                         </div>
 
                                         <div className="flex items-center gap-2">
-                                            <code className="min-w-0 flex-1 truncate rounded-xl bg-secondary px-3 py-2.5 font-mono text-xs">
+                                            <code
+                                                className="min-w-0 flex-1 truncate rounded-xl bg-secondary px-3 py-2.5 font-mono text-xs">
                                                 {credential.password}
                                             </code>
 
@@ -536,9 +538,9 @@ export function EditWeddingForm({
                                                 )}
                                             >
                                                 {copiedIndex === index ? (
-                                                    <Check className="h-4 w-4" />
+                                                    <Check className="h-4 w-4"/>
                                                 ) : (
-                                                    <Copy className="h-4 w-4" />
+                                                    <Copy className="h-4 w-4"/>
                                                 )}
                                             </button>
                                         </div>
@@ -598,19 +600,19 @@ export function EditWeddingForm({
                         >
                             {isSubmitting ? (
                                 <>
-                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    <Loader2 className="h-4 w-4 animate-spin"/>
 
                                     {t("saving")}
                                 </>
                             ) : saved ? (
                                 <>
-                                    <Check className="h-4 w-4" />
+                                    <Check className="h-4 w-4"/>
 
                                     {t("saved")}
                                 </>
                             ) : (
                                 <>
-                                    <Save className="h-4 w-4" />
+                                    <Save className="h-4 w-4"/>
 
                                     {t("saveChanges")}
                                 </>
@@ -720,7 +722,8 @@ function FeatureToggle({
     children: ReactNode;
 }) {
     return (
-        <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-border/60 bg-background p-4 transition-colors hover:bg-secondary/30">
+        <label
+            className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-border/60 bg-background p-4 transition-colors hover:bg-secondary/30">
             <div className="flex min-w-0 items-start gap-3">
                 <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-secondary">
                     <Icon

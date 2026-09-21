@@ -1,4 +1,4 @@
-import { PricingSection } from '@/components/pricing-section'
+import {PricingSection} from '@/components/pricing-section'
 import {SiteHeader} from "@/components/landing/SiteHeader";
 import {HeroSection} from "@/components/landing/HeroSection";
 import {ValueSection} from "@/components/landing/ValueSection";
@@ -11,19 +11,19 @@ import {SiteFooter} from "@/components/landing/SiteFooter";
 export default function PortfolioLandingPage() {
     return (
         <main className="min-h-screen overflow-hidden bg-background text-foreground">
-            <SiteHeader />
-            <HeroSection />
-            <ValueSection />
-            <FeaturesSection />
-            <HowItWorksSection />
+            <SiteHeader/>
+            <HeroSection/>
+            <ValueSection/>
+            <FeaturesSection/>
+            <HowItWorksSection/>
 
             <section id="pricing" className="px-6 py-24 lg:py-32">
-                <PricingSection />
+                <PricingSection/>
             </section>
 
-            <FaqSection />
-            <FinalCtaSection />
-            <SiteFooter />
+            <FaqSection/>
+            <FinalCtaSection/>
+            <SiteFooter/>
         </main>
     )
 }

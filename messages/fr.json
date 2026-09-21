@@ -486,7 +486,6 @@
     "perWedding": "par mariage",
     "included": "Ce qui est inclus",
     "choosePlan": "Choisir {plan}",
-
     "plans": {
       "basic": {
         "eyebrow": "Essentiel",
@@ -504,7 +503,6 @@
         "description": "Sans limites, pour les mariages plus importants"
       }
     },
-
     "features": {
       "basic": {
         "findSeat": "Trouver ma place",
@@ -531,7 +529,6 @@
         "publicGallery": "Galerie partageable (lien public)"
       }
     },
-
     "customPlan": {
       "text": "Vous n'avez pas trouvé ce que vous cherchez ?",
       "contact": "Contactez-nous",

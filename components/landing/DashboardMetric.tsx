@@ -1,7 +1,7 @@
-import { Camera, Heart, Images, LayoutGrid, MapPin, Users } from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
+import {Camera, Heart, Images, LayoutGrid, MapPin, Users} from 'lucide-react'
+import {getTranslations} from 'next-intl/server'
 
-function DashboardMetric({ value, label }: { value: string; label: string }) {
+function DashboardMetric({value, label}: { value: string; label: string }) {
     return (
         <div className="rounded-xl border border-border/50 bg-card p-3.5">
             <p className="font-serif text-xl">{value}</p>
@@ -23,20 +23,21 @@ export async function DashboardPreview() {
                 className="absolute -inset-10 rounded-full bg-[hsl(var(--primary))]/10 blur-3xl"
             />
 
-            <div className="relative overflow-hidden rounded-[2rem] border border-border/70 bg-card p-2 shadow-[0_35px_100px_-35px_rgba(39,28,24,0.35)]">
+            <div
+                className="relative overflow-hidden rounded-[2rem] border border-border/70 bg-card p-2 shadow-[0_35px_100px_-35px_rgba(39,28,24,0.35)]">
                 {/* Browser header */}
                 <div className="flex h-12 items-center justify-between border-b border-border/60 px-4">
                     <div className="flex gap-1.5">
-                        <span className="h-2.5 w-2.5 rounded-full bg-border" />
-                        <span className="h-2.5 w-2.5 rounded-full bg-border" />
-                        <span className="h-2.5 w-2.5 rounded-full bg-border" />
+                        <span className="h-2.5 w-2.5 rounded-full bg-border"/>
+                        <span className="h-2.5 w-2.5 rounded-full bg-border"/>
+                        <span className="h-2.5 w-2.5 rounded-full bg-border"/>
                     </div>
 
                     <div className="rounded-full bg-secondary px-4 py-1.5 text-[10px] text-muted-foreground">
                         wedora.app
                     </div>
 
-                    <div className="w-10" />
+                    <div className="w-10"/>
                 </div>
 
                 {/* Dashboard */}
@@ -44,8 +45,9 @@ export async function DashboardPreview() {
                     {/* Sidebar */}
                     <div className="border-r border-border/50 bg-card px-3 py-5">
                         <div className="mb-7 flex justify-center">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--primary))] text-white">
-                                <Heart className="h-4 w-4" fill="currentColor" />
+                            <div
+                                className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--primary))] text-white">
+                                <Heart className="h-4 w-4" fill="currentColor"/>
                             </div>
                         </div>
 
@@ -59,7 +61,7 @@ export async function DashboardPreview() {
                                             : 'text-muted-foreground'
                                     }`}
                                 >
-                                    <Icon className="h-4 w-4" />
+                                    <Icon className="h-4 w-4"/>
                                 </div>
                             ))}
                         </div>
@@ -78,15 +80,16 @@ export async function DashboardPreview() {
                                 </h3>
                             </div>
 
-                            <div className="hidden rounded-full border border-border bg-card px-3 py-1.5 text-[10px] text-muted-foreground sm:block">
+                            <div
+                                className="hidden rounded-full border border-border bg-card px-3 py-1.5 text-[10px] text-muted-foreground sm:block">
                                 21 September
                             </div>
                         </div>
 
                         <div className="mb-5 grid grid-cols-3 gap-3">
-                            <DashboardMetric value="128" label={t('preview.guests')} />
-                            <DashboardMetric value="14" label={t('preview.tables')} />
-                            <DashboardMetric value="347" label={t('preview.photos')} />
+                            <DashboardMetric value="128" label={t('preview.guests')}/>
+                            <DashboardMetric value="14" label={t('preview.tables')}/>
+                            <DashboardMetric value="347" label={t('preview.photos')}/>
                         </div>
 
                         <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
@@ -101,8 +104,9 @@ export async function DashboardPreview() {
                                     </p>
                                 </div>
 
-                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[hsl(var(--accent))]">
-                                    <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--primary))]" />
+                                <div
+                                    className="flex h-8 w-8 items-center justify-center rounded-lg bg-[hsl(var(--accent))]">
+                                    <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--primary))]"/>
                                 </div>
                             </div>
 
@@ -144,7 +148,8 @@ export async function DashboardPreview() {
                           the mockup). Uses --ink instead of --dark, since --dark
                           flips to a light value in .dark mode.
                         */}
-                        <div className="absolute -bottom-7 -right-3 w-[185px] rounded-[1.7rem] border border-border/70 bg-card p-3 shadow-2xl sm:-right-7 sm:w-[205px]">
+                        <div
+                            className="absolute -bottom-7 -right-3 w-[185px] rounded-[1.7rem] border border-border/70 bg-card p-3 shadow-2xl sm:-right-7 sm:w-[205px]">
                             <div className="rounded-[1.25rem] bg-[hsl(var(--ink))] px-4 py-5 text-white">
                                 <div className="mb-8 flex items-center justify-between">
                                     <Heart

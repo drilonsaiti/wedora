@@ -1,12 +1,7 @@
-import {
-    ArrowLeft,
-    CalendarDays,
-    LayoutDashboard,
-    SearchX,
-} from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
+import {ArrowLeft, CalendarDays, LayoutDashboard, SearchX,} from 'lucide-react'
+import {getTranslations} from 'next-intl/server'
 
-import { Link } from '@/lib/navigation'
+import {Link} from '@/lib/navigation'
 
 export default async function AdminNotFound() {
     const t =
@@ -15,7 +10,8 @@ export default async function AdminNotFound() {
         )
 
     return (
-        <main className="relative flex min-h-[calc(100dvh-80px)] items-center justify-center overflow-hidden px-4 py-12 sm:px-6">
+        <main
+            className="relative flex min-h-[calc(100dvh-80px)] items-center justify-center overflow-hidden px-4 py-12 sm:px-6">
             {/* =====================================
                 AMBIENT BACKGROUND
             ===================================== */}
@@ -23,7 +19,8 @@ export default async function AdminNotFound() {
                 aria-hidden
                 className="pointer-events-none absolute inset-0 overflow-hidden"
             >
-                <div className="absolute left-1/2 top-[-280px] h-[520px] w-[680px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/20 blur-[140px]" />
+                <div
+                    className="absolute left-1/2 top-[-280px] h-[520px] w-[680px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/20 blur-[140px]"/>
             </div>
 
             {/* =====================================
@@ -32,7 +29,8 @@ export default async function AdminNotFound() {
             <div className="relative z-10 w-full max-w-xl">
                 <div className="card-wedding px-6 py-10 text-center sm:px-10 sm:py-12">
                     {/* Icon */}
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-border/70 bg-secondary/60 text-foreground">
+                    <div
+                        className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-border/70 bg-secondary/60 text-foreground">
                         <SearchX
                             className="h-6 w-6"
                             strokeWidth={1.5}
@@ -56,13 +54,13 @@ export default async function AdminNotFound() {
 
                     {/* 404 */}
                     <div className="my-8 flex items-center gap-4">
-                        <div className="h-px flex-1 bg-border/70" />
+                        <div className="h-px flex-1 bg-border/70"/>
 
                         <span className="text-[10px] font-medium tracking-[0.2em] text-muted-foreground/60">
                             404
                         </span>
 
-                        <div className="h-px flex-1 bg-border/70" />
+                        <div className="h-px flex-1 bg-border/70"/>
                     </div>
 
                     {/* Primary actions */}
@@ -71,7 +69,7 @@ export default async function AdminNotFound() {
                             href="/admin/dashboard"
                             className="btn-primary justify-center"
                         >
-                            <LayoutDashboard className="h-4 w-4" />
+                            <LayoutDashboard className="h-4 w-4"/>
 
                             {t('dashboard')}
                         </Link>
@@ -80,7 +78,7 @@ export default async function AdminNotFound() {
                             href="/admin/weddings"
                             className="btn-secondary justify-center"
                         >
-                            <CalendarDays className="h-4 w-4" />
+                            <CalendarDays className="h-4 w-4"/>
 
                             {t('weddings')}
                         </Link>

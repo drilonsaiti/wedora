@@ -2,7 +2,7 @@ import {createServerClient} from '@supabase/ssr'
 import {type NextRequest, NextResponse} from 'next/server'
 import type {Database} from '@/types/database'
 import createI18nMiddleware from 'next-intl/middleware';
-import {locales, defaultLocale} from './lib/i18n';
+import {defaultLocale, locales} from './lib/i18n';
 
 const i18nMiddleware = createI18nMiddleware({
     locales,

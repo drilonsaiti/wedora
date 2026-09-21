@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import {ArrowRight, Check, Sparkles} from 'lucide-react'
+import {ArrowRight, Check} from 'lucide-react'
 import {getTranslations} from 'next-intl/server'
 import {DashboardPreview} from "@/components/landing/DashboardMetric";
 

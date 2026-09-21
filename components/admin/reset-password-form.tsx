@@ -1,39 +1,15 @@
 'use client'
 
-import {
-    useEffect,
-    useState,
-} from 'react'
+import {useEffect, useState,} from 'react'
 
-import {
-    AlertCircle,
-    Check,
-    Eye,
-    EyeOff,
-    Loader2,
-    Lock,
-} from 'lucide-react'
-import {
-    useTranslations,
-} from 'next-intl'
-import {
-    useForm,
-} from 'react-hook-form'
-import {
-    zodResolver,
-} from '@hookform/resolvers/zod'
+import {AlertCircle, Check, Eye, EyeOff, Loader2, Lock,} from 'lucide-react'
+import {useTranslations,} from 'next-intl'
+import {useForm,} from 'react-hook-form'
+import {zodResolver,} from '@hookform/resolvers/zod'
 
-import {
-    Link,
-    useRouter,
-} from '@/lib/navigation'
-import {
-    createClient,
-} from '@/lib/supabase/client'
-import {
-    resetPasswordSchema,
-    type ResetPasswordValues,
-} from '@/schemas'
+import {Link, useRouter,} from '@/lib/navigation'
+import {createClient,} from '@/lib/supabase/client'
+import {resetPasswordSchema, type ResetPasswordValues,} from '@/schemas'
 
 export function ResetPasswordForm() {
     const router =
@@ -157,7 +133,8 @@ export function ResetPasswordForm() {
     if (success) {
         return (
             <div className="py-3 text-center">
-                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]">
+                <div
+                    className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]">
                     <Check
                         className="h-6 w-6 text-[hsl(var(--primary))]"
                         strokeWidth={
@@ -398,7 +375,7 @@ export function ResetPasswordForm() {
                     role="alert"
                     className="flex items-start gap-3 rounded-2xl border border-destructive/15 bg-destructive/[0.06] px-4 py-3.5"
                 >
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive"/>
 
                     <p className="text-xs leading-5 text-destructive">
                         {error}
@@ -416,7 +393,7 @@ export function ResetPasswordForm() {
             >
                 {loading ? (
                     <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin"/>
 
                         {t(
                             'saving'
@@ -424,7 +401,7 @@ export function ResetPasswordForm() {
                     </>
                 ) : (
                     <>
-                        <Lock className="h-4 w-4" />
+                        <Lock className="h-4 w-4"/>
 
                         {t(
                             'changePassword'

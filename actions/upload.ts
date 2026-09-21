@@ -1,14 +1,14 @@
 "use server";
 
-import { createHmac } from "node:crypto";
+import {createHmac} from "node:crypto";
 
-import { revalidateTag } from "next/cache";
-import { headers } from "next/headers";
-import { v4 as uuidv4 } from "uuid";
+import {revalidateTag} from "next/cache";
+import {headers} from "next/headers";
+import {v4 as uuidv4} from "uuid";
 
-import { createServiceClient } from "@/lib/supabase/server";
-import { processImage } from "@/lib/sharp";
-import { serverUploadSchema } from "@/schemas";
+import {createServiceClient} from "@/lib/supabase/server";
+import {processImage} from "@/lib/sharp";
+import {serverUploadSchema} from "@/schemas";
 
 const MAX_FILE_BYTES =
     Number(process.env.MAX_FILE_SIZE_MB ?? 10) * 1024 * 1024;
@@ -176,7 +176,7 @@ async function completeCleanupJob(
 ): Promise<boolean> {
     const rpc = getRpcClient(supabase);
 
-    const { error } = await rpc.rpc<null>("complete_photo_upload_cleanup_job", {
+    const {error} = await rpc.rpc<null>("complete_photo_upload_cleanup_job", {
         p_photo_id: photoId,
     });
 
@@ -196,7 +196,7 @@ async function markCleanupFailure(
 ): Promise<void> {
     const rpc = getRpcClient(supabase);
 
-    const { error } = await rpc.rpc<null>("mark_photo_upload_cleanup_failed", {
+    const {error} = await rpc.rpc<null>("mark_photo_upload_cleanup_failed", {
         p_photo_id: photoId,
         p_error: message,
     });
@@ -240,7 +240,7 @@ async function cleanupStorageArtifacts(
 async function drainStaleCleanupJobs(supabase: ServiceClient): Promise<void> {
     const rpc = getRpcClient(supabase);
 
-    const { data, error } = await rpc.rpc<CleanupJob[]>(
+    const {data, error} = await rpc.rpc<CleanupJob[]>(
         "get_stale_photo_upload_cleanup_jobs",
         {
             p_limit: CLEANUP_BATCH_SIZE,
@@ -267,7 +267,7 @@ async function registerCleanupJob(
 ): Promise<boolean> {
     const rpc = getRpcClient(supabase);
 
-    const { error } = await rpc.rpc<null>("register_photo_upload_cleanup_job", {
+    const {error} = await rpc.rpc<null>("register_photo_upload_cleanup_job", {
         p_photo_id: job.photo_id,
         p_original_path: job.original_path,
         p_thumbnail_path: job.thumbnail_path,
@@ -303,7 +303,7 @@ async function runUploadPreflight(
 
     const ipKeyHash = await getClientIpHash();
 
-    const { data, error } = await rpc.rpc<BeginUploadRow[]>(
+    const {data, error} = await rpc.rpc<BeginUploadRow[]>(
         "begin_guest_photo_upload",
         {
             p_event_id: eventId,
@@ -366,7 +366,7 @@ async function verifyPhotoCommit(
     supabase: ServiceClient,
     photoId: string
 ): Promise<"committed" | "not_committed" | "unknown"> {
-    const { data, error } = await supabase
+    const {data, error} = await supabase
         .from("photos")
         .select("id")
         .eq("id", photoId)
@@ -408,7 +408,7 @@ async function finalizeUpload(
 > {
     const rpc = getRpcClient(supabase);
 
-    const { data, error } = await rpc.rpc<FinalizeUploadRow[]>(
+    const {data, error} = await rpc.rpc<FinalizeUploadRow[]>(
         "finalize_guest_photo_upload",
         {
             p_photo_id: input.photoId,
@@ -521,7 +521,7 @@ export async function uploadPhotoAction(
             return failure("UNKNOWN");
         }
 
-        const { eventId, guestName, message, isPublic, sessionId } = parsed.data;
+        const {eventId, guestName, message, isPublic, sessionId} = parsed.data;
 
         const supabase = createServiceClient();
 
@@ -616,7 +616,7 @@ export async function uploadPhotoAction(
         let deferCleanup = false;
 
         try {
-            const { error: originalError } = await supabase.storage
+            const {error: originalError} = await supabase.storage
                 .from("photos")
                 .upload(originalPath, optimizedBuffer, {
                     contentType: "image/webp",
@@ -629,7 +629,7 @@ export async function uploadPhotoAction(
                 return failure("STORAGE_ERROR");
             }
 
-            const { error: thumbnailError } = await supabase.storage
+            const {error: thumbnailError} = await supabase.storage
                 .from("thumbnails")
                 .upload(thumbnailPath, thumbnailBuffer, {
                     contentType: "image/webp",

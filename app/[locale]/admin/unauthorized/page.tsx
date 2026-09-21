@@ -1,12 +1,7 @@
-import {
-    ArrowLeft,
-    Heart,
-    LogIn,
-    ShieldAlert,
-} from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
+import {ArrowLeft, Heart, LogIn, ShieldAlert,} from 'lucide-react'
+import {getTranslations} from 'next-intl/server'
 
-import { Link } from '@/lib/navigation'
+import {Link} from '@/lib/navigation'
 
 export default async function AdminUnauthorizedPage() {
     const t =
@@ -15,7 +10,8 @@ export default async function AdminUnauthorizedPage() {
         )
 
     return (
-        <main className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-background px-4 py-12 sm:px-6">
+        <main
+            className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-background px-4 py-12 sm:px-6">
             {/* =====================================
                 AMBIENT BACKGROUND
             ===================================== */}
@@ -23,9 +19,11 @@ export default async function AdminUnauthorizedPage() {
                 aria-hidden
                 className="pointer-events-none absolute inset-0 overflow-hidden"
             >
-                <div className="absolute left-1/2 top-[-240px] h-[560px] w-[760px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/25 blur-[140px]" />
+                <div
+                    className="absolute left-1/2 top-[-240px] h-[560px] w-[760px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/25 blur-[140px]"/>
 
-                <div className="absolute bottom-[-220px] right-[-180px] h-[420px] w-[420px] rounded-full bg-[hsl(var(--gold))]/8 blur-[130px]" />
+                <div
+                    className="absolute bottom-[-220px] right-[-180px] h-[420px] w-[420px] rounded-full bg-[hsl(var(--gold))]/8 blur-[130px]"/>
             </div>
 
             <div className="relative z-10 w-full max-w-xl">
@@ -37,7 +35,8 @@ export default async function AdminUnauthorizedPage() {
                         href="/"
                         className="inline-flex items-center gap-2.5"
                     >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
+                        <div
+                            className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
                             <Heart
                                 className="h-3.5 w-3.5"
                                 fill="currentColor"
@@ -54,7 +53,8 @@ export default async function AdminUnauthorizedPage() {
                     CARD
                 ===================================== */}
                 <section className="card-wedding px-6 py-10 text-center sm:px-10 sm:py-12">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-border/70 bg-secondary text-foreground">
+                    <div
+                        className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-border/70 bg-secondary text-foreground">
                         <ShieldAlert
                             className="h-6 w-6"
                             strokeWidth={1.5}

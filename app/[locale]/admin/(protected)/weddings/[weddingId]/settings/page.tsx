@@ -1,7 +1,7 @@
-import { EditWeddingForm } from '@/components/admin/edit-wedding-form'
-import { RsvpApiKeyManager } from '@/components/admin/rsvp-api-key-manager'
-import { redirect } from '@/lib/navigation'
-import { createClient } from '@/lib/supabase/server'
+import {EditWeddingForm} from '@/components/admin/edit-wedding-form'
+import {RsvpApiKeyManager} from '@/components/admin/rsvp-api-key-manager'
+import {redirect} from '@/lib/navigation'
+import {createClient} from '@/lib/supabase/server'
 import {notFound} from "next/navigation";
 
 type Props = {
@@ -23,7 +23,7 @@ export default async function WeddingSettingsPage({
         await createClient()
 
     const {
-        data: { user },
+        data: {user},
     } = await supabase.auth.getUser()
 
     if (!user) {
@@ -35,7 +35,7 @@ export default async function WeddingSettingsPage({
         return null
     }
 
-    const { data: admin } =
+    const {data: admin} =
         await supabase
             .from('admins')
             .select('id')
