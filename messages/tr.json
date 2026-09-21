@@ -4,6 +4,7 @@
     "cancel": "İptal",
     "delete": "Sil",
     "loading": "Yükleniyor...",
+    "saving": "Kaydediliyor...",
     "error": "Bir şeyler yanlış gitti",
     "success": "Başarılı",
     "actions": "İşlemler",
@@ -14,7 +15,12 @@
     "search": "Ara...",
     "noData": "Veri yok",
     "noResults": "Sonuç bulunamadı",
-    "switchLanguage": "Dili değiştir"
+    "switchLanguage": "Dili değiştir",
+    "logout": "Çıkış Yap",
+    "optional": "isteğe bağlı",
+    "close": "Kapat",
+    "switchToLightMode": "Açık moda geç",
+    "switchToDarkMode": "Koyu moda geç"
   },
   "nav": {
     "dashboard": "Panel",
@@ -29,13 +35,13 @@
     "login": "Giriş Yap",
     "email": "E-posta",
     "password": "Şifre",
-    "forgotPassword": "Şifremi unuttum",
     "resetPassword": "Şifreyi Sıfırla",
     "rememberMe": "Beni hatırla",
     "signIn": "Giriş yap",
     "createAccount": "Hesap oluştur",
     "privateAccess": "Özel erişim",
     "adminPortal": "Yönetici Paneli",
+    "adminLoginDescription": "Düğünleri, davetlileri, oturma düzenini ve paylaşılan fotoğrafları yönetmek için giriş yapın.",
     "invalidCredentials": "E-posta veya şifre hatalı",
     "accessDenied": "Erişim reddedildi. Bu hesap yönetici hesabı değil.",
     "authentication": "Kimlik doğrulama",
@@ -50,22 +56,30 @@
     "emailPlaceholder": "siz@ornek.com",
     "sendLink": "Bağlantıyı gönder",
     "newPasswordTitle": "Yeni şifrenizi belirleyin",
+    "newPasswordDescription": "Wedora hesabınız için güvenli bir yeni şifre seçin.",
     "newPassword": "Yeni şifre",
     "confirmPassword": "Şifreyi onayla",
     "passwordMinLength": "Şifre en az 8 karakter olmalıdır",
     "passwordsDoNotMatch": "Şifreler eşleşmiyor",
+    "passwordChangedEyebrow": "Şifre güncellendi",
     "passwordChanged": "Şifre değiştirildi",
     "redirectingToLogin": "Giriş sayfasına yönlendiriliyorsunuz...",
     "saving": "Kaydediliyor…",
     "changePassword": "Şifreyi Değiştir",
-    "forgotPasswordForm": {
+    "showPassword": "Şifreyi göster",
+    "hidePassword": "Şifreyi gizle",
+    "loginEyebrow": "Giriş",
+    "forgotPassword": {
       "title": "Şifrenizi mi unuttunuz?",
+      "eyebrow": "Şifrenizi mi unuttunuz?",
       "description": "E-posta adresinizi girin, size şifrenizi sıfırlamanız için bir bağlantı gönderelim.",
       "email": "E-posta",
       "emailPlaceholder": "siz@ornek.com",
+      "sendLink": "Bağlantıyı gönder",
       "sendResetLink": "Sıfırlama bağlantısını gönder",
       "sendingLink": "Bağlantı gönderiliyor…",
       "backToLogin": "Girişe dön",
+      "emailSent": "E-posta gönderildi",
       "checkYourEmail": "E-postanızı kontrol edin",
       "resetLinkSent": "Şifre sıfırlama bağlantısını e-posta adresinize gönderdik.",
       "unexpectedError": "Beklenmeyen bir hata oluştu"
@@ -76,16 +90,29 @@
   "dashboard": {
     "title": "Panel",
     "welcome": "Tekrar hoş geldiniz",
+    "overview": "Genel Bakış",
+    "overviewDescription": "Düğünleri, davetlileri, oturma düzenini ve paylaşılan fotoğrafları tek bir yerden yönetin.",
     "noWeddings": "Henüz hiç düğününüz yok",
     "noWeddingsDescription": "Başlamak için ilk düğününüzü oluşturun",
     "createWedding": "Düğün Oluştur",
-    "overview": "Genel Bakış",
+    "createWeddingDescription": "Yeni bir düğün oluşturun, çift erişimini ve davetli özelliklerini ayarlayın.",
     "viewAllWeddings": "Tüm düğünleri görüntüle",
+    "viewAll": "Tümünü görüntüle",
     "activeWeddings": "Aktif düğünler",
     "totalGuests": "Toplam davetli",
     "photoCountLabel": "Fotoğraflar",
+    "pendingPhotos": "Bekleyen fotoğraflar",
     "newPhotos": "{count} yeni",
+    "pendingPhotosDescription": "Yeni davetli fotoğrafları incelemenizi bekliyor.",
+    "reviewPhotos": "Fotoğrafları incele",
+    "weddings": "Düğünler",
     "recentWeddings": "Son düğünler",
+    "seating": "Oturma Düzeni",
+    "management": "Yönetim",
+    "quickActions": "Hızlı işlemler",
+    "manageWeddings": "Düğünleri Yönet",
+    "manageWeddingsDescription": "Tüm düğünleri görüntüleyin, düzenleyin ve yönetin.",
+    "atAGlance": "Bir bakışta",
     "weddingCreated": "Düğün oluşturuldu!",
     "saveCredentials": "Bu giriş bilgilerini kaydedin — şifre tekrar gösterilmeyecektir",
     "noAccountCreated": "Hiçbir hesap oluşturulmadı — girilen e-posta adreslerini kontrol edin.",
@@ -97,7 +124,9 @@
     "themeColor": "Tema Rengi",
     "preview": "Önizleme",
     "activeFunctions": "Aktif Özellikler",
+    "findSeat": "Yerimi Bul",
     "findSeatDescription": "Davetliler isimlerini arayıp masalarını görüntüler",
+    "photoUpload": "Fotoğraf Yükleme",
     "photoUploadDescription": "Davetliler düğünden fotoğraf yükler",
     "totalPhotoLimit": "Toplam Fotoğraf Limiti",
     "photoLimitPerGuest": "Davetli Başına Fotoğraf Limiti",
@@ -105,7 +134,11 @@
     "leaveEmptyForNoLimit": "Limitsiz olması için boş bırakın",
     "howManyPhotosPerGuest": "Kişi başına kaç fotoğrafa izin verildiği",
     "creating": "Oluşturuluyor...",
+    "photosLabel": "Fotoğraflar",
     "photos": {
+      "title": "Fotoğraflar",
+      "description": "Bu düğün için yüklenen fotoğrafları inceleyin, düzenleyin ve paylaşın.",
+      "backToWedding": "Düğüne dön",
       "allPhotos": "Tüm fotoğraflar",
       "favourites": "Favoriler",
       "hidden": "Gizlenenler",
@@ -113,11 +146,17 @@
       "loadingPhotos": "Fotoğraflar yükleniyor...",
       "loadMore": "Daha fazla yükle",
       "noPhotos": "Bu filtreye uygun fotoğraf bulunamadı",
+      "noPhotosMatchingFilter": "Başka bir filtre deneyin veya davetlilerin fotoğraf yüklemesini bekleyin.",
       "confirmDelete": "Bu fotoğrafı silmek istediğinizden emin misiniz?",
       "deleteFailed": "Fotoğraf silinemedi",
       "shareGallery": "Galeriyi Paylaş",
+      "shareGalleryTitle": "Galeriyi Paylaş",
+      "shareGalleryDescription": "Çift, aile veya davetliler için paylaşılabilir bir bağlantı oluşturun.",
       "downloadZip": "ZIP İndir",
       "downloadFavourites": "Favorileri İndir",
+      "onlyFavourites": "Yalnızca Favoriler",
+      "preparingZip": "Hazırlanıyor...",
+      "failedToGenerateZip": "ZIP dosyası oluşturulamadı. Lütfen tekrar deneyin.",
       "approve": "Onayla",
       "unapprove": "Onayı kaldır",
       "favourite": "Favorilere ekle",
@@ -129,44 +168,39 @@
       "date": "Tarih",
       "message": "Mesaj",
       "close": "Kapat",
+      "photoCount": "{count} fotoğraf",
+      "seating": "Oturma Düzeni",
+      "download": "İndir",
+      "deletePermanently": "Kalıcı olarak sil",
       "copyLink": "Bağlantıyı kopyala",
       "linkCopied": "Kopyalandı!",
       "expires": "Bitiş: {date}",
       "neverExpires": "Süresi dolmaz",
       "deleteLink": "Bağlantıyı sil",
       "createLink": "Paylaşım bağlantısı oluştur",
+      "creatingLink": "Bağlantı oluşturuluyor...",
       "galleryLabel": "Galeri Adı",
       "photoFilter": "Fotoğraf Filtresi",
-      "onlyFavourites": "Yalnızca Favoriler",
       "expiresIn": "Sona erme süresi (gün)",
       "optional": "isteğe bağlı",
       "create": "Oluştur",
       "back": "Geri",
       "showMessages": "Davetli mesajlarını galeride göster",
       "manageShareLinks": "Paylaşım bağlantılarını yönet",
-      "photoCount": "{count} fotoğraf",
-      "seating": "Oturma Düzeni",
-      "preparingZip": "Hazırlanıyor...",
-      "noPhotosMatchingFilter": "Başka bir filtre deneyin veya davetlilerin fotoğraf yüklemesini bekleyin.",
       "linkExpiresAfter": "Bağlantının süresi",
       "never": "Asla",
       "days7": "7 gün",
       "days30": "30 gün",
       "days90": "90 gün",
       "year1": "1 yıl",
-      "creatingLink": "Bağlantı oluşturuluyor...",
       "backToGalleryList": "Galeri listesine dön",
+      "backToGalleryLinks": "Galeri bağlantılarına dön",
       "galleryLink": "Galeri bağlantısı",
       "shareWithCouple": "Bu bağlantıyı çift veya davetlilerle paylaşın",
       "whichPhotos": "Hangi fotoğraflar?",
       "filterNote": "Yalnızca davetlilerin herkese açık olarak paylaşılmasına izin verdiği onaylı fotoğraflar dahil edilir — bu filtre yalnızca bu seçimi daraltır.",
       "showMessagesTitle": "Davetli mesajlarını göster",
       "showMessagesDescription": "Galeride isimleri ve mesajları göster",
-      "backToGalleryLinks": "Galeri bağlantılarına dön",
-      "download": "İndir",
-      "deletePermanently": "Kalıcı olarak sil",
-      "shareGalleryTitle": "Galeriyi Paylaş",
-      "shareGalleryDescription": "Davetliler için paylaşılabilir bir bağlantı oluşturun",
       "noGalleryLinks": "Henüz galeri bağlantısı yok.",
       "createNewGalleryLink": "Yeni Galeri Bağlantısı Oluştur",
       "linkName": "Bağlantı adı",
@@ -174,67 +208,211 @@
       "favouritesOnly": "Yalnızca favoriler",
       "deleteGalleryLinkConfirm": "Bu galeri bağlantısını silmek istiyor musunuz? Bağlantı hemen çalışmayı durduracaktır.",
       "failedToCreateLink": "Bağlantı oluşturulamadı",
-      "failedToGenerateZip": "ZIP dosyası oluşturulamadı. Lütfen tekrar deneyin."
+      "galleryLinksLoadFailed": "Galeri bağlantıları yüklenemedi.",
+      "retry": "Tekrar dene",
+      "copyingLink": "Kopyalanıyor…",
+      "confirmations": {
+        "deletePhoto": {
+          "title": "Fotoğraf silinsin mi?",
+          "description": "Bu fotoğraf kalıcı olarak silinecek ve kurtarılamayacaktır.",
+          "confirm": "Fotoğrafı sil"
+        },
+        "deleteGalleryLink": {
+          "title": "Galeri bağlantısı silinsin mi?",
+          "description": "Bu paylaşılan galeri bağlantısı hemen çalışmayı durduracaktır.",
+          "confirm": "Bağlantıyı sil"
+        }
+      },
+      "notifications": {
+        "photoDeleted": "Fotoğraf silindi",
+        "galleryLinkDeleted": "Galeri bağlantısı silindi",
+        "photoApproved": "Fotoğraf onaylandı",
+        "photoUnapproved": "Fotoğraf onay bekleyenlere taşındı",
+        "photoHidden": "Fotoğraf gizlendi",
+        "photoShown": "Fotoğraf tekrar görünür",
+        "photoFavourited": "Fotoğraf favorilere eklendi",
+        "photoUnfavourited": "Fotoğraf favorilerden çıkarıldı",
+        "photoUpdateFailed": "Fotoğraf güncellenemedi. Değişiklikler geri alındı.",
+        "photoDeleteFailed": "Fotoğraf silinemedi. Hiçbir şey değişmedi.",
+        "galleryLinkCreated": "Galeri bağlantısı oluşturuldu",
+        "galleryLinkCopied": "Galeri bağlantısı kopyalandı",
+        "galleryLinkCopyFailed": "Galeri bağlantısı kopyalanamadı. Lütfen tekrar deneyin.",
+        "galleryLinkDeleteFailed": "Galeri bağlantısı silinemedi. Hiçbir şey değişmedi.",
+        "photoDownloaded": "Fotoğraf indirme başladı",
+        "photoDownloadFailed": "Fotoğraf indirilemedi. Lütfen tekrar deneyin.",
+        "zipDownloaded": "Fotoğraf arşivi indirme başladı",
+        "zipDownloadFailed": "Fotoğraf arşivi hazırlanamadı. Lütfen tekrar deneyin.",
+        "zipQueued": "Büyük albüm sıraya alındı. {count} fotoğrafı arka planda hazırlayacağız.",
+        "zipReady": "Fotoğraf arşiviniz hazır. İndirme başladı.",
+        "zipExportFailed": "Fotoğraf arşivi oluşturulamadı. Lütfen tekrar deneyin.",
+        "zipExportTimedOut": "Arşiv hâlâ hazırlanıyor. İndirmeyi birazdan tekrar deneyin."
+      }
+    }
+  },
+  "seating": {
+    "title": "Davetli Oturma Düzeni",
+    "description": "Bu düğün için davetlileri, masaları ve mekan düzenini yönetin.",
+    "backToWeddings": "Düğünlere dön",
+    "loadingDesigner": "Oturma düzeni editörü yükleniyor...",
+    "print": "Listeyi Yazdır",
+    "printTitle": "Masalara Göre Davetli Listesi",
+    "guests": "Davetliler",
+    "tables": "Masalar",
+    "photos": "Fotoğraflar",
+    "designerLabel": "Düzenleyici",
+    "searchGuests": "Davetli ara...",
+    "addGuest": "Davetli Ekle",
+    "addTable": "Masa Ekle",
+    "addNewGuest": "Yeni Davetli Ekle",
+    "addNewTable": "Yeni Masa Ekle",
+    "editGuest": "Davetliyi Düzenle",
+    "editTable": "Masayı Düzenle",
+    "total": "Toplam",
+    "seated": "Yerleştirilen",
+    "unseated": "Yerleştirilmeyen",
+    "noGuests": "Davetli bulunamadı",
+    "noTables": "Henüz masa oluşturulmadı",
+    "noTablesCreated": "Henüz masa oluşturulmadı.",
+    "confirmDeleteGuest": "Bu davetliyi silmek istediğinizden emin misiniz?",
+    "deleteGuestFailed": "Davetli silinemedi",
+    "confirmDeleteTable": "Bu masayı silmek istediğinizden emin misiniz? Atanan tüm davetliler masasız kalacaktır.",
+    "deleteTableFailed": "Masa silinemedi",
+    "rsvpCycleHint": "RSVP durumunu değiştirmek için tıklayın: beklemede -> onaylandı -> reddedildi",
+    "rsvpUpdateFailed": "RSVP güncellenemedi",
+    "rsvpStatus": {
+      "pending": "Beklemede",
+      "confirmed": "Onaylandı",
+      "declined": "Reddedildi"
     },
-    "seating": {
-      "loadingDesigner": "Oturma düzeni editörü yükleniyor...",
-      "confirmDeleteGuest": "Bu davetliyi silmek istediğinizden emin misiniz?",
-      "deleteGuestFailed": "Davetli silinemedi",
-      "confirmDeleteTable": "Bu masayı silmek istediğinizden emin misiniz? Atanan tüm davetliler masasız kalacaktır.",
-      "deleteTableFailed": "Masa silinemedi",
-      "title": "Davetli Oturma Düzeni",
-      "print": "Listeyi Yazdır",
-      "guests": "Davetliler",
-      "tables": "Masalar",
-      "designer": "Düzenleyici",
-      "searchGuests": "Davetli ara...",
-      "addGuest": "Davetli Ekle",
-      "addTable": "Masa Ekle",
-      "seated": "Yerleştirilen",
-      "unseated": "Yerleştirilmeyen",
-      "total": "Toplam",
-      "noGuests": "Davetli bulunamadı",
-      "noTables": "Henüz masa oluşturulmadı",
-      "tableNumber": "Masa {number}",
-      "seats": "Koltuklar",
-      "edit": "Düzenle",
-      "delete": "Sil",
-      "printTitle": "Masalara Göre Davetli Listesi",
+    "table": "Masa",
+    "tableNumber": "Masa {number}",
+    "occupied": "Dolu",
+    "seats": "Koltuklar",
+    "edit": "Düzenle",
+    "delete": "Sil",
+    "firstName": "Ad",
+    "firstNamePlaceholder": "örn. Ahmet",
+    "lastName": "Soyad",
+    "lastNamePlaceholder": "örn. Yılmaz",
+    "assignTableOptional": "Masa ata (isteğe bağlı)",
+    "tableOption": "Masa {number} ({seats} koltuk)",
+    "updateGuest": "Davetliyi Güncelle",
+    "tableShape": "Masa şekli",
+    "shapeRound": "Yuvarlak",
+    "shapeSquare": "Kare",
+    "shapeRectangle": "Dikdörtgen",
+    "tableNumberLabel": "Masa numarası",
+    "tableNumberPlaceholder": "örn. 1",
+    "seatsPlaceholder": "örn. 8",
+    "seatDistribution": "Koltukların kenarlara dağılımı",
+    "top": "Üst",
+    "bottom": "Alt",
+    "left": "Sol",
+    "right": "Sağ",
+    "assignedSeats": "{assigned} / {total} koltuk atandı",
+    "tableLabelOptional": "Etiket (isteğe bağlı)",
+    "tableLabelPlaceholder": "örn. Yılmaz Ailesi",
+    "updateTable": "Masayı Güncelle",
+    "venuePresets": {
+      "entrance": "Giriş",
+      "pool": "Havuz",
+      "couple_table": "Çift Masası",
+      "music": "Müzik",
+      "bar": "Bar",
+      "toilet": "Tuvalet"
+    },
+    "confirmations": {
+      "deleteGuest": {
+        "title": "Davetli silinsin mi?",
+        "description": "{name} davetli listesinden kalıcı olarak kaldırılacak.",
+        "confirm": "Davetliyi sil"
+      },
+      "deleteTable": {
+        "title": "Masa silinsin mi?",
+        "description": "Masa {number} kaldırılacak ve atanan tüm davetliler masasız kalacak.",
+        "confirm": "Masayı sil"
+      },
+      "deleteVenueElement": {
+        "title": "Mekan öğesi silinsin mi?",
+        "description": "{name} mekan düzeninden kalıcı olarak kaldırılacak.",
+        "confirm": "Öğeyi sil"
+      },
+      "deletePhoto": {
+        "title": "Fotoğraf silinsin mi?",
+        "description": "Bu fotoğraf kalıcı olarak silinecek ve kurtarılamayacaktır.",
+        "confirm": "Fotoğrafı sil"
+      },
+      "deleteGalleryLink": {
+        "title": "Galeri bağlantısı silinsin mi?",
+        "description": "Bu paylaşılan galeri bağlantısı hemen çalışmayı durduracaktır.",
+        "confirm": "Bağlantıyı sil"
+      }
+    },
+    "notifications": {
+      "guestDeleted": "Davetli silindi",
+      "rsvpUpdated": "RSVP {status} olarak işaretlendi",
+      "tableDeleted": "Masa silindi",
+      "venueElementDeleted": "Mekan öğesi silindi",
+      "photoDeleted": "Fotoğraf silindi",
+      "galleryLinkDeleted": "Galeri bağlantısı silindi",
+      "galleryLinkDeleteFailed": "Galeri bağlantısı silinemedi"
+    },
+    "designer": {
+      "unassignedGuests": "Atanmamış davetliler ({count})",
+      "searchGuests": "İsimle ara...",
+      "addElement": "Öğe ekle",
+      "noGuestsFound": "Aramanızla eşleşen davetli yok.",
+      "allGuestsAssigned": "Tüm davetliler atandı.",
+      "showGuests": "Davetlileri göster",
+      "downloadImage": "Görseli indir",
+      "fullscreen": "Tam ekran",
+      "exitFullscreen": "Tam ekrandan çık",
+      "exit": "Çıkış",
       "table": "Masa",
-      "noTablesCreated": "Henüz masa oluşturulmadı.",
-      "editGuest": "Davetliyi Düzenle",
-      "addNewGuest": "Yeni Davetli Ekle",
-      "editTable": "Masayı Düzenle",
-      "addNewTable": "Yeni Masa Ekle",
-      "occupied": "Dolu",
-      "firstName": "Ad",
-      "firstNamePlaceholder": "örn. Ahmet",
-      "lastName": "Soyad",
-      "lastNamePlaceholder": "örn. Yılmaz",
-      "assignTableOptional": "Masa ata (isteğe bağlı)",
-      "tableOption": "Masa {number} ({seats} koltuk)",
-      "updateGuest": "Davetliyi Güncelle",
-      "tableShape": "Masa şekli",
-      "shapeRound": "Yuvarlak",
-      "shapeSquare": "Kare",
-      "shapeRectangle": "Dikdörtgen",
-      "tableNumberLabel": "Masa numarası",
-      "tableNumberPlaceholder": "örn. 1",
-      "seatsPlaceholder": "örn. 8",
-      "seatDistribution": "Koltukların kenarlara dağılımı",
-      "top": "Üst",
-      "bottom": "Alt",
-      "left": "Sol",
-      "right": "Sağ",
-      "assignedSeats": "{assigned} / {total} koltuk atandı",
-      "tableLabelOptional": "Etiket (isteğe bağlı)",
-      "tableLabelPlaceholder": "örn. Yılmaz Ailesi",
-      "updateTable": "Masayı Güncelle"
+      "seatOccupied": "Bu koltuk zaten dolu.",
+      "tableFull": "Masa {number} dolu.",
+      "assignSeatFailed": "Davetli bu koltuğa atanamadı.",
+      "assignGuestFailed": "Davetli bu masaya atanamadı.",
+      "elementAdded": "Mekan öğesi eklendi",
+      "elementDeleted": "Mekan öğesi silindi",
+      "addElementFailed": "Mekan öğesi eklenemedi.",
+      "deleteElementFailed": "Mekan öğesi silinemedi."
+    },
+    "venueEditor": {
+      "eyebrow": "Mekan tasarımcısı",
+      "title": "Mekan öğesi ekle",
+      "description": "Yaygın bir mekan özelliği ekleyin veya kat planı için özel bir öğe oluşturun.",
+      "quickPresets": "Hızlı ön ayarlar",
+      "orCustom": "Veya kendiniz oluşturun",
+      "name": "İsim",
+      "namePlaceholder": "örn. Fotoğraf kabini, Düğün pastası",
+      "icon": "Simge",
+      "selectIcon": "Simge seç: {icon}",
+      "shape": "Şekil",
+      "color": "Renk",
+      "create": "Öğe oluştur",
+      "deleteElement": "{name} öğesini sil",
+      "shapes": {
+        "circle": "Daire",
+        "square": "Kare",
+        "rectangle": "Dikdörtgen"
+      },
+      "colors": {
+        "blue": "Mavi",
+        "rose": "Gül",
+        "purple": "Mor",
+        "amber": "Amber",
+        "gray": "Gri",
+        "green": "Yeşil",
+        "teal": "Turkuaz",
+        "pink": "Pembe"
+      }
     }
   },
   "weddings": {
     "title": "Düğünler",
     "newWedding": "Yeni Düğün",
+    "backToDashboard": "Panele dön",
     "noWeddings": "Henüz hiç düğününüz yok",
     "noWeddingsDescription": "Başlamak için ilk düğününüzü oluşturun",
     "createFirstWedding": "İlk Düğününüzü Oluşturun",
@@ -243,9 +421,66 @@
     "create": "Düğün Oluştur",
     "groomName": "Damat Adı",
     "brideName": "Gelin Adı",
+    "groomEmail": "Damat E-postası",
+    "brideEmail": "Gelin E-postası",
     "date": "Düğün Tarihi",
     "location": "Konum",
-    "emri": "Ad"
+    "emri": "Ad",
+    "settings": "Ayarlar",
+    "openWedding": "Düğünü aç",
+    "status": "Durum",
+    "searchPlaceholder": "Düğün ara...",
+    "clearSearch": "Aramayı temizle",
+    "noWeddingFound": "„{query}“ için düğün bulunamadı",
+    "weddingCount": "{count, plural, =1 {# düğün} other {# düğün}}",
+    "moreActions": "Daha fazla işlem",
+    "manageSeating": "Oturma düzenini yönet",
+    "managePhotos": "Fotoğrafları yönet",
+    "settingsPage": {
+      "eyebrow": "Düğün ayarları",
+      "title": "Ayarlar",
+      "description": "Düğün detaylarını, çift erişimini, temayı ve aktif davetli özelliklerini yönetin.",
+      "backToWedding": "Düğüne dön",
+      "coupleDetails": "Çift detayları",
+      "accounts": "Çift hesapları",
+      "weddingDetails": "Düğün detayları",
+      "groomEmail": "Damat e-postası",
+      "brideEmail": "Gelin e-postası",
+      "emailNotice": "Buradan e-posta değiştirmek, mevcut bir giriş hesabının e-posta adresini değiştirmez.",
+      "publicUrl": "Genel URL",
+      "theme": "Düğün teması",
+      "preview": "Önizleme",
+      "themePreviewDescription": "Seçilen düğün renginin önizlemesi.",
+      "features": "Davetli özellikleri",
+      "findSeat": "Yer bul",
+      "findSeatDescription": "Davetlilerin atanmış masalarını aramasına izin verin.",
+      "photoUpload": "Fotoğraf yükleme",
+      "photoUploadDescription": "Davetlilerin düğünden fotoğraf yüklemesine izin verin.",
+      "autoApproveUploads": "Fotoğraf moderasyonunu atla",
+      "autoApproveUploadsDescription": "Davetli fotoğrafları, yönetici onayı olmadan hemen galeride görünür. Varsayılan olarak kapalıdır -- bunu açana kadar her yükleme inceleme için bekletilir.",
+      "newCredentials": "Yeni giriş bilgileri",
+      "newCredentialsDescription": "Yeni veya sıfırlanmış çift hesapları oluşturuldu. Bu şifreleri şimdi kaydedin çünkü bir daha gösterilmeyecekler.",
+      "failedAccounts": "Şu hesaplar için hesap oluşturma veya sıfırlama başarısız oldu: {emails}",
+      "saving": "Kaydediliyor...",
+      "saved": "Kaydedildi",
+      "saveChanges": "Değişiklikleri kaydet",
+      "saveFailed": "Düğün ayarları kaydedilemedi.",
+      "copyPassword": "Şifreyi kopyala",
+      "customColor": "Veya özel bir renk seçin",
+      "colorPresets": {
+        "rose": "Gül",
+        "ocean": "Okyanus",
+        "sage": "Adaçayı",
+        "violet": "Menekşe",
+        "terracotta": "Terrakota",
+        "burgundy": "Bordo"
+      },
+      "notifications": {
+        "created": "Düğün oluşturuldu",
+        "updated": "Düğün güncellendi",
+        "deleted": "Düğün silindi"
+      }
+    }
   },
   "status": {
     "upcoming": "Yaklaşan",
@@ -286,6 +521,12 @@
     "takePhoto": "Fotoğraf çek",
     "uploadFromGallery": "Galeriden yükle",
     "addMessage": "Mesaj ekle",
+    "clearSearch": "Aramayı temizle",
+    "noResultsFor": "Davetli listesinde „{query}“ bulunamadı.",
+    "yourSeat": "Yeriniz",
+    "seat": "Koltuk",
+    "venueMapDescription": "Girişten masanıza giden vurgulanan rotayı takip edin.",
+    "mapInteractionHint": "Mekanı keşfetmek için haritayı sürükleyin veya kaydırın.",
     "home": {
       "invitation": "Bizimle kutlamaya davetlisiniz",
       "photoDescription": "Bu özel günün her güzel anını saklamamıza yardımcı olun. Fotoğraflarınızı ve mesajlarınızı çiftle paylaşın.",
@@ -294,7 +535,10 @@
         "takePhoto": "Fotoğraf çek",
         "gallery": "Galeriden yükle",
         "message": "Mesaj ekle"
-      }
+      },
+      "findSeatEyebrow": "Oturma Düzeni",
+      "findSeatTitle": "Yerinizi bulun",
+      "photoTitle": "Anlarınızı paylaşın"
     },
     "demo": {
       "banner": "Portföy Demosu — Örnek Veriler"
@@ -302,7 +546,8 @@
     "nav": {
       "home": "Ana Sayfa",
       "findSeat": "Yerimi Bul",
-      "upload": "Yükle"
+      "upload": "Yükle",
+      "navigation": "Düğün navigasyonu"
     },
     "searchPlaceholder": "Adınızı arayarak yerinizi bulun",
     "tableNumber": "Masa {number}",
@@ -344,61 +589,96 @@
       "sendPhoto": "Fotoğrafı gönder",
       "selectPhotoFirst": "Lütfen önce bir fotoğraf seçin",
       "preview": "Fotoğraf önizlemesi",
+      "removePhoto": "Fotoğrafı kaldır",
+      "flipPhoto": "Fotoğrafı çevir",
       "success": {
         "title": "Teşekkürler!",
         "subtitle": "Fotoğrafınız başarıyla paylaşıldı",
         "description": "Anınız başarıyla alındı. Sara & Drilon bu anıyı sevgiyle saklayacak.",
         "uploadAnother": "Başka bir fotoğraf paylaş",
         "backHome": "Ana sayfaya dön"
+      },
+      "errors": {
+        "invalidFileTitle": "Desteklenmeyen fotoğraf",
+        "invalidFile": "JPEG, PNG, WebP veya HEIC görseli seçin.",
+        "fileTooLargeTitle": "Fotoğraf çok büyük",
+        "fileTooLarge": "10 MB'den küçük bir görsel seçin.",
+        "guestLimitTitle": "Yükleme limitine ulaşıldı",
+        "guestLimit": "Bu cihazdan izin verilen maksimum fotoğraf sayısına ulaştınız.",
+        "weddingLimitTitle": "Galeri limitine ulaşıldı",
+        "weddingLimit": "Bu düğün fotoğraf yükleme limitine ulaştı.",
+        "rateLimitedTitle": "Çok fazla yükleme",
+        "rateLimited": "Başka bir fotoğraf yüklemeden önce lütfen biraz bekleyin.",
+        "rateLimitedWithTime": "Tekrar denemeden önce lütfen {seconds} saniye bekleyin.",
+        "uploadDisabledTitle": "Yüklemeler kapalı",
+        "uploadDisabled": "Bu düğün için fotoğraf yükleme şu anda kullanılamıyor.",
+        "unavailableTitle": "Yükleme kullanılamıyor",
+        "unavailable": "Bu düğün yükleme bağlantısı artık kullanılamıyor.",
+        "uploadFailedTitle": "Fotoğraf yüklenemedi",
+        "storageFailed": "Fotoğrafı kaydedemedik. Lütfen tekrar deneyin.",
+        "temporaryFailure": "Fotoğrafınız kaydedilirken bir şeyler yanlış gitti. Lütfen kısa süre sonra tekrar deneyin."
       }
     },
     "findSeat": {
       "title": "Yerinizi Bulun",
       "weddingOf": "{bride} & {groom} düğünü",
       "hint": "Adınızı arayın ve haritada yerinizi görün 🗺️",
+      "searchLabel": "Davetli arama",
       "searchPlaceholder": "Adınızı arayın...",
+      "searchHelper": "Adınızın veya soyadınızın en az iki harfini girin.",
+      "clearSearch": "Aramayı temizle",
+      "resultsLabel": "Davetliler",
+      "noResultsTitle": "Davetli bulunamadı",
       "table": "Masa {number}",
       "tableSeat": "Masa {number} · Koltuk {seat}",
       "noTable": "Henüz bir masaya atanmadınız",
       "viewSeat": "Yeri görüntüle",
       "noResults": "Davetli listemizde \"{query}\" bulunamadı.",
-      "keepTyping": "Yerinizi bulmak için yazmaya devam edin..."
+      "keepTyping": "Yerinizi bulmak için yazmaya devam edin...",
+      "madeWithWedora": "Wedora ile yapıldı"
     }
   },
   "pricing": {
     "eyebrow": "Fiyatlandırma",
-    "title": "Size uygun planı seçin",
+    "title": "Size uygun paketi seçin",
     "description": "Düğününüz için tek seferlik ödeme — aylık abonelik yok.",
     "mostPopular": "En popüler",
     "perWedding": "düğün başına",
-    "choosePlan": "{plan} planını seç",
+    "included": "Pakete dahil olanlar",
+    "choosePlan": "{plan} paketini seç",
+
     "plans": {
       "basic": {
+        "eyebrow": "Temel",
         "name": "Basic",
-        "description": "Daha küçük düğünler için, yalnızca yer bulma"
+        "description": "Daha küçük düğünler için, yalnızca oturma yeri bulma"
       },
       "standard": {
+        "eyebrow": "Popüler",
         "name": "Standard",
         "description": "En popüler kombinasyonumuz — oturma düzeni + fotoğraflar"
       },
       "premium": {
+        "eyebrow": "Eksiksiz",
         "name": "Premium",
-        "description": "Sınırsız, daha büyük düğünler için"
+        "description": "Sınırsız özellikler, daha büyük düğünler için"
       }
     },
+
     "features": {
       "basic": {
         "findSeat": "Yerimi Bul",
         "tableArrangement": "Masa düzeni",
         "photoUpload": "Fotoğraf yükleme",
-        "guestLimit": "150 davetliye kadar",
-        "storage": "Düğünden sonra 30 gün depolama"
+        "guestLimit": "150 misafire kadar",
+        "storage": "Düğünden sonra 30 gün depolama",
+        "publicGallery": "Paylaşılabilir galeri (genel bağlantı)"
       },
       "standard": {
         "findSeat": "Yerimi Bul",
         "tableArrangement": "Masa düzeni",
         "photoUpload": "Fotoğraf yükleme — 300 fotoğrafa kadar",
-        "guestLimit": "300 davetliye kadar",
+        "guestLimit": "300 misafire kadar",
         "storage": "Düğünden sonra 90 gün depolama",
         "publicGallery": "Paylaşılabilir galeri (genel bağlantı)"
       },
@@ -406,40 +686,120 @@
         "findSeat": "Yerimi Bul",
         "tableArrangement": "Masa düzeni",
         "photoUpload": "Fotoğraf yükleme — sınırsız",
-        "guestLimit": "Sınırsız davetli",
+        "guestLimit": "Sınırsız misafir",
         "storage": "Düğünden sonra 1 yıl depolama",
         "publicGallery": "Paylaşılabilir galeri (genel bağlantı)"
       }
     },
+
     "customPlan": {
       "text": "Aradığınızı bulamadınız mı?",
-      "contact": "Bizimle iletişime geçin",
-      "suffix": "özel bir plan için."
+      "contact": "Bize ulaşın",
+      "suffix": "size özel bir paket için."
     }
   },
   "landing": {
     "eyebrow": "Düğün Yönetim Platformu",
+    "nav": {
+      "features": "Özellikler",
+      "howItWorks": "Nasıl çalışır",
+      "pricing": "Fiyatlandırma",
+      "demo": "Demoyu Görüntüle"
+    },
     "hero": {
+      "eyebrow": "Düğün Yönetim Platformu",
+      "title": "Her davetli yerinde. Her an kayıt altında.",
       "description": "Çiftlerin oturma düzenlerini organize ettiği, davetlilerle fotoğraf paylaştığı ve dijital bir düğün deneyimi oluşturduğu tek platform — evrak yok, karmaşa yok.",
-      "demoButton": "Demoyu Görüntüle"
+      "primaryCta": "Demoyu Görüntüle",
+      "secondaryCta": "Nasıl çalıştığını gör",
+      "pointOne": "Uygulama indirmeye gerek yok",
+      "pointTwo": "Bir öğleden sonrada kurulum",
+      "pointThree": "Tek seferlik ödeme"
+    },
+    "preview": {
+      "event": "Etkinlik",
+      "guests": "Davetliler",
+      "tables": "Masalar",
+      "photos": "Fotoğraflar",
+      "seatingTitle": "Oturma planı",
+      "seatingDescription": "Masaları düzenlemek için sürükle ve bırak",
+      "findSeat": "Yerini bul",
+      "yourTable": "Masanız"
+    },
+    "value": {
+      "title": "Elektronik tablo yok. Basılı oturma planı yok.",
+      "description": "Çiftin ve davetlilerin ihtiyaç duyduğu her şey tek bir sayfada — düğün gününe kadar gerçek zamanlı güncellenir."
     },
     "features": {
-      "guests": {
-        "title": "Davetli Oturma Düzeni",
-        "description": "Masaları sürükle-bırak ile düzenleyin, davetlileri atayın ve oturma planınızı görsel veya PDF olarak dışa aktarın."
-      },
-      "seat": {
-        "title": "Yerimi Bul",
-        "description": "Davetliler isimlerini arar ve masalarını ve mekan haritasını anında görüntüler."
-      },
-      "photos": {
-        "title": "Fotoğraf Galerisi",
-        "description": "Davetliler doğrudan telefonlarından fotoğraf yüklerken çift bunları yönetir ve paylaşır."
-      },
-      "theme": {
-        "title": "Özel Tema",
-        "description": "Her düğünün kendine ait renkleri, isimleri ve genel URL'si vardır."
+      "eyebrow": "Özellikler",
+      "title": "Düğün gününüz için ihtiyacınız olan her şey",
+      "description": "Çiftlerin büyük günden önce genellikle uğraştığı elektronik tabloların, basılı planların ve grup sohbetlerinin yerini alan dört araç.",
+      "items": {
+        "guests": {
+          "title": "Davetli Oturma Düzeni",
+          "description": "Masaları sürükle-bırak ile düzenleyin, davetlileri atayın ve oturma planınızı görsel veya PDF olarak dışa aktarın."
+        },
+        "seat": {
+          "title": "Yerimi Bul",
+          "description": "Davetliler isimlerini arar ve masalarını ve mekan haritasını anında görüntüler."
+        },
+        "photos": {
+          "title": "Fotoğraf Galerisi",
+          "description": "Davetliler doğrudan telefonlarından fotoğraf yüklerken çift bunları yönetir ve paylaşır."
+        },
+        "theme": {
+          "title": "Özel Tema",
+          "description": "Her düğünün kendine ait renkleri, isimleri ve genel URL'si vardır."
+        }
       }
+    },
+    "howItWorks": {
+      "eyebrow": "Nasıl çalışır",
+      "title": "Davetli listesinden düğün gününe üç adımda",
+      "description": "Eklenti yok, e-posta ile gönderilen tablolar yok. Her şeyi bir kez kurun, sonra davetlilerinizle tek bir bağlantı paylaşın.",
+      "steps": {
+        "create": {
+          "title": "Düğününüzü oluşturun",
+          "description": "İsimlerinizi, tarihinizi ve mekanınızı ekleyin, ardından bir tema seçin. Özel paneliniz ve genel sayfanız dakikalar içinde hazır."
+        },
+        "organise": {
+          "title": "Oturma düzeninizi organize edin",
+          "description": "Davetlileri ve masaları ekleyin, ardından odayı düzenlemek için sürükleyip bırakın. Değişiklikler anında kaydedilir ve davetli sayfasıyla senkronize edilir."
+        },
+        "share": {
+          "title": "Davetlilerinizle paylaşın",
+          "description": "Tek bir bağlantı gönderin. Davetliler yerlerini bulur, fotoğraf yükler ve mesaj bırakır — hepsi telefonlarından."
+        }
+      },
+      "cta": "Düğününüzü planlamaya başlayın"
+    },
+    "faq": {
+      "eyebrow": "SSS",
+      "title": "Sıkça sorulan sorular",
+      "description": "Düğününüzü kurmadan önce bilmeniz gereken her şey.",
+      "items": {
+        "one": {
+          "question": "Davetlilerimin bir uygulama indirmesi gerekiyor mu?",
+          "answer": "Hayır. Davetliler paylaştığınız bağlantıyı açar — herhangi bir telefonda, tablette veya bilgisayarda, indirme veya hesap gerekmez."
+        },
+        "two": {
+          "question": "Bağlantıyı paylaştıktan sonra oturma düzenini değiştirebilir miyim?",
+          "answer": "Evet. Masalarda veya davetlilerde yaptığınız her değişiklik anında güncellenir, böylece davetliler her zaman güncel oturma planını görür."
+        },
+        "three": {
+          "question": "Düğün sayfam etkinlikten sonra ne kadar süreyle kullanılabilir?",
+          "answer": "Planınıza bağlıdır — düğünden sonra 30 günden tam bir yıla kadar depolama, böylece fotoğraf toplamaya ve indirmeye devam edebilirsiniz."
+        },
+        "four": {
+          "question": "Kendi renklerimi ve isimlerimi kullanabilir miyim?",
+          "answer": "Evet. Her düğün kendi tema rengini, çift isimlerini ve genel bir URL'yi alır, böylece sayfa düğününüzün stiline uyar."
+        }
+      }
+    },
+    "finalCta": {
+      "title": "Düğün gününüzü planlamaya hazır mısınız?",
+      "description": "Oturma düzeninizi, galerinizi ve davetli sayfanızı bir öğleden sonrada kurun — aylık abonelik gerekmez.",
+      "button": "Demoyu Görüntüle"
     },
     "contact": {
       "eyebrow": "İletişim",
@@ -465,7 +825,31 @@
     "photoAlt": "Fotoğraf {number}",
     "openPhoto": "{number}. fotoğrafı aç",
     "goToPhoto": "{number}. fotoğrafa git",
-    "photoCounter": "{current} / {total}"
+    "photoCounter": "{current} / {total}",
+    "empty": {
+      "eyebrow": "Paylaşılan galeri",
+      "title": "Henüz fotoğraf yok",
+      "description": "Fotoğraflar paylaşıma hazır olduğunda burada görünecektir."
+    },
+    "imageUnavailable": {
+      "short": "Fotoğraf kullanılamıyor",
+      "title": "Bu fotoğraf yüklenemedi",
+      "description": "Görsel geçici olarak kullanılamıyor. Galerinin geri kalanı hâlâ erişilebilir."
+    },
+    "unavailable": {
+      "invalid": {
+        "eyebrow": "Galeri kullanılamıyor",
+        "title": "Bu galeri bağlantısı artık kullanılamıyor.",
+        "description": "Bağlantı kaldırılmış veya artık geçerli olmayabilir."
+      },
+      "expired": {
+        "eyebrow": "Bağlantının süresi doldu",
+        "title": "Bu galeri bağlantısının süresi doldu.",
+        "description": "Bu paylaşılan galeri sınırlı bir süre için kullanılabilirdi ve artık açılamıyor."
+      },
+      "contact": "Yeni bir bağlantı istiyorsanız lütfen bu galeriyi sizinle paylaşan kişiyle iletişime geçin.",
+      "home": "Wedora'ya dön"
+    }
   },
   "couple": {
     "seating": {
@@ -476,6 +860,76 @@
       "guests": "Davetliler ({count})",
       "table": "Masa {number}",
       "noTable": "Masa yok"
+    }
+  },
+  "notFound": {
+    "eyebrow": "Sayfa bulunamadı",
+    "title": "Bu sayfa kaybolmuş görünüyor.",
+    "description": "Aradığınız sayfa mevcut değil, taşınmış veya artık kullanılamıyor.",
+    "home": "Wedora'ya dön",
+    "back": "Ana sayfaya dön",
+    "admin": {
+      "eyebrow": "Sayfa bulunamadı",
+      "title": "Bu yönetici sayfasını bulamadık.",
+      "description": "Sayfa taşınmış, silinmiş veya bağlantı artık geçerli olmayabilir.",
+      "dashboard": "Panel",
+      "weddings": "Düğünler",
+      "back": "Panele dön"
+    }
+  },
+  "errors": {
+    "public": {
+      "eyebrow": "Bir şeyler yanlış gitti",
+      "title": "Bu sayfayı yükleyemedik.",
+      "description": "Bu sayfa yüklenirken beklenmeyen bir şey oldu. Tekrar deneyin veya Wedora'ya dönün.",
+      "retry": "Tekrar dene",
+      "home": "Wedora'ya dön",
+      "reference": "Hata referansı"
+    }
+  },
+  "adminSettings": {
+    "eyebrow": "Yönetici",
+    "title": "Ayarlar",
+    "description": "Wedora yönetici hesabınızı ve arayüz tercihlerinizi yönetin.",
+    "account": {
+      "title": "Hesap",
+      "description": "Şu anda oturum açmış hesap hakkında bilgiler.",
+      "email": "E-posta adresi",
+      "role": "Rol",
+      "admin": "Yönetici"
+    },
+    "appearance": {
+      "title": "Görünüm",
+      "description": "Wedora yönetici arayüzünün nasıl görüneceğini seçin.",
+      "theme": "Arayüz teması",
+      "themeDescription": "Açık ve koyu görünüm arasında geçiş yapın."
+    },
+    "security": {
+      "title": "Güvenlik",
+      "description": "Yönetici oturumunuz Wedora kimlik doğrulama hesabınızla korunur."
+    },
+    "session": {
+      "title": "Mevcut oturum",
+      "description": "İşiniz bittiğinde bu tarayıcıdan çıkış yapın.",
+      "logout": "Çıkış yap"
+    }
+  },
+  "adminNav": {
+    "navigation": "Yönetici navigasyonu",
+    "dashboard": "Panel",
+    "weddings": "Düğünler",
+    "settings": "Ayarlar",
+    "openMenu": "Navigasyonu aç",
+    "closeMenu": "Navigasyonu kapat",
+    "signedInAs": "Giriş yapan"
+  },
+  "unauthorized": {
+    "admin": {
+      "eyebrow": "Erişim kısıtlı",
+      "title": "Yönetici erişiminiz yok.",
+      "description": "Bu hesap oturum açmış, ancak Wedora yönetim alanına erişim izni yok.",
+      "login": "Başka bir hesap kullan",
+      "home": "Wedora'ya dön"
     }
   }
 }

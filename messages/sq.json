@@ -4,6 +4,7 @@
     "cancel": "Anulo",
     "delete": "Fshi",
     "loading": "Duke u ngarkuar...",
+    "saving": "Duke ruajtur...",
     "error": "Diçka shkoi keq",
     "success": "Sukses",
     "actions": "Veprimet",
@@ -14,7 +15,12 @@
     "search": "Kërko...",
     "noData": "Nuk ka të dhëna",
     "noResults": "Nuk u gjet asgjë",
-    "switchLanguage": "Ndrysho gjuhën"
+    "switchLanguage": "Ndrysho gjuhën",
+    "logout": "Shkyçu",
+    "optional": "opsionale",
+    "close": "Mbyll",
+    "switchToLightMode": "Kalo në modalitetin e ndriçuar",
+    "switchToDarkMode": "Kalo në modalitetin e errët"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -29,13 +35,13 @@
     "login": "Identifikohu",
     "email": "Email",
     "password": "Fjalëkalimi",
-    "forgotPassword": "Keni harruar fjalëkalimin?",
     "resetPassword": "Rivendos Fjalëkalimin",
     "rememberMe": "Më mbaj mend",
     "signIn": "Hyni",
     "createAccount": "Krijo llogari",
     "privateAccess": "Qasje private",
     "adminPortal": "Portali i Adminit",
+    "adminLoginDescription": "Hyni për të menaxhuar dasmat, të ftuarit, sistemimin dhe fotot e shpërndara.",
     "invalidCredentials": "Email ose fjalëkalim i gabuar",
     "accessDenied": "Qasja u refuzua. Kjo llogari nuk është admin.",
     "authentication": "Autentifikimi",
@@ -50,22 +56,30 @@
     "emailPlaceholder": "you@example.com",
     "sendLink": "Dërgo Lidhjen",
     "newPasswordTitle": "Vendosni fjalëkalimin e ri",
+    "newPasswordDescription": "Zgjidhni një fjalëkalim të ri dhe të sigurt për llogarinë tuaj Wedora.",
     "newPassword": "Fjalëkalimi i ri",
     "confirmPassword": "Konfirmo fjalëkalimin",
     "passwordMinLength": "Fjalëkalimi duhet të ketë të paktën 8 shkronja",
     "passwordsDoNotMatch": "Fjalëkalimet nuk përputhen",
+    "passwordChangedEyebrow": "Fjalëkalimi u përditësua",
     "passwordChanged": "Fjalëkalimi u ndryshua",
     "redirectingToLogin": "Po ju çojmë te faqja e hyrjes...",
     "saving": "Duke ruajtur…",
     "changePassword": "Ndrysho Fjalëkalimin",
-    "forgotPasswordForm": {
+    "showPassword": "Shfaq fjalëkalimin",
+    "hidePassword": "Fshih fjalëkalimin",
+    "loginEyebrow": "Hyrja",
+    "forgotPassword": {
       "title": "Keni harruar fjalëkalimin?",
+      "eyebrow": "Keni harruar fjalëkalimin?",
       "description": "Shënoni email-in tuaj dhe ne do t'ju dërgojmë një link për të rivendosur fjalëkalimin.",
       "email": "Email",
       "emailPlaceholder": "you@example.com",
+      "sendLink": "Dërgo linkun",
       "sendResetLink": "Dërgo linkun për rivendosje",
       "sendingLink": "Duke dërguar linkun…",
       "backToLogin": "Kthehu te kyçja",
+      "emailSent": "Email-i u dërgua",
       "checkYourEmail": "Kontrolloni email-in tuaj",
       "resetLinkSent": "Kemi dërguar një link për rivendosjen e fjalëkalimit në email-in tuaj.",
       "unexpectedError": "Ndodhi një gabim i papritur"
@@ -76,16 +90,29 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Mirësevini përsëri",
+    "overview": "Përmbledhje",
+    "overviewDescription": "Menaxhoni dasmat, të ftuarit, sistemimin dhe fotot e shpërndara nga një vend.",
     "noWeddings": "Ende s'keni asnjë dasmë",
     "noWeddingsDescription": "Krijoni dasmën tuaj të parë për të filluar",
     "createWedding": "Krijo Dasmën",
-    "overview": "Përmbledhje",
+    "createWeddingDescription": "Konfiguroni një dasmë të re, qasjen e çiftit dhe funksionet për të ftuarit.",
     "viewAllWeddings": "Shiko të gjitha dasmat",
+    "viewAll": "Shiko të gjitha",
     "activeWeddings": "Dasma aktive",
     "totalGuests": "Të ftuar gjithsej",
     "photoCountLabel": "Foto",
+    "pendingPhotos": "Foto në pritje",
     "newPhotos": "{count} të reja",
+    "pendingPhotosDescription": "Fotot e reja të të ftuarve presin shqyrtimin tuaj.",
+    "reviewPhotos": "Shqyrto fotot",
+    "weddings": "Dasmat",
     "recentWeddings": "Dasmat e fundit",
+    "seating": "Sistemimi",
+    "management": "Menaxhimi",
+    "quickActions": "Veprime të shpejta",
+    "manageWeddings": "Menaxho dasmat",
+    "manageWeddingsDescription": "Shikoni, editoni dhe menaxhoni të gjitha dasmat.",
+    "atAGlance": "Me një shikim",
     "weddingCreated": "Dasma u krijua!",
     "saveCredentials": "Ruani këto të dhëna hyrjeje — fjalëkalimi s'do shfaqet përsëri",
     "noAccountCreated": "Nuk u krijua asnjë llogari — kontrolloni email-et e vendosura.",
@@ -97,7 +124,9 @@
     "themeColor": "Ngjyra e Temës",
     "preview": "Pamja paraprake",
     "activeFunctions": "Funksionet Aktive",
+    "findSeat": "Gjej vendin",
     "findSeatDescription": "Të ftuarit kërkojnë emrin dhe shohin tavolinën",
+    "photoUpload": "Ngarkimi i fotove",
     "photoUploadDescription": "Të ftuarit ngarkojnë foto nga dasma",
     "totalPhotoLimit": "Limit Total Fotosh",
     "photoLimitPerGuest": "Limit për Të Ftuar",
@@ -105,7 +134,11 @@
     "leaveEmptyForNoLimit": "Lëreni bosh për pa limit",
     "howManyPhotosPerGuest": "Sa foto lejohen për person",
     "creating": "Duke krijuar...",
+    "photosLabel": "Fotot",
     "photos": {
+      "title": "Fotot",
+      "description": "Shqyrtoni, organizoni dhe shpërndani fotot e ngarkuara për këtë dasmë.",
+      "backToWedding": "Kthehu te dasma",
       "allPhotos": "Të gjitha fotot",
       "favourites": "Të preferuarat",
       "hidden": "Të fshehura",
@@ -113,11 +146,17 @@
       "loadingPhotos": "Duke ngarkuar fotot...",
       "loadMore": "Ngarko më shumë",
       "noPhotos": "Nuk u gjet asnjë foto me këtë filtër",
+      "noPhotosMatchingFilter": "Provoni një filtër tjetër ose prisni që të ftuarit të ngarkojnë foto.",
       "confirmDelete": "A jeni të sigurt që dëshironi të fshini këtë foto?",
       "deleteFailed": "Dështoi fshirja e fotos",
       "shareGallery": "Shpërndaj Galerinë",
+      "shareGalleryTitle": "Ndaj Galerinë",
+      "shareGalleryDescription": "Krijoni një link që mund ta ndani me të ftuarit",
       "downloadZip": "Shkarko ZIP",
       "downloadFavourites": "Shkarko të preferuarat",
+      "onlyFavourites": "Vetëm të preferuarat",
+      "preparingZip": "Duke u përgatitur…",
+      "failedToGenerateZip": "Krijimi i ZIP-it dështoi. Ju lutem provoni përsëri.",
       "approve": "Aprovo",
       "unapprove": "Çaprovo",
       "favourite": "Prefero",
@@ -129,44 +168,39 @@
       "date": "Data",
       "message": "Mesazhi",
       "close": "Mbyll",
+      "photoCount": "{count} foto",
+      "seating": "Sistemimi",
+      "download": "Shkarko",
+      "deletePermanently": "Fshi përgjithmonë",
       "copyLink": "Kopjo linkun",
       "linkCopied": "U kopjua!",
       "expires": "Skadon: {date}",
       "neverExpires": "Nuk skadon kurrë",
       "deleteLink": "Fshi linkun",
       "createLink": "Krijo linkun",
+      "creatingLink": "Duke krijuar linkun...",
       "galleryLabel": "Emri i Galerisë",
       "photoFilter": "Filtri i Fotove",
-      "onlyFavourites": "Vetëm të preferuarat",
       "expiresIn": "Skadon pas (ditë)",
       "optional": "opsionale",
       "create": "Krijo",
       "back": "Mbrapa",
       "showMessages": "Shfaq mesazhet në galeri",
       "manageShareLinks": "Menaxho linkat",
-      "photoCount": "{count} foto",
-      "seating": "Sistemimi",
-      "preparingZip": "Duke u përgatitur…",
-      "noPhotosMatchingFilter": "Provoni një filtër tjetër ose prisni që të ftuarit të ngarkojnë foto.",
       "linkExpiresAfter": "Linku skadon pas",
       "never": "Kurrë",
       "days7": "7 ditë",
       "days30": "30 ditë",
       "days90": "90 ditë",
       "year1": "1 vit",
-      "creatingLink": "Duke krijuar linkun...",
       "backToGalleryList": "Mbrapa te lista",
+      "backToGalleryLinks": "Mbrapa te linkat",
       "galleryLink": "Linku i galerisë",
       "shareWithCouple": "Shpërndajeni këtë link me çiftin ose të ftuarit",
       "whichPhotos": "Cilat foto?",
       "filterNote": "Vetëm fotot e aprovuara që të ftuarit kanë pranuar t'i shpërndajnë publikisht përfshihen.",
       "showMessagesTitle": "Shfaq mesazhet",
       "showMessagesDescription": "Përfshi emrat dhe urimet në galeri",
-      "backToGalleryLinks": "Mbrapa te linkat",
-      "download": "Shkarko",
-      "deletePermanently": "Fshi përgjithmonë",
-      "shareGalleryTitle": "Ndaj Galerinë",
-      "shareGalleryDescription": "Krijoni një link që mund ta ndani me të ftuarit",
       "noGalleryLinks": "Nuk ka ende linke të galerisë.",
       "createNewGalleryLink": "Krijo Link të Ri të Galerisë",
       "linkName": "Emri i linkut",
@@ -174,67 +208,211 @@
       "favouritesOnly": "Vetëm të preferuarat",
       "deleteGalleryLinkConfirm": "A dëshironi ta fshini këtë link të galerisë? Ai do të ndalojë së funksionuari menjëherë.",
       "failedToCreateLink": "Krijimi i linkut dështoi",
-      "failedToGenerateZip": "Krijimi i ZIP-it dështoi. Ju lutem provoni përsëri."
+      "galleryLinksLoadFailed": "Linket e galerisë nuk mund të ngarkoheshin.",
+      "retry": "Provo përsëri",
+      "copyingLink": "Duke kopjuar…",
+      "confirmations": {
+        "deletePhoto": {
+          "title": "Të fshihet fotoja?",
+          "description": "Kjo foto do të fshihet përgjithmonë dhe nuk mund të rikthehet.",
+          "confirm": "Fshi foton"
+        },
+        "deleteGalleryLink": {
+          "title": "Të fshihet linku i galerisë?",
+          "description": "Ky link i galerisë së shpërndarë do të ndalojë së funksionuari menjëherë.",
+          "confirm": "Fshi linkun"
+        }
+      },
+      "notifications": {
+        "photoDeleted": "Fotoja u fshi",
+        "galleryLinkDeleted": "Linku i galerisë u fshi",
+        "photoApproved": "Fotoja u aprovua",
+        "photoUnapproved": "Fotoja u kthye në pritje",
+        "photoHidden": "Fotoja u fsheh",
+        "photoShown": "Fotoja është sërish e dukshme",
+        "photoFavourited": "Fotoja u shtua te të preferuarat",
+        "photoUnfavourited": "Fotoja u hoq nga të preferuarat",
+        "photoUpdateFailed": "Fotoja nuk mund të përditësohej. Ndryshimet tuaja u kthyen mbrapsht.",
+        "photoDeleteFailed": "Fotoja nuk mund të fshihej. Asgjë nuk u ndryshua.",
+        "galleryLinkCreated": "Linku i galerisë u krijua",
+        "galleryLinkCopied": "Linku i galerisë u kopjua",
+        "galleryLinkCopyFailed": "Linku i galerisë nuk mund të kopjohej. Ju lutem provoni përsëri.",
+        "galleryLinkDeleteFailed": "Linku i galerisë nuk mund të fshihej. Asgjë nuk u ndryshua.",
+        "photoDownloaded": "Shkarkimi i fotos filloi",
+        "photoDownloadFailed": "Fotoja nuk mund të shkarkohej. Ju lutem provoni përsëri.",
+        "zipDownloaded": "Shkarkimi i arkivit të fotove filloi",
+        "zipDownloadFailed": "Arkivi i fotove nuk mund të përgatitej. Ju lutem provoni përsëri.",
+        "zipQueued": "Albumi i madh u vendos në radhë. Do të përgatisim {count} foto në prapavijë.",
+        "zipReady": "Arkivi juaj i fotove është gati. Shkarkimi filloi.",
+        "zipExportFailed": "Arkivi i fotove nuk mund të krijohej. Ju lutem provoni përsëri.",
+        "zipExportTimedOut": "Arkivi ende po përgatitet. Provoni shkarkimin përsëri pas pak."
+      }
+    }
+  },
+  "seating": {
+    "title": "Sistemimi i të ftuarve",
+    "description": "Menaxhoni të ftuarit, tavolinat dhe planin e sallës për këtë dasmë.",
+    "backToWeddings": "Kthehu te dasmat",
+    "loadingDesigner": "Duke ngarkuar planin e uljes...",
+    "print": "Printo Listën",
+    "printTitle": "Lista e të Ftuarve sipas Tavolinave",
+    "guests": "Të ftuarit",
+    "tables": "Tavolinat",
+    "photos": "Fotot",
+    "designerLabel": "Dizajneri",
+    "searchGuests": "Kërko të ftuarit...",
+    "addGuest": "Shto të ftuar",
+    "addTable": "Shto tavolinë",
+    "addNewGuest": "Shto të ftuar të ri",
+    "addNewTable": "Shto tavolinë të re",
+    "editGuest": "Edito të ftuarin",
+    "editTable": "Edito tavolinën",
+    "total": "Gjithsej",
+    "seated": "Me vend",
+    "unseated": "Pa vend",
+    "noGuests": "Nuk u gjet asnjë i ftuar",
+    "noTables": "Ende nuk keni krijuar tavolina",
+    "noTablesCreated": "Nuk është krijuar asnjë tavolinë ende.",
+    "confirmDeleteGuest": "A jeni të sigurt që dëshironi të fshini këtë të ftuar?",
+    "deleteGuestFailed": "Dështoi fshirja e të ftuarit",
+    "confirmDeleteTable": "A jeni të sigurt që dëshironi të fshini këtë tavolinë? Të gjithë të ftuarit e caktuar do të mbeten pa tavolinë.",
+    "deleteTableFailed": "Dështoi fshirja e tavolinës",
+    "rsvpCycleHint": "Klikoni për të ndryshuar statusin RSVP: në pritje -> konfirmuar -> refuzuar",
+    "rsvpUpdateFailed": "Përditësimi i RSVP dështoi",
+    "rsvpStatus": {
+      "pending": "Në pritje",
+      "confirmed": "Konfirmuar",
+      "declined": "Refuzuar"
     },
-    "seating": {
-      "loadingDesigner": "Duke ngarkuar planin e uljes...",
-      "confirmDeleteGuest": "A jeni të sigurt që dëshironi të fshini këtë të ftuar?",
-      "deleteGuestFailed": "Dështoi fshirja e të ftuarit",
-      "confirmDeleteTable": "A jeni të sigurt që dëshironi të fshini këtë tavolinë? Të gjithë të ftuarit e caktuar do të mbeten pa tavolinë.",
-      "deleteTableFailed": "Dështoi fshirja e tavolinës",
-      "title": "Sistemimi i të ftuarve",
-      "print": "Printo Listën",
-      "guests": "Të ftuarit",
-      "tables": "Tavolinat",
-      "designer": "Dizajneri",
-      "searchGuests": "Kërko të ftuarit...",
-      "addGuest": "Shto të ftuar",
-      "addTable": "Shto tavolinë",
-      "seated": "Me vend",
-      "unseated": "Pa vend",
-      "total": "Gjithsej",
-      "noGuests": "Nuk u gjet asnjë i ftuar",
-      "noTables": "Ende nuk keni krijuar tavolina",
-      "tableNumber": "Tavolina {number}",
-      "seats": "Vende",
-      "edit": "Edito",
-      "delete": "Fshi",
-      "printTitle": "Lista e të Ftuarve sipas Tavolinave",
+    "table": "Tavolina",
+    "tableNumber": "Tavolina {number}",
+    "occupied": "Vende të zëna",
+    "seats": "Vende",
+    "edit": "Edito",
+    "delete": "Fshi",
+    "firstName": "Emri",
+    "firstNamePlaceholder": "p.sh. Filan",
+    "lastName": "Mbiemri",
+    "lastNamePlaceholder": "p.sh. Fisteku",
+    "assignTableOptional": "Cakto tavolinën (Opsionale)",
+    "tableOption": "Tavolina {number} ({seats} vende)",
+    "updateGuest": "Përditëso të ftuarin",
+    "tableShape": "Forma e tavolinës",
+    "shapeRound": "Rrethore",
+    "shapeSquare": "Katrore",
+    "shapeRectangle": "Drejtkëndore",
+    "tableNumberLabel": "Numri i tavolinës",
+    "tableNumberPlaceholder": "p.sh. 1",
+    "seatsPlaceholder": "p.sh. 8",
+    "seatDistribution": "Shpërndarja e vendeve nëpër anët",
+    "top": "Sipër",
+    "bottom": "Poshtë",
+    "left": "Majtas",
+    "right": "Djathtas",
+    "assignedSeats": "{assigned} / {total} vende të caktuara",
+    "tableLabelOptional": "Etiketa (opsionale)",
+    "tableLabelPlaceholder": "p.sh. Familja Saiti",
+    "updateTable": "Përditëso tavolinën",
+    "venuePresets": {
+      "entrance": "Hyrja",
+      "pool": "Pishina",
+      "couple_table": "Çifti",
+      "music": "Muzika",
+      "bar": "Bari",
+      "toilet": "Tualeti"
+    },
+    "confirmations": {
+      "deleteGuest": {
+        "title": "Të fshihet i ftuari?",
+        "description": "{name} do të hiqet përgjithmonë nga lista e të ftuarve.",
+        "confirm": "Fshi të ftuarin"
+      },
+      "deleteTable": {
+        "title": "Të fshihet tavolina?",
+        "description": "Tavolina {number} do të hiqet dhe të gjithë të ftuarit e caktuar në të do të mbeten pa vend.",
+        "confirm": "Fshi tavolinën"
+      },
+      "deleteVenueElement": {
+        "title": "Të fshihet elementi i sallës?",
+        "description": "{name} do të hiqet përgjithmonë nga plani i sallës.",
+        "confirm": "Fshi elementin"
+      },
+      "deletePhoto": {
+        "title": "Të fshihet fotoja?",
+        "description": "Kjo foto do të fshihet përgjithmonë dhe nuk mund të rikthehet.",
+        "confirm": "Fshi foton"
+      },
+      "deleteGalleryLink": {
+        "title": "Të fshihet linku i galerisë?",
+        "description": "Ky link i galerisë së shpërndarë do të ndalojë së funksionuari menjëherë.",
+        "confirm": "Fshi linkun"
+      }
+    },
+    "notifications": {
+      "guestDeleted": "I ftuari u fshi",
+      "rsvpUpdated": "RSVP u shënua si {status}",
+      "tableDeleted": "Tavolina u fshi",
+      "venueElementDeleted": "Elementi i sallës u fshi",
+      "photoDeleted": "Fotoja u fshi",
+      "galleryLinkDeleted": "Linku i galerisë u fshi",
+      "galleryLinkDeleteFailed": "Linku i galerisë nuk mund të fshihej"
+    },
+    "designer": {
+      "unassignedGuests": "Të ftuar të pacaktuar ({count})",
+      "searchGuests": "Kërko sipas emrit...",
+      "addElement": "Shto element",
+      "noGuestsFound": "Asnjë i ftuar nuk përputhet me kërkimin tuaj.",
+      "allGuestsAssigned": "Të gjithë të ftuarit janë caktuar.",
+      "showGuests": "Shfaq të ftuarit",
+      "downloadImage": "Shkarko imazhin",
+      "fullscreen": "Ekran i plotë",
+      "exitFullscreen": "Dil nga ekrani i plotë",
+      "exit": "Dil",
       "table": "Tavolina",
-      "noTablesCreated": "Nuk është krijuar asnjë tavolinë ende.",
-      "editGuest": "Edito të ftuarin",
-      "addNewGuest": "Shto të ftuar të ri",
-      "editTable": "Edito tavolinën",
-      "addNewTable": "Shto tavolinë të re",
-      "occupied": "Vende të zëna",
-      "firstName": "Emri",
-      "firstNamePlaceholder": "p.sh. Filan",
-      "lastName": "Mbiemri",
-      "lastNamePlaceholder": "p.sh. Fisteku",
-      "assignTableOptional": "Cakto tavolinën (Opsionale)",
-      "tableOption": "Tavolina {number} ({seats} vende)",
-      "updateGuest": "Përditëso të ftuarin",
-      "tableShape": "Forma e tavolinës",
-      "shapeRound": "Rrethore",
-      "shapeSquare": "Katrore",
-      "shapeRectangle": "Drejtkëndore",
-      "tableNumberLabel": "Numri i tavolinës",
-      "tableNumberPlaceholder": "p.sh. 1",
-      "seatsPlaceholder": "p.sh. 8",
-      "seatDistribution": "Shpërndarja e vendeve nëpër anët",
-      "top": "Sipër",
-      "bottom": "Poshtë",
-      "left": "Majtas",
-      "right": "Djathtas",
-      "assignedSeats": "{assigned} / {total} vende të caktuara",
-      "tableLabelOptional": "Etiketa (opsionale)",
-      "tableLabelPlaceholder": "p.sh. Familja Saiti",
-      "updateTable": "Përditëso tavolinën"
+      "seatOccupied": "Ky vend është tashmë i zënë.",
+      "tableFull": "Tavolina {number} është plot.",
+      "assignSeatFailed": "I ftuari nuk mund të caktohej në këtë vend.",
+      "assignGuestFailed": "I ftuari nuk mund të caktohej në këtë tavolinë.",
+      "elementAdded": "Elementi i sallës u shtua",
+      "elementDeleted": "Elementi i sallës u fshi",
+      "addElementFailed": "Elementi i sallës nuk mund të shtohej.",
+      "deleteElementFailed": "Elementi i sallës nuk mund të fshihej."
+    },
+    "venueEditor": {
+      "eyebrow": "Dizajneri i sallës",
+      "title": "Shto element të sallës",
+      "description": "Shtoni një element të zakonshëm të sallës ose krijoni një element të personalizuar për planin.",
+      "quickPresets": "Opsione të shpejta",
+      "orCustom": "Ose krijoni tuajin",
+      "name": "Emri",
+      "namePlaceholder": "p.sh. Kabinë fotografike, torta e dasmës",
+      "icon": "Ikona",
+      "selectIcon": "Zgjidh ikonën: {icon}",
+      "shape": "Forma",
+      "color": "Ngjyra",
+      "create": "Krijo elementin",
+      "deleteElement": "Fshi {name}",
+      "shapes": {
+        "circle": "Rreth",
+        "square": "Katror",
+        "rectangle": "Drejtkëndësh"
+      },
+      "colors": {
+        "blue": "Blu",
+        "rose": "Rozë e mbyllur",
+        "purple": "Vjollcë",
+        "amber": "Qelibar",
+        "gray": "Gri",
+        "green": "Gjelbër",
+        "teal": "Blu-gjelbër",
+        "pink": "Rozë"
+      }
     }
   },
   "weddings": {
     "title": "Dasmat",
     "newWedding": "Dasmë e Re",
+    "backToDashboard": "Kthehu te dashboard-i",
     "noWeddings": "Ende nuk keni dasma",
     "noWeddingsDescription": "Krijoni dasmën tuaj të parë për të filluar",
     "createFirstWedding": "Krijo Dasmën e Parë",
@@ -243,9 +421,66 @@
     "create": "Krijo Dasmë",
     "groomName": "Emri i Dhëndrit",
     "brideName": "Emri i Nuses",
+    "groomEmail": "Email-i i dhëndrit",
+    "brideEmail": "Email-i i nuses",
     "date": "Data e Dasmës",
     "location": "Lokacioni",
-    "emri": "Emri"
+    "emri": "Emri",
+    "settings": "Cilësimet",
+    "openWedding": "Hap dasmën",
+    "status": "Statusi",
+    "searchPlaceholder": "Kërko dasmat...",
+    "clearSearch": "Pastro kërkimin",
+    "noWeddingFound": "Nuk u gjet asnjë dasmë për “{query}”",
+    "weddingCount": "{count, plural, =1 {# dasmë} other {# dasma}}",
+    "moreActions": "Më shumë veprime",
+    "manageSeating": "Menaxho sistemimin",
+    "managePhotos": "Menaxho fotot",
+    "settingsPage": {
+      "eyebrow": "Cilësimet e dasmës",
+      "title": "Cilësimet",
+      "description": "Menaxhoni detajet e dasmës, qasjen e çiftit, temën dhe funksionet aktive për të ftuarit.",
+      "backToWedding": "Kthehu te dasma",
+      "coupleDetails": "Detajet e çiftit",
+      "accounts": "Llogaritë e çiftit",
+      "weddingDetails": "Detajet e dasmës",
+      "groomEmail": "Email-i i dhëndrit",
+      "brideEmail": "Email-i i nuses",
+      "emailNotice": "Ndryshimi i email-it këtu nuk ndryshon adresën e email-it të një llogarie ekzistuese.",
+      "publicUrl": "URL publike",
+      "theme": "Tema e dasmës",
+      "preview": "Pamja paraprake",
+      "themePreviewDescription": "Pamje paraprake e ngjyrës së zgjedhur të dasmës.",
+      "features": "Funksionet për të ftuarit",
+      "findSeat": "Gjej vendin",
+      "findSeatDescription": "Lejoni të ftuarit të kërkojnë tavolinën e caktuar.",
+      "photoUpload": "Ngarkimi i fotove",
+      "photoUploadDescription": "Lejoni të ftuarit të ngarkojnë foto nga dasma.",
+      "autoApproveUploads": "Anashkalo moderimin e fotove",
+      "autoApproveUploadsDescription": "Fotot e të ftuarve shfaqen menjëherë në galeri, pa pasur nevojë të aprovohen më parë nga një administrator. Si parazgjedhje është e çaktivizuar. Çdo foto mbahet për shqyrtim derisa ta aktivizoni këtë opsion.",
+      "newCredentials": "Të dhëna të reja hyrjeje",
+      "newCredentialsDescription": "U krijuan llogari të reja ose u rivendosën llogaritë e çiftit. Ruani këto fjalëkalime tani sepse nuk do të shfaqen përsëri.",
+      "failedAccounts": "Krijimi ose rivendosja e llogarisë dështoi për: {emails}",
+      "saving": "Duke ruajtur...",
+      "saved": "U ruajt",
+      "saveChanges": "Ruaj ndryshimet",
+      "saveFailed": "Cilësimet e dasmës nuk mund të ruheshin.",
+      "copyPassword": "Kopjo fjalëkalimin",
+      "customColor": "Ose zgjidhni një ngjyrë të personalizuar",
+      "colorPresets": {
+        "rose": "Rozë",
+        "ocean": "Oqean",
+        "sage": "Sherebelë",
+        "violet": "Vjollcë",
+        "terracotta": "Terrakotë",
+        "burgundy": "Bordo"
+      },
+      "notifications": {
+        "created": "Dasma u krijua",
+        "updated": "Dasma u përditësua",
+        "deleted": "Dasma u fshi"
+      }
+    }
   },
   "status": {
     "upcoming": "E ardhshme",
@@ -286,6 +521,12 @@
     "takePhoto": "Bëj një foto",
     "uploadFromGallery": "Ngarko nga galeria",
     "addMessage": "Shto një mesazh",
+    "clearSearch": "Pastro kërkimin",
+    "noResultsFor": "Nuk mundëm ta gjenim “{query}” në listën e të ftuarve.",
+    "yourSeat": "Vendi juaj",
+    "seat": "Vendi",
+    "venueMapDescription": "Ndiqni rrugën e theksuar nga hyrja deri te tavolina juaj.",
+    "mapInteractionHint": "Tërhiqeni ose lëvizeni hartën për të eksploruar sallën.",
     "home": {
       "invitation": "Jeni të ftuar të festoni me ne",
       "photoDescription": "Na ndihmoni të ruajmë çdo moment të bukur të kësaj dite të veçantë. Ndani fotot dhe mesazhet tuaja me çiftin.",
@@ -294,7 +535,10 @@
         "takePhoto": "Bëj një foto",
         "gallery": "Ngarko nga galeria",
         "message": "Shto një mesazh"
-      }
+      },
+      "findSeatEyebrow": "Sistemimi",
+      "findSeatTitle": "Gjeni vendin tuaj",
+      "photoTitle": "Ndani momentet tuaja"
     },
     "demo": {
       "banner": "Demonstrim Portofoli — Të dhëna Shembulli"
@@ -302,7 +546,8 @@
     "nav": {
       "home": "Ballina",
       "findSeat": "Vendi juaj",
-      "upload": "Ngarko"
+      "upload": "Ngarko",
+      "navigation": "Navigimi i dasmës"
     },
     "searchPlaceholder": "Kërko vendin tuaj përmes emrit tuaj",
     "tableNumber": "Tavolina {number}",
@@ -344,102 +589,217 @@
       "sendPhoto": "Dërgo foton",
       "selectPhotoFirst": "Ju lutem zgjidhni një foto së pari",
       "preview": "Parapamje e fotos",
+      "removePhoto": "Hiq foton",
+      "flipPhoto": "Kthe foton",
       "success": {
         "title": "Faleminderit!",
         "subtitle": "Fotoja juaj u nda me sukses",
         "description": "Kujtimi juaj u pranua me sukses. Sara & Drilon do ta ruajnë me kënaqësi.",
         "uploadAnother": "Ndaj një tjetër foto",
         "backHome": "Kthehu në faqen kryesore"
+      },
+      "errors": {
+        "invalidFileTitle": "Foto e pambështetur",
+        "invalidFile": "Zgjidhni një imazh JPEG, PNG, WebP ose HEIC.",
+        "fileTooLargeTitle": "Fotoja është shumë e madhe",
+        "fileTooLarge": "Zgjidhni një imazh më të vogël se 10 MB.",
+        "guestLimitTitle": "U arrit limiti i ngarkimeve",
+        "guestLimit": "Keni arritur numrin maksimal të fotove të lejuara nga kjo pajisje.",
+        "weddingLimitTitle": "U arrit limiti i galerisë",
+        "weddingLimit": "Kjo dasmë ka arritur limitin e ngarkimit të fotove.",
+        "rateLimitedTitle": "Shumë ngarkime",
+        "rateLimited": "Ju lutem prisni pak para se të ngarkoni një foto tjetër.",
+        "rateLimitedWithTime": "Ju lutem prisni {seconds} sekonda para se të provoni përsëri.",
+        "uploadDisabledTitle": "Ngarkimet janë mbyllur",
+        "uploadDisabled": "Ngarkimi i fotove aktualisht nuk është i disponueshëm për këtë dasmë.",
+        "unavailableTitle": "Ngarkimi nuk është i disponueshëm",
+        "unavailable": "Ky link për ngarkimin e fotove të dasmës nuk është më i disponueshëm.",
+        "uploadFailedTitle": "Fotoja nuk mund të ngarkohej",
+        "storageFailed": "Nuk mundëm ta ruanim foton. Ju lutem provoni përsëri.",
+        "temporaryFailure": "Diçka shkoi keq gjatë ruajtjes së fotos. Ju lutem provoni përsëri pas pak."
       }
     },
     "findSeat": {
       "title": "Gjeni vendin tuaj",
       "weddingOf": "Dasma e {bride} & {groom}",
       "hint": "Kërkoni emrin tuaj dhe shihni vendin tuaj në hartë 🗺️",
+      "searchLabel": "Kërkimi i të ftuarve",
       "searchPlaceholder": "Kërkoni emrin tuaj...",
+      "searchHelper": "Shkruani të paktën dy shkronja të emrit ose mbiemrit.",
+      "clearSearch": "Pastro kërkimin",
+      "resultsLabel": "Të ftuarit",
+      "noResultsTitle": "I ftuari nuk u gjet",
       "table": "Tavolina {number}",
       "tableSeat": "Tavolina {number} · Vendi {seat}",
       "noTable": "Ende pa tavolinë",
       "viewSeat": "Shiko vendin",
       "noResults": "Nuk mundëm të gjenim \"{query}\" në listën tonë të të ftuarve.",
-      "keepTyping": "Vazhdoni të shkruani për të gjetur vendin tuaj..."
+      "keepTyping": "Vazhdoni të shkruani për të gjetur vendin tuaj...",
+      "madeWithWedora": "Krijuar me Wedora"
     }
   },
   "pricing": {
     "eyebrow": "Çmimet",
-    "title": "Zgjidhni planin që ju përshtatet",
-    "description": "Pagesë e vetme për dasmën tuaj — jo abonim mujor.",
-    "mostPopular": "Më i kërkuari",
+    "title": "Zgjidh paketën që të përshtatet",
+    "description": "Një pagesë e vetme për dasmën tuaj — pa abonim mujor.",
+    "mostPopular": "Më e pëlqyera",
     "perWedding": "për dasmë",
+    "included": "Çfarë përfshihet",
     "choosePlan": "Zgjidh {plan}",
+
     "plans": {
       "basic": {
-        "name": "Bazë",
-        "description": "Për dasma të vogla, vetëm gjetja e vendit"
+        "eyebrow": "Thelbësore",
+        "name": "Basic",
+        "description": "Për dasma më të vogla, vetëm për gjetjen e vendit"
       },
       "standard": {
+        "eyebrow": "E popullarizuar",
         "name": "Standard",
-        "description": "Kombinimi më i kërkuar — vend + foto"
+        "description": "Kombinimi ynë më i pëlqyer — ulëset + fotot"
       },
       "premium": {
+        "eyebrow": "Komplete",
         "name": "Premium",
-        "description": "Pa limite, për dasma të mëdha"
+        "description": "Pa kufizime, për dasma më të mëdha"
       }
     },
+
     "features": {
       "basic": {
-        "findSeat": "Gjej Vendin Tim",
-        "tableArrangement": "Sistemimi i tavolinave",
-        "photoUpload": "Ngarko Foto",
+        "findSeat": "Gjej vendin tim",
+        "tableArrangement": "Organizimi i tavolinave",
+        "photoUpload": "Ngarkimi i fotove",
         "guestLimit": "Deri në 150 të ftuar",
-        "storage": "Ruajtje 30 ditë pas dasmës"
+        "storage": "30 ditë ruajtje pas dasmës",
+        "publicGallery": "Galeri e shpërndashme (link publik)"
       },
       "standard": {
-        "findSeat": "Gjej Vendin Tim",
-        "tableArrangement": "Sistemimi i tavolinave",
-        "photoUpload": "Ngarko Foto — deri në 300 foto",
+        "findSeat": "Gjej vendin tim",
+        "tableArrangement": "Organizimi i tavolinave",
+        "photoUpload": "Ngarkimi i fotove — deri në 300 foto",
         "guestLimit": "Deri në 300 të ftuar",
-        "storage": "Ruajtje 90 ditë pas dasmës",
-        "publicGallery": "Galeri e ndashme (link publik)"
+        "storage": "90 ditë ruajtje pas dasmës",
+        "publicGallery": "Galeri e shpërndashme (link publik)"
       },
       "premium": {
-        "findSeat": "Gjej Vendin Tim",
-        "tableArrangement": "Sistemimi i tavolinave",
-        "photoUpload": "Ngarko Foto — pa limit",
-        "guestLimit": "Të ftuar pa limit",
-        "storage": "Ruajtje 1 vit pas dasmës",
-        "publicGallery": "Galeri e ndashme (link publik)"
+        "findSeat": "Gjej vendin tim",
+        "tableArrangement": "Organizimi i tavolinave",
+        "photoUpload": "Ngarkimi i fotove — pa kufizim",
+        "guestLimit": "Numër i pakufizuar të ftuarish",
+        "storage": "1 vit ruajtje pas dasmës",
+        "publicGallery": "Galeri e shpërndashme (link publik)"
       }
     },
+
     "customPlan": {
-      "text": "Nuk gjetët çfarë kërkuat?",
-      "contact": "Na kontaktoni",
-      "suffix": "për plan të personalizuar."
+      "text": "Nuk gjete atë që kërkon?",
+      "contact": "Na kontakto",
+      "suffix": "për një paketë të personalizuar."
     }
   },
   "landing": {
     "eyebrow": "Platformë për Menaxhim Dasmash",
+    "nav": {
+      "features": "Funksionet",
+      "howItWorks": "Si funksionon",
+      "pricing": "Çmimet",
+      "demo": "Shiko demonstrimin"
+    },
     "hero": {
+      "eyebrow": "Platformë për Menaxhimin e Dasmave",
+      "title": "Çdo i ftuar, në vendin e vet. Çdo moment, i ruajtur.",
       "description": "Një platformë e vetme ku çiftet organizojnë sistemimin e tavolinave, ndajnë foto me të ftuarit dhe krijojnë një përvojë digjitale për dasmën e tyre — pa letra, pa kaos.",
-      "demoButton": "Shiko Demonstrimin"
+      "primaryCta": "Shiko Demonstrimin",
+      "secondaryCta": "Shiko si funksionon",
+      "pointOne": "Pa instaluar aplikacion",
+      "pointTwo": "Konfigurohet brenda një pasditeje",
+      "pointThree": "Pagesë njëherëshe"
+    },
+    "preview": {
+      "event": "Ngjarja",
+      "guests": "Të ftuarit",
+      "tables": "Tavolinat",
+      "photos": "Fotot",
+      "seatingTitle": "Plani i uljes",
+      "seatingDescription": "Tërhiq dhe lësho për të rregulluar tavolinat",
+      "findSeat": "Gjej vendin tënd",
+      "yourTable": "Tavolina jote"
+    },
+    "value": {
+      "title": "Pa tabela Excel. Pa plane uljeje të printuara.",
+      "description": "Gjithçka që i duhet çiftit dhe të ftuarve gjendet në një faqe — e përditësuar në kohë reale deri në ditën e dasmës."
     },
     "features": {
-      "guests": {
-        "title": "Sistemimi i të Ftuarve",
-        "description": "Organizo tavolinat me drag-and-drop, cakto të ftuarit dhe eksporto planin e tavolinave si foto ose PDF."
-      },
-      "seat": {
-        "title": "Gjej Vendin Tim",
-        "description": "Të ftuarit kërkojnë emrin dhe shohin menjëherë tavolinën dhe hartën e sallës."
-      },
-      "photos": {
-        "title": "Galeri Fotosh",
-        "description": "Të ftuarit ngarkojnë foto direkt nga telefoni, ndërsa çifti i menaxhon dhe i shpërndan."
-      },
-      "theme": {
-        "title": "Temë e Personalizuar",
-        "description": "Çdo dasmë merr ngjyrat, emrat dhe URL-në e vet publike."
+      "eyebrow": "Funksionet",
+      "title": "Gjithçka që i duhet ditës suaj të dasmës",
+      "description": "Katër mjete që zëvendësojnë tabelat, planet e printuara dhe bisedat në grup që çiftet zakonisht menaxhojnë para ditës së madhe.",
+      "items": {
+        "guests": {
+          "title": "Sistemimi i të Ftuarve",
+          "description": "Organizoni tavolinat me drag-and-drop, caktoni të ftuarit dhe eksportoni planin e uljes si imazh ose PDF."
+        },
+        "seat": {
+          "title": "Gjej Vendin Tim",
+          "description": "Të ftuarit kërkojnë emrin dhe shohin menjëherë tavolinën dhe hartën e sallës."
+        },
+        "photos": {
+          "title": "Galeria e Fotove",
+          "description": "Të ftuarit ngarkojnë foto direkt nga telefoni, ndërsa çifti i menaxhon dhe i shpërndan."
+        },
+        "theme": {
+          "title": "Temë e Personalizuar",
+          "description": "Çdo dasmë merr ngjyrat, emrat dhe URL-në e vet publike."
+        }
       }
+    },
+    "howItWorks": {
+      "eyebrow": "Si funksionon",
+      "title": "Nga lista e të ftuarve te dita e dasmës në tre hapa",
+      "description": "Pa shtojca dhe pa tabela për t'u dërguar me email. Konfiguroni gjithçka një herë dhe pastaj ndani një link të vetëm me të ftuarit.",
+      "steps": {
+        "create": {
+          "title": "Krijoni dasmën tuaj",
+          "description": "Shtoni emrat, datën dhe sallën, pastaj zgjidhni një temë. Dashboard-i privat dhe faqja publike janë gati brenda pak minutash."
+        },
+        "organise": {
+          "title": "Organizoni sistemimin",
+          "description": "Shtoni të ftuarit dhe tavolinat, pastaj përdorni drag-and-drop për të rregulluar sallën. Ndryshimet ruhen menjëherë dhe sinkronizohen me faqen e të ftuarve."
+        },
+        "share": {
+          "title": "Ndajeni me të ftuarit",
+          "description": "Dërgoni një link. Të ftuarit gjejnë vendin, ngarkojnë foto dhe lënë mesazhe — të gjitha nga telefoni."
+        }
+      },
+      "cta": "Filloni planifikimin e dasmës"
+    },
+    "faq": {
+      "eyebrow": "Pyetje të shpeshta",
+      "title": "Pyetjet më të shpeshta",
+      "description": "Gjithçka që duhet të dini para se të konfiguroni dasmën tuaj.",
+      "items": {
+        "one": {
+          "question": "A duhet të instalojnë të ftuarit një aplikacion?",
+          "answer": "Jo. Të ftuarit thjesht hapin linkun që ndani — në çdo telefon, tablet ose kompjuter, pa shkarkim dhe pa krijuar llogari."
+        },
+        "two": {
+          "question": "A mund ta ndryshoj sistemimin pasi ta kem shpërndarë linkun?",
+          "answer": "Po. Çdo ndryshim që bëni te tavolinat ose të ftuarit përditësohet menjëherë, kështu që të ftuarit shohin gjithmonë planin aktual."
+        },
+        "three": {
+          "question": "Sa gjatë mbetet e disponueshme faqja e dasmës pas eventit?",
+          "answer": "Varet nga plani juaj — nga 30 ditë deri në një vit të plotë ruajtjeje pas dasmës, që të vazhdoni të mblidhni dhe shkarkoni foto."
+        },
+        "four": {
+          "question": "A mund të përdor ngjyrat dhe emrat e mi?",
+          "answer": "Po. Çdo dasmë ka ngjyrën e vet të temës, emrat e çiftit dhe një URL publike, që faqja të përputhet me stilin e dasmës."
+        }
+      }
+    },
+    "finalCta": {
+      "title": "Gati për të planifikuar ditën e dasmës?",
+      "description": "Konfiguroni sistemimin, galerinë dhe faqen e të ftuarve brenda një pasditeje — pa abonim mujor.",
+      "button": "Shiko Demonstrimin"
     },
     "contact": {
       "eyebrow": "Kontakt",
@@ -465,7 +825,31 @@
     "photoAlt": "Foto {number}",
     "openPhoto": "Hap foton {number}",
     "goToPhoto": "Shko te fotoja {number}",
-    "photoCounter": "{current} / {total}"
+    "photoCounter": "{current} / {total}",
+    "empty": {
+      "eyebrow": "Galeria e shpërndarë",
+      "title": "Ende nuk ka foto të disponueshme",
+      "description": "Fotot do të shfaqen këtu sapo të jenë gati për t'u shpërndarë."
+    },
+    "imageUnavailable": {
+      "short": "Fotoja nuk është e disponueshme",
+      "title": "Kjo foto nuk mund të ngarkohej",
+      "description": "Imazhi përkohësisht nuk është i disponueshëm. Pjesa tjetër e galerisë vazhdon të jetë e disponueshme."
+    },
+    "unavailable": {
+      "invalid": {
+        "eyebrow": "Galeria nuk është e disponueshme",
+        "title": "Ky link i galerisë nuk është më i disponueshëm.",
+        "description": "Linku mund të jetë hequr ose të mos jetë më i vlefshëm."
+      },
+      "expired": {
+        "eyebrow": "Linku ka skaduar",
+        "title": "Ky link i galerisë ka skaduar.",
+        "description": "Kjo galeri e shpërndarë ishte e disponueshme për një kohë të kufizuar dhe nuk mund të hapet më."
+      },
+      "contact": "Ju lutem kontaktoni personin që e ndau këtë galeri me ju nëse dëshironi një link të ri.",
+      "home": "Kthehu te Wedora"
+    }
   },
   "couple": {
     "seating": {
@@ -476,6 +860,76 @@
       "guests": "Të ftuarit ({count})",
       "table": "Tavolina {number}",
       "noTable": "Pa tavolinë"
+    }
+  },
+  "notFound": {
+    "eyebrow": "Faqja nuk u gjet",
+    "title": "Duket se kjo faqe ka humbur rrugën.",
+    "description": "Faqja që po kërkoni nuk ekziston, është zhvendosur ose nuk është më e disponueshme.",
+    "home": "Kthehu te Wedora",
+    "back": "Kthehu në ballinë",
+    "admin": {
+      "eyebrow": "Faqja nuk u gjet",
+      "title": "Nuk mundëm ta gjenim këtë faqe të administratorit.",
+      "description": "Faqja mund të jetë zhvendosur, fshirë ose linku mund të mos jetë më i vlefshëm.",
+      "dashboard": "Dashboard",
+      "weddings": "Dasmat",
+      "back": "Kthehu te dashboard-i"
+    }
+  },
+  "errors": {
+    "public": {
+      "eyebrow": "Diçka shkoi keq",
+      "title": "Nuk mundëm ta ngarkonim këtë faqe.",
+      "description": "Ndodhi diçka e papritur gjatë ngarkimit të kësaj faqeje. Provoni përsëri ose kthehuni te Wedora.",
+      "retry": "Provo përsëri",
+      "home": "Kthehu te Wedora",
+      "reference": "Referenca e gabimit"
+    }
+  },
+  "adminSettings": {
+    "eyebrow": "Admin",
+    "title": "Cilësimet",
+    "description": "Menaxhoni llogarinë tuaj të administratorit Wedora dhe preferencat e ndërfaqes.",
+    "account": {
+      "title": "Llogaria",
+      "description": "Informacione për llogarinë që është aktualisht e kyçur.",
+      "email": "Adresa e email-it",
+      "role": "Roli",
+      "admin": "Administrator"
+    },
+    "appearance": {
+      "title": "Pamja",
+      "description": "Zgjidhni si të shfaqet ndërfaqja e administratorit Wedora.",
+      "theme": "Tema e ndërfaqes",
+      "themeDescription": "Kaloni mes pamjes së ndriçuar dhe asaj të errët."
+    },
+    "security": {
+      "title": "Siguria",
+      "description": "Sesioni juaj i administratorit mbrohet nga llogaria juaj e autentifikimit Wedora."
+    },
+    "session": {
+      "title": "Sesioni aktual",
+      "description": "Dilni nga ky shfletues kur të keni përfunduar.",
+      "logout": "Shkyçu"
+    }
+  },
+  "adminNav": {
+    "navigation": "Navigimi i administratorit",
+    "dashboard": "Dashboard",
+    "weddings": "Dasmat",
+    "settings": "Cilësimet",
+    "openMenu": "Hap navigimin",
+    "closeMenu": "Mbyll navigimin",
+    "signedInAs": "I kyçur si"
+  },
+  "unauthorized": {
+    "admin": {
+      "eyebrow": "Qasje e kufizuar",
+      "title": "Nuk keni qasje si administrator.",
+      "description": "Kjo llogari është e kyçur, por nuk ka leje për të hyrë në zonën e administrimit të Wedora.",
+      "login": "Përdor një llogari tjetër",
+      "home": "Kthehu te Wedora"
     }
   }
 }

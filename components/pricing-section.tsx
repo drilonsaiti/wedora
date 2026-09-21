@@ -196,7 +196,8 @@ export async function PricingSection() {
                     className="font-medium text-foreground underline-offset-4 hover:underline"
                 >
                     {t('customPlan.contact')}
-                </a>
+                </a>{' '}
+                {t('customPlan.suffix')}
             </p>
         </div>
     )

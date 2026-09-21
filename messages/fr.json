@@ -14,7 +14,13 @@
     "search": "Rechercher...",
     "noData": "Aucune donnée disponible",
     "noResults": "Aucun résultat trouvé",
-    "switchLanguage": "Changer de langue"
+    "switchLanguage": "Changer de langue",
+    "saving": "Enregistrement...",
+    "logout": "Déconnexion",
+    "optional": "facultatif",
+    "close": "Fermer",
+    "switchToLightMode": "Passer au mode clair",
+    "switchToDarkMode": "Passer au mode sombre"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -67,10 +73,19 @@
       "backToLogin": "Retour à la connexion",
       "checkYourEmail": "Consultez votre boîte e-mail",
       "resetLinkSent": "Nous avons envoyé un lien de réinitialisation du mot de passe à votre adresse e-mail.",
-      "unexpectedError": "Une erreur inattendue est survenue"
+      "unexpectedError": "Une erreur inattendue est survenue",
+      "eyebrow": "Mot de passe oublié ?",
+      "sendLink": "Envoyer le lien",
+      "emailSent": "E-mail envoyé"
     },
     "passwordPlaceholder": "••••••••",
-    "invalidEmail": "Veuillez saisir une adresse e-mail valide."
+    "invalidEmail": "Veuillez saisir une adresse e-mail valide.",
+    "adminLoginDescription": "Connectez-vous pour gérer les mariages, les invités, le plan de table et les photos partagées.",
+    "newPasswordDescription": "Choisissez un nouveau mot de passe sécurisé pour votre compte Wedora.",
+    "passwordChangedEyebrow": "Mot de passe mis à jour",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "loginEyebrow": "Connexion"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -173,63 +188,66 @@
       "favouritesOnly": "Favoris uniquement",
       "deleteGalleryLinkConfirm": "Supprimer ce lien de galerie ? Il cessera immédiatement de fonctionner.",
       "failedToCreateLink": "Impossible de créer le lien",
-      "failedToGenerateZip": "Impossible de générer le fichier ZIP. Veuillez réessayer."
+      "failedToGenerateZip": "Impossible de générer le fichier ZIP. Veuillez réessayer.",
+      "title": "Photos",
+      "description": "Vérifiez, organisez et partagez les photos importées pour ce mariage.",
+      "backToWedding": "Retour au mariage",
+      "galleryLinksLoadFailed": "Impossible de charger les liens de galerie.",
+      "retry": "Réessayer",
+      "copyingLink": "Copie…",
+      "confirmations": {
+        "deletePhoto": {
+          "title": "Supprimer la photo ?",
+          "description": "Cette photo sera définitivement supprimée et ne pourra pas être récupérée.",
+          "confirm": "Supprimer la photo"
+        },
+        "deleteGalleryLink": {
+          "title": "Supprimer le lien de galerie ?",
+          "description": "Ce lien de galerie partagée cessera immédiatement de fonctionner.",
+          "confirm": "Supprimer le lien"
+        }
+      },
+      "notifications": {
+        "photoDeleted": "Photo supprimée",
+        "galleryLinkDeleted": "Lien de galerie supprimé",
+        "photoApproved": "Photo approuvée",
+        "photoUnapproved": "Photo remise en attente",
+        "photoHidden": "Photo masquée",
+        "photoShown": "Photo de nouveau visible",
+        "photoFavourited": "Photo ajoutée aux favoris",
+        "photoUnfavourited": "Photo retirée des favoris",
+        "photoUpdateFailed": "La photo n'a pas pu être mise à jour. Vos modifications ont été annulées.",
+        "photoDeleteFailed": "La photo n'a pas pu être supprimée. Aucune modification n'a été effectuée.",
+        "galleryLinkCreated": "Lien de galerie créé",
+        "galleryLinkCopied": "Lien de galerie copié",
+        "galleryLinkCopyFailed": "Impossible de copier le lien de galerie. Veuillez réessayer.",
+        "galleryLinkDeleteFailed": "Impossible de supprimer le lien de galerie. Aucune modification n'a été effectuée.",
+        "photoDownloaded": "Téléchargement de la photo lancé",
+        "photoDownloadFailed": "Impossible de télécharger la photo. Veuillez réessayer.",
+        "zipDownloaded": "Téléchargement de l'archive photo lancé",
+        "zipDownloadFailed": "Impossible de préparer l'archive photo. Veuillez réessayer.",
+        "zipQueued": "Grand album mis en file d'attente. Nous préparerons {count} photos en arrière-plan.",
+        "zipReady": "Votre archive photo est prête. Le téléchargement a commencé.",
+        "zipExportFailed": "Impossible de générer l'archive photo. Veuillez réessayer.",
+        "zipExportTimedOut": "L'archive est toujours en cours de préparation. Réessayez le téléchargement dans un instant."
+      }
     },
-    "seating": {
-      "loadingDesigner": "Chargement du créateur de plan de table...",
-      "confirmDeleteGuest": "Voulez-vous vraiment supprimer cet invité ?",
-      "deleteGuestFailed": "Impossible de supprimer l'invité",
-      "confirmDeleteTable": "Voulez-vous vraiment supprimer cette table ? Tous les invités assignés ne seront plus placés.",
-      "deleteTableFailed": "Impossible de supprimer la table",
-      "title": "Plan de table des invités",
-      "print": "Imprimer la liste",
-      "guests": "Invités",
-      "tables": "Tables",
-      "designer": "Éditeur",
-      "searchGuests": "Rechercher des invités...",
-      "addGuest": "Ajouter un invité",
-      "addTable": "Ajouter une table",
-      "seated": "Placés",
-      "unseated": "Non placés",
-      "total": "Total",
-      "noGuests": "Aucun invité trouvé",
-      "noTables": "Aucune table créée pour le moment",
-      "tableNumber": "Table {number}",
-      "seats": "Places",
-      "edit": "Modifier",
-      "delete": "Supprimer",
-      "printTitle": "Liste des invités par table",
-      "table": "Table",
-      "noTablesCreated": "Aucune table créée pour le moment.",
-      "editGuest": "Modifier l'invité",
-      "addNewGuest": "Ajouter un nouvel invité",
-      "editTable": "Modifier la table",
-      "addNewTable": "Ajouter une nouvelle table",
-      "occupied": "Occupée",
-      "firstName": "Prénom",
-      "firstNamePlaceholder": "ex. Jean",
-      "lastName": "Nom",
-      "lastNamePlaceholder": "ex. Dupont",
-      "assignTableOptional": "Attribuer une table (facultatif)",
-      "tableOption": "Table {number} ({seats} places)",
-      "updateGuest": "Mettre à jour l'invité",
-      "tableShape": "Forme de la table",
-      "shapeRound": "Ronde",
-      "shapeSquare": "Carrée",
-      "shapeRectangle": "Rectangulaire",
-      "tableNumberLabel": "Numéro de table",
-      "tableNumberPlaceholder": "ex. 1",
-      "seatsPlaceholder": "ex. 8",
-      "seatDistribution": "Répartition des places par côté",
-      "top": "Haut",
-      "bottom": "Bas",
-      "left": "Gauche",
-      "right": "Droite",
-      "assignedSeats": "{assigned} / {total} places attribuées",
-      "tableLabelOptional": "Libellé (facultatif)",
-      "tableLabelPlaceholder": "ex. Famille Dupont",
-      "updateTable": "Mettre à jour la table"
-    }
+    "overviewDescription": "Gérez les mariages, les invités, le plan de table et les photos partagées depuis un seul endroit.",
+    "createWeddingDescription": "Configurez un nouveau mariage, l'accès du couple et les fonctionnalités pour les invités.",
+    "viewAll": "Tout voir",
+    "pendingPhotos": "Photos en attente",
+    "pendingPhotosDescription": "De nouvelles photos d'invités attendent votre validation.",
+    "reviewPhotos": "Vérifier les photos",
+    "weddings": "Mariages",
+    "seating": "Plan de table",
+    "management": "Gestion",
+    "quickActions": "Actions rapides",
+    "manageWeddings": "Gérer les mariages",
+    "manageWeddingsDescription": "Consultez, modifiez et gérez tous les mariages.",
+    "atAGlance": "En un coup d'œil",
+    "findSeat": "Trouver une place",
+    "photoUpload": "Importation de photos",
+    "photosLabel": "Photos"
   },
   "weddings": {
     "title": "Mariages",
@@ -244,7 +262,65 @@
     "brideName": "Nom de la mariée",
     "date": "Date du mariage",
     "location": "Lieu",
-    "emri": "Nom"
+    "emri": "Nom",
+    "backToDashboard": "Retour au tableau de bord",
+    "groomEmail": "E-mail du marié",
+    "brideEmail": "E-mail de la mariée",
+    "settings": "Paramètres",
+    "openWedding": "Ouvrir le mariage",
+    "status": "Statut",
+    "searchPlaceholder": "Rechercher des mariages...",
+    "clearSearch": "Effacer la recherche",
+    "noWeddingFound": "Aucun mariage trouvé pour « {query} »",
+    "weddingCount": "{count, plural, =1 {# mariage} other {# mariages}}",
+    "moreActions": "Plus d'actions",
+    "manageSeating": "Gérer le plan de table",
+    "managePhotos": "Gérer les photos",
+    "settingsPage": {
+      "eyebrow": "Paramètres du mariage",
+      "title": "Paramètres",
+      "description": "Gérez les détails du mariage, l'accès du couple, le thème et les fonctionnalités actives pour les invités.",
+      "backToWedding": "Retour au mariage",
+      "coupleDetails": "Détails du couple",
+      "accounts": "Comptes du couple",
+      "weddingDetails": "Détails du mariage",
+      "groomEmail": "E-mail du marié",
+      "brideEmail": "E-mail de la mariée",
+      "emailNotice": "Modifier une adresse e-mail ici ne change pas l'adresse e-mail d'un compte de connexion existant.",
+      "publicUrl": "URL publique",
+      "theme": "Thème du mariage",
+      "preview": "Aperçu",
+      "themePreviewDescription": "Aperçu de la couleur de mariage sélectionnée.",
+      "features": "Fonctionnalités pour les invités",
+      "findSeat": "Trouver sa place",
+      "findSeatDescription": "Permettre aux invités de rechercher la table qui leur est attribuée.",
+      "photoUpload": "Importation de photos",
+      "photoUploadDescription": "Permettre aux invités d'importer des photos du mariage.",
+      "autoApproveUploads": "Ignorer la modération des photos",
+      "autoApproveUploadsDescription": "Les photos des invités apparaissent immédiatement dans la galerie, sans validation préalable par un administrateur. Désactivé par défaut. Chaque photo est mise en attente pour vérification jusqu’à ce que vous activiez cette option.",
+      "newCredentials": "Nouveaux identifiants de connexion",
+      "newCredentialsDescription": "De nouveaux comptes du couple ont été créés ou réinitialisés. Enregistrez ces mots de passe maintenant, car ils ne seront plus affichés.",
+      "failedAccounts": "Échec de la création ou de la réinitialisation du compte pour : {emails}",
+      "saving": "Enregistrement...",
+      "saved": "Enregistré",
+      "saveChanges": "Enregistrer les modifications",
+      "saveFailed": "Les paramètres du mariage n'ont pas pu être enregistrés.",
+      "copyPassword": "Copier le mot de passe",
+      "customColor": "Ou choisissez une couleur personnalisée",
+      "colorPresets": {
+        "rose": "Rose",
+        "ocean": "Océan",
+        "sage": "Sauge",
+        "violet": "Violet",
+        "terracotta": "Terracotta",
+        "burgundy": "Bordeaux"
+      },
+      "notifications": {
+        "created": "Mariage créé",
+        "updated": "Mariage mis à jour",
+        "deleted": "Mariage supprimé"
+      }
+    }
   },
   "status": {
     "upcoming": "À venir",
@@ -293,7 +369,10 @@
         "takePhoto": "Prendre une photo",
         "gallery": "Importer depuis la galerie",
         "message": "Ajouter un message"
-      }
+      },
+      "findSeatEyebrow": "Plan de table",
+      "findSeatTitle": "Trouvez votre place",
+      "photoTitle": "Partagez vos moments"
     },
     "demo": {
       "banner": "Démo du portfolio — Données d'exemple"
@@ -301,7 +380,8 @@
     "nav": {
       "home": "Accueil",
       "findSeat": "Trouver ma place",
-      "upload": "Importer"
+      "upload": "Importer",
+      "navigation": "Navigation du mariage"
     },
     "searchPlaceholder": "Trouvez votre place avec votre nom",
     "tableNumber": "Table {number}",
@@ -349,6 +429,28 @@
         "description": "Votre souvenir a bien été reçu. Sara & Drilon le garderont précieusement.",
         "uploadAnother": "Partager une autre photo",
         "backHome": "Retour à l'accueil"
+      },
+      "removePhoto": "Supprimer la photo",
+      "flipPhoto": "Retourner la photo",
+      "errors": {
+        "invalidFileTitle": "Photo non prise en charge",
+        "invalidFile": "Choisissez une image JPEG, PNG, WebP ou HEIC.",
+        "fileTooLargeTitle": "La photo est trop volumineuse",
+        "fileTooLarge": "Choisissez une image de moins de 10 Mo.",
+        "guestLimitTitle": "Limite d'importation atteinte",
+        "guestLimit": "Vous avez atteint le nombre maximal de photos autorisées depuis cet appareil.",
+        "weddingLimitTitle": "Limite de la galerie atteinte",
+        "weddingLimit": "Ce mariage a atteint sa limite d'importation de photos.",
+        "rateLimitedTitle": "Trop d'importations",
+        "rateLimited": "Veuillez patienter un instant avant d'importer une autre photo.",
+        "rateLimitedWithTime": "Veuillez patienter {seconds} secondes avant de réessayer.",
+        "uploadDisabledTitle": "Les importations sont fermées",
+        "uploadDisabled": "Les importations de photos ne sont actuellement pas disponibles pour ce mariage.",
+        "unavailableTitle": "Importation indisponible",
+        "unavailable": "Ce lien d'importation du mariage n'est plus disponible.",
+        "uploadFailedTitle": "La photo n'a pas pu être importée",
+        "storageFailed": "Nous n'avons pas pu enregistrer la photo. Veuillez réessayer.",
+        "temporaryFailure": "Une erreur est survenue lors de l'enregistrement de votre photo. Veuillez réessayer dans quelques instants."
       }
     },
     "findSeat": {
@@ -361,90 +463,189 @@
       "noTable": "Pas encore attribué à une table",
       "viewSeat": "Voir la place",
       "noResults": "Nous n'avons pas trouvé « {query} » dans notre liste d'invités.",
-      "keepTyping": "Continuez à saisir votre nom pour trouver votre place..."
-    }
+      "keepTyping": "Continuez à saisir votre nom pour trouver votre place...",
+      "searchLabel": "Recherche d'invité",
+      "searchHelper": "Saisissez au moins deux lettres de votre prénom ou nom.",
+      "clearSearch": "Effacer la recherche",
+      "resultsLabel": "Invités",
+      "noResultsTitle": "Invité introuvable",
+      "madeWithWedora": "Créé avec Wedora"
+    },
+    "clearSearch": "Effacer la recherche",
+    "noResultsFor": "Nous n'avons pas trouvé « {query} » dans la liste des invités.",
+    "yourSeat": "Votre place",
+    "seat": "Place",
+    "venueMapDescription": "Suivez l'itinéraire mis en évidence depuis l'entrée jusqu'à votre table.",
+    "mapInteractionHint": "Faites glisser ou faites défiler le plan pour explorer le lieu."
   },
   "pricing": {
     "eyebrow": "Tarifs",
-    "title": "Choisissez l'offre qui vous convient",
-    "description": "Un paiement unique pour votre mariage — aucun abonnement mensuel.",
+    "title": "Choisissez la formule qui vous convient",
+    "description": "Un paiement unique pour votre mariage — sans abonnement mensuel.",
     "mostPopular": "Le plus populaire",
     "perWedding": "par mariage",
+    "included": "Ce qui est inclus",
     "choosePlan": "Choisir {plan}",
+
     "plans": {
       "basic": {
+        "eyebrow": "Essentiel",
         "name": "Basic",
-        "description": "Pour les petits mariages, recherche de place uniquement"
+        "description": "Pour les petits mariages, uniquement pour trouver sa place"
       },
       "standard": {
+        "eyebrow": "Populaire",
         "name": "Standard",
         "description": "Notre combinaison la plus populaire — plan de table + photos"
       },
       "premium": {
+        "eyebrow": "Complet",
         "name": "Premium",
-        "description": "Aucune limite, pour les mariages plus importants"
+        "description": "Sans limites, pour les mariages plus importants"
       }
     },
+
     "features": {
       "basic": {
         "findSeat": "Trouver ma place",
-        "tableArrangement": "Organisation des tables",
-        "photoUpload": "Importation de photos",
+        "tableArrangement": "Plan de table",
+        "photoUpload": "Téléchargement de photos",
         "guestLimit": "Jusqu'à 150 invités",
-        "storage": "30 jours de stockage après le mariage"
+        "storage": "30 jours de stockage après le mariage",
+        "publicGallery": "Galerie partageable (lien public)"
       },
       "standard": {
         "findSeat": "Trouver ma place",
-        "tableArrangement": "Organisation des tables",
-        "photoUpload": "Importation de photos — jusqu'à 300 photos",
+        "tableArrangement": "Plan de table",
+        "photoUpload": "Téléchargement de photos — jusqu'à 300 photos",
         "guestLimit": "Jusqu'à 300 invités",
         "storage": "90 jours de stockage après le mariage",
         "publicGallery": "Galerie partageable (lien public)"
       },
       "premium": {
         "findSeat": "Trouver ma place",
-        "tableArrangement": "Organisation des tables",
-        "photoUpload": "Importation de photos — illimitée",
+        "tableArrangement": "Plan de table",
+        "photoUpload": "Téléchargement de photos — illimité",
         "guestLimit": "Nombre d'invités illimité",
         "storage": "1 an de stockage après le mariage",
         "publicGallery": "Galerie partageable (lien public)"
       }
     },
+
     "customPlan": {
-      "text": "Vous n'avez pas trouvé ce que vous recherchez ?",
+      "text": "Vous n'avez pas trouvé ce que vous cherchez ?",
       "contact": "Contactez-nous",
-      "suffix": "pour une offre personnalisée."
+      "suffix": "pour une formule personnalisée."
     }
   },
   "landing": {
     "eyebrow": "Plateforme de gestion de mariage",
     "hero": {
       "description": "Une plateforme unique où les couples organisent leur plan de table, partagent des photos avec leurs invités et créent une expérience de mariage numérique — sans paperasse, sans chaos.",
-      "demoButton": "Voir la démo"
+      "eyebrow": "Plateforme de gestion de mariage",
+      "title": "Chaque invité à sa place. Chaque moment préservé.",
+      "primaryCta": "Voir la démo",
+      "secondaryCta": "Voir comment ça marche",
+      "pointOne": "Aucune application à installer",
+      "pointTwo": "Configuration en un après-midi",
+      "pointThree": "Paiement unique"
     },
     "features": {
-      "guests": {
-        "title": "Plan de table des invités",
-        "description": "Organisez les tables par glisser-déposer, attribuez les invités et exportez votre plan de table sous forme d'image ou de PDF."
-      },
-      "seat": {
-        "title": "Trouver ma place",
-        "description": "Les invités recherchent leur nom et voient instantanément leur table ainsi que le plan du lieu."
-      },
-      "photos": {
-        "title": "Galerie photo",
-        "description": "Les invités téléchargent des photos directement depuis leur téléphone pendant que le couple les gère et les partage."
-      },
-      "theme": {
-        "title": "Thème personnalisé",
-        "description": "Chaque mariage dispose de ses propres couleurs, noms et URL publique."
+      "eyebrow": "Fonctionnalités",
+      "title": "Tout ce qu'il faut pour le jour de votre mariage",
+      "description": "Quatre outils qui remplacent les feuilles de calcul, les plans imprimés et les discussions de groupe que les couples doivent habituellement gérer avant le grand jour.",
+      "items": {
+        "guests": {
+          "title": "Plan de table des invités",
+          "description": "Organisez les tables par glisser-déposer, attribuez les invités et exportez votre plan de table en image ou en PDF."
+        },
+        "seat": {
+          "title": "Trouver ma place",
+          "description": "Les invités recherchent leur nom et voient instantanément leur table ainsi que le plan du lieu."
+        },
+        "photos": {
+          "title": "Galerie photo",
+          "description": "Les invités importent des photos directement depuis leur téléphone pendant que le couple les gère et les partage."
+        },
+        "theme": {
+          "title": "Thème personnalisé",
+          "description": "Chaque mariage dispose de ses propres couleurs, noms et URL publique."
+        }
       }
     },
     "contact": {
       "eyebrow": "Contact",
       "title": "Parlons de votre mariage"
     },
-    "footer": "Créé par Drilon Saiti"
+    "footer": "Créé par Drilon Saiti",
+    "nav": {
+      "features": "Fonctionnalités",
+      "howItWorks": "Comment ça marche",
+      "pricing": "Tarifs",
+      "demo": "Voir la démo"
+    },
+    "preview": {
+      "event": "Événement",
+      "guests": "Invités",
+      "tables": "Tables",
+      "photos": "Photos",
+      "seatingTitle": "Plan de table",
+      "seatingDescription": "Glissez-déposez pour organiser les tables",
+      "findSeat": "Trouvez votre place",
+      "yourTable": "Votre table"
+    },
+    "value": {
+      "title": "Pas de feuilles de calcul. Pas de plans de table imprimés.",
+      "description": "Tout ce dont le couple et ses invités ont besoin se trouve sur une seule page — mise à jour en temps réel jusqu'au jour du mariage."
+    },
+    "howItWorks": {
+      "eyebrow": "Comment ça marche",
+      "title": "De la liste des invités au jour du mariage en trois étapes",
+      "description": "Aucun plugin, aucune feuille de calcul à envoyer par e-mail. Configurez tout une seule fois, puis partagez un lien unique avec vos invités.",
+      "steps": {
+        "create": {
+          "title": "Créez votre mariage",
+          "description": "Ajoutez vos noms, la date et le lieu, puis choisissez un thème. Votre tableau de bord privé et votre page publique sont prêts en quelques minutes."
+        },
+        "organise": {
+          "title": "Organisez votre plan de table",
+          "description": "Ajoutez les invités et les tables, puis organisez la salle par glisser-déposer. Les modifications sont enregistrées instantanément et synchronisées avec la page des invités."
+        },
+        "share": {
+          "title": "Partagez avec vos invités",
+          "description": "Envoyez un seul lien. Les invités trouvent leur place, importent des photos et laissent des messages — directement depuis leur téléphone."
+        }
+      },
+      "cta": "Commencez à organiser votre mariage"
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Questions fréquentes",
+      "description": "Tout ce que vous devez savoir avant de configurer votre mariage.",
+      "items": {
+        "one": {
+          "question": "Mes invités doivent-ils installer une application ?",
+          "answer": "Non. Les invités ouvrent simplement le lien que vous partagez — sur n'importe quel téléphone, tablette ou ordinateur, sans téléchargement ni compte."
+        },
+        "two": {
+          "question": "Puis-je modifier le plan de table après avoir partagé le lien ?",
+          "answer": "Oui. Toute modification apportée aux tables ou aux invités est mise à jour instantanément, afin que les invités voient toujours le plan de table actuel."
+        },
+        "three": {
+          "question": "Combien de temps ma page de mariage reste-t-elle disponible après l'événement ?",
+          "answer": "Cela dépend de votre offre — de 30 jours jusqu'à une année complète de stockage après le mariage, afin que vous puissiez continuer à collecter et télécharger les photos."
+        },
+        "four": {
+          "question": "Puis-je utiliser mes propres couleurs et noms ?",
+          "answer": "Oui. Chaque mariage dispose de sa propre couleur de thème, des noms du couple et d'une URL publique, afin que la page corresponde au style de votre mariage."
+        }
+      }
+    },
+    "finalCta": {
+      "title": "Prêt à organiser le jour de votre mariage ?",
+      "description": "Configurez votre plan de table, votre galerie et votre page invités en un après-midi — sans abonnement mensuel.",
+      "button": "Voir la démo"
+    }
   },
   "gallery": {
     "title": "Notre galerie de mariage",
@@ -464,7 +665,31 @@
     "photoAlt": "Photo {number}",
     "openPhoto": "Ouvrir la photo {number}",
     "goToPhoto": "Aller à la photo {number}",
-    "photoCounter": "{current} / {total}"
+    "photoCounter": "{current} / {total}",
+    "empty": {
+      "eyebrow": "Galerie partagée",
+      "title": "Aucune photo disponible pour le moment",
+      "description": "Les photos apparaîtront ici dès qu'elles seront prêtes à être partagées."
+    },
+    "imageUnavailable": {
+      "short": "Photo indisponible",
+      "title": "Cette photo n'a pas pu être chargée",
+      "description": "L'image est temporairement indisponible. Le reste de la galerie reste accessible."
+    },
+    "unavailable": {
+      "invalid": {
+        "eyebrow": "Galerie indisponible",
+        "title": "Ce lien de galerie n'est plus disponible.",
+        "description": "Le lien a peut-être été supprimé ou n'est plus valide."
+      },
+      "expired": {
+        "eyebrow": "Lien expiré",
+        "title": "Ce lien de galerie a expiré.",
+        "description": "Cette galerie partagée était disponible pour une durée limitée et ne peut plus être ouverte."
+      },
+      "contact": "Veuillez contacter la personne qui vous a partagé cette galerie si vous souhaitez obtenir un nouveau lien.",
+      "home": "Retour à Wedora"
+    }
   },
   "couple": {
     "seating": {
@@ -475,6 +700,236 @@
       "guests": "Invités ({count})",
       "table": "Table {number}",
       "noTable": "Aucune table"
+    }
+  },
+  "seating": {
+    "loadingDesigner": "Chargement du créateur de plan de table...",
+    "confirmDeleteGuest": "Voulez-vous vraiment supprimer cet invité ?",
+    "deleteGuestFailed": "Impossible de supprimer l'invité",
+    "confirmDeleteTable": "Voulez-vous vraiment supprimer cette table ? Tous les invités assignés ne seront plus placés.",
+    "deleteTableFailed": "Impossible de supprimer la table",
+    "title": "Plan de table des invités",
+    "print": "Imprimer la liste",
+    "guests": "Invités",
+    "tables": "Tables",
+    "searchGuests": "Rechercher des invités...",
+    "addGuest": "Ajouter un invité",
+    "addTable": "Ajouter une table",
+    "seated": "Placés",
+    "unseated": "Non placés",
+    "total": "Total",
+    "noGuests": "Aucun invité trouvé",
+    "noTables": "Aucune table créée pour le moment",
+    "tableNumber": "Table {number}",
+    "seats": "Places",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "printTitle": "Liste des invités par table",
+    "table": "Table",
+    "noTablesCreated": "Aucune table créée pour le moment.",
+    "editGuest": "Modifier l'invité",
+    "addNewGuest": "Ajouter un nouvel invité",
+    "editTable": "Modifier la table",
+    "addNewTable": "Ajouter une nouvelle table",
+    "occupied": "Occupée",
+    "firstName": "Prénom",
+    "firstNamePlaceholder": "ex. Jean",
+    "lastName": "Nom",
+    "lastNamePlaceholder": "ex. Dupont",
+    "assignTableOptional": "Attribuer une table (facultatif)",
+    "tableOption": "Table {number} ({seats} places)",
+    "updateGuest": "Mettre à jour l'invité",
+    "tableShape": "Forme de la table",
+    "shapeRound": "Ronde",
+    "shapeSquare": "Carrée",
+    "shapeRectangle": "Rectangulaire",
+    "tableNumberLabel": "Numéro de table",
+    "tableNumberPlaceholder": "ex. 1",
+    "seatsPlaceholder": "ex. 8",
+    "seatDistribution": "Répartition des places par côté",
+    "top": "Haut",
+    "bottom": "Bas",
+    "left": "Gauche",
+    "right": "Droite",
+    "assignedSeats": "{assigned} / {total} places attribuées",
+    "tableLabelOptional": "Libellé (facultatif)",
+    "tableLabelPlaceholder": "ex. Famille Dupont",
+    "updateTable": "Mettre à jour la table",
+    "designerLabel": "Éditeur",
+    "description": "Gérez les invités, les tables et l'aménagement du lieu pour ce mariage.",
+    "backToWeddings": "Retour aux mariages",
+    "photos": "Photos",
+    "rsvpCycleHint": "Cliquez pour changer le statut RSVP : en attente -> confirmé -> refusé",
+    "rsvpUpdateFailed": "Échec de la mise à jour du RSVP",
+    "rsvpStatus": {
+      "pending": "En attente",
+      "confirmed": "Confirmé",
+      "declined": "Refusé"
+    },
+    "venuePresets": {
+      "entrance": "Entrée",
+      "pool": "Piscine",
+      "couple_table": "Couple",
+      "music": "Musique",
+      "bar": "Bar",
+      "toilet": "Toilettes"
+    },
+    "confirmations": {
+      "deleteGuest": {
+        "title": "Supprimer l'invité ?",
+        "description": "{name} sera définitivement supprimé de la liste des invités.",
+        "confirm": "Supprimer l'invité"
+      },
+      "deleteTable": {
+        "title": "Supprimer la table ?",
+        "description": "La table {number} sera supprimée et tous les invités qui y sont assignés ne seront plus placés.",
+        "confirm": "Supprimer la table"
+      },
+      "deleteVenueElement": {
+        "title": "Supprimer l'élément du lieu ?",
+        "description": "{name} sera définitivement supprimé du plan du lieu.",
+        "confirm": "Supprimer l'élément"
+      },
+      "deletePhoto": {
+        "title": "Supprimer la photo ?",
+        "description": "Cette photo sera définitivement supprimée et ne pourra pas être récupérée.",
+        "confirm": "Supprimer la photo"
+      },
+      "deleteGalleryLink": {
+        "title": "Supprimer le lien de galerie ?",
+        "description": "Ce lien de galerie partagée cessera immédiatement de fonctionner.",
+        "confirm": "Supprimer le lien"
+      }
+    },
+    "notifications": {
+      "guestDeleted": "Invité supprimé",
+      "rsvpUpdated": "RSVP marqué comme {status}",
+      "tableDeleted": "Table supprimée",
+      "venueElementDeleted": "Élément du lieu supprimé",
+      "photoDeleted": "Photo supprimée",
+      "galleryLinkDeleted": "Lien de galerie supprimé",
+      "galleryLinkDeleteFailed": "Impossible de supprimer le lien de galerie"
+    },
+    "designer": {
+      "unassignedGuests": "Invités non assignés ({count})",
+      "searchGuests": "Rechercher par nom...",
+      "addElement": "Ajouter un élément",
+      "noGuestsFound": "Aucun invité ne correspond à votre recherche.",
+      "allGuestsAssigned": "Tous les invités sont assignés.",
+      "showGuests": "Afficher les invités",
+      "downloadImage": "Télécharger l'image",
+      "fullscreen": "Plein écran",
+      "exitFullscreen": "Quitter le plein écran",
+      "exit": "Quitter",
+      "table": "Table",
+      "seatOccupied": "Cette place est déjà occupée.",
+      "tableFull": "La table {number} est complète.",
+      "assignSeatFailed": "L'invité n'a pas pu être assigné à cette place.",
+      "assignGuestFailed": "L'invité n'a pas pu être assigné à cette table.",
+      "elementAdded": "Élément du lieu ajouté",
+      "elementDeleted": "Élément du lieu supprimé",
+      "addElementFailed": "L'élément du lieu n'a pas pu être ajouté.",
+      "deleteElementFailed": "L'élément du lieu n'a pas pu être supprimé."
+    },
+    "venueEditor": {
+      "eyebrow": "Éditeur du lieu",
+      "title": "Ajouter un élément au lieu",
+      "description": "Ajoutez un élément courant du lieu ou créez un élément personnalisé pour le plan.",
+      "quickPresets": "Préréglages rapides",
+      "orCustom": "Ou créez le vôtre",
+      "name": "Nom",
+      "namePlaceholder": "ex. Photomaton, gâteau de mariage",
+      "icon": "Icône",
+      "selectIcon": "Sélectionner l'icône : {icon}",
+      "shape": "Forme",
+      "color": "Couleur",
+      "create": "Créer l'élément",
+      "deleteElement": "Supprimer {name}",
+      "shapes": {
+        "circle": "Cercle",
+        "square": "Carré",
+        "rectangle": "Rectangle"
+      },
+      "colors": {
+        "blue": "Bleu",
+        "rose": "Rose",
+        "purple": "Violet",
+        "amber": "Ambre",
+        "gray": "Gris",
+        "green": "Vert",
+        "teal": "Sarcelle",
+        "pink": "Rose"
+      }
+    }
+  },
+  "notFound": {
+    "eyebrow": "Page introuvable",
+    "title": "Cette page semble s'être égarée.",
+    "description": "La page que vous recherchez n'existe pas, a été déplacée ou n'est plus disponible.",
+    "home": "Retour à Wedora",
+    "back": "Retour à l'accueil",
+    "admin": {
+      "eyebrow": "Page introuvable",
+      "title": "Nous n'avons pas trouvé cette page d'administration.",
+      "description": "La page a peut-être été déplacée, supprimée ou le lien n'est peut-être plus valide.",
+      "dashboard": "Tableau de bord",
+      "weddings": "Mariages",
+      "back": "Retour au tableau de bord"
+    }
+  },
+  "errors": {
+    "public": {
+      "eyebrow": "Une erreur est survenue",
+      "title": "Nous n'avons pas pu charger cette page.",
+      "description": "Un problème inattendu est survenu lors du chargement de cette page. Réessayez ou revenez à Wedora.",
+      "retry": "Réessayer",
+      "home": "Retour à Wedora",
+      "reference": "Référence de l'erreur"
+    }
+  },
+  "adminSettings": {
+    "eyebrow": "Admin",
+    "title": "Paramètres",
+    "description": "Gérez votre compte administrateur Wedora et vos préférences d'interface.",
+    "account": {
+      "title": "Compte",
+      "description": "Informations sur le compte actuellement connecté.",
+      "email": "Adresse e-mail",
+      "role": "Rôle",
+      "admin": "Administrateur"
+    },
+    "appearance": {
+      "title": "Apparence",
+      "description": "Choisissez l'apparence de l'interface d'administration Wedora.",
+      "theme": "Thème de l'interface",
+      "themeDescription": "Basculez entre le mode clair et le mode sombre."
+    },
+    "security": {
+      "title": "Sécurité",
+      "description": "Votre session administrateur est protégée par votre compte d'authentification Wedora."
+    },
+    "session": {
+      "title": "Session actuelle",
+      "description": "Déconnectez-vous de ce navigateur lorsque vous avez terminé.",
+      "logout": "Se déconnecter"
+    }
+  },
+  "adminNav": {
+    "navigation": "Navigation administrateur",
+    "dashboard": "Tableau de bord",
+    "weddings": "Mariages",
+    "settings": "Paramètres",
+    "openMenu": "Ouvrir la navigation",
+    "closeMenu": "Fermer la navigation",
+    "signedInAs": "Connecté en tant que"
+  },
+  "unauthorized": {
+    "admin": {
+      "eyebrow": "Accès restreint",
+      "title": "Vous n'avez pas accès à l'administration.",
+      "description": "Ce compte est connecté, mais il n'est pas autorisé à accéder à l'espace d'administration Wedora.",
+      "login": "Utiliser un autre compte",
+      "home": "Retour à Wedora"
     }
   }
 }

@@ -645,28 +645,35 @@
     "description": "A one-time payment for your wedding — no monthly subscription.",
     "mostPopular": "Most popular",
     "perWedding": "per wedding",
+    "included": "What's included",
     "choosePlan": "Choose {plan}",
+
     "plans": {
       "basic": {
+        "eyebrow": "Essential",
         "name": "Basic",
         "description": "For smaller weddings, seat finding only"
       },
       "standard": {
+        "eyebrow": "Popular",
         "name": "Standard",
         "description": "Our most popular combination — seating + photos"
       },
       "premium": {
+        "eyebrow": "Complete",
         "name": "Premium",
         "description": "No limits, for larger weddings"
       }
     },
+
     "features": {
       "basic": {
         "findSeat": "Find My Seat",
         "tableArrangement": "Table arrangement",
         "photoUpload": "Photo uploads",
         "guestLimit": "Up to 150 guests",
-        "storage": "30 days of storage after the wedding"
+        "storage": "30 days of storage after the wedding",
+        "publicGallery": "Shareable gallery (public link)"
       },
       "standard": {
         "findSeat": "Find My Seat",
@@ -685,6 +692,7 @@
         "publicGallery": "Shareable gallery (public link)"
       }
     },
+
     "customPlan": {
       "text": "Didn't find what you're looking for?",
       "contact": "Contact us",

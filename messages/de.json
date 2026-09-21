@@ -14,7 +14,13 @@
     "search": "Suchen...",
     "noData": "Keine Daten verfügbar",
     "noResults": "Keine Ergebnisse gefunden",
-    "switchLanguage": "Sprache wechseln"
+    "switchLanguage": "Sprache wechseln",
+    "logout": "Abmelden",
+    "optional": "optional",
+    "close": "Schließen",
+    "saving": "Wird gespeichert...",
+    "switchToLightMode": "Zum hellen Modus wechseln",
+    "switchToDarkMode": "Zum dunklen Modus wechseln"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -67,10 +73,19 @@
       "backToLogin": "Zurück zur Anmeldung",
       "checkYourEmail": "Überprüfe deine E-Mails",
       "resetLinkSent": "Wir haben einen Link zum Zurücksetzen des Passworts an deine E-Mail-Adresse gesendet.",
-      "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten"
+      "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten",
+      "eyebrow": "Passwort vergessen?",
+      "sendLink": "Link senden",
+      "emailSent": "E-Mail gesendet"
     },
     "passwordPlaceholder": "••••••••",
-    "invalidEmail": "Bitte gib eine gültige E-Mail-Adresse ein."
+    "invalidEmail": "Bitte gib eine gültige E-Mail-Adresse ein.",
+    "loginEyebrow": "Anmelden",
+    "adminLoginDescription": "Melde dich an, um Hochzeiten, Gäste, Sitzordnung und geteilte Fotos zu verwalten.",
+    "newPasswordDescription": "Wähle ein sicheres neues Passwort für dein Wedora-Konto.",
+    "passwordChangedEyebrow": "Passwort aktualisiert",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort ausblenden"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -173,63 +188,66 @@
       "favouritesOnly": "Nur Favoriten",
       "deleteGalleryLinkConfirm": "Diesen Galerielink löschen? Er funktioniert danach sofort nicht mehr.",
       "failedToCreateLink": "Link konnte nicht erstellt werden",
-      "failedToGenerateZip": "ZIP-Datei konnte nicht erstellt werden. Bitte versuche es erneut."
+      "failedToGenerateZip": "ZIP-Datei konnte nicht erstellt werden. Bitte versuche es erneut.",
+      "title": "Fotos",
+      "confirmations": {
+        "deleteGalleryLink": {
+          "confirm": "Link löschen",
+          "title": "Galerielink löschen?",
+          "description": "Dieser geteilte Galerielink funktioniert danach sofort nicht mehr."
+        },
+        "deletePhoto": {
+          "title": "Foto löschen?",
+          "description": "Dieses Foto wird dauerhaft gelöscht und kann nicht wiederhergestellt werden.",
+          "confirm": "Foto löschen"
+        }
+      },
+      "description": "Prüfe, organisiere und teile die für diese Hochzeit hochgeladenen Fotos.",
+      "backToWedding": "Zurück zur Hochzeit",
+      "galleryLinksLoadFailed": "Galerielinks konnten nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "copyingLink": "Link wird kopiert…",
+      "notifications": {
+        "photoDeleted": "Foto gelöscht",
+        "galleryLinkDeleted": "Galerielink gelöscht",
+        "photoApproved": "Foto freigegeben",
+        "photoUnapproved": "Foto wieder in die Prüfung verschoben",
+        "photoHidden": "Foto ausgeblendet",
+        "photoShown": "Foto wieder sichtbar",
+        "photoFavourited": "Foto zu den Favoriten hinzugefügt",
+        "photoUnfavourited": "Foto aus den Favoriten entfernt",
+        "photoUpdateFailed": "Das Foto konnte nicht aktualisiert werden. Deine Änderungen wurden rückgängig gemacht.",
+        "photoDeleteFailed": "Das Foto konnte nicht gelöscht werden. Es wurde nichts geändert.",
+        "galleryLinkCreated": "Galerielink erstellt",
+        "galleryLinkCopied": "Galerielink kopiert",
+        "galleryLinkCopyFailed": "Der Galerielink konnte nicht kopiert werden. Bitte versuche es erneut.",
+        "galleryLinkDeleteFailed": "Der Galerielink konnte nicht gelöscht werden. Es wurde nichts geändert.",
+        "photoDownloaded": "Foto-Download gestartet",
+        "photoDownloadFailed": "Das Foto konnte nicht heruntergeladen werden. Bitte versuche es erneut.",
+        "zipDownloaded": "Download des Fotoarchivs gestartet",
+        "zipDownloadFailed": "Das Fotoarchiv konnte nicht vorbereitet werden. Bitte versuche es erneut.",
+        "zipQueued": "Grosses Album eingereiht. Wir bereiten {count} Fotos im Hintergrund vor.",
+        "zipReady": "Dein Fotoarchiv ist bereit. Der Download wurde gestartet.",
+        "zipExportFailed": "Das Fotoarchiv konnte nicht erstellt werden. Bitte versuche es erneut.",
+        "zipExportTimedOut": "Das Archiv wird noch vorbereitet. Versuche den Download gleich noch einmal."
+      }
     },
-    "seating": {
-      "loadingDesigner": "Sitzplan-Designer wird geladen...",
-      "confirmDeleteGuest": "Möchtest du diesen Gast wirklich löschen?",
-      "deleteGuestFailed": "Gast konnte nicht gelöscht werden",
-      "confirmDeleteTable": "Möchtest du diesen Tisch wirklich löschen? Alle zugewiesenen Gäste verlieren ihre Sitzplatzzuordnung.",
-      "deleteTableFailed": "Tisch konnte nicht gelöscht werden",
-      "title": "Gästesitzordnung",
-      "print": "Liste drucken",
-      "guests": "Gäste",
-      "tables": "Tische",
-      "designer": "Designer",
-      "searchGuests": "Gäste suchen...",
-      "addGuest": "Gast hinzufügen",
-      "addTable": "Tisch hinzufügen",
-      "seated": "Platziert",
-      "unseated": "Nicht platziert",
-      "total": "Gesamt",
-      "noGuests": "Keine Gäste gefunden",
-      "noTables": "Noch keine Tische erstellt",
-      "tableNumber": "Tisch {number}",
-      "seats": "Sitzplätze",
-      "edit": "Bearbeiten",
-      "delete": "Löschen",
-      "printTitle": "Gästeliste nach Tischen",
-      "table": "Tisch",
-      "noTablesCreated": "Noch keine Tische erstellt.",
-      "editGuest": "Gast bearbeiten",
-      "addNewGuest": "Neuen Gast hinzufügen",
-      "editTable": "Tisch bearbeiten",
-      "addNewTable": "Neuen Tisch hinzufügen",
-      "occupied": "Belegt",
-      "firstName": "Vorname",
-      "firstNamePlaceholder": "z. B. Max",
-      "lastName": "Nachname",
-      "lastNamePlaceholder": "z. B. Mustermann",
-      "assignTableOptional": "Tisch zuweisen (optional)",
-      "tableOption": "Tisch {number} ({seats} Plätze)",
-      "updateGuest": "Gast aktualisieren",
-      "tableShape": "Tischform",
-      "shapeRound": "Rund",
-      "shapeSquare": "Quadratisch",
-      "shapeRectangle": "Rechteckig",
-      "tableNumberLabel": "Tischnummer",
-      "tableNumberPlaceholder": "z. B. 1",
-      "seatsPlaceholder": "z. B. 8",
-      "seatDistribution": "Sitzverteilung nach Seite",
-      "top": "Oben",
-      "bottom": "Unten",
-      "left": "Links",
-      "right": "Rechts",
-      "assignedSeats": "{assigned} / {total} Sitzplätze zugewiesen",
-      "tableLabelOptional": "Bezeichnung (optional)",
-      "tableLabelPlaceholder": "z. B. Familie Mustermann",
-      "updateTable": "Tisch aktualisieren"
-    }
+    "weddings": "Hochzeiten",
+    "seating": "Sitzordnung",
+    "findSeat": "Sitzplatz finden",
+    "photosLabel": "Fotos",
+    "overviewDescription": "Verwalte Hochzeiten, Gäste, Sitzordnung und geteilte Fotos an einem Ort.",
+    "createWeddingDescription": "Richte eine neue Hochzeit, den Zugang für das Brautpaar und die Gästefunktionen ein.",
+    "viewAll": "Alle anzeigen",
+    "pendingPhotos": "Ausstehende Fotos",
+    "pendingPhotosDescription": "Neue Gästefotos warten auf deine Prüfung.",
+    "reviewPhotos": "Fotos prüfen",
+    "management": "Verwaltung",
+    "quickActions": "Schnellaktionen",
+    "manageWeddings": "Hochzeiten verwalten",
+    "manageWeddingsDescription": "Alle Hochzeiten anzeigen, bearbeiten und verwalten.",
+    "atAGlance": "Auf einen Blick",
+    "photoUpload": "Foto-Upload"
   },
   "weddings": {
     "title": "Hochzeiten",
@@ -244,7 +262,65 @@
     "brideName": "Name der Braut",
     "date": "Hochzeitsdatum",
     "location": "Ort",
-    "emri": "Name"
+    "emri": "Name",
+    "settings": "Einstellungen",
+    "settingsPage": {
+      "title": "Einstellungen",
+      "publicUrl": "Öffentliche URL",
+      "preview": "Vorschau",
+      "eyebrow": "Hochzeitseinstellungen",
+      "description": "Verwalte Hochzeitsdetails, Zugang für das Brautpaar, Design und aktive Gästefunktionen.",
+      "backToWedding": "Zurück zur Hochzeit",
+      "coupleDetails": "Details zum Brautpaar",
+      "accounts": "Konten des Brautpaars",
+      "weddingDetails": "Hochzeitsdetails",
+      "groomEmail": "E-Mail des Bräutigams",
+      "brideEmail": "E-Mail der Braut",
+      "emailNotice": "Das Ändern einer E-Mail-Adresse hier ändert nicht die E-Mail-Adresse eines bestehenden Anmeldekontos.",
+      "theme": "Hochzeitsdesign",
+      "themePreviewDescription": "Vorschau der ausgewählten Hochzeitsfarbe.",
+      "features": "Gästefunktionen",
+      "findSeat": "Sitzplatz finden",
+      "findSeatDescription": "Erlaube Gästen, nach ihrem zugewiesenen Tisch zu suchen.",
+      "photoUpload": "Foto-Upload",
+      "photoUploadDescription": "Erlaube Gästen, Fotos von der Hochzeit hochzuladen.",
+      "autoApproveUploads": "Fotomoderation überspringen",
+      "autoApproveUploadsDescription": "Gästefotos erscheinen sofort in der Galerie, ohne dass sie zuerst von einem Admin freigegeben werden müssen. Standardmässig deaktiviert. Jeder Upload wird zur Prüfung zurückgehalten, bis du diese Option aktivierst.",
+      "newCredentials": "Neue Anmeldedaten",
+      "newCredentialsDescription": "Neue oder zurückgesetzte Konten für das Brautpaar wurden erstellt. Speichere diese Passwörter jetzt, da sie später nicht erneut angezeigt werden.",
+      "failedAccounts": "Kontoerstellung oder Zurücksetzung fehlgeschlagen für: {emails}",
+      "saving": "Wird gespeichert...",
+      "saved": "Gespeichert",
+      "saveChanges": "Änderungen speichern",
+      "saveFailed": "Die Hochzeitseinstellungen konnten nicht gespeichert werden.",
+      "copyPassword": "Passwort kopieren",
+      "customColor": "Oder eine eigene Farbe wählen",
+      "colorPresets": {
+        "rose": "Rosa",
+        "ocean": "Ozean",
+        "sage": "Salbei",
+        "violet": "Violett",
+        "terracotta": "Terrakotta",
+        "burgundy": "Bordeaux"
+      },
+      "notifications": {
+        "created": "Hochzeit erstellt",
+        "updated": "Hochzeit aktualisiert",
+        "deleted": "Hochzeit gelöscht"
+      }
+    },
+    "backToDashboard": "Zurück zum Dashboard",
+    "groomEmail": "E-Mail des Bräutigams",
+    "brideEmail": "E-Mail der Braut",
+    "openWedding": "Hochzeit öffnen",
+    "status": "Status",
+    "searchPlaceholder": "Hochzeiten suchen...",
+    "clearSearch": "Suche löschen",
+    "noWeddingFound": "Keine Hochzeit für „{query}“ gefunden",
+    "weddingCount": "{count, plural, =1 {# Hochzeit} other {# Hochzeiten}}",
+    "moreActions": "Weitere Aktionen",
+    "manageSeating": "Sitzordnung verwalten",
+    "managePhotos": "Fotos verwalten"
   },
   "status": {
     "upcoming": "Bevorstehend",
@@ -293,7 +369,10 @@
         "takePhoto": "Foto aufnehmen",
         "gallery": "Aus Galerie hochladen",
         "message": "Nachricht hinzufügen"
-      }
+      },
+      "findSeatEyebrow": "Sitzordnung",
+      "findSeatTitle": "Finde deinen Sitzplatz",
+      "photoTitle": "Teile deine Momente"
     },
     "demo": {
       "banner": "Portfolio-Demo — Beispieldaten"
@@ -301,7 +380,8 @@
     "nav": {
       "home": "Startseite",
       "findSeat": "Sitzplatz finden",
-      "upload": "Hochladen"
+      "upload": "Hochladen",
+      "navigation": "Hochzeitsnavigation"
     },
     "searchPlaceholder": "Finde deinen Sitzplatz über deinen Namen",
     "tableNumber": "Tisch {number}",
@@ -349,6 +429,28 @@
         "description": "Deine Erinnerung wurde erfolgreich empfangen. Sara & Drilon werden sie in Ehren halten.",
         "uploadAnother": "Weiteres Foto teilen",
         "backHome": "Zurück zur Startseite"
+      },
+      "removePhoto": "Foto entfernen",
+      "flipPhoto": "Foto spiegeln",
+      "errors": {
+        "invalidFileTitle": "Nicht unterstütztes Foto",
+        "invalidFile": "Wähle ein JPEG-, PNG-, WebP- oder HEIC-Bild.",
+        "fileTooLargeTitle": "Foto ist zu gross",
+        "fileTooLarge": "Wähle ein Bild, das kleiner als 10 MB ist.",
+        "guestLimitTitle": "Upload-Limit erreicht",
+        "guestLimit": "Du hast die maximal erlaubte Anzahl an Fotos von diesem Gerät erreicht.",
+        "weddingLimitTitle": "Galerielimit erreicht",
+        "weddingLimit": "Diese Hochzeit hat ihr Foto-Upload-Limit erreicht.",
+        "rateLimitedTitle": "Zu viele Uploads",
+        "rateLimited": "Bitte warte einen Moment, bevor du ein weiteres Foto hochlädst.",
+        "rateLimitedWithTime": "Bitte warte {seconds} Sekunden, bevor du es erneut versuchst.",
+        "uploadDisabledTitle": "Uploads sind geschlossen",
+        "uploadDisabled": "Foto-Uploads sind für diese Hochzeit derzeit nicht verfügbar.",
+        "unavailableTitle": "Upload nicht verfügbar",
+        "unavailable": "Dieser Upload-Link für die Hochzeit ist nicht mehr verfügbar.",
+        "uploadFailedTitle": "Foto konnte nicht hochgeladen werden",
+        "storageFailed": "Wir konnten das Foto nicht speichern. Bitte versuche es erneut.",
+        "temporaryFailure": "Beim Speichern deines Fotos ist etwas schiefgelaufen. Bitte versuche es in Kürze erneut."
       }
     },
     "findSeat": {
@@ -361,8 +463,20 @@
       "noTable": "Noch keinem Tisch zugewiesen",
       "viewSeat": "Sitzplatz anzeigen",
       "noResults": "Wir konnten „{query}“ nicht in unserer Gästeliste finden.",
-      "keepTyping": "Tippe weiter, um deinen Sitzplatz zu finden..."
-    }
+      "keepTyping": "Tippe weiter, um deinen Sitzplatz zu finden...",
+      "resultsLabel": "Gäste",
+      "searchLabel": "Gästesuche",
+      "searchHelper": "Gib mindestens zwei Buchstaben deines Vor- oder Nachnamens ein.",
+      "clearSearch": "Suche löschen",
+      "noResultsTitle": "Gast nicht gefunden",
+      "madeWithWedora": "Erstellt mit Wedora"
+    },
+    "clearSearch": "Suche löschen",
+    "noResultsFor": "Wir konnten „{query}“ nicht in der Gästeliste finden.",
+    "yourSeat": "Dein Sitzplatz",
+    "seat": "Sitzplatz",
+    "venueMapDescription": "Folge der markierten Route vom Eingang zu deinem Tisch.",
+    "mapInteractionHint": "Ziehe oder scrolle den Plan, um den Raum zu erkunden."
   },
   "pricing": {
     "eyebrow": "Preise",
@@ -370,17 +484,21 @@
     "description": "Eine einmalige Zahlung für deine Hochzeit — kein monatliches Abonnement.",
     "mostPopular": "Am beliebtesten",
     "perWedding": "pro Hochzeit",
+    "included": "Inklusive Leistungen",
     "choosePlan": "{plan} wählen",
     "plans": {
       "basic": {
+        "eyebrow": "Essentiell",
         "name": "Basic",
         "description": "Für kleinere Hochzeiten, ausschließlich Sitzplatzsuche"
       },
       "standard": {
+        "eyebrow": "Beliebt",
         "name": "Standard",
         "description": "Unsere beliebteste Kombination — Sitzordnung + Fotos"
       },
       "premium": {
+        "eyebrow": "Komplett",
         "name": "Premium",
         "description": "Keine Limits, für größere Hochzeiten"
       }
@@ -391,7 +509,8 @@
         "tableArrangement": "Tischanordnung",
         "photoUpload": "Foto-Uploads",
         "guestLimit": "Bis zu 150 Gäste",
-        "storage": "30 Tage Speicher nach der Hochzeit"
+        "storage": "30 Tage Speicher nach der Hochzeit",
+        "publicGallery": "Teilbare Galerie (öffentlicher Link)"
       },
       "standard": {
         "findSeat": "Meinen Sitzplatz finden",
@@ -420,7 +539,14 @@
     "eyebrow": "Plattform für Hochzeitsmanagement",
     "hero": {
       "description": "Eine Plattform, auf der Paare ihre Sitzordnung organisieren, Fotos mit Gästen teilen und ein digitales Hochzeitserlebnis schaffen — ohne Papierkram, ohne Chaos.",
-      "demoButton": "Demo ansehen"
+      "demoButton": "Demo ansehen",
+      "eyebrow": "Plattform für Hochzeitsmanagement",
+      "title": "Jeder Gast platziert. Jeder Moment festgehalten.",
+      "primaryCta": "Demo ansehen",
+      "secondaryCta": "So funktioniert es",
+      "pointOne": "Keine App erforderlich",
+      "pointTwo": "An einem Nachmittag eingerichtet",
+      "pointThree": "Einmalige Zahlung"
     },
     "features": {
       "guests": {
@@ -438,13 +564,102 @@
       "theme": {
         "title": "Individuelles Design",
         "description": "Jede Hochzeit erhält eigene Farben, Namen und eine öffentliche URL."
-      }
+      },
+      "items": {
+        "guests": {
+          "title": "Gästesitzordnung",
+          "description": "Organisiere Tische per Drag-and-drop, weise Gäste zu und exportiere deinen Sitzplan als Bild oder PDF."
+        },
+        "seat": {
+          "title": "Meinen Sitzplatz finden",
+          "description": "Gäste suchen nach ihrem Namen und sehen sofort ihren Tisch und den Raumplan."
+        },
+        "photos": {
+          "title": "Fotogalerie",
+          "description": "Gäste laden Fotos direkt von ihrem Smartphone hoch, während das Brautpaar sie verwaltet und teilt."
+        },
+        "theme": {
+          "title": "Individuelles Design",
+          "description": "Jede Hochzeit erhält eigene Farben, Namen und eine öffentliche URL."
+        }
+      },
+      "eyebrow": "Funktionen",
+      "title": "Alles, was euer Hochzeitstag braucht",
+      "description": "Vier Werkzeuge ersetzen Tabellen, gedruckte Sitzpläne und Gruppenchats, die Paare vor dem grossen Tag sonst parallel verwalten."
     },
     "contact": {
       "eyebrow": "Kontakt",
       "title": "Lass uns über deine Hochzeit sprechen"
     },
-    "footer": "Erstellt von Drilon Saiti"
+    "footer": "Erstellt von Drilon Saiti",
+    "nav": {
+      "pricing": "Preise",
+      "features": "Funktionen",
+      "howItWorks": "So funktioniert es",
+      "demo": "Demo ansehen"
+    },
+    "preview": {
+      "guests": "Gäste",
+      "tables": "Tische",
+      "photos": "Fotos",
+      "event": "Veranstaltung",
+      "seatingTitle": "Sitzplan",
+      "seatingDescription": "Tische per Drag-and-drop anordnen",
+      "findSeat": "Sitzplatz finden",
+      "yourTable": "Dein Tisch"
+    },
+    "howItWorks": {
+      "steps": {
+        "create": {
+          "title": "Erstelle deine Hochzeit",
+          "description": "Füge eure Namen, das Datum und den Veranstaltungsort hinzu und wähle anschliessend ein Design. Euer privates Dashboard und die öffentliche Seite sind in wenigen Minuten bereit."
+        },
+        "organise": {
+          "title": "Sitzordnung organisieren",
+          "description": "Füge Gäste und Tische hinzu und ordne den Raum per Drag-and-drop an. Änderungen werden sofort gespeichert und mit der Gästeseite synchronisiert."
+        },
+        "share": {
+          "title": "Mit euren Gästen teilen",
+          "description": "Teile einen einzigen Link. Gäste finden ihren Sitzplatz, laden Fotos hoch und hinterlassen Nachrichten, alles direkt vom Smartphone."
+        }
+      },
+      "eyebrow": "So funktioniert es",
+      "title": "Von der Gästeliste bis zum Hochzeitstag in drei Schritten",
+      "description": "Keine Plugins, keine Tabellen zum Herumschicken. Richte alles einmal ein und teile danach einen einzigen Link mit deinen Gästen.",
+      "cta": "Hochzeit planen"
+    },
+    "value": {
+      "title": "Keine Tabellen. Keine gedruckten Sitzpläne.",
+      "description": "Alles, was das Brautpaar und seine Gäste brauchen, befindet sich auf einer Seite und wird bis zum Hochzeitstag in Echtzeit aktualisiert."
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Häufig gestellte Fragen",
+      "description": "Alles, was du wissen musst, bevor du deine Hochzeit einrichtest.",
+      "items": {
+        "one": {
+          "question": "Müssen meine Gäste eine App installieren?",
+          "answer": "Nein. Gäste öffnen einfach den von dir geteilten Link auf einem Smartphone, Tablet oder Computer. Kein Download und kein Konto erforderlich."
+        },
+        "two": {
+          "question": "Kann ich die Sitzordnung ändern, nachdem ich den Link geteilt habe?",
+          "answer": "Ja. Jede Änderung an Tischen oder Gästen wird sofort aktualisiert, sodass Gäste immer den aktuellen Sitzplan sehen."
+        },
+        "three": {
+          "question": "Wie lange ist meine Hochzeitsseite nach der Veranstaltung verfügbar?",
+          "answer": "Das hängt von deinem Tarif ab. Je nach Tarif stehen nach der Hochzeit zwischen 30 Tagen und einem ganzen Jahr Speicher zur Verfügung, damit du weiterhin Fotos sammeln und herunterladen kannst."
+        },
+        "four": {
+          "question": "Kann ich eigene Farben und Namen verwenden?",
+          "answer": "Ja. Jede Hochzeit erhält eine eigene Designfarbe, die Namen des Brautpaars und eine öffentliche URL, damit die Seite zum Stil eurer Hochzeit passt."
+        }
+      }
+    },
+    "finalCta": {
+      "title": "Bereit, euren Hochzeitstag zu planen?",
+      "description": "Richte Sitzordnung, Galerie und Gästeseite an einem Nachmittag ein, ganz ohne monatliches Abonnement.",
+      "button": "Demo ansehen"
+    }
   },
   "gallery": {
     "title": "Unsere Hochzeitsgalerie",
@@ -464,7 +679,31 @@
     "photoAlt": "Foto {number}",
     "openPhoto": "Foto {number} öffnen",
     "goToPhoto": "Zu Foto {number} wechseln",
-    "photoCounter": "{current} / {total}"
+    "photoCounter": "{current} / {total}",
+    "empty": {
+      "eyebrow": "Geteilte Galerie",
+      "title": "Noch keine Fotos verfügbar",
+      "description": "Fotos erscheinen hier, sobald sie zum Teilen bereit sind."
+    },
+    "imageUnavailable": {
+      "short": "Foto nicht verfügbar",
+      "title": "Dieses Foto konnte nicht geladen werden",
+      "description": "Das Bild ist vorübergehend nicht verfügbar. Der Rest der Galerie ist weiterhin verfügbar."
+    },
+    "unavailable": {
+      "invalid": {
+        "eyebrow": "Galerie nicht verfügbar",
+        "title": "Dieser Galerielink ist nicht mehr verfügbar.",
+        "description": "Der Link wurde möglicherweise entfernt oder ist nicht mehr gültig."
+      },
+      "expired": {
+        "eyebrow": "Link abgelaufen",
+        "title": "Dieser Galerielink ist abgelaufen.",
+        "description": "Diese geteilte Galerie war nur für eine begrenzte Zeit verfügbar und kann nicht mehr geöffnet werden."
+      },
+      "contact": "Bitte kontaktiere die Person, die diese Galerie mit dir geteilt hat, wenn du einen neuen Link möchtest.",
+      "home": "Zurück zu Wedora"
+    }
   },
   "couple": {
     "seating": {
@@ -475,6 +714,236 @@
       "guests": "Gäste ({count})",
       "table": "Tisch {number}",
       "noTable": "Kein Tisch"
+    }
+  },
+  "seating": {
+    "loadingDesigner": "Sitzplan-Designer wird geladen...",
+    "confirmDeleteGuest": "Möchtest du diesen Gast wirklich löschen?",
+    "deleteGuestFailed": "Gast konnte nicht gelöscht werden",
+    "confirmDeleteTable": "Möchtest du diesen Tisch wirklich löschen? Alle zugewiesenen Gäste verlieren ihre Sitzplatzzuordnung.",
+    "deleteTableFailed": "Tisch konnte nicht gelöscht werden",
+    "title": "Gästesitzordnung",
+    "print": "Liste drucken",
+    "guests": "Gäste",
+    "tables": "Tische",
+    "searchGuests": "Gäste suchen...",
+    "addGuest": "Gast hinzufügen",
+    "addTable": "Tisch hinzufügen",
+    "seated": "Platziert",
+    "unseated": "Nicht platziert",
+    "total": "Gesamt",
+    "noGuests": "Keine Gäste gefunden",
+    "noTables": "Noch keine Tische erstellt",
+    "tableNumber": "Tisch {number}",
+    "seats": "Sitzplätze",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "printTitle": "Gästeliste nach Tischen",
+    "table": "Tisch",
+    "noTablesCreated": "Noch keine Tische erstellt.",
+    "editGuest": "Gast bearbeiten",
+    "addNewGuest": "Neuen Gast hinzufügen",
+    "editTable": "Tisch bearbeiten",
+    "addNewTable": "Neuen Tisch hinzufügen",
+    "occupied": "Belegt",
+    "firstName": "Vorname",
+    "firstNamePlaceholder": "z. B. Max",
+    "lastName": "Nachname",
+    "lastNamePlaceholder": "z. B. Mustermann",
+    "assignTableOptional": "Tisch zuweisen (optional)",
+    "tableOption": "Tisch {number} ({seats} Plätze)",
+    "updateGuest": "Gast aktualisieren",
+    "tableShape": "Tischform",
+    "shapeRound": "Rund",
+    "shapeSquare": "Quadratisch",
+    "shapeRectangle": "Rechteckig",
+    "tableNumberLabel": "Tischnummer",
+    "tableNumberPlaceholder": "z. B. 1",
+    "seatsPlaceholder": "z. B. 8",
+    "seatDistribution": "Sitzverteilung nach Seite",
+    "top": "Oben",
+    "bottom": "Unten",
+    "left": "Links",
+    "right": "Rechts",
+    "assignedSeats": "{assigned} / {total} Sitzplätze zugewiesen",
+    "tableLabelOptional": "Bezeichnung (optional)",
+    "tableLabelPlaceholder": "z. B. Familie Mustermann",
+    "updateTable": "Tisch aktualisieren",
+    "rsvpCycleHint": "Klicken, um den RSVP-Status zu wechseln: Ausstehend -> Bestätigt -> Abgelehnt",
+    "rsvpUpdateFailed": "RSVP konnte nicht aktualisiert werden",
+    "rsvpStatus": {
+      "pending": "Ausstehend",
+      "confirmed": "Bestätigt",
+      "declined": "Abgelehnt"
+    },
+    "designerLabel": "Designer",
+    "photos": "Fotos",
+    "confirmations": {
+      "deleteGalleryLink": {
+        "confirm": "Link löschen",
+        "title": "Galerielink löschen?",
+        "description": "Dieser geteilte Galerielink funktioniert danach sofort nicht mehr."
+      },
+      "deleteGuest": {
+        "title": "Gast löschen?",
+        "description": "{name} wird dauerhaft aus der Gästeliste entfernt.",
+        "confirm": "Gast löschen"
+      },
+      "deleteTable": {
+        "title": "Tisch löschen?",
+        "description": "Tisch {number} wird entfernt und alle zugewiesenen Gäste verlieren ihre Sitzplatzzuordnung.",
+        "confirm": "Tisch löschen"
+      },
+      "deleteVenueElement": {
+        "title": "Raumelement löschen?",
+        "description": "{name} wird dauerhaft aus dem Raumplan entfernt.",
+        "confirm": "Element löschen"
+      },
+      "deletePhoto": {
+        "title": "Foto löschen?",
+        "description": "Dieses Foto wird dauerhaft gelöscht und kann nicht wiederhergestellt werden.",
+        "confirm": "Foto löschen"
+      }
+    },
+    "designer": {
+      "exitFullscreen": "Vollbild verlassen",
+      "table": "Tisch",
+      "unassignedGuests": "Nicht zugewiesene Gäste ({count})",
+      "searchGuests": "Nach Namen suchen...",
+      "addElement": "Element hinzufügen",
+      "noGuestsFound": "Keine Gäste entsprechen deiner Suche.",
+      "allGuestsAssigned": "Alle Gäste sind zugewiesen.",
+      "showGuests": "Gäste anzeigen",
+      "downloadImage": "Bild herunterladen",
+      "fullscreen": "Vollbild",
+      "exit": "Beenden",
+      "seatOccupied": "Dieser Sitzplatz ist bereits belegt.",
+      "tableFull": "Tisch {number} ist voll.",
+      "assignSeatFailed": "Der Gast konnte diesem Sitzplatz nicht zugewiesen werden.",
+      "assignGuestFailed": "Der Gast konnte diesem Tisch nicht zugewiesen werden.",
+      "elementAdded": "Raumelement hinzugefügt",
+      "elementDeleted": "Raumelement gelöscht",
+      "addElementFailed": "Das Raumelement konnte nicht hinzugefügt werden.",
+      "deleteElementFailed": "Das Raumelement konnte nicht gelöscht werden."
+    },
+    "venueEditor": {
+      "name": "Name",
+      "shapes": {
+        "square": "Quadratisch",
+        "rectangle": "Rechteckig",
+        "circle": "Kreis"
+      },
+      "eyebrow": "Raumplaner",
+      "title": "Raumelement hinzufügen",
+      "description": "Füge ein häufig verwendetes Raumelement hinzu oder erstelle ein eigenes Element für den Raumplan.",
+      "quickPresets": "Schnellauswahl",
+      "orCustom": "Oder eigenes Element erstellen",
+      "namePlaceholder": "z. B. Fotobox, Hochzeitstorte",
+      "icon": "Symbol",
+      "selectIcon": "Symbol auswählen: {icon}",
+      "shape": "Form",
+      "color": "Farbe",
+      "create": "Element erstellen",
+      "deleteElement": "{name} löschen",
+      "colors": {
+        "blue": "Blau",
+        "rose": "Rosa",
+        "purple": "Violett",
+        "amber": "Bernstein",
+        "gray": "Grau",
+        "green": "Grün",
+        "teal": "Türkis",
+        "pink": "Pink"
+      }
+    },
+    "description": "Verwalte Gäste, Tische und den Raumplan für diese Hochzeit.",
+    "backToWeddings": "Zurück zu den Hochzeiten",
+    "venuePresets": {
+      "entrance": "Eingang",
+      "pool": "Pool",
+      "couple_table": "Brautpaar",
+      "music": "Musik",
+      "bar": "Bar",
+      "toilet": "WC"
+    },
+    "notifications": {
+      "guestDeleted": "Gast gelöscht",
+      "rsvpUpdated": "RSVP als {status} markiert",
+      "tableDeleted": "Tisch gelöscht",
+      "venueElementDeleted": "Raumelement gelöscht",
+      "photoDeleted": "Foto gelöscht",
+      "galleryLinkDeleted": "Galerielink gelöscht",
+      "galleryLinkDeleteFailed": "Der Galerielink konnte nicht gelöscht werden"
+    }
+  },
+  "notFound": {
+    "admin": {
+      "dashboard": "Dashboard",
+      "weddings": "Hochzeiten",
+      "eyebrow": "Seite nicht gefunden",
+      "title": "Diese Admin-Seite konnte nicht gefunden werden.",
+      "description": "Die Seite wurde möglicherweise verschoben oder gelöscht oder der Link ist nicht mehr gültig.",
+      "back": "Zurück zum Dashboard"
+    },
+    "eyebrow": "Seite nicht gefunden",
+    "title": "Diese Seite scheint verschwunden zu sein.",
+    "description": "Die gesuchte Seite existiert nicht, wurde verschoben oder ist nicht mehr verfügbar.",
+    "home": "Zurück zu Wedora",
+    "back": "Zurück zur Startseite"
+  },
+  "errors": {
+    "public": {
+      "eyebrow": "Etwas ist schiefgelaufen",
+      "title": "Diese Seite konnte nicht geladen werden.",
+      "description": "Beim Laden dieser Seite ist etwas Unerwartetes passiert. Versuche es erneut oder kehre zu Wedora zurück.",
+      "retry": "Erneut versuchen",
+      "home": "Zurück zu Wedora",
+      "reference": "Fehlerreferenz"
+    }
+  },
+  "adminSettings": {
+    "title": "Einstellungen",
+    "eyebrow": "Admin",
+    "description": "Verwalte dein Wedora-Administratorkonto und die Einstellungen der Benutzeroberfläche.",
+    "account": {
+      "title": "Konto",
+      "description": "Informationen zum aktuell angemeldeten Konto.",
+      "email": "E-Mail-Adresse",
+      "role": "Rolle",
+      "admin": "Administrator"
+    },
+    "appearance": {
+      "title": "Darstellung",
+      "description": "Wähle, wie die Wedora-Administrationsoberfläche dargestellt wird.",
+      "theme": "Oberflächendesign",
+      "themeDescription": "Zwischen heller und dunkler Darstellung wechseln."
+    },
+    "security": {
+      "title": "Sicherheit",
+      "description": "Deine Admin-Sitzung ist durch dein Wedora-Authentifizierungskonto geschützt."
+    },
+    "session": {
+      "title": "Aktuelle Sitzung",
+      "description": "Melde dich in diesem Browser ab, wenn du fertig bist.",
+      "logout": "Abmelden"
+    }
+  },
+  "adminNav": {
+    "dashboard": "Dashboard",
+    "weddings": "Hochzeiten",
+    "settings": "Einstellungen",
+    "navigation": "Admin-Navigation",
+    "openMenu": "Navigation öffnen",
+    "closeMenu": "Navigation schliessen",
+    "signedInAs": "Angemeldet als"
+  },
+  "unauthorized": {
+    "admin": {
+      "eyebrow": "Zugriff eingeschränkt",
+      "title": "Du hast keinen Admin-Zugriff.",
+      "description": "Dieses Konto ist angemeldet, hat aber keine Berechtigung für den Wedora-Administrationsbereich.",
+      "login": "Anderes Konto verwenden",
+      "home": "Zurück zu Wedora"
     }
   }
 }
