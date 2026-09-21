@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Copy, KeyRound, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -25,12 +25,6 @@ interface RsvpApiKeyManagerProps {
     weddingSlug: string | null;
 }
 
-/*
- * Lets a wedding owner/admin issue and revoke the API key an external
- * RSVP form/site uses to confirm or decline guests by name via
- * POST /api/public/rsvp. The raw key is shown exactly once, right after
- * creation -- only its hash is stored server-side.
- */
 export function RsvpApiKeyManager({
                                       weddingId,
                                       weddingSlug,
@@ -42,25 +36,45 @@ export function RsvpApiKeyManager({
     const [revokingId, setRevokingId] = useState<string | null>(null);
     const [newKey, setNewKey] = useState<string | null>(null);
 
-    const loadKeys = useCallback(async () => {
-        setLoading(true);
+    useEffect(() => {
+        let cancelled = false;
 
-        try {
-            const result = await listRsvpApiKeysAction(weddingId);
+        async function loadInitialKeys() {
+            try {
+                const result = await listRsvpApiKeysAction(weddingId);
 
-            if (result.error) {
-                toast.error(result.error);
+                if (cancelled) {
+                    return;
+                }
+
+                if (result.error) {
+                    toast.error(result.error);
+                }
+
+                setKeys(result.keys);
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
             }
-
-            setKeys(result.keys);
-        } finally {
-            setLoading(false);
         }
+
+        void loadInitialKeys();
+
+        return () => {
+            cancelled = true;
+        };
     }, [weddingId]);
 
-    useEffect(() => {
-        void loadKeys();
-    }, [loadKeys]);
+    const refreshKeys = async () => {
+        const result = await listRsvpApiKeysAction(weddingId);
+
+        if (result.error) {
+            toast.error(result.error);
+        }
+
+        setKeys(result.keys);
+    };
 
     const handleCreate = async () => {
         setCreating(true);
@@ -68,7 +82,7 @@ export function RsvpApiKeyManager({
         try {
             const result = await createRsvpApiKeyAction(
                 weddingId,
-                label.trim() || undefined
+                label.trim() || undefined,
             );
 
             if (!result.success || !result.apiKey) {
@@ -78,7 +92,9 @@ export function RsvpApiKeyManager({
 
             setNewKey(result.apiKey);
             setLabel("");
-            await loadKeys();
+
+            await refreshKeys();
+
             toast.success("RSVP API key created");
         } finally {
             setCreating(false);
@@ -98,10 +114,8 @@ export function RsvpApiKeyManager({
 
             setKeys((current) =>
                 current.map((key) =>
-                    key.id === id
-                        ? { ...key, revokedAt: new Date().toISOString() }
-                        : key
-                )
+                    key.id === id ? { ...key, revokedAt: new Date().toISOString() } : key,
+                ),
             );
 
             toast.success("API key revoked");

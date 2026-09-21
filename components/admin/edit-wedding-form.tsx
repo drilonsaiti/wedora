@@ -18,7 +18,7 @@ import {
     Users,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { updateWedding } from "@/actions/wedding";
@@ -125,7 +125,7 @@ export function EditWeddingForm({
     const {
         register,
         handleSubmit,
-        watch,
+        control,
         setValue,
         formState: { errors, isSubmitting },
     } = useForm<EditWeddingInput>({
@@ -152,11 +152,10 @@ export function EditWeddingForm({
         },
     });
 
-    const themeHue = watch("theme_hue");
-
-    const groomName = watch("groom_name");
-
-    const brideName = watch("bride_name");
+    const [themeHue, groomName, brideName, photoUploadEnabled] = useWatch({
+        control,
+        name: ["theme_hue", "groom_name", "bride_name", "enable_photo_upload"],
+    });
 
     const previewTheme = generateWeddingTheme(themeHue);
 

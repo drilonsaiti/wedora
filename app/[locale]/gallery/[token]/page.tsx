@@ -38,9 +38,11 @@ export default async function GalleryPage({ params }: Props) {
         return <GalleryUnavailable reason="invalid" />;
     }
 
+    const now = new Date().getTime();
+
     if (
         galleryToken.expires_at &&
-        new Date(galleryToken.expires_at).getTime() <= Date.now()
+        new Date(galleryToken.expires_at).getTime() <= now
     ) {
         return <GalleryUnavailable reason="expired" />;
     }

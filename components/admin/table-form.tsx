@@ -16,7 +16,7 @@ import {
     type LucideIcon,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useForm } from 'react-hook-form'
+import {useForm, useWatch} from 'react-hook-form'
 
 import {
     addTable,
@@ -157,7 +157,7 @@ export function TableForm({
     const {
         register,
         handleSubmit,
-        watch,
+        control,
         setValue,
         formState: {
             errors,
@@ -203,20 +203,27 @@ export function TableForm({
             },
         })
 
-    const selectedShape =
-        watch(
-            'shape'
-        )
+    const [
+        selectedShape,
+        seatsValue,
+        watchedSides,
+    ] = useWatch({
+        control,
+        name: [
+            "shape",
+            "seats",
+            "seatSides",
+        ],
+    });
 
-    const seatsCount =
-        watch(
-            'seats'
-        ) || 0
+    const seatsCount = seatsValue || 0;
 
-    const sides =
-        watch(
-            'seatSides'
-        ) as SeatSides
+    const sides: SeatSides = watchedSides ?? {
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+    };
 
     const shapeOptions: Array<{
         value: TableFormValues['shape']

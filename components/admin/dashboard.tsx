@@ -254,19 +254,6 @@ export function AdminDashboard({
 
     const [galleryLabel, setGalleryLabel] = useState("Wedding Gallery");
 
-    /*
-     * Synchronise client state with
-     * server-side filter results.
-     */
-    useEffect(() => {
-        setPhotos(initialPhotos);
-
-        setTotal(initialTotal);
-
-        setError(initialError);
-
-        setSelectedPhoto(null);
-    }, [initialPhotos, initialTotal, initialError, activeFilter]);
 
     /*
      * Signed URLs

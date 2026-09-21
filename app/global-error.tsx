@@ -1,141 +1,97 @@
-'use client'
+"use client";
 
-import {
-    useEffect,
-    useState,
-} from 'react'
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface GlobalErrorProps {
     error: Error & {
-        digest?: string
-    }
-    reset: () => void
+        digest?: string;
+    };
+    reset: () => void;
 }
 
-type SupportedLocale =
-    | 'en'
-    | 'de'
-    | 'fr'
-    | 'al'
+type SupportedLocale = "en" | "de" | "fr" | "al";
 
 const messages = {
     en: {
-        eyebrow:
-            'Something went wrong',
-        title:
-            'Wedora couldn’t load properly.',
+        eyebrow: "Something went wrong",
+        title: "Wedora couldn’t load properly.",
         description:
-            'An unexpected error occurred while loading the application. Try again or return to Wedora.',
-        retry:
-            'Try again',
-        home:
-            'Back to Wedora',
-        reference:
-            'Error reference',
+            "An unexpected error occurred while loading the application. Try again or return to Wedora.",
+        retry: "Try again",
+        home: "Back to Wedora",
+        reference: "Error reference",
     },
 
     de: {
-        eyebrow:
-            'Etwas ist schiefgelaufen',
-        title:
-            'Wedora konnte nicht richtig geladen werden.',
+        eyebrow: "Etwas ist schiefgelaufen",
+        title: "Wedora konnte nicht richtig geladen werden.",
         description:
-            'Beim Laden der Anwendung ist ein unerwarteter Fehler aufgetreten. Versuche es erneut oder kehre zu Wedora zurück.',
-        retry:
-            'Erneut versuchen',
-        home:
-            'Zurück zu Wedora',
-        reference:
-            'Fehlerreferenz',
+            "Beim Laden der Anwendung ist ein unerwarteter Fehler aufgetreten. Versuche es erneut oder kehre zu Wedora zurück.",
+        retry: "Erneut versuchen",
+        home: "Zurück zu Wedora",
+        reference: "Fehlerreferenz",
     },
 
     fr: {
-        eyebrow:
-            'Une erreur est survenue',
-        title:
-            'Wedora n’a pas pu se charger correctement.',
+        eyebrow: "Une erreur est survenue",
+        title: "Wedora n’a pas pu se charger correctement.",
         description:
-            'Une erreur inattendue est survenue lors du chargement de l’application. Réessayez ou revenez à Wedora.',
-        retry:
-            'Réessayer',
-        home:
-            'Retour à Wedora',
-        reference:
-            'Référence de l’erreur',
+            "Une erreur inattendue est survenue lors du chargement de l’application. Réessayez ou revenez à Wedora.",
+        retry: "Réessayer",
+        home: "Retour à Wedora",
+        reference: "Référence de l’erreur",
     },
 
     al: {
-        eyebrow:
-            'Diçka shkoi keq',
-        title:
-            'Wedora nuk mundi të ngarkohej siç duhet.',
+        eyebrow: "Diçka shkoi keq",
+        title: "Wedora nuk mundi të ngarkohej siç duhet.",
         description:
-            'Ndodhi një gabim i papritur gjatë ngarkimit të aplikacionit. Provo përsëri ose kthehu te Wedora.',
-        retry:
-            'Provo përsëri',
-        home:
-            'Kthehu te Wedora',
-        reference:
-            'Referenca e gabimit',
+            "Ndodhi një gabim i papritur gjatë ngarkimit të aplikacionit. Provo përsëri ose kthehu te Wedora.",
+        retry: "Provo përsëri",
+        home: "Kthehu te Wedora",
+        reference: "Referenca e gabimit",
     },
 } satisfies Record<
     SupportedLocale,
     {
-        eyebrow: string
-        title: string
-        description: string
-        retry: string
-        home: string
-        reference: string
+        eyebrow: string;
+        title: string;
+        description: string;
+        retry: string;
+        home: string;
+        reference: string;
     }
->
+>;
 
-function getLocaleFromPath():
-    SupportedLocale {
-    const segment =
-        window.location.pathname
-            .split('/')
-            .filter(Boolean)[0]
-            ?.toLowerCase()
+function getLocaleFromPath(pathname: string): SupportedLocale {
+    const segment = pathname.split("/").filter(Boolean)[0]?.toLowerCase();
 
     if (
-        segment === 'de' ||
-        segment === 'fr' ||
-        segment === 'en' ||
-        segment === 'al'
+        segment === "de" ||
+        segment === "fr" ||
+        segment === "en" ||
+        segment === "al"
     ) {
-        return segment
+        return segment;
     }
 
-    /*
-     * Support "sq" as an Albanian
-     * fallback if it is ever used.
-     */
-    if (segment === 'sq') {
-        return 'al'
+    if (segment === "sq") {
+        return "al";
     }
 
-    return 'en'
+    return "en";
 }
 
 export default function GlobalError({
                                         error,
                                         reset,
                                     }: GlobalErrorProps) {
-    const [
-        locale,
-        setLocale,
-    ] =
-        useState<SupportedLocale>(
-            'en'
-        )
+    const pathname = usePathname()
 
-    useEffect(() => {
-        setLocale(
-            getLocaleFromPath()
-        )
-    }, [])
+    const locale =
+        getLocaleFromPath(pathname)
 
     useEffect(() => {
         console.error(
@@ -144,17 +100,10 @@ export default function GlobalError({
         )
     }, [error])
 
-    const t =
-        messages[locale]
+    const t = messages[locale]
 
     return (
-        <html
-            lang={
-                locale === 'al'
-                    ? 'sq'
-                    : locale
-            }
-        >
+        <html lang={locale === "al" ? "sq" : locale}>
         <body className="m-0 bg-[#faf8f5] text-[#231f1c] antialiased">
         <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12 sm:px-6">
             {/* =====================================
@@ -178,20 +127,20 @@ export default function GlobalError({
                         href="/"
                         className="inline-flex items-center gap-2.5 text-[#231f1c] no-underline"
                     >
-                                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#9a4b62] text-white shadow-sm">
-                                    <svg
-                                        aria-hidden="true"
-                                        viewBox="0 0 24 24"
-                                        fill="currentColor"
-                                        className="h-3.5 w-3.5"
-                                    >
-                                        <path d="M12 21s-6.716-4.35-9.428-8.11C.163 9.55 1.41 5.24 5.15 4.25c2.15-.57 4.2.25 5.4 1.88L12 8.09l1.45-1.96c1.2-1.63 3.25-2.45 5.4-1.88 3.74.99 4.987 5.3 2.578 8.64C18.716 16.65 12 21 12 21Z" />
-                                    </svg>
-                                </span>
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#9a4b62] text-white shadow-sm">
+                  <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="h-3.5 w-3.5"
+                  >
+                    <path d="M12 21s-6.716-4.35-9.428-8.11C.163 9.55 1.41 5.24 5.15 4.25c2.15-.57 4.2.25 5.4 1.88L12 8.09l1.45-1.96c1.2-1.63 3.25-2.45 5.4-1.88 3.74.99 4.987 5.3 2.578 8.64C18.716 16.65 12 21 12 21Z" />
+                  </svg>
+                </span>
 
                         <span className="font-serif text-xl tracking-tight">
-                                    Wedora
-                                </span>
+                  Wedora
+                </span>
                     </Link>
                 </div>
 
@@ -211,11 +160,7 @@ export default function GlobalError({
                             strokeLinejoin="round"
                             className="h-6 w-6"
                         >
-                            <circle
-                                cx="12"
-                                cy="12"
-                                r="9"
-                            />
+                            <circle cx="12" cy="12" r="9" />
 
                             <path d="M12 8v5" />
 
@@ -241,9 +186,7 @@ export default function GlobalError({
                     <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
                         <button
                             type="button"
-                            onClick={
-                                reset
-                            }
+                            onClick={reset}
                             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#9a4b62] px-7 py-3 text-xs font-medium tracking-[0.06em] text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#9a4b62]/25 focus:ring-offset-2"
                         >
                             <svg
@@ -281,15 +224,11 @@ export default function GlobalError({
                     {error.digest && (
                         <div className="mt-8 border-t border-[#e7e0d9] pt-5">
                             <p className="text-[9px] font-medium uppercase tracking-[0.16em] text-[#8d837c]">
-                                {
-                                    t.reference
-                                }
+                                {t.reference}
                             </p>
 
                             <code className="mt-1 block break-all font-mono text-[10px] text-[#8d837c]">
-                                {
-                                    error.digest
-                                }
+                                {error.digest}
                             </code>
                         </div>
                     )}
@@ -298,5 +237,5 @@ export default function GlobalError({
         </main>
         </body>
         </html>
-    )
+    );
 }
