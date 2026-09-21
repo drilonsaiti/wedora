@@ -16,7 +16,7 @@ type CookieToSet = {
     options?: Record<string, unknown>
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const {pathname} = request.nextUrl
 
     // 1. Handle i18n first
