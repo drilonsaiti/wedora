@@ -87,6 +87,7 @@ export async function createWedding(input: CreateWeddingInput) {
         theme_hue: parsed.data.theme_hue,
         enable_find_seat: parsed.data.enable_find_seat,
         enable_photo_upload: parsed.data.enable_photo_upload,
+        auto_approve_uploads: parsed.data.auto_approve_uploads,
         max_photos_total: parsed.data.max_photos_total ?? null,
         max_photos_per_guest: parsed.data.max_photos_per_guest ?? null,
         photo_retention_days: parsed.data.photo_retention_days,
@@ -195,11 +196,12 @@ export async function updateWedding(weddingId: string, input: Partial<CreateWedd
         if (error) return {success: false as const, error: 'Dështoi ruajtja e ndryshimeve'}
     }
 
-    if (input.theme_hue !== undefined || input.enable_find_seat !== undefined || input.enable_photo_upload !== undefined) {
+    if (input.theme_hue !== undefined || input.enable_find_seat !== undefined || input.enable_photo_upload !== undefined || input.auto_approve_uploads !== undefined) {
         const settingsUpdates: WeddingSettingsUpdate = {}
         if (input.theme_hue !== undefined) settingsUpdates.theme_hue = input.theme_hue
         if (input.enable_find_seat !== undefined) settingsUpdates.enable_find_seat = input.enable_find_seat
         if (input.enable_photo_upload !== undefined) settingsUpdates.enable_photo_upload = input.enable_photo_upload
+        if (input.auto_approve_uploads !== undefined) settingsUpdates.auto_approve_uploads = input.auto_approve_uploads
         if (input.max_photos_total !== undefined) settingsUpdates.max_photos_total = input.max_photos_total || null
         if (input.max_photos_per_guest !== undefined) settingsUpdates.max_photos_per_guest = input.max_photos_per_guest || null
         if (input.photo_retention_days !== undefined) settingsUpdates.photo_retention_days = input.photo_retention_days // ← shtuar

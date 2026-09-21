@@ -9,6 +9,7 @@ type Props = { params: Promise<{ locale: string; slug: string }> }
 export default async function PublicUploadPage({params}: Props) {
     const {locale, slug} = await params
     const wedding = await getWeddingBySlug(slug)
+    const maxFileSizeMb = Number(process.env.MAX_FILE_SIZE_MB ?? 10);
     if (!wedding) notFound()
     if (!wedding.wedding_settings?.enable_photo_upload) notFound()
 
@@ -27,6 +28,7 @@ export default async function PublicUploadPage({params}: Props) {
                 <UploadForm
                     eventId={event.id}
                     maxPhotosPerGuest={wedding.wedding_settings.max_photos_per_guest}
+                    maxFileSizeMb={maxFileSizeMb}
                 />
             </div>
             <BottomNav

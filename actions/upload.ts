@@ -10,7 +10,8 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { processImage } from "@/lib/sharp";
 import { serverUploadSchema } from "@/schemas";
 
-const MAX_FILE_BYTES = 10 * 1024 * 1024;
+const MAX_FILE_BYTES =
+    Number(process.env.MAX_FILE_SIZE_MB ?? 10) * 1024 * 1024;
 
 const RATE_LIMIT_WINDOW_SECONDS = 60;
 

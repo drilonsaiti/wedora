@@ -55,6 +55,23 @@ export function invertUpdate(
 }
 
 
+/*
+ * Shared guest-name normalizer.
+ *
+ * Lets guests (and external RSVP integrations) be found without typing
+ * accents exactly, e.g. "Besartë" also matches "besarte". Mirrors the
+ * normalizeText() helpers already used in find-seat-client.tsx and
+ * home-search.tsx.
+ */
+export function normalizeGuestName(value: string): string {
+    return value
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .trim()
+        .toLocaleLowerCase()
+        .replace(/\s+/g, ' ')
+}
+
 const SHAPE_ICON_CLASSES: Record<TableShape, string> = {
     round: 'rounded-full',
     square: 'rounded-2xl',

@@ -32,6 +32,7 @@ import { cn, formatBytes, getOrCreateSessionId } from "@/lib/utils";
 interface UploadFormProps {
     eventId: string;
     maxPhotosPerGuest?: number | null;
+    maxFileSizeMb: number;
 }
 
 type UploadState = "idle" | "compressing" | "uploading" | "done" | "error";
@@ -314,11 +315,11 @@ type UploadFailure = {
     retryAfterSeconds?: number;
 };
 
-export function UploadForm({ eventId, maxPhotosPerGuest }: UploadFormProps) {
+export function UploadForm({ eventId, maxPhotosPerGuest,maxFileSizeMb, }: UploadFormProps) {
     const t = useTranslations("wedding.upload");
 
     const tv = useTranslations("validation");
-
+    const maxFileBytes = maxFileSizeMb * 1024 * 1024;
     /*
      * ============================================
      * FILTERS
@@ -453,7 +454,6 @@ export function UploadForm({ eventId, maxPhotosPerGuest }: UploadFormProps) {
      * FILE SELECTION
      * ============================================
      */
-    const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
     const handleFileSelect = useCallback(
         async (file: File) => {
@@ -469,7 +469,7 @@ export function UploadForm({ eventId, maxPhotosPerGuest }: UploadFormProps) {
 
             setSelectedFilter("none");
 
-            if (file.size > MAX_FILE_BYTES) {
+            if (file.size > maxFileBytes) {
                 setSelectedFile(null);
 
                 setPreview(null);
@@ -547,7 +547,7 @@ export function UploadForm({ eventId, maxPhotosPerGuest }: UploadFormProps) {
                 setPreview(URL.createObjectURL(file));
             }
         },
-        [t]
+        [t,maxFileBytes]
     );
 
     /*

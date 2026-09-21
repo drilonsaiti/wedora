@@ -1,4 +1,5 @@
 import { EditWeddingForm } from '@/components/admin/edit-wedding-form'
+import { RsvpApiKeyManager } from '@/components/admin/rsvp-api-key-manager'
 import { redirect } from '@/lib/navigation'
 import { createClient } from '@/lib/supabase/server'
 import {notFound} from "next/navigation";
@@ -80,9 +81,14 @@ export default async function WeddingSettingsPage({
     }
 
     return (
-        <main className="relative z-10 mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+        <main className="relative z-10 mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 sm:py-10">
             <EditWeddingForm
                 wedding={wedding}
+            />
+
+            <RsvpApiKeyManager
+                weddingId={weddingId}
+                weddingSlug={wedding.slug}
             />
         </main>
     )

@@ -1,9 +1,26 @@
+import { timingSafeEqual } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
+function safeEqual(left: string, right: string) {
+    const leftBuffer = Buffer.from(left)
+    const rightBuffer = Buffer.from(right)
+    if (leftBuffer.length !== rightBuffer.length) return false
+    return timingSafeEqual(leftBuffer, rightBuffer)
+}
+
 export async function GET(request: Request) {
-    const authHeader = request.headers.get('authorization')
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const cronSecret = process.env.CRON_SECRET
+
+    // Fail closed: never compare against "Bearer undefined" if the
+    // secret was not configured for this deployment.
+    if (!cronSecret) {
+        console.error('CRON_SECRET is not configured; refusing request')
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const authHeader = request.headers.get('authorization') ?? ''
+    if (!safeEqual(authHeader, `Bearer ${cronSecret}`)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

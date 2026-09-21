@@ -22,6 +22,8 @@ export interface TableSeat {
     relative_y: number;
 }
 
+export type RsvpStatus = 'pending' | 'confirmed' | 'declined';
+
 export interface Guest {
     id: string;
     first_name: string;
@@ -30,6 +32,10 @@ export interface Guest {
     table_id: string | null;
     seat_id: string | null;
     created_at: string;
+    rsvp_status: RsvpStatus;
+    rsvp_party_size: number | null;
+    rsvp_note: string | null;
+    rsvp_responded_at: string | null;
 }
 
 export interface GuestWithTable extends Guest {

@@ -4,6 +4,7 @@ import {
     useEffect,
     useState,
 } from 'react'
+import Link from "next/link";
 
 interface GlobalErrorProps {
     error: Error & {
@@ -173,7 +174,7 @@ export default function GlobalError({
                             BRAND
                         ================================= */}
                 <div className="mb-7 flex justify-center">
-                    <a
+                    <Link
                         href="/"
                         className="inline-flex items-center gap-2.5 text-[#231f1c] no-underline"
                     >
@@ -191,7 +192,7 @@ export default function GlobalError({
                         <span className="font-serif text-xl tracking-tight">
                                     Wedora
                                 </span>
-                    </a>
+                    </Link>
                 </div>
 
                 {/* =================================
@@ -266,12 +267,12 @@ export default function GlobalError({
                             {t.retry}
                         </button>
 
-                        <a
+                        <Link
                             href="/"
                             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#e1d9d2] bg-white px-7 py-3 text-xs font-medium tracking-[0.05em] text-[#231f1c] no-underline transition hover:-translate-y-0.5 hover:bg-[#f5f1ed] focus:outline-none focus:ring-2 focus:ring-[#9a4b62]/20 focus:ring-offset-2"
                         >
                             {t.home}
-                        </a>
+                        </Link>
                     </div>
 
                     {/* =================================

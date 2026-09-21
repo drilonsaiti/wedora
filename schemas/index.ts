@@ -242,6 +242,7 @@ export const createWeddingSchema = z
 
         enable_find_seat: z.boolean().default(true),
         enable_photo_upload: z.boolean().default(true),
+        auto_approve_uploads: z.boolean().default(false),
 
         max_photos_total: z.preprocess(
             (val) =>
@@ -330,6 +331,7 @@ export const editWeddingSchema = z
 
         enable_find_seat: z.boolean(),
         enable_photo_upload: z.boolean(),
+        auto_approve_uploads: z.boolean(),
     })
     .refine(
         (data) =>
@@ -343,3 +345,101 @@ export const editWeddingSchema = z
 
 export type EditWeddingInput =
     z.infer<typeof editWeddingSchema>
+
+/*
+ * ============================================
+ * RSVP
+ * ============================================
+ */
+export const rsvpStatusEnum = z.enum(['pending', 'confirmed', 'declined'])
+
+export type RsvpStatusValue = z.infer<typeof rsvpStatusEnum>
+
+const rsvpNameSchema = z.object({
+    weddingSlug: z
+        .string()
+        .trim()
+        .min(1, 'validation.required')
+        .max(60, 'validation.maxSixtyChars'),
+
+    firstName: z
+        .string()
+        .trim()
+        .min(1, 'validation.required')
+        .max(50, 'validation.maxFiftyChars'),
+
+    lastName: z
+        .string()
+        .trim()
+        .min(1, 'validation.required')
+        .max(50, 'validation.maxFiftyChars'),
+})
+
+export const rsvpLookupSchema = rsvpNameSchema
+
+export type RsvpLookupInput = z.infer<typeof rsvpLookupSchema>
+
+export const rsvpUpdateSchema = rsvpNameSchema.extend({
+    status: rsvpStatusEnum,
+
+    partySize: z.preprocess(
+        (val) =>
+            val === '' || val === undefined || val === null || Number.isNaN(val)
+                ? undefined
+                : val,
+        z
+            .number()
+            .int('validation.invalidNumber')
+            .min(0, 'validation.positiveOrZero')
+            .max(50, 'validation.maxPartySize')
+            .optional()
+    ),
+
+    note: z
+        .string()
+        .trim()
+        .max(500, 'validation.messageLength')
+        .optional()
+        .nullable(),
+})
+
+export type RsvpUpdateInput = z.infer<typeof rsvpUpdateSchema>
+
+export const rsvpManualUpdateSchema = z.object({
+    guestId: z.string().uuid('validation.invalidId'),
+    status: rsvpStatusEnum,
+
+    partySize: z.preprocess(
+        (val) =>
+            val === '' || val === undefined || val === null || Number.isNaN(val)
+                ? undefined
+                : val,
+        z
+            .number()
+            .int('validation.invalidNumber')
+            .min(0, 'validation.positiveOrZero')
+            .max(50, 'validation.maxPartySize')
+            .optional()
+            .nullable()
+    ),
+
+    note: z
+        .string()
+        .trim()
+        .max(500, 'validation.messageLength')
+        .optional()
+        .nullable(),
+})
+
+export type RsvpManualUpdateInput = z.infer<typeof rsvpManualUpdateSchema>
+
+export const rsvpApiKeyLabelSchema = z.object({
+    label: z
+        .string()
+        .trim()
+        .max(60, 'validation.maxSixtyChars')
+        .optional()
+        .or(z.literal('')),
+})
+
+export type RsvpApiKeyLabelInput = z.infer<typeof rsvpApiKeyLabelSchema>
