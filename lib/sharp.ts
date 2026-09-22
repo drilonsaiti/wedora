@@ -39,7 +39,7 @@ const HEIC_BRANDS = new Set([
     'msf1',
 ])
 
-function isHeicBuffer(buffer: Buffer): boolean {
+export function isHeicBuffer(buffer: Buffer): boolean {
     if (buffer.length < 12) {
         return false
     }

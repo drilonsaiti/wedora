@@ -2,8 +2,8 @@
 
 Wedora is a multi-tenant wedding-guest-experience platform. Each wedding gets its own
 branded microsite (`your-domain.com/<slug>`) for guest photo sharing and find‑my‑seat,
-plus a couple/admin dashboard for seating design, photo moderation, gallery sharing, and (new) RSVP — all backed by
-Next.js Server Actions and Supabase (Postgres + RLS + Auth +
+plus a couple/admin dashboard for seating design, photo moderation, gallery sharing, and
+(new) RSVP — all backed by Next.js Server Actions and Supabase (Postgres + RLS + Auth +
 Storage).
 
 This README documents the project **as it actually behaves today**, including a security
@@ -24,6 +24,7 @@ hardening pass that was applied on top of the original schema (see
 - [Photo uploads](#photo-uploads)
 - [RSVP API](#rsvp-api)
 - [Local development](#local-development)
+- [Tests](#tests)
 - [Deployment (Vercel + Supabase)](#deployment-vercel--supabase)
 - [Manual QA checklist](#manual-qa-checklist)
 - [Security notes](#security-notes)
@@ -48,13 +49,14 @@ hardening pass that was applied on top of the original schema (see
   of approved photos, with independent "show messages" and "favourites only" toggles.
 - **RSVP API** *(new)* — an external site/form can confirm, decline, or reset a guest's
   RSVP by name through a per-wedding API key, without ever touching Supabase directly.
-  The admin guest list also shows each guest's current RSVP status as a colored badge (pending/confirmed/declined) that
-  an admin can click to cycle and set manually —
+  The admin guest list also shows each guest's current RSVP status as a colored badge
+  (pending/confirmed/declined) that an admin can click to cycle and set manually —
   e.g. after a phone call or paper reply. See [RSVP API](#rsvp-api).
 - **Multi-tenant** — any number of weddings on one deployment, each with its own slug,
   theme hue, and feature toggles (`enable_find_seat`, `enable_photo_upload`,
   `enable_couple_login`, photo limits, retention window).
-- **Three access roles** — platform admin, wedding owner, and an assigned couple login (see below).
+- **Three access roles** — platform admin, wedding owner, and an assigned couple login
+  (see below).
 - **i18n** — English, German, French, Italian, Turkish, Albanian, Macedonian via
   `next-intl`.
 
@@ -64,16 +66,17 @@ hardening pass that was applied on top of the original schema (see
 
 - **Next.js 16 App Router** (Turbopack), server components by default, client
   components only where there's real interactivity.
-- **Supabase** — Postgres with Row Level Security enforced server-side, Auth (admin + couple logins), Storage (`photos`,
-  `thumbnails`, `photo-exports` buckets,
+- **Supabase** — Postgres with Row Level Security enforced server-side, Auth
+  (admin + couple logins), Storage (`photos`, `thumbnails`, `photo-exports` buckets,
   all private).
-- **Server Actions** for essentially all reads/writes from the app itself (`actions/*.ts`); a small number of **Route
-  Handlers** under `app/api/**` for
+- **Server Actions** for essentially all reads/writes from the app itself
+  (`actions/*.ts`); a small number of **Route Handlers** under `app/api/**` for
   things Server Actions can't do: cron jobs, the streaming ZIP download, the
   Supabase auth callback, and the RSVP API that's meant to be called from *outside*
   this app.
-- **Sharp** for server-side image processing, **fflate** for streaming ZIP archives, **@dnd-kit** for the seating
-  designer, **framer-motion** for guest-facing UI, **next-intl** for i18n, **zod** for all input validation.
+- **Sharp** for server-side image processing, **fflate** for streaming ZIP archives,
+  **@dnd-kit** for the seating designer, **framer-motion** for guest-facing UI,
+  **next-intl** for i18n, **zod** for all input validation.
 - Every table/venue/photo mutation goes through a **service-role Supabase client**
   *after* an explicit, hand-written authorization check in the action itself — RLS is
   a second line of defense, not the only one.
@@ -157,11 +160,11 @@ wedora/
 
 Three distinct identities, all backed by Supabase Auth:
 
-| Role               | How it's granted                                                                                                     | Scope                                                                            | Where it's used                             |
-|--------------------|----------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|---------------------------------------------|
-| **Platform admin** | A row in `public.admins` (created manually via SQL — see setup)                                                      | Every wedding                                                                    | `/admin/**`                                 |
-| **Wedding owner**  | Whoever's `auth.uid()` called `createWedding()` — stored as `weddings.owner_user_id`                                 | Only their own wedding                                                           | Server actions & RLS (`is_wedding_owner()`) |
-| **Couple**         | Auto-provisioned when a wedding is created with a groom/bride email; `app_metadata = { role: 'couple', wedding_id }` | Only their own wedding, and only if `wedding_settings.enable_couple_login` is on | `/couple/**`                                |
+| Role | How it's granted | Scope | Where it's used |
+|---|---|---|---|
+| **Platform admin** | A row in `public.admins` (created manually via SQL — see setup) | Every wedding | `/admin/**` |
+| **Wedding owner** | Whoever's `auth.uid()` called `createWedding()` — stored as `weddings.owner_user_id` | Only their own wedding | Server actions & RLS (`is_wedding_owner()`) |
+| **Couple** | Auto-provisioned when a wedding is created with a groom/bride email; `app_metadata = { role: 'couple', wedding_id }` | Only their own wedding, and only if `wedding_settings.enable_couple_login` is on | `/couple/**` |
 
 Every server action that touches wedding-scoped data (`requireWeddingAccess`,
 `requireWeddingReadAccess`, `requireWeddingPhotoAccess`, `authorizePhotoZipWedding`,
@@ -196,17 +199,17 @@ feature.
 
 Copy `.env.example` to `.env.local` and fill in:
 
-| Variable                        | Required    | Notes                                                                                                       |
-|---------------------------------|-------------|-------------------------------------------------------------------------------------------------------------|
-| `NEXT_PUBLIC_SUPABASE_URL`      | yes         | Your Supabase project URL                                                                                   |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes         | Public by design — shipped to the browser                                                                   |
-| `SUPABASE_SERVICE_ROLE_KEY`     | yes         | **Server-only.** Never expose to the client                                                                 |
-| `NEXT_PUBLIC_APP_URL`           | yes         | Used to build gallery/QR links                                                                              |
-| `NEXT_PUBLIC_EVENT_ID`          | legacy      | Only used by the old single-event `/upload` fallback; not needed for the multi-tenant `/[slug]/upload` flow |
-| `MAX_FILE_SIZE_MB`              | yes         | Upload size cap (also hard-capped at 10 MB server-side)                                                     |
-| `CRON_SECRET`                   | yes         | Bearer secret for `/api/cron/cleanup-photos`. **Must be set** — the route now fails closed if it's missing  |
-| `ZIP_WORKER_SECRET`             | yes         | Bearer secret for `/api/internal/photo-zip-worker`                                                          |
-| `UPLOAD_RATE_LIMIT_SECRET`      | recommended | HMAC pepper for hashing session/IP rate-limit keys; falls back to the service role key if unset             |
+| Variable | Required | Notes |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | yes | Your Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | Public by design — shipped to the browser |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes | **Server-only.** Never expose to the client |
+| `NEXT_PUBLIC_APP_URL` | yes | Used to build gallery/QR links |
+| `NEXT_PUBLIC_EVENT_ID` | legacy | Only used by the old single-event `/upload` fallback; not needed for the multi-tenant `/[slug]/upload` flow |
+| `MAX_FILE_SIZE_MB` | yes | Upload size cap (also hard-capped at 10 MB server-side) |
+| `CRON_SECRET` | yes | Bearer secret for `/api/cron/cleanup-photos`. **Must be set** — the route now fails closed if it's missing |
+| `ZIP_WORKER_SECRET` | yes | Bearer secret for `/api/internal/photo-zip-worker` |
+| `UPLOAD_RATE_LIMIT_SECRET` | recommended | HMAC pepper for hashing session/IP rate-limit keys; falls back to the service role key if unset |
 
 ---
 
@@ -248,18 +251,19 @@ Copy `.env.example` to `.env.local` and fill in:
    insert into public.admins (id, email)
    values ('USER-UUID-FROM-AUTH', 'admin@yourdomain.com');
    ```
-6. **Log in** at `/admin/login` with that user and create your first wedding from **Admin → Weddings → New**.
+6. **Log in** at `/admin/login` with that user and create your first wedding from
+   **Admin → Weddings → New**.
 
 ---
 
 ## RLS & security summary
 
-| Data                                                      | Who can read it                                                                                                                                                                | Who can write it                                                                                 |
-|-----------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| A wedding's guests / tables / venue layout                | Admin, that wedding's owner, or its assigned couple (if `enable_couple_login`) — **always via a service-role client after an app-level check**, never a direct anonymous query | Admin or that wedding's owner                                                                    |
-| A wedding's photos                                        | Admin, owner, couple (moderation view); the public only via a valid **gallery token**, scoped to that wedding, approved + public + non-hidden photos only                      | Guests may *insert* (upload) only, subject to server-side rate limits and per-wedding photo caps |
-| RSVP status                                               | Admin/owner/couple via the app; externally, only with a valid, non-revoked **per-wedding RSVP API key**                                                                        | Admin/owner (manual override) or a valid RSVP API key, scoped to that one wedding                |
-| Storage objects (`photos`, `thumbnails`, `photo-exports`) | Admin/owner/couple via short-lived signed URLs generated server-side                                                                                                           | Guests may upload; nothing is ever publicly readable by path                                     |
+| Data | Who can read it | Who can write it |
+|---|---|---|
+| A wedding's guests / tables / venue layout | Admin, that wedding's owner, or its assigned couple (if `enable_couple_login`) — **always via a service-role client after an app-level check**, never a direct anonymous query | Admin or that wedding's owner |
+| A wedding's photos | Admin, owner, couple (moderation view); the public only via a valid **gallery token**, scoped to that wedding, approved + public + non-hidden photos only | Guests may *insert* (upload) only, subject to server-side rate limits and per-wedding photo caps |
+| RSVP status | Admin/owner/couple via the app; externally, only with a valid, non-revoked **per-wedding RSVP API key** | Admin/owner (manual override) or a valid RSVP API key, scoped to that one wedding |
+| Storage objects (`photos`, `thumbnails`, `photo-exports`) | Admin/owner/couple via short-lived signed URLs generated server-side | Guests may upload; nothing is ever publicly readable by path |
 
 As of the `20260920090000_harden_public_rls_leaks.sql` migration, **nothing in this
 app is readable with just the public anon key** — every guest, table, venue-element,
@@ -321,6 +325,31 @@ itself can't decode a given file (corrupt upload, an exotic HEIC variant),
 `processImage()` throws and the upload fails cleanly with `INVALID_FILE`
 rather than silently corrupting or mis-processing it.
 
+### Shared gallery caching
+
+`actions/gallery.ts`'s `getGalleryPhotosAction()` used to call Supabase
+Storage's `createSignedUrls` fresh on **every** gallery page load/scroll,
+even though the signed URLs it hands out are valid for 24h and the
+underlying photos don't change once approved. Two costs from that: every
+repeat visitor burned a fresh Storage API round-trip for photos nobody had
+touched, and — worse for actual page speed — the signed URL string itself
+changed on every visit, so the browser (and any CDN in front of it) could
+never recognize "I already have this image" and cache it.
+
+The photo-query + signed-URL-signing step is now wrapped in `unstable_cache`,
+keyed by `(wedding_id, photo_filter, offset)` and revalidated every hour —
+comfortably inside the 24h signed-URL expiry, so a cached response's URLs
+are never served after they'd have gone stale. It's tagged with the same
+`gallery-wedding-${weddingId}` tag that photo moderation actions
+(`actions/admin.ts`'s `revalidateWeddingPhotos()`) already invalidate on
+approve/hide/favourite/new-upload, so a moderation change still shows up
+immediately rather than waiting out the hour. `show_messages` (which
+redacts guest name/message per gallery link) is deliberately *not* part of
+the cache key — it's applied after the cached fetch returns, so two
+different share links into the same wedding's photos (one showing messages,
+one not) share the same cached signed URLs instead of duplicating the
+Storage signing work.
+
 ---
 
 ## RSVP API
@@ -354,8 +383,8 @@ in this order, first one found wins):
    browser history, or a reverse proxy's logs, so prefer a header when you can. Use
    this only when the calling tool genuinely can't set headers.
 
-Plus a `weddingSlug` (the same slug in `https://your-domain.com/<slug>`) identifying *which* wedding this key/request is
-for — a key only works for the wedding it was
+Plus a `weddingSlug` (the same slug in `https://your-domain.com/<slug>`) identifying
+*which* wedding this key/request is for — a key only works for the wedding it was
 created under.
 
 Every accepted channel is verified identically once the raw key is extracted (hashed,
@@ -426,15 +455,7 @@ Authorization: Bearer wr_live_...
 ```json
 {
   "guests": [
-    {
-      "id": "...",
-      "firstName": "...",
-      "lastName": "...",
-      "rsvpStatus": "confirmed",
-      "rsvpPartySize": 2,
-      "rsvpNote": null,
-      "rsvpRespondedAt": "..."
-    }
+    { "id": "...", "firstName": "...", "lastName": "...", "rsvpStatus": "confirmed", "rsvpPartySize": 2, "rsvpNote": null, "rsvpRespondedAt": "..." }
   ],
   "total": 42,
   "limit": 100,
@@ -446,16 +467,16 @@ Authorization: Bearer wr_live_...
 
 Every error is `{ "error": "<human message>", "code": "<CODE>" }`.
 
-| Status | Code                                                    | Meaning                                                                 |
-|--------|---------------------------------------------------------|-------------------------------------------------------------------------|
-| 400    | `VALIDATION_ERROR` / `MISSING_WEDDING` / `INVALID_JSON` | Malformed or missing field                                              |
-| 401    | `MISSING_API_KEY`                                       | No key found in `Authorization`, `X-Api-Key`, or `?api_key=`            |
-| 401    | `INVALID_API_KEY`                                       | Wrong, unknown, or revoked key for that wedding                         |
-| 404    | `WEDDING_NOT_FOUND`                                     | No wedding with that slug                                               |
-| 404    | `GUEST_NOT_FOUND`                                       | No guest matches that name in this wedding                              |
-| 409    | `AMBIGUOUS_GUEST`                                       | Two or more guests share that exact name                                |
-| 429    | `RATE_LIMITED`                                          | Too many requests from this key; see the `Retry-After` header (seconds) |
-| 500    | `*_FAILED` / `UNEXPECTED_ERROR`                         | Server-side failure — safe to retry                                     |
+| Status | Code | Meaning |
+|---|---|---|
+| 400 | `VALIDATION_ERROR` / `MISSING_WEDDING` / `INVALID_JSON` | Malformed or missing field |
+| 401 | `MISSING_API_KEY` | No key found in `Authorization`, `X-Api-Key`, or `?api_key=` |
+| 401 | `INVALID_API_KEY` | Wrong, unknown, or revoked key for that wedding |
+| 404 | `WEDDING_NOT_FOUND` | No wedding with that slug |
+| 404 | `GUEST_NOT_FOUND` | No guest matches that name in this wedding |
+| 409 | `AMBIGUOUS_GUEST` | Two or more guests share that exact name |
+| 429 | `RATE_LIMITED` | Too many requests from this key; see the `Retry-After` header (seconds) |
+| 500 | `*_FAILED` / `UNEXPECTED_ERROR` | Server-side failure — safe to retry |
 
 ### 5. Rate limits
 
@@ -502,7 +523,30 @@ npm run dev
 App runs at `http://localhost:3000`. Other scripts: `npm run build`, `npm run start`,
 `npm run lint` (runs `eslint .` against `eslint.config.mjs`, ESLint 9's flat-config
 format — Next.js 16 dropped the `next lint` subcommand entirely, and the old
-`.eslintrc.json` predated flat config anyway, so both had to change together).
+`.eslintrc.json` predated flat config anyway, so both had to change together),
+`npm test` (see [Tests](#tests)).
+
+---
+
+## Tests
+
+```bash
+npm test              # run once
+npm run test:watch    # re-run on change
+npm run test:coverage # with a coverage report
+```
+
+[Vitest](https://vitest.dev/)-based, no database or network required. Scoped
+deliberately to pure logic and the RSVP API's auth resolution (`lib/rsvp-auth.ts`,
+`lib/sharp.ts`'s HEIC detection, `lib/utils.ts`, `schemas/index.ts`) — the parts of
+the codebase where a subtle bug is a security hole or a silently-wrong guest match,
+not just a broken UI. **This is a starting point, not full coverage**: React
+components, Server Actions end-to-end, the RSVP API route handlers as HTTP
+endpoints, and the Postgres RPC functions are all untested for now. See
+`tests/README.md` for exactly what's covered and, just as importantly, what isn't
+and why — including what tool would actually be right for each of those (Testing
+Library for components, pgTAP for the RPC functions, etc.), so extending this
+doesn't mean reaching for the same hammer everywhere.
 
 ---
 
