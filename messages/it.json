@@ -720,14 +720,14 @@
       "pointThree": "Pagamento unico"
     },
     "preview": {
-      "event": "Evento",
-      "guests": "Invitati",
-      "tables": "Tavoli",
-      "photos": "Foto",
-      "seatingTitle": "Disposizione dei posti",
-      "seatingDescription": "Trascina e rilascia per sistemare i tavoli",
-      "findSeat": "Trova il tuo posto",
-      "yourTable": "Il tuo tavolo"
+      "eyebrow": "Sistemazione degli invitati",
+      "tabGuests": "Invitati",
+      "tabTables": "Tavoli",
+      "tabDesigner": "Designer",
+      "statTotal": "Totale",
+      "statSeated": "Sistemati",
+      "statUnseated": "Non sistemati",
+      "yourSeatEyebrow": "Il tuo posto"
     },
     "value": {
       "title": "Niente fogli di calcolo. Niente planimetrie stampate.",
@@ -749,6 +749,10 @@
         "photos": {
           "title": "Galleria fotografica",
           "description": "Gli invitati caricano foto direttamente dai loro telefoni mentre la coppia le gestisce e le condivide."
+        },
+        "rsvp": {
+          "title": "Monitoraggio RSVP",
+          "description": "Gli invitati confermano o declinano direttamente sul tuo sito, e ogni risposta aggiorna istantaneamente la lista degli invitati -- niente più fogli di calcolo da inseguire."
         },
         "theme": {
           "title": "Tema personalizzato",

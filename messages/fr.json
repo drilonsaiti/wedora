@@ -567,6 +567,10 @@
           "title": "Galerie photo",
           "description": "Les invités importent des photos directement depuis leur téléphone pendant que le couple les gère et les partage."
         },
+        "rsvp": {
+          "title": "Suivi des RSVP",
+          "description": "Les invités confirment ou déclinent directement sur votre site, et chaque réponse met à jour la liste des invités instantanément -- plus de tableur à courir après."
+        },
         "theme": {
           "title": "Thème personnalisé",
           "description": "Chaque mariage dispose de ses propres couleurs, noms et URL publique."
@@ -585,14 +589,14 @@
       "demo": "Voir la démo"
     },
     "preview": {
-      "event": "Événement",
-      "guests": "Invités",
-      "tables": "Tables",
-      "photos": "Photos",
-      "seatingTitle": "Plan de table",
-      "seatingDescription": "Glissez-déposez pour organiser les tables",
-      "findSeat": "Trouvez votre place",
-      "yourTable": "Votre table"
+      "eyebrow": "Placement des invités",
+      "tabGuests": "Invités",
+      "tabTables": "Tables",
+      "tabDesigner": "Concepteur",
+      "statTotal": "Total",
+      "statSeated": "Placés",
+      "statUnseated": "Non placés",
+      "yourSeatEyebrow": "Votre place"
     },
     "value": {
       "title": "Pas de feuilles de calcul. Pas de plans de table imprimés.",

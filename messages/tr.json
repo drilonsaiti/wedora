@@ -720,14 +720,14 @@
       "pointThree": "Tek seferlik ödeme"
     },
     "preview": {
-      "event": "Etkinlik",
-      "guests": "Davetliler",
-      "tables": "Masalar",
-      "photos": "Fotoğraflar",
-      "seatingTitle": "Oturma planı",
-      "seatingDescription": "Masaları düzenlemek için sürükle ve bırak",
-      "findSeat": "Yerini bul",
-      "yourTable": "Masanız"
+      "eyebrow": "Misafir Oturma Düzeni",
+      "tabGuests": "Misafirler",
+      "tabTables": "Masalar",
+      "tabDesigner": "Tasarımcı",
+      "statTotal": "Toplam",
+      "statSeated": "Oturtulmuş",
+      "statUnseated": "Oturtulmamış",
+      "yourSeatEyebrow": "Yeriniz"
     },
     "value": {
       "title": "Elektronik tablo yok. Basılı oturma planı yok.",
@@ -749,6 +749,10 @@
         "photos": {
           "title": "Fotoğraf Galerisi",
           "description": "Davetliler doğrudan telefonlarından fotoğraf yüklerken çift bunları yönetir ve paylaşır."
+        },
+        "rsvp": {
+          "title": "RSVP Takibi",
+          "description": "Misafirler sitenizde doğrudan onaylar veya reddeder ve her yanıt misafir listesini anında günceller -- peşinden koşulacak elektronik tablo yok."
         },
         "theme": {
           "title": "Özel Tema",

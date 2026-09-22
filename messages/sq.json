@@ -720,14 +720,14 @@
       "pointThree": "Pagesë njëherëshe"
     },
     "preview": {
-      "event": "Ngjarja",
-      "guests": "Të ftuarit",
-      "tables": "Tavolinat",
-      "photos": "Fotot",
-      "seatingTitle": "Plani i uljes",
-      "seatingDescription": "Tërhiq dhe lësho për të rregulluar tavolinat",
-      "findSeat": "Gjej vendin tënd",
-      "yourTable": "Tavolina jote"
+      "eyebrow": "Vendosja e të ftuarve",
+      "tabGuests": "Të ftuar",
+      "tabTables": "Tavolina",
+      "tabDesigner": "Dizajneri",
+      "statTotal": "Totali",
+      "statSeated": "Të vendosur",
+      "statUnseated": "Të pavendosur",
+      "yourSeatEyebrow": "Vendi juaj"
     },
     "value": {
       "title": "Pa tabela Excel. Pa plane uljeje të printuara.",
@@ -749,6 +749,10 @@
         "photos": {
           "title": "Galeria e Fotove",
           "description": "Të ftuarit ngarkojnë foto direkt nga telefoni, ndërsa çifti i menaxhon dhe i shpërndan."
+        },
+        "rsvp": {
+          "title": "Ndjekja e RSVP",
+          "description": "Të ftuarit konfirmojnë ose refuzojnë direkt në faqen tuaj, dhe çdo përgjigje përditëson menjëherë listën e të ftuarve -- pa spreadsheet për të ndjekur."
         },
         "theme": {
           "title": "Temë e Personalizuar",

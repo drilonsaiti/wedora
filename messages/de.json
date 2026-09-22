@@ -583,6 +583,10 @@
           "title": "Fotogalerie",
           "description": "Gäste laden Fotos direkt von ihrem Smartphone hoch, während das Brautpaar sie verwaltet und teilt."
         },
+        "rsvp": {
+          "title": "RSVP-Verfolgung",
+          "description": "Gäste bestätigen oder lehnen direkt auf Ihrer Seite ab, und jede Antwort aktualisiert die Gästeliste sofort -- keine Tabelle, der Sie hinterherjagen müssen."
+        },
         "theme": {
           "title": "Individuelles Design",
           "description": "Jede Hochzeit erhält eigene Farben, Namen und eine öffentliche URL."
@@ -604,14 +608,14 @@
       "demo": "Demo ansehen"
     },
     "preview": {
-      "guests": "Gäste",
-      "tables": "Tische",
-      "photos": "Fotos",
-      "event": "Veranstaltung",
-      "seatingTitle": "Sitzplan",
-      "seatingDescription": "Tische per Drag-and-drop anordnen",
-      "findSeat": "Sitzplatz finden",
-      "yourTable": "Dein Tisch"
+      "eyebrow": "Gäste-Sitzordnung",
+      "tabGuests": "Gäste",
+      "tabTables": "Tische",
+      "tabDesigner": "Designer",
+      "statTotal": "Gesamt",
+      "statSeated": "Platziert",
+      "statUnseated": "Nicht platziert",
+      "yourSeatEyebrow": "Ihr Sitzplatz"
     },
     "howItWorks": {
       "steps": {

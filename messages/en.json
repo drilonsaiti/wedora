@@ -709,6 +709,7 @@
       "pricing": "Pricing",
       "demo": "View demo"
     },
+
     "hero": {
       "eyebrow": "Wedding Management Platform",
       "title": "Every guest, seated. Every moment, saved.",
@@ -720,14 +721,14 @@
       "pointThree": "One-time payment"
     },
     "preview": {
-      "event": "Event",
-      "guests": "Guests",
-      "tables": "Tables",
-      "photos": "Photos",
-      "seatingTitle": "Seating plan",
-      "seatingDescription": "Drag and drop to arrange tables",
-      "findSeat": "Find your seat",
-      "yourTable": "Your table"
+      "eyebrow": "Guest Seating",
+      "tabGuests": "Guests",
+      "tabTables": "Tables",
+      "tabDesigner": "Designer",
+      "statTotal": "Total",
+      "statSeated": "Seated",
+      "statUnseated": "Unseated",
+      "yourSeatEyebrow": "Your seat"
     },
     "value": {
       "title": "No spreadsheets. No printed seating charts.",
@@ -749,6 +750,10 @@
         "photos": {
           "title": "Photo Gallery",
           "description": "Guests upload photos directly from their phones while the couple manages and shares them."
+        },
+        "rsvp": {
+          "title": "RSVP Tracking",
+          "description": "Guests confirm or decline right on your site, and every response updates the guest list instantly -- no spreadsheet to chase."
         },
         "theme": {
           "title": "Custom Theme",

@@ -1,43 +1,51 @@
-import {Camera, LayoutGrid, MapPin, Palette} from 'lucide-react'
-import {getTranslations} from 'next-intl/server'
-import {SectionHeading} from "@/components/ui/SectionHeading";
+import {
+    Camera,
+    ClipboardCheck,
+    LayoutGrid,
+    MapPin,
+    Palette,
+} from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 
 const BENEFITS = [
     {
-        id: 'seat',
+        id: "seat",
         icon: MapPin,
-        className: 'lg:col-span-7',
+        className: "lg:col-span-7",
     },
     {
-        id: 'guests',
+        id: "guests",
         icon: LayoutGrid,
-        className: 'lg:col-span-5',
+        className: "lg:col-span-5",
     },
     {
-        id: 'photos',
+        id: "rsvp",
+        icon: ClipboardCheck,
+        className: "lg:col-span-5",
+    },
+    {
+        id: "photos",
         icon: Camera,
-        className: 'lg:col-span-5',
+        className: "lg:col-span-7",
     },
     {
-        id: 'theme',
+        id: "theme",
         icon: Palette,
-        className: 'lg:col-span-7',
+        className: "lg:col-span-12",
     },
-] as const
+] as const;
 
-function FeatureDecoration({type}: { type: string }) {
-    if (type === 'seat') {
+function FeatureDecoration({ type }: { type: string }) {
+    if (type === "seat") {
         return (
-            <div
-                className="absolute bottom-[-45px] right-[-15px] w-[55%] min-w-[260px] rounded-[1.7rem] border border-border/70 bg-background p-4 shadow-xl transition-transform duration-500 group-hover:-translate-y-2">
+            <div className="absolute bottom-[-45px] right-[-15px] w-[55%] min-w-[260px] rounded-[1.7rem] border border-border/70 bg-background p-4 shadow-xl transition-transform duration-500 group-hover:-translate-y-2">
                 <p className="mb-3 text-[9px] uppercase tracking-widest text-muted-foreground">
                     Find your seat
                 </p>
 
                 <div className="rounded-xl border border-border bg-card px-3 py-3">
-                    <p className="text-[10px] text-muted-foreground">
-                        Emma Wilson
-                    </p>
+                    <p className="text-[10px] text-muted-foreground">Emma Wilson</p>
 
                     <div className="mt-3 flex items-end justify-between">
                         <div>
@@ -45,22 +53,19 @@ function FeatureDecoration({type}: { type: string }) {
                                 Your table
                             </p>
 
-                            <p className="mt-0.5 font-serif text-2xl">
-                                Table 02
-                            </p>
+                            <p className="mt-0.5 font-serif text-2xl">Table 02</p>
                         </div>
 
-                        <MapPin className="h-4 w-4 text-[hsl(var(--primary))]"/>
+                        <MapPin className="h-4 w-4 text-[hsl(var(--primary))]" />
                     </div>
                 </div>
             </div>
-        )
+        );
     }
 
-    if (type === 'guests') {
+    if (type === "guests") {
         return (
-            <div
-                className="absolute bottom-[-25px] right-[-20px] grid w-[55%] grid-cols-2 gap-2 rotate-[-4deg] opacity-90">
+            <div className="absolute bottom-[-25px] right-[-20px] grid w-[55%] grid-cols-2 gap-2 rotate-[-4deg] opacity-90">
                 {[1, 2, 3, 4].map((item) => (
                     <div
                         key={item}
@@ -68,10 +73,38 @@ function FeatureDecoration({type}: { type: string }) {
                     />
                 ))}
             </div>
-        )
+        );
     }
 
-    if (type === 'photos') {
+    if (type === "rsvp") {
+        return (
+            <div className="absolute bottom-[-40px] right-[-15px] w-[60%] min-w-[240px] space-y-2 rounded-[1.7rem] border border-border/70 bg-background p-4 shadow-xl transition-transform duration-500 group-hover:-translate-y-2">
+                <p className="mb-1 text-[9px] uppercase tracking-widest text-muted-foreground">
+                    RSVP
+                </p>
+
+                <div className="flex items-center justify-between rounded-xl border border-border bg-card px-3 py-2.5">
+                    <span className="text-[10px] text-muted-foreground">Emma Wilson</span>
+
+                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[9px] font-medium text-emerald-700">
+            Confirmed
+          </span>
+                </div>
+
+                <div className="flex items-center justify-between rounded-xl border border-border bg-card px-3 py-2.5">
+          <span className="text-[10px] text-muted-foreground">
+            James Carter
+          </span>
+
+                    <span className="rounded-full border border-border/70 bg-secondary/40 px-2 py-0.5 text-[9px] font-medium text-muted-foreground">
+            Pending
+          </span>
+                </div>
+            </div>
+        );
+    }
+
+    if (type === "photos") {
         return (
             <div className="absolute -bottom-10 -right-6 grid w-[58%] rotate-3 grid-cols-2 gap-2">
                 {[1, 2, 3, 4].map((item) => (
@@ -79,42 +112,40 @@ function FeatureDecoration({type}: { type: string }) {
                         key={item}
                         className={`aspect-[4/5] rounded-xl ${
                             item % 2
-                                ? 'bg-gradient-to-br from-[hsl(var(--blush))] to-[hsl(var(--secondary))]'
-                                : 'bg-gradient-to-br from-[hsl(var(--gold))]/30 to-[hsl(var(--accent))]'
+                                ? "bg-gradient-to-br from-[hsl(var(--blush))] to-[hsl(var(--secondary))]"
+                                : "bg-gradient-to-br from-[hsl(var(--gold))]/30 to-[hsl(var(--accent))]"
                         }`}
                     />
                 ))}
             </div>
-        )
+        );
     }
 
     return (
-        <div
-            className="absolute bottom-[-50px] right-[-20px] h-[220px] w-[220px] rounded-full border-[35px] border-[hsl(var(--accent))] opacity-80 transition-transform duration-500 group-hover:scale-110"/>
-    )
+        <div className="absolute bottom-[-50px] right-[-20px] h-[220px] w-[220px] rounded-full border-[35px] border-[hsl(var(--accent))] opacity-80 transition-transform duration-500 group-hover:scale-110" />
+    );
 }
 
 export async function FeaturesSection() {
-    const t = await getTranslations('landing')
+    const t = await getTranslations("landing");
 
     return (
         <section id="features" className="px-6 py-24 lg:py-32">
             <div className="mx-auto max-w-7xl">
                 <SectionHeading
-                    eyebrow={t('features.eyebrow')}
-                    title={t('features.title')}
-                    description={t('features.description')}
+                    eyebrow={t("features.eyebrow")}
+                    title={t("features.title")}
+                    description={t("features.description")}
                 />
 
                 <div className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-12">
-                    {BENEFITS.map(({id, icon: Icon, className}) => (
+                    {BENEFITS.map(({ id, icon: Icon, className }) => (
                         <article
                             key={id}
                             className={`group relative min-h-[340px] overflow-hidden rounded-[2rem] border border-border/70 bg-card p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl md:p-9 ${className}`}
                         >
                             <div className="relative z-10 max-w-md">
-                                <div
-                                    className="mb-7 flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                                <div className="mb-7 flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
                                     <Icon
                                         className="h-5 w-5 text-[hsl(var(--primary))]"
                                         strokeWidth={1.5}
@@ -130,11 +161,11 @@ export async function FeaturesSection() {
                                 </p>
                             </div>
 
-                            <FeatureDecoration type={id}/>
+                            <FeatureDecoration type={id} />
                         </article>
                     ))}
                 </div>
             </div>
         </section>
-    )
+    );
 }
