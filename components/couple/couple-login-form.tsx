@@ -1,16 +1,27 @@
 'use client'
 
-import {useState} from 'react'
+import { useState } from 'react'
 
-import {AlertCircle, Eye, EyeOff, Loader2, Lock, LogIn, Mail,} from 'lucide-react'
-import {useRouter} from 'next/navigation'
-import {useTranslations} from 'next-intl'
-import {useForm} from 'react-hook-form'
-import {zodResolver} from '@hookform/resolvers/zod'
+import {
+    AlertCircle,
+    Eye,
+    EyeOff,
+    Loader2,
+    Lock,
+    LogIn,
+    Mail,
+} from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
-import {createClient} from '@/lib/supabase/client'
-import {Link} from '@/lib/navigation'
-import {coupleLoginSchema, type CoupleLoginValues,} from '@/schemas'
+import { loginCouple } from '@/actions/auth'
+import { Link } from '@/lib/navigation'
+import {
+    coupleLoginSchema,
+    type CoupleLoginValues,
+} from '@/schemas'
 
 export function CoupleLoginForm() {
     const router = useRouter()
@@ -31,7 +42,7 @@ export function CoupleLoginForm() {
     const {
         register,
         handleSubmit,
-        formState: {errors},
+        formState: { errors },
     } = useForm<CoupleLoginValues>({
         resolver: zodResolver(
             coupleLoginSchema
@@ -45,53 +56,47 @@ export function CoupleLoginForm() {
         setLoading(true)
 
         try {
-            const supabase =
-                await createClient()
-
-            const {
-                data,
-                error: authError,
-            } =
-                await supabase.auth.signInWithPassword(
-                    {
-                        email:
-                        values.email,
-                        password:
-                        values.password,
-                    }
+            const result =
+                await loginCouple(
+                    values.email,
+                    values.password
                 )
 
-            if (authError) {
-                setError(
-                    t(
-                        'invalidCredentials'
+            if (!result.success) {
+                if (
+                    result.code ===
+                    'RATE_LIMITED'
+                ) {
+                    setError(
+                        t(
+                            'rateLimited',
+                            {
+                                seconds:
+                                    result.retryAfterSeconds ??
+                                    60,
+                            }
+                        )
                     )
-                )
-                return
-            }
-
-            const appMetadata =
-                data.user
-                    .app_metadata as {
-                    role?: string
-                    wedding_id?: string
+                } else if (
+                    result.code ===
+                    'ACCESS_DENIED'
+                ) {
+                    setError(
+                        t('accessDenied')
+                    )
+                } else {
+                    setError(
+                        t(
+                            'invalidCredentials'
+                        )
+                    )
                 }
 
-            if (
-                appMetadata.role !==
-                'couple' ||
-                !appMetadata.wedding_id
-            ) {
-                await supabase.auth.signOut()
-
-                setError(
-                    t('accessDenied')
-                )
                 return
             }
 
             router.push(
-                `/couple/weddings/${appMetadata.wedding_id}`
+                `/couple/weddings/${result.weddingId}`
             )
 
             router.refresh()
@@ -252,7 +257,7 @@ export function CoupleLoginForm() {
                     role="alert"
                     className="flex items-start gap-3 rounded-2xl border border-destructive/15 bg-destructive/[0.06] px-4 py-3.5"
                 >
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive"/>
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
 
                     <p className="text-xs leading-5 text-destructive">
                         {error}
@@ -268,13 +273,13 @@ export function CoupleLoginForm() {
             >
                 {loading ? (
                     <>
-                        <Loader2 className="h-4 w-4 animate-spin"/>
+                        <Loader2 className="h-4 w-4 animate-spin" />
 
                         {tc('loading')}
                     </>
                 ) : (
                     <>
-                        <LogIn className="h-4 w-4"/>
+                        <LogIn className="h-4 w-4" />
 
                         {t('signIn')}
                     </>

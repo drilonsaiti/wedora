@@ -51,6 +51,7 @@
     "forgotPasswordDescription": "Saisissez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
     "sendResetLink": "Envoyer le lien de réinitialisation",
     "sendingLink": "Envoi du lien...",
+    "rateLimited": "Trop de tentatives. Veuillez réessayer dans {seconds, plural, one {# seconde} other {# secondes}}.",
     "unexpectedError": "Une erreur inattendue est survenue",
     "emailPlaceholder": "vous@exemple.com",
     "sendLink": "Envoyer le lien",
@@ -276,6 +277,8 @@
     "moreActions": "Plus d'actions",
     "manageSeating": "Gérer le plan de table",
     "managePhotos": "Gérer les photos",
+    "rsvpApiKey": "Clé API RSVP",
+    "quickEdit": "Modification rapide",
     "settingsPage": {
       "eyebrow": "Paramètres du mariage",
       "title": "Paramètres",

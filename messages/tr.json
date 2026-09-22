@@ -44,6 +44,7 @@
     "adminLoginDescription": "Düğünleri, davetlileri, oturma düzenini ve paylaşılan fotoğrafları yönetmek için giriş yapın.",
     "invalidCredentials": "E-posta veya şifre hatalı",
     "accessDenied": "Erişim reddedildi. Bu hesap yönetici hesabı değil.",
+    "rateLimited": "Çok fazla deneme. Lütfen {seconds, plural, one {# saniye} other {# saniye}} sonra tekrar deneyin.",
     "authentication": "Kimlik doğrulama",
     "checkEmail": "E-postanızı kontrol edin",
     "resetLinkSent": "Şifre sıfırlama bağlantısını e-posta adresinize gönderdik.",
@@ -277,6 +278,7 @@
     "deleteGuestFailed": "Davetli silinemedi",
     "confirmDeleteTable": "Bu masayı silmek istediğinizden emin misiniz? Atanan tüm davetliler masasız kalacaktır.",
     "deleteTableFailed": "Masa silinemedi",
+    "rsvpApi": "RSVP API",
     "rsvpCycleHint": "RSVP durumunu değiştirmek için tıklayın: beklemede -> onaylandı -> reddedildi",
     "rsvpUpdateFailed": "RSVP güncellenemedi",
     "rsvpStatus": {
@@ -436,6 +438,8 @@
     "moreActions": "Daha fazla işlem",
     "manageSeating": "Oturma düzenini yönet",
     "managePhotos": "Fotoğrafları yönet",
+    "rsvpApiKey": "RSVP API anahtarı",
+    "quickEdit": "Hızlı düzenleme",
     "settingsPage": {
       "eyebrow": "Düğün ayarları",
       "title": "Ayarlar",
@@ -460,6 +464,8 @@
       "autoApproveUploadsDescription": "Davetli fotoğrafları, yönetici onayı olmadan hemen galeride görünür. Varsayılan olarak kapalıdır -- bunu açana kadar her yükleme inceleme için bekletilir.",
       "newCredentials": "Yeni giriş bilgileri",
       "newCredentialsDescription": "Yeni veya sıfırlanmış çift hesapları oluşturuldu. Bu şifreleri şimdi kaydedin çünkü bir daha gösterilmeyecekler.",
+      "rsvpApiKeyLink": "RSVP API anahtarı",
+      "rsvpApiKeyLinkDescription": "Harici bir RSVP formunun kullandığı anahtarı oluşturun veya kopyalayın -- tam ayarlar sayfasından yönetilir.",
       "failedAccounts": "Şu hesaplar için hesap oluşturma veya sıfırlama başarısız oldu: {emails}",
       "saving": "Kaydediliyor...",
       "saved": "Kaydedildi",

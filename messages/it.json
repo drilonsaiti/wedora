@@ -68,6 +68,7 @@
     "changePassword": "Cambia password",
     "showPassword": "Mostra password",
     "hidePassword": "Nascondi password",
+    "rateLimited": "Troppi tentativi. Riprova tra {seconds, plural, one {# secondo} other {# secondi}}.",
     "loginEyebrow": "Accesso",
     "forgotPassword": {
       "title": "Password dimenticata?",
@@ -277,6 +278,7 @@
     "deleteGuestFailed": "Impossibile eliminare l'invitato",
     "confirmDeleteTable": "Sei sicuro di voler eliminare questo tavolo? Tutti gli invitati assegnati rimarranno senza posto.",
     "deleteTableFailed": "Impossibile eliminare il tavolo",
+    "rsvpApi": "API RSVP",
     "rsvpCycleHint": "Clicca per cambiare lo stato RSVP: in attesa -> confermato -> rifiutato",
     "rsvpUpdateFailed": "Impossibile aggiornare lo stato RSVP",
     "rsvpStatus": {
@@ -436,6 +438,8 @@
     "moreActions": "Altre azioni",
     "manageSeating": "Gestisci posti a sedere",
     "managePhotos": "Gestisci foto",
+    "rsvpApiKey": "Chiave API RSVP",
+    "quickEdit": "Modifica rapida",
     "settingsPage": {
       "eyebrow": "Impostazioni matrimonio",
       "title": "Impostazioni",
@@ -461,6 +465,8 @@
       "newCredentials": "Nuove credenziali di accesso",
       "newCredentialsDescription": "Sono stati creati nuovi account della coppia o reimpostati. Salva queste password ora perché non verranno più mostrate.",
       "failedAccounts": "Creazione o reimpostazione dell'account non riuscita per: {emails}",
+      "rsvpApiKeyLink": "Chiave API RSVP",
+      "rsvpApiKeyLinkDescription": "Genera o copia la chiave utilizzata da un modulo RSVP esterno -- gestita nella pagina completa delle impostazioni.",
       "saving": "Salvataggio...",
       "saved": "Salvato",
       "saveChanges": "Salva modifiche",

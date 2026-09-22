@@ -63,6 +63,7 @@
     "redirectingToLogin": "Du wirst zur Anmeldeseite weitergeleitet...",
     "saving": "Wird gespeichert…",
     "changePassword": "Passwort ändern",
+    "rateLimited": "Zu viele Versuche. Bitte versuchen Sie es in {seconds, plural, one {# Sekunde} other {# Sekunden}} erneut.",
     "forgotPassword": {
       "title": "Passwort vergessen?",
       "description": "Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen deines Passworts.",
@@ -289,6 +290,8 @@
       "newCredentials": "Neue Anmeldedaten",
       "newCredentialsDescription": "Neue oder zurückgesetzte Konten für das Brautpaar wurden erstellt. Speichere diese Passwörter jetzt, da sie später nicht erneut angezeigt werden.",
       "failedAccounts": "Kontoerstellung oder Zurücksetzung fehlgeschlagen für: {emails}",
+      "rsvpApiKeyLink": "RSVP-API-Schlüssel",
+      "rsvpApiKeyLinkDescription": "Generieren oder kopieren Sie den Schlüssel, den ein externes RSVP-Formular verwendet -- verwaltet auf der vollständigen Einstellungsseite.",
       "saving": "Wird gespeichert...",
       "saved": "Gespeichert",
       "saveChanges": "Änderungen speichern",
@@ -320,7 +323,9 @@
     "weddingCount": "{count, plural, =1 {# Hochzeit} other {# Hochzeiten}}",
     "moreActions": "Weitere Aktionen",
     "manageSeating": "Sitzordnung verwalten",
-    "managePhotos": "Fotos verwalten"
+    "managePhotos": "Fotos verwalten",
+    "rsvpApiKey": "RSVP-API-Schlüssel",
+    "quickEdit": "Schnellbearbeitung"
   },
   "status": {
     "upcoming": "Bevorstehend",
@@ -769,6 +774,7 @@
     "tableLabelOptional": "Bezeichnung (optional)",
     "tableLabelPlaceholder": "z. B. Familie Mustermann",
     "updateTable": "Tisch aktualisieren",
+    "rsvpApi": "RSVP-API",
     "rsvpCycleHint": "Klicken, um den RSVP-Status zu wechseln: Ausstehend -> Bestätigt -> Abgelehnt",
     "rsvpUpdateFailed": "RSVP konnte nicht aktualisiert werden",
     "rsvpStatus": {

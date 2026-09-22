@@ -68,6 +68,7 @@
     "changePassword": "Промени лозинка",
     "showPassword": "Прикажи лозинка",
     "hidePassword": "Сокриј лозинка",
+    "rateLimited": "Премногу обиди. Обидете се повторно за {seconds, plural, one {# секунда} other {# секунди}}.",
     "loginEyebrow": "Најава",
     "forgotPassword": {
       "title": "Ја заборавивте лозинката?",
@@ -277,6 +278,7 @@
     "deleteGuestFailed": "Не успеа бришењето на гостинот",
     "confirmDeleteTable": "Дали сте сигурни дека сакате да ја избришете оваа маса? Сите доделени гости ќе останат без доделена маса.",
     "deleteTableFailed": "Не успеа бришењето на масата",
+    "rsvpApi": "RSVP API",
     "rsvpCycleHint": "Кликнете за да го смените статусот на RSVP: во чекање -> потврдено -> одбиено",
     "rsvpUpdateFailed": "Не успеа ажурирањето на RSVP",
     "rsvpStatus": {
@@ -436,6 +438,8 @@
     "moreActions": "Повеќе акции",
     "manageSeating": "Управувај со распоред на седење",
     "managePhotos": "Управувај со фотографии",
+    "rsvpApiKey": "Chiave API RSVP",
+    "quickEdit": "Modifica rapida",
     "settingsPage": {
       "eyebrow": "Поставки за свадба",
       "title": "Поставки",
@@ -461,6 +465,8 @@
       "newCredentials": "Нови податоци за најава",
       "newCredentialsDescription": "Креирани се нови или ресетирани сметки за парот. Зачувајте ги овие лозинки сега бидејќи повеќе нема да бидат прикажани.",
       "failedAccounts": "Креирањето или ресетирањето на сметка не успеа за: {emails}",
+      "rsvpApiKeyLink": "Клуч за RSVP API",
+      "rsvpApiKeyLinkDescription": "Генерирајте или копирајте го клучот што го користи надворешен RSVP формулар -- се управува на целосната страница со поставки.",
       "saving": "Се зачувува...",
       "saved": "Зачувано",
       "saveChanges": "Зачувај промени",

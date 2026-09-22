@@ -28,6 +28,22 @@ security surface, rather than attempting broad coverage:
   could actually hit: the create/edit-wedding "at least one guest feature must stay
   on" refine, the RSVP status enum, party-size bounds, note length, and the
   guestId-must-be-a-UUID check on the admin manual-override schema.
+- **`lib/login-rate-limit.ts`** — the pure helpers behind admin/couple login rate
+  limiting: email normalization, the HMAC key hashing (deterministic, secret- and
+  value-sensitive), that admin/couple and different emails/IPs land in separate
+  buckets, the client-IP header precedence, and `getLoginRateLimitSecret`'s
+  env-var fallback/throw behavior.
+- **`actions/auth.ts`** (`loginAdmin`/`loginCouple`) — with a mocked Supabase
+  client, covering: a successful login, wrong credentials never reaching the
+  admins-table/app_metadata check, a valid Supabase login that still gets denied
+  (not an admin / not a couple with a wedding_id) and signed back out, an
+  exhausted rate-limit bucket blocking the attempt *before* Supabase Auth is ever
+  called, and a rate-limit RPC error failing closed (denied, not let through)
+  rather than silently disabling the limit.
+- **`next.config.js`** — the Content-Security-Policy header: production vs.
+  development script-src, the next-themes script's hash allowlist, and the
+  security-relevant directives (`object-src`, `frame-ancestors`, `form-action`,
+  no open wildcard in `img-src`).
 
 ## What's NOT covered, and why
 

@@ -68,6 +68,7 @@
     "changePassword": "Change Password",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
+    "rateLimited": "Too many attempts. Please try again in {seconds, plural, one {# second} other {# seconds}}.",
     "loginEyebrow": "Login",
     "forgotPassword": {
       "title": "Forgot password?",
@@ -279,6 +280,7 @@
     "deleteTableFailed": "Failed to delete table",
     "rsvpCycleHint": "Click to cycle RSVP status: pending -> confirmed -> declined",
     "rsvpUpdateFailed": "Failed to update RSVP",
+    "rsvpApi": "RSVP API",
     "rsvpStatus": {
       "pending": "Pending",
       "confirmed": "Confirmed",
@@ -436,6 +438,8 @@
     "moreActions": "More actions",
     "manageSeating": "Manage seating",
     "managePhotos": "Manage photos",
+    "rsvpApiKey": "RSVP API key",
+    "quickEdit": "Quick edit",
     "settingsPage": {
       "eyebrow": "Wedding settings",
       "title": "Settings",
@@ -460,6 +464,8 @@
       "autoApproveUploadsDescription": "Guest photos appear in the gallery immediately, without an admin approving them first. Off by default -- every upload is held for review until you turn this on.",
       "newCredentials": "New login credentials",
       "newCredentialsDescription": "New or reset couple accounts were created. Save these passwords now because they will not be shown again.",
+      "rsvpApiKeyLink": "RSVP API key",
+      "rsvpApiKeyLinkDescription": "Generate or copy the key an external RSVP form uses -- managed on the full settings page.",
       "failedAccounts": "Account creation or reset failed for: {emails}",
       "saving": "Saving...",
       "saved": "Saved",

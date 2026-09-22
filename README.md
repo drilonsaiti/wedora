@@ -21,14 +21,12 @@ hardening pass that was applied on top of the original schema (see
 - [Environment variables](#environment-variables)
 - [Supabase setup](#supabase-setup)
 - [RLS & security summary](#rls--security-summary)
+- [Login hardening](#login-hardening)
 - [Photo uploads](#photo-uploads)
 - [RSVP API](#rsvp-api)
 - [Local development](#local-development)
 - [Tests](#tests)
 - [Deployment (Vercel + Supabase)](#deployment-vercel--supabase)
-- [Manual QA checklist](#manual-qa-checklist)
-- [Security notes](#security-notes)
-- [Known limitations / roadmap](#known-limitations--roadmap)
 
 ---
 
@@ -210,6 +208,7 @@ Copy `.env.example` to `.env.local` and fill in:
 | `CRON_SECRET` | yes | Bearer secret for `/api/cron/cleanup-photos`. **Must be set** — the route now fails closed if it's missing |
 | `ZIP_WORKER_SECRET` | yes | Bearer secret for `/api/internal/photo-zip-worker` |
 | `UPLOAD_RATE_LIMIT_SECRET` | recommended | HMAC pepper for hashing session/IP rate-limit keys; falls back to the service role key if unset |
+| `LOGIN_RATE_LIMIT_SECRET` | recommended | HMAC pepper for hashing admin/couple login rate-limit keys (email + IP); falls back to the service role key if unset |
 
 ---
 
@@ -217,8 +216,8 @@ Copy `.env.example` to `.env.local` and fill in:
 
 1. **Create a project** at supabase.com.
 2. **Run the bootstrap SQL**, in the Supabase SQL Editor, in this order:
-    - `supabase/schema.sql`
-    - `supabase/schema-additions.sql`
+  - `supabase/schema.sql`
+  - `supabase/schema-additions.sql`
 3. **Run every migration in `supabase/migrations/`, in filename order** (they're
    timestamp-prefixed, so sorting the filenames gives you the right order):
    ```
@@ -273,6 +272,47 @@ authorization check. Earlier versions of the schema had a handful of
 left over from before multi-tenancy that let anyone with the anon key read every
 wedding's guest list directly against the Supabase REST API; those are now dropped.
 If you're running an older deployment, apply that migration.
+
+---
+
+## Login hardening
+
+`/admin/login` and `/couple/login` both used to call
+`supabase.auth.signInWithPassword()` directly from the browser, with no app-level
+limit on repeated attempts beyond whatever Supabase's project-wide Auth rate limits
+already impose. Sign-in now happens through Server Actions
+(`loginAdmin`/`loginCouple` in `actions/auth.ts`) instead, which is what makes an
+app-controlled rate limit enforceable at all — it runs *before* Supabase Auth is ever
+touched, so it can't be bypassed by calling the Supabase API directly or with
+JavaScript disabled.
+
+Two independent buckets are checked on every attempt (`lib/login-rate-limit.ts`,
+migration `20260922100000_login_rate_limit.sql`):
+
+- **Per email**, 5 attempts / 15 minutes — the primary defense against guessing one
+  account's password.
+- **Per IP**, 20 attempts / 15 minutes, deliberately looser — catches credential
+  stuffing across many different emails from one source, without punishing a shared
+  venue/office IP for one person mistyping their password a few times.
+
+Both are namespaced separately for `admin` vs `couple` logins, and separately from
+the pre-existing upload/RSVP-API rate limits — locking out someone hammering the
+admin login doesn't affect their ability to use the couple login or upload photos,
+and vice versa. The email/IP themselves are never stored — same HMAC-then-hash
+approach as the upload rate limiter (`UPLOAD_RATE_LIMIT_SECRET`), keyed by
+`LOGIN_RATE_LIMIT_SECRET` (see [Environment variables](#environment-variables)).
+
+If the rate-limit check itself fails (a database hiccup), the attempt is **denied**,
+not let through — the same "fail closed" choice the photo-upload preflight already
+makes. A false "try again in a moment" is a better failure mode here than silently
+turning off login rate limiting.
+
+This is app-level defense in depth on top of whatever your Supabase project's own
+Auth rate limits are already set to (Dashboard → Authentication → Rate Limits) — it
+doesn't replace those, and doesn't add CAPTCHA. If you're still seeing suspicious
+login volume after this, tightening the Supabase-level limits or adding a CAPTCHA
+(e.g. via a Supabase Auth hook) would be the next step, not something this change
+attempts to cover.
 
 ---
 
@@ -558,9 +598,9 @@ doesn't mean reaching for the same hammer everywhere.
 3. Deploy. Vercel handles the App Router and Server Actions automatically; Sharp
    needs the Node.js runtime, which is the default here (nothing to change).
 4. `vercel.json` already wires up the two cron jobs:
-    - `/api/cron/cleanup-photos` — daily at 03:00, deletes photos past each wedding's
-      retention window
-    - `/api/internal/photo-zip-worker` — every minute, processes queued ZIP exports
+  - `/api/cron/cleanup-photos` — daily at 03:00, deletes photos past each wedding's
+    retention window
+  - `/api/internal/photo-zip-worker` — every minute, processes queued ZIP exports
 5. Add your custom domain under **Settings → Domains**, then update
    `NEXT_PUBLIC_APP_URL` to match.
 

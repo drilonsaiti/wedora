@@ -1,196 +1,108 @@
-'use client'
+"use client";
 
-import {useState,} from 'react'
+import { useState } from "react";
 
-import {AlertCircle, Eye, EyeOff, Loader2, Lock, LogIn, Mail,} from 'lucide-react'
-import {useTranslations,} from 'next-intl'
-import {useForm,} from 'react-hook-form'
-import {zodResolver,} from '@hookform/resolvers/zod'
+import {
+    AlertCircle,
+    Eye,
+    EyeOff,
+    Loader2,
+    Lock,
+    LogIn,
+    Mail,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import {Link, useRouter,} from '@/lib/navigation'
-import {createClient,} from '@/lib/supabase/client'
-import {adminLoginSchema, type AdminLoginValues,} from '@/schemas'
+import { Link, useRouter } from "@/lib/navigation";
+import { loginAdmin } from "@/actions/auth";
+import { adminLoginSchema, type AdminLoginValues } from "@/schemas";
 
 export function AdminLoginForm() {
-    const router =
-        useRouter()
+    const router = useRouter();
 
-    const t =
-        useTranslations('auth')
+    const t = useTranslations("auth");
 
-    const tv =
-        useTranslations(
-            'validation'
-        )
+    const tv = useTranslations("validation");
 
-    const tc =
-        useTranslations(
-            'common'
-        )
+    const tc = useTranslations("common");
 
-    const [
-        error,
-        setError,
-    ] =
-        useState<string | null>(
-            null
-        )
+    const [error, setError] = useState<string | null>(null);
 
-    const [
-        loading,
-        setLoading,
-    ] = useState(false)
+    const [loading, setLoading] = useState(false);
 
-    const [
-        showPassword,
-        setShowPassword,
-    ] = useState(false)
+    const [showPassword, setShowPassword] = useState(false);
 
     const {
         register,
         handleSubmit,
-        formState: {
-            errors,
-        },
-    } =
-        useForm<AdminLoginValues>(
-            {
-                resolver:
-                    zodResolver(
-                        adminLoginSchema
-                    ),
-            }
-        )
+        formState: { errors },
+    } = useForm<AdminLoginValues>({
+        resolver: zodResolver(adminLoginSchema),
+    });
 
-    const onSubmit = async (
-        values: AdminLoginValues
-    ) => {
-        setError(null)
-        setLoading(true)
+    const onSubmit = async (values: AdminLoginValues) => {
+        setError(null);
+        setLoading(true);
 
         try {
-            const supabase =
-                await createClient()
+            const result = await loginAdmin(values.email, values.password);
 
-            const {
-                data,
-                error: authError,
-            } =
-                await supabase.auth.signInWithPassword(
-                    {
-                        email:
-                        values.email,
-                        password:
-                        values.password,
-                    }
-                )
+            if (!result.success) {
+                if (result.code === "RATE_LIMITED") {
+                    setError(
+                        t("rateLimited", {
+                            seconds: result.retryAfterSeconds ?? 60,
+                        }),
+                    );
+                } else if (result.code === "ACCESS_DENIED") {
+                    setError(t("accessDenied"));
+                } else {
+                    setError(t("invalidCredentials"));
+                }
 
-            if (authError) {
-                setError(
-                    t(
-                        'invalidCredentials'
-                    )
-                )
-
-                return
+                return;
             }
 
-            /*
-             * Verify admin access.
-             */
-            const {
-                data: admin,
-            } =
-                await supabase
-                    .from(
-                        'admins'
-                    )
-                    .select(
-                        'id'
-                    )
-                    .eq(
-                        'id',
-                        data.user
-                            .id
-                    )
-                    .single()
+            router.push("/admin/dashboard");
 
-            if (!admin) {
-                await supabase.auth.signOut()
-
-                setError(
-                    t(
-                        'accessDenied'
-                    )
-                )
-
-                return
-            }
-
-            router.push(
-                '/admin/dashboard'
-            )
-
-            router.refresh()
+            router.refresh();
         } catch {
-            setError(
-                tc('error')
-            )
+            setError(tc("error"));
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     return (
-        <form
-            onSubmit={handleSubmit(
-                onSubmit
-            )}
-            className="space-y-5"
-        >
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Email */}
             <div>
-                <label
-                    htmlFor="email"
-                    className="label-wedding"
-                >
-                    {t('email')}
+                <label htmlFor="email" className="label-wedding">
+                    {t("email")}
                 </label>
 
                 <div className="relative">
                     <Mail
                         className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                        strokeWidth={
-                            1.6
-                        }
+                        strokeWidth={1.6}
                     />
 
                     <input
-                        {...register(
-                            'email'
-                        )}
+                        {...register("email")}
                         id="email"
                         type="email"
-                        placeholder={t(
-                            'emailPlaceholder'
-                        )}
+                        placeholder={t("emailPlaceholder")}
                         autoComplete="email"
-                        disabled={
-                            loading
-                        }
+                        disabled={loading}
                         className="input-wedding h-12 pl-11"
                     />
                 </div>
 
-                {errors.email
-                    ?.message && (
+                {errors.email?.message && (
                     <p className="mt-1.5 text-xs leading-5 text-destructive">
-                        {tv(
-                            errors.email.message.replace(
-                                'validation.',
-                                ''
-                            )
-                        )}
+                        {tv(errors.email.message.replace("validation.", ""))}
                     </p>
                 )}
             </div>
@@ -202,100 +114,51 @@ export function AdminLoginForm() {
                         htmlFor="password"
                         className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground"
                     >
-                        {t(
-                            'password'
-                        )}
+                        {t("password")}
                     </label>
 
                     <Link
                         href="/admin/forgot-password"
                         className="text-[11px] font-medium text-muted-foreground transition-colors hover:text-[hsl(var(--primary))]"
                     >
-                        {t(
-                            'forgotPassword.title'
-                        )}
+                        {t("forgotPassword.title")}
                     </Link>
                 </div>
 
                 <div className="relative">
                     <Lock
                         className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                        strokeWidth={
-                            1.6
-                        }
+                        strokeWidth={1.6}
                     />
 
                     <input
-                        {...register(
-                            'password'
-                        )}
+                        {...register("password")}
                         id="password"
-                        type={
-                            showPassword
-                                ? 'text'
-                                : 'password'
-                        }
-                        placeholder={t(
-                            'passwordPlaceholder'
-                        )}
+                        type={showPassword ? "text" : "password"}
+                        placeholder={t("passwordPlaceholder")}
                         autoComplete="current-password"
-                        disabled={
-                            loading
-                        }
+                        disabled={loading}
                         className="input-wedding h-12 pl-11 pr-11"
                     />
 
                     <button
                         type="button"
-                        onClick={() =>
-                            setShowPassword(
-                                (
-                                    current
-                                ) =>
-                                    !current
-                            )
-                        }
-                        disabled={
-                            loading
-                        }
-                        aria-label={
-                            showPassword
-                                ? t(
-                                    'hidePassword'
-                                )
-                                : t(
-                                    'showPassword'
-                                )
-                        }
+                        onClick={() => setShowPassword((current) => !current)}
+                        disabled={loading}
+                        aria-label={showPassword ? t("hidePassword") : t("showPassword")}
                         className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
                     >
                         {showPassword ? (
-                            <EyeOff
-                                className="h-4 w-4"
-                                strokeWidth={
-                                    1.6
-                                }
-                            />
+                            <EyeOff className="h-4 w-4" strokeWidth={1.6} />
                         ) : (
-                            <Eye
-                                className="h-4 w-4"
-                                strokeWidth={
-                                    1.6
-                                }
-                            />
+                            <Eye className="h-4 w-4" strokeWidth={1.6} />
                         )}
                     </button>
                 </div>
 
-                {errors.password
-                    ?.message && (
+                {errors.password?.message && (
                     <p className="mt-1.5 text-xs leading-5 text-destructive">
-                        {t(
-                            errors.password.message.replace(
-                                'auth.',
-                                ''
-                            )
-                        )}
+                        {t(errors.password.message.replace("auth.", ""))}
                     </p>
                 )}
             </div>
@@ -306,40 +169,32 @@ export function AdminLoginForm() {
                     role="alert"
                     className="flex items-start gap-3 rounded-2xl border border-destructive/15 bg-destructive/[0.06] px-4 py-3.5"
                 >
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive"/>
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
 
-                    <p className="text-xs leading-5 text-destructive">
-                        {error}
-                    </p>
+                    <p className="text-xs leading-5 text-destructive">{error}</p>
                 </div>
             )}
 
             {/* Submit */}
             <button
                 type="submit"
-                disabled={
-                    loading
-                }
+                disabled={loading}
                 className="btn-primary w-full justify-center py-3.5"
             >
                 {loading ? (
                     <>
-                        <Loader2 className="h-4 w-4 animate-spin"/>
+                        <Loader2 className="h-4 w-4 animate-spin" />
 
-                        {tc(
-                            'loading'
-                        )}
+                        {tc("loading")}
                     </>
                 ) : (
                     <>
-                        <LogIn className="h-4 w-4"/>
+                        <LogIn className="h-4 w-4" />
 
-                        {t(
-                            'signIn'
-                        )}
+                        {t("signIn")}
                     </>
                 )}
             </button>
         </form>
-    )
+    );
 }

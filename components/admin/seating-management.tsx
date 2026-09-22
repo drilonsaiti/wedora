@@ -1,12 +1,13 @@
 "use client";
 
-import {type ReactNode, useMemo, useState, useTransition} from "react";
+import { type ReactNode, useMemo, useState, useTransition } from "react";
 
 import dynamic from "next/dynamic";
 import {
     ArrowLeft,
     Edit2,
     Images,
+    KeyRound,
     LayoutGrid,
     Loader2,
     Map as MapIcon,
@@ -16,19 +17,23 @@ import {
     Trash2,
     Users,
 } from "lucide-react";
-import {useTranslations} from "next-intl";
+import { useTranslations } from "next-intl";
 
-import {deleteGuest, deleteTable} from "@/actions/seating";
-import {updateGuestRsvpAction} from "@/actions/rsvp";
-import {GuestForm} from "@/components/admin/guest-form";
-import {TableForm} from "@/components/admin/table-form";
-import {GuestAvatar} from "@/components/guest-avatar";
-import {Modal} from "@/components/ui/modal";
-import {Link, useRouter} from "@/lib/navigation";
-import {cn} from "@/lib/utils";
-import type {GuestWithTable, TableWithSeats, VenueElement,} from "@/types/seating";
-import {toast} from "sonner";
-import {ConfirmationModal} from "@/components/ui/confirmation-modal";
+import { deleteGuest, deleteTable } from "@/actions/seating";
+import { updateGuestRsvpAction } from "@/actions/rsvp";
+import { GuestForm } from "@/components/admin/guest-form";
+import { TableForm } from "@/components/admin/table-form";
+import { GuestAvatar } from "@/components/guest-avatar";
+import { Modal } from "@/components/ui/modal";
+import { Link, useRouter } from "@/lib/navigation";
+import { cn } from "@/lib/utils";
+import type {
+    GuestWithTable,
+    TableWithSeats,
+    VenueElement,
+} from "@/types/seating";
+import { toast } from "sonner";
+import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 
 /*
  * Dynamic designer loading component.
@@ -43,7 +48,7 @@ function SeatingDesignerLoading() {
     return (
         <div className="flex min-h-[600px] flex-1 items-center justify-center bg-secondary/20">
             <div className="flex flex-col items-center gap-3">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground"/>
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
 
                 <p className="text-xs text-muted-foreground">{t("loadingDesigner")}</p>
             </div>
@@ -321,7 +326,7 @@ export function SeatingManagement({
                         href="/admin/weddings"
                         className="mb-6 inline-flex items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
                     >
-                        <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.6}/>
+                        <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.6} />
 
                         {t("backToWeddings")}
                     </Link>
@@ -357,7 +362,7 @@ export function SeatingManagement({
                                 onClick={handlePrint}
                                 className="btn-secondary justify-center"
                             >
-                                <Printer className="h-4 w-4"/>
+                                <Printer className="h-4 w-4" />
 
                                 {t("print")}
                             </button>
@@ -366,9 +371,18 @@ export function SeatingManagement({
                                 href={`/admin/weddings/${wedding.id}/photos`}
                                 className="btn-secondary justify-center"
                             >
-                                <Images className="h-4 w-4"/>
+                                <Images className="h-4 w-4" />
 
                                 {t("photos")}
+                            </Link>
+
+                            <Link
+                                href={`/admin/weddings/${wedding.id}/settings`}
+                                className="btn-secondary justify-center"
+                            >
+                                <KeyRound className="h-4 w-4" />
+
+                                {t("rsvpApi")}
                             </Link>
                         </div>
                     </section>
@@ -376,26 +390,25 @@ export function SeatingManagement({
                     {/* ==================================
                         TABS
                     ================================== */}
-                    <section
-                        className="mb-7 flex gap-1 overflow-x-auto rounded-2xl border border-border/70 bg-card/70 p-1.5 shadow-sm">
+                    <section className="mb-7 flex gap-1 overflow-x-auto rounded-2xl border border-border/70 bg-card/70 p-1.5 shadow-sm">
                         <TabButton
                             active={activeTab === "guests"}
                             onClick={() => setActiveTab("guests")}
-                            icon={<Users className="h-3.5 w-3.5"/>}
+                            icon={<Users className="h-3.5 w-3.5" />}
                             label={t("guests")}
                         />
 
                         <TabButton
                             active={activeTab === "tables"}
                             onClick={() => setActiveTab("tables")}
-                            icon={<LayoutGrid className="h-3.5 w-3.5"/>}
+                            icon={<LayoutGrid className="h-3.5 w-3.5" />}
                             label={t("tables")}
                         />
 
                         <TabButton
                             active={activeTab === "designer"}
                             onClick={() => setActiveTab("designer")}
-                            icon={<MapIcon className="h-3.5 w-3.5"/>}
+                            icon={<MapIcon className="h-3.5 w-3.5" />}
                             label={t("designerLabel")}
                         />
                     </section>
@@ -407,9 +420,9 @@ export function SeatingManagement({
                         <div>
                             {/* Stats */}
                             <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                                <StatCard value={guestStats.total} label={t("total")}/>
+                                <StatCard value={guestStats.total} label={t("total")} />
 
-                                <StatCard value={guestStats.seated} label={t("seated")}/>
+                                <StatCard value={guestStats.seated} label={t("seated")} />
 
                                 <StatCard
                                     value={guestStats.unseated}
@@ -417,7 +430,7 @@ export function SeatingManagement({
                                     attention={guestStats.unseated > 0}
                                 />
 
-                                <StatCard value={initialTables.length} label={t("tables")}/>
+                                <StatCard value={initialTables.length} label={t("tables")} />
                             </div>
 
                             {/* Toolbar */}
@@ -442,15 +455,14 @@ export function SeatingManagement({
                                     onClick={openNewGuest}
                                     className="btn-primary justify-center"
                                 >
-                                    <Plus className="h-4 w-4"/>
+                                    <Plus className="h-4 w-4" />
 
                                     {t("addGuest")}
                                 </button>
                             </div>
 
                             {/* Guest list */}
-                            <div
-                                className="overflow-hidden rounded-[2rem] border border-border/70 bg-card/80 shadow-sm backdrop-blur">
+                            <div className="overflow-hidden rounded-[2rem] border border-border/70 bg-card/80 shadow-sm backdrop-blur">
                                 {filteredGuests.length > 0 ? (
                                     <div className="divide-y divide-border/60">
                                         {filteredGuests.map((guest) => {
@@ -464,7 +476,7 @@ export function SeatingManagement({
                                                     className="group flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-secondary/20 sm:px-6"
                                                 >
                                                     <div className="flex min-w-0 items-center gap-4">
-                                                        <GuestAvatar initials={initials}/>
+                                                        <GuestAvatar initials={initials} />
 
                                                         <div className="min-w-0">
                                                             <p className="truncate text-sm font-medium text-foreground">
@@ -509,7 +521,7 @@ export function SeatingManagement({
                                                             )}
                                                         >
                                                             {rsvpUpdatingId === guest.id ? (
-                                                                <Loader2 className="h-3 w-3 animate-spin"/>
+                                                                <Loader2 className="h-3 w-3 animate-spin" />
                                                             ) : (
                                                                 t(`rsvpStatus.${guest.rsvp_status}`)
                                                             )}
@@ -521,7 +533,7 @@ export function SeatingManagement({
                                                             aria-label={t("editGuest")}
                                                             className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                                                         >
-                                                            <Edit2 className="h-3.5 w-3.5"/>
+                                                            <Edit2 className="h-3.5 w-3.5" />
                                                         </button>
 
                                                         <button
@@ -536,7 +548,7 @@ export function SeatingManagement({
                                                             aria-label="Delete"
                                                             className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive disabled:opacity-50"
                                                         >
-                                                            <Trash2 className="h-3.5 w-3.5"/>
+                                                            <Trash2 className="h-3.5 w-3.5" />
                                                         </button>
                                                     </div>
                                                 </div>
@@ -544,7 +556,7 @@ export function SeatingManagement({
                                         })}
                                     </div>
                                 ) : (
-                                    <EmptyState icon={Search} title={t("noGuests")}/>
+                                    <EmptyState icon={Search} title={t("noGuests")} />
                                 )}
                             </div>
                         </div>
@@ -571,7 +583,7 @@ export function SeatingManagement({
                                     onClick={openNewTable}
                                     className="btn-primary justify-center"
                                 >
-                                    <Plus className="h-4 w-4"/>
+                                    <Plus className="h-4 w-4" />
 
                                     {t("addNewTable")}
                                 </button>
@@ -595,7 +607,7 @@ export function SeatingManagement({
                                                         aria-label={t("editTable")}
                                                         className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                                                     >
-                                                        <Edit2 className="h-3.5 w-3.5"/>
+                                                        <Edit2 className="h-3.5 w-3.5" />
                                                     </button>
 
                                                     <button
@@ -610,7 +622,7 @@ export function SeatingManagement({
                                                         aria-label="Delete"
                                                         className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive disabled:opacity-50"
                                                     >
-                                                        <Trash2 className="h-3.5 w-3.5"/>
+                                                        <Trash2 className="h-3.5 w-3.5" />
                                                     </button>
                                                 </div>
 
@@ -630,8 +642,7 @@ export function SeatingManagement({
                               {t("table")}
                             </span>
 
-                                                        <span
-                                                            className="mt-0.5 font-serif text-2xl font-light text-foreground">
+                                                        <span className="mt-0.5 font-serif text-2xl font-light text-foreground">
                               {table.number}
                             </span>
                                                     </div>
@@ -649,8 +660,7 @@ export function SeatingManagement({
 
                                                 {/* Occupancy */}
                                                 <div className="mt-4">
-                                                    <div
-                                                        className="mb-2 flex items-center justify-between text-[10px] text-muted-foreground">
+                                                    <div className="mb-2 flex items-center justify-between text-[10px] text-muted-foreground">
                             <span>
                               {occupied} / {table.seats}
                             </span>
@@ -687,7 +697,7 @@ export function SeatingManagement({
                                                 onClick={openNewTable}
                                                 className="btn-primary mt-5 inline-flex"
                                             >
-                                                <Plus className="h-4 w-4"/>
+                                                <Plus className="h-4 w-4" />
 
                                                 {t("addNewTable")}
                                             </button>
@@ -967,10 +977,10 @@ function StatCard({
     return (
         <div className="rounded-[1.5rem] border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur sm:p-5">
             <div className="mb-4 flex items-start justify-between">
-                <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/20"/>
+                <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/20" />
 
                 {attention && value > 0 && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--primary))]"/>
+                    <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--primary))]" />
                 )}
             </div>
 
@@ -1000,7 +1010,7 @@ function EmptyState({
     return (
         <div className="px-6 py-16 text-center">
             <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-secondary">
-                <Icon className="h-4 w-4 text-muted-foreground" strokeWidth={1.5}/>
+                <Icon className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
             </div>
 
             <p className="mt-4 text-sm text-muted-foreground">{title}</p>

@@ -68,6 +68,7 @@
     "changePassword": "Ndrysho Fjalëkalimin",
     "showPassword": "Shfaq fjalëkalimin",
     "hidePassword": "Fshih fjalëkalimin",
+    "rateLimited": "Shumë përpjekje. Ju lutemi provoni përsëri pas {seconds, plural, one {# sekonde} other {# sekondash}}.",
     "loginEyebrow": "Hyrja",
     "forgotPassword": {
       "title": "Keni harruar fjalëkalimin?",
@@ -277,6 +278,7 @@
     "deleteGuestFailed": "Dështoi fshirja e të ftuarit",
     "confirmDeleteTable": "A jeni të sigurt që dëshironi të fshini këtë tavolinë? Të gjithë të ftuarit e caktuar do të mbeten pa tavolinë.",
     "deleteTableFailed": "Dështoi fshirja e tavolinës",
+    "rsvpApi": "API RSVP",
     "rsvpCycleHint": "Klikoni për të ndryshuar statusin RSVP: në pritje -> konfirmuar -> refuzuar",
     "rsvpUpdateFailed": "Përditësimi i RSVP dështoi",
     "rsvpStatus": {
@@ -436,6 +438,8 @@
     "moreActions": "Më shumë veprime",
     "manageSeating": "Menaxho sistemimin",
     "managePhotos": "Menaxho fotot",
+    "rsvpApiKey": "Çelësi i API-së RSVP",
+    "quickEdit": "Redaktim i shpejtë",
     "settingsPage": {
       "eyebrow": "Cilësimet e dasmës",
       "title": "Cilësimet",
@@ -461,6 +465,8 @@
       "newCredentials": "Të dhëna të reja hyrjeje",
       "newCredentialsDescription": "U krijuan llogari të reja ose u rivendosën llogaritë e çiftit. Ruani këto fjalëkalime tani sepse nuk do të shfaqen përsëri.",
       "failedAccounts": "Krijimi ose rivendosja e llogarisë dështoi për: {emails}",
+      "rsvpApiKeyLink": "Çelësi i API-së RSVP",
+      "rsvpApiKeyLinkDescription": "Gjenero ose kopjo çelësin që përdor një formular i jashtëm RSVP -- administrohet në faqen e plotë të cilësimeve.",
       "saving": "Duke ruajtur...",
       "saved": "U ruajt",
       "saveChanges": "Ruaj ndryshimet",
