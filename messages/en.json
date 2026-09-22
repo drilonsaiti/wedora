@@ -44,6 +44,7 @@
     "adminLoginDescription": "Sign in to manage weddings, guests, seating and shared photos.",
     "invalidCredentials": "Invalid email or password",
     "accessDenied": "Access denied. This account is not an admin.",
+    "accessDeniedCouple": "Access denied. This account is not linked to a wedding.",
     "authentication": "Authentication",
     "checkEmail": "Check your email",
     "resetLinkSent": "We've sent a password reset link to your email address.",
@@ -86,7 +87,11 @@
       "unexpectedError": "An unexpected error occurred"
     },
     "passwordPlaceholder": "••••••••",
-    "invalidEmail": "Please enter a valid email address."
+    "invalidEmail": "Please enter a valid email address.",
+    "resetLinkExpiredEyebrow": "Link expired",
+    "resetLinkExpiredTitle": "This link has expired",
+    "resetLinkExpiredDescription": "This password reset link has expired or was already used. Please request a new one.",
+    "requestNewLink": "Request a new link"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -146,6 +151,8 @@
       "unapproved": "Unapproved",
       "loadingPhotos": "Loading photos...",
       "loadMore": "Load More",
+      "loadPhoto": "Load photo",
+      "openPhoto": "Open photo",
       "noPhotos": "No photos found matching this filter",
       "noPhotosMatchingFilter": "Try another filter or wait for guests to upload photos.",
       "confirmDelete": "Are you sure you want to delete this photo?",
@@ -246,7 +253,8 @@
         "zipQueued": "Large album queued. We’ll prepare {count} photos in the background.",
         "zipReady": "Your photo archive is ready. Download started.",
         "zipExportFailed": "The photo archive could not be generated. Please try again.",
-        "zipExportTimedOut": "The archive is still being prepared. Try the download again in a moment."
+        "zipExportTimedOut": "The archive is still being prepared. Try the download again in a moment.",
+        "photosLoadFailed": "Photos could not be loaded. Please try again."
       }
     }
   },
@@ -273,6 +281,7 @@
     "unseated": "Unseated",
     "noGuests": "No guests found",
     "noTables": "No tables created yet",
+    "noTable": "No table",
     "noTablesCreated": "No tables created yet.",
     "confirmDeleteGuest": "Are you sure you want to delete this guest?",
     "deleteGuestFailed": "Failed to delete guest",
@@ -378,7 +387,14 @@
       "elementAdded": "Venue element added",
       "elementDeleted": "Venue element deleted",
       "addElementFailed": "The venue element could not be added.",
-      "deleteElementFailed": "The venue element could not be deleted."
+      "deleteElementFailed": "The venue element could not be deleted.",
+      "assignMenu": {
+        "triggerLabel": "Seating options for {name}",
+        "currentTable": "Currently seated at table {number}",
+        "unassign": "Remove from table",
+        "full": "Full",
+        "noOtherTables": "No other tables yet."
+      }
     },
     "venueEditor": {
       "eyebrow": "Venue designer",
@@ -648,57 +664,87 @@
     "eyebrow": "Pricing",
     "title": "Choose the plan that suits you",
     "description": "A one-time payment for your wedding — no monthly subscription.",
+    "paymentNotice": "Online payment isn't live yet — choose a plan below and we'll follow up by email to set everything up with you directly.",
     "mostPopular": "Most popular",
-    "perWedding": "per wedding",
+    "perWedding": "one-time",
     "included": "What's included",
+    "everythingInPlus": "Everything in {plan}, plus:",
+    "everythingIn": "Everything in {plan}",
+    "getStarted": "Get Started",
     "choosePlan": "Choose {plan}",
-    "plans": {
+    "contactUs": "Contact Us",
+    "onRequest": "On request",
+    "tiers": {
       "basic": {
-        "eyebrow": "Essential",
+        "eyebrow": "Basic",
         "name": "Basic",
-        "description": "For smaller weddings, seat finding only"
-      },
-      "standard": {
-        "eyebrow": "Popular",
-        "name": "Standard",
-        "description": "Our most popular combination — seating + photos"
+        "description": "Everything you need to get started"
       },
       "premium": {
-        "eyebrow": "Complete",
+        "eyebrow": "Premium",
         "name": "Premium",
+        "description": "Our most popular combination — seating + photos"
+      },
+      "unlimited": {
+        "eyebrow": "Unlimited",
+        "name": "Unlimited",
         "description": "No limits, for larger weddings"
+      },
+      "custom": {
+        "eyebrow": "Custom Design",
+        "name": "Custom Design",
+        "description": "A fully bespoke invitation designed just for you"
       }
     },
     "features": {
-      "basic": {
-        "findSeat": "Find My Seat",
-        "tableArrangement": "Table arrangement",
-        "photoUpload": "Photo uploads",
-        "guestLimit": "Up to 150 guests",
-        "storage": "30 days of storage after the wedding",
-        "publicGallery": "Shareable gallery (public link)"
-      },
-      "standard": {
-        "findSeat": "Find My Seat",
-        "tableArrangement": "Table arrangement",
-        "photoUpload": "Photo uploads — up to 300 photos",
-        "guestLimit": "Up to 300 guests",
-        "storage": "90 days of storage after the wedding",
-        "publicGallery": "Shareable gallery (public link)"
-      },
-      "premium": {
-        "findSeat": "Find My Seat",
-        "tableArrangement": "Table arrangement",
-        "photoUpload": "Photo uploads — unlimited",
-        "guestLimit": "Unlimited guests",
-        "storage": "1 year of storage after the wedding",
-        "publicGallery": "Shareable gallery (public link)"
-      }
+      "digitalInvitation": "Digital invitation page",
+      "customTheme": "Custom color theme",
+      "findSeat": "Find My Seat",
+      "rsvpManagement": "RSVP tracking & management",
+      "guestList": "Guest list",
+      "shareableLink": "Shareable link, unlimited opens",
+      "tableArrangement": "Drag-and-drop table arrangement",
+      "photoUpload": "Guest photo uploads — up to 300 photos",
+      "publicGallery": "Shareable photo gallery (public link)",
+      "unlimitedGuests": "Unlimited guests",
+      "unlimitedGuestsBadge": "Unlimited guests",
+      "unlimitedPhotos": "Unlimited photo uploads",
+      "multilingual": "Multilingual guest experience (7 languages)",
+      "extendedStorage": "1 year of storage after the wedding",
+      "customLayout": "Custom illustrations & layout",
+      "dedicatedSupport": "Dedicated designer support"
     },
-    "customPlan": {
-      "text": "Didn't find what you're looking for?",
-      "contact": "Contact us",
-      "suffix": "for a custom plan."
+    "builder": {
+      "eyebrow": "Or build your own",
+      "title": "Start from Basic and add only what you need",
+      "summaryTitle": "Your custom package",
+      "oneTimePayment": "one-time payment",
+      "baseLabel": "Basic invitation",
+      "total": "Total",
+      "alwaysIncluded": "Always included",
+      "cta": "Get Started",
+      "addons": {
+        "tableArrangement": {
+          "name": "Table arrangement",
+          "description": "Drag-and-drop seating designer for your venue"
+        },
+        "photoGallery": {
+          "name": "Guest photo gallery",
+          "description": "Guests can upload photos to a shared, shareable gallery"
+        },
+        "guestLimit": {
+          "name": "Raise guest limit to 300",
+          "description": "For weddings bigger than the Basic 150-guest limit"
+        },
+        "multilingual": {
+          "name": "Multilingual guest experience",
+          "description": "Guest pages available in all 7 supported languages"
+        },
+        "extendedStorage": {
+          "name": "Extended storage",
+          "description": "Keep everything online for 1 year after the wedding"
+        }
+      }
     }
   },
   "landing": {
@@ -709,7 +755,6 @@
       "pricing": "Pricing",
       "demo": "View demo"
     },
-
     "hero": {
       "eyebrow": "Wedding Management Platform",
       "title": "Every guest, seated. Every moment, saved.",
@@ -728,7 +773,8 @@
       "statTotal": "Total",
       "statSeated": "Seated",
       "statUnseated": "Unseated",
-      "yourSeatEyebrow": "Your seat"
+      "yourSeatEyebrow": "Your seat",
+      "yourTable": "Your table"
     },
     "value": {
       "title": "No spreadsheets. No printed seating charts.",
@@ -855,6 +901,11 @@
         "title": "This gallery link has expired.",
         "description": "This shared gallery was available for a limited time and can no longer be opened."
       },
+      "error": {
+        "eyebrow": "Something went wrong",
+        "title": "We couldn't load this gallery.",
+        "description": "Please try opening the link again in a moment."
+      },
       "contact": "Please contact the person who shared this gallery with you if you would like a new link.",
       "home": "Back to Wedora"
     }
@@ -939,5 +990,32 @@
       "login": "Use another account",
       "home": "Back to Wedora"
     }
+  },
+  "rsvpApiKeyManager": {
+    "title": "RSVP API",
+    "description": "Let an external site confirm or decline guests by name.",
+    "endpoint": {
+      "keySentAs": "with the key sent as",
+      "or": "or",
+      "queryParamNote": "for tools that can't set custom headers",
+      "andBody": "and body",
+      "readmeNote": "See the README for the full request/response reference."
+    },
+    "createKeyFailed": "Failed to create API key",
+    "keyCreated": "RSVP API key created",
+    "revokeFailed": "Failed to revoke API key",
+    "keyRevoked": "API key revoked",
+    "copySuccess": "Copied to clipboard",
+    "copyFailed": "Could not copy automatically -- copy it manually",
+    "copyNowWarning": "Copy this key now -- it will not be shown again.",
+    "copyKeyAriaLabel": "Copy API key",
+    "labelPlaceholder": "Label (optional, e.g. \"Squarespace RSVP form\")",
+    "createKey": "Create key",
+    "loadingKeys": "Loading keys...",
+    "noActiveKeys": "No active API keys yet.",
+    "untitledKey": "Untitled key",
+    "neverUsed": "never used",
+    "lastUsed": "last used {date}",
+    "revokeKeyAriaLabel": "Revoke API key"
   }
 }

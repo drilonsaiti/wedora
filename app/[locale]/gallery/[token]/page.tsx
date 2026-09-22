@@ -1,7 +1,7 @@
-import {createServiceClient} from "@/lib/supabase/server";
-import {getGalleryPhotosAction} from "@/actions/gallery";
-import {GalleryUnavailable} from "@/components/gallery/gallery-unavailable";
-import {GallerySlideshow} from "@/app/[locale]/gallery/[token]/slideshow-client";
+import { createServiceClient } from "@/lib/supabase/server";
+import { getGalleryPhotosAction } from "@/actions/gallery";
+import { GalleryUnavailable } from "@/components/gallery/gallery-unavailable";
+import { GallerySlideshow } from "@/app/[locale]/gallery/[token]/slideshow-client";
 
 type Props = {
     params: Promise<{
@@ -11,12 +11,12 @@ type Props = {
 
 export const dynamic = "force-dynamic";
 
-export default async function GalleryPage({params}: Props) {
-    const {token} = await params;
+export default async function GalleryPage({ params }: Props) {
+    const { token } = await params;
 
     const supabase = createServiceClient();
 
-    const {data: galleryToken, error: tokenError} = await supabase
+    const { data: galleryToken, error: tokenError } = await supabase
         .from("gallery_tokens")
         .select(
             `
@@ -28,25 +28,21 @@ export default async function GalleryPage({params}: Props) {
                 show_messages,
                 expires_at,
                 photo_filter
-            `
+            `,
         )
         .eq("token", token)
         .maybeSingle();
 
-
     if (tokenError || !galleryToken) {
-        return <GalleryUnavailable reason="invalid"/>;
+        return <GalleryUnavailable reason="invalid" />;
     }
-
-    const now = new Date().getTime();
 
     if (
         galleryToken.expires_at &&
-        new Date(galleryToken.expires_at).getTime() <= now
+        new Date(galleryToken.expires_at).getTime() <= Date.now()
     ) {
-        return <GalleryUnavailable reason="expired"/>;
+        return <GalleryUnavailable reason="expired" />;
     }
-
 
     let countQuery = supabase
         .from("photos")
@@ -63,26 +59,26 @@ export default async function GalleryPage({params}: Props) {
         countQuery = countQuery.eq("favourite", true);
     }
 
-    const {count, error: countError} = await countQuery;
+    const { count, error: countError } = await countQuery;
 
     if (countError) {
         console.error("Gallery photo count error:", countError);
     }
 
-
     const result = await getGalleryPhotosAction(token, 0);
 
-
     if (result.error === "Invalid gallery link") {
-        return <GalleryUnavailable reason="invalid"/>;
+        return <GalleryUnavailable reason="invalid" />;
     }
 
     if (result.error === "Gallery expired") {
-        return <GalleryUnavailable reason="expired"/>;
+        return <GalleryUnavailable reason="expired" />;
     }
 
     if (result.error) {
-        throw new Error(result.error);
+        console.error("Gallery photos error:", result.error);
+
+        return <GalleryUnavailable reason="error" />;
     }
 
     return (

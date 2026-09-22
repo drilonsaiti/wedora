@@ -70,6 +70,11 @@
     "hidePassword": "Nascondi password",
     "rateLimited": "Troppi tentativi. Riprova tra {seconds, plural, one {# secondo} other {# secondi}}.",
     "loginEyebrow": "Accesso",
+    "accessDeniedCouple": "Accesso negato. Questo account non è collegato a un matrimonio.",
+    "resetLinkExpiredEyebrow": "Link scaduto",
+    "resetLinkExpiredTitle": "Questo link è scaduto",
+    "resetLinkExpiredDescription": "Questo link per reimpostare la password è scaduto o è già stato utilizzato. Richiedine uno nuovo.",
+    "requestNewLink": "Richiedi un nuovo link",
     "forgotPassword": {
       "title": "Password dimenticata?",
       "eyebrow": "Password dimenticata?",
@@ -146,6 +151,8 @@
       "unapproved": "Non approvate",
       "loadingPhotos": "Caricamento foto...",
       "loadMore": "Carica altro",
+      "loadPhoto": "Carica foto",
+      "openPhoto": "Apri foto",
       "noPhotos": "Nessuna foto trovata con questo filtro",
       "noPhotosMatchingFilter": "Prova un altro filtro oppure attendi che gli invitati carichino delle foto.",
       "confirmDelete": "Sei sicuro di voler eliminare questa foto?",
@@ -233,6 +240,7 @@
         "photoShown": "Foto di nuovo visibile",
         "photoFavourited": "Foto aggiunta ai preferiti",
         "photoUnfavourited": "Foto rimossa dai preferiti",
+        "photosLoadFailed": "Impossibile caricare le foto. Riprova.",
         "photoUpdateFailed": "Impossibile aggiornare la foto. Le modifiche sono state annullate.",
         "photoDeleteFailed": "Impossibile eliminare la foto. Nulla è stato modificato.",
         "galleryLinkCreated": "Link della galleria creato",
@@ -273,6 +281,7 @@
     "unseated": "Non assegnati",
     "noGuests": "Nessun invitato trovato",
     "noTables": "Nessun tavolo creato",
+    "noTable": "Nessun tavolo",
     "noTablesCreated": "Nessun tavolo creato.",
     "confirmDeleteGuest": "Sei sicuro di voler eliminare questo invitato?",
     "deleteGuestFailed": "Impossibile eliminare l'invitato",
@@ -378,7 +387,14 @@
       "elementAdded": "Elemento della location aggiunto",
       "elementDeleted": "Elemento della location eliminato",
       "addElementFailed": "Impossibile aggiungere l'elemento della location.",
-      "deleteElementFailed": "Impossibile eliminare l'elemento della location."
+      "deleteElementFailed": "Impossibile eliminare l'elemento della location.",
+      "assignMenu": {
+        "triggerLabel": "Opzioni di postazione per {name}",
+        "currentTable": "Attualmente seduto al tavolo {number}",
+        "unassign": "Rimuovi dal tavolo",
+        "full": "Pieno",
+        "noOtherTables": "Nessun altro tavolo ancora."
+      }
     },
     "venueEditor": {
       "eyebrow": "Designer della location",
@@ -648,57 +664,56 @@
     "eyebrow": "Prezzi",
     "title": "Scegli il piano più adatto a te",
     "description": "Un pagamento unico per il tuo matrimonio — nessun abbonamento mensile.",
-    "mostPopular": "Più popolare",
-    "perWedding": "per matrimonio",
+    "paymentNotice": "Il pagamento online non è ancora attivo — scegli un piano qui sotto e ti contatteremo via email per organizzare tutto direttamente con te.",
+    "mostPopular": "Il più scelto",
+    "perWedding": "una tantum",
     "included": "Cosa è incluso",
+    "everythingInPlus": "Tutto ciò che è incluso in {plan}, più:",
+    "everythingIn": "Tutto ciò che è incluso in {plan}",
+    "getStarted": "Inizia ora",
     "choosePlan": "Scegli {plan}",
-    "plans": {
-      "basic": {
-        "eyebrow": "Essenziale",
-        "name": "Basic",
-        "description": "Per matrimoni più piccoli, solo per trovare il proprio posto"
-      },
-      "standard": {
-        "eyebrow": "Popolare",
-        "name": "Standard",
-        "description": "La nostra combinazione più popolare — disposizione dei tavoli + foto"
-      },
-      "premium": {
-        "eyebrow": "Completo",
-        "name": "Premium",
-        "description": "Senza limiti, per matrimoni più grandi"
-      }
+    "contactUs": "Contattaci",
+    "onRequest": "Su richiesta",
+    "tiers": {
+      "basic":     { "eyebrow": "Basic",             "name": "Basic",             "description": "Tutto ciò che serve per iniziare" },
+      "premium":   { "eyebrow": "Premium",           "name": "Premium",           "description": "La nostra combinazione più scelta — posti + foto" },
+      "unlimited": { "eyebrow": "Unlimited",         "name": "Unlimited",         "description": "Nessun limite, per matrimoni più grandi" },
+      "custom":    { "eyebrow": "Design su misura",  "name": "Design su misura",  "description": "Un invito completamente personalizzato, creato solo per voi" }
     },
     "features": {
-      "basic": {
-        "findSeat": "Trova il mio posto",
-        "tableArrangement": "Disposizione dei tavoli",
-        "photoUpload": "Caricamento di foto",
-        "guestLimit": "Fino a 150 invitati",
-        "storage": "30 giorni di archiviazione dopo il matrimonio",
-        "publicGallery": "Galleria condivisibile (link pubblico)"
-      },
-      "standard": {
-        "findSeat": "Trova il mio posto",
-        "tableArrangement": "Disposizione dei tavoli",
-        "photoUpload": "Caricamento di foto — fino a 300 foto",
-        "guestLimit": "Fino a 300 invitati",
-        "storage": "90 giorni di archiviazione dopo il matrimonio",
-        "publicGallery": "Galleria condivisibile (link pubblico)"
-      },
-      "premium": {
-        "findSeat": "Trova il mio posto",
-        "tableArrangement": "Disposizione dei tavoli",
-        "photoUpload": "Caricamento di foto — illimitato",
-        "guestLimit": "Numero illimitato di invitati",
-        "storage": "1 anno di archiviazione dopo il matrimonio",
-        "publicGallery": "Galleria condivisibile (link pubblico)"
-      }
+      "digitalInvitation": "Pagina d'invito digitale",
+      "customTheme": "Tema colori personalizzato",
+      "findSeat": "Trova il mio posto",
+      "rsvpManagement": "Monitoraggio e gestione RSVP",
+      "guestList": "Lista degli invitati",
+      "shareableLink": "Link condivisibile, aperture illimitate",
+      "tableArrangement": "Disposizione dei tavoli con drag-and-drop",
+      "photoUpload": "Caricamento foto degli invitati — fino a 300 foto",
+      "publicGallery": "Galleria fotografica condivisibile (link pubblico)",
+      "unlimitedGuests": "Invitati illimitati",
+      "unlimitedGuestsBadge": "Invitati illimitati",
+      "unlimitedPhotos": "Caricamenti foto illimitati",
+      "multilingual": "Esperienza invitato multilingue (7 lingue)",
+      "extendedStorage": "1 anno di archiviazione dopo il matrimonio",
+      "customLayout": "Illustrazioni e layout personalizzati",
+      "dedicatedSupport": "Supporto dedicato di un designer"
     },
-    "customPlan": {
-      "text": "Non hai trovato quello che cerchi?",
-      "contact": "Contattaci",
-      "suffix": "per un piano personalizzato."
+    "builder": {
+      "eyebrow": "Oppure crea il tuo pacchetto",
+      "title": "Parti da Basic e aggiungi solo ciò che ti serve",
+      "summaryTitle": "Il tuo pacchetto personalizzato",
+      "oneTimePayment": "pagamento una tantum",
+      "baseLabel": "Invito Basic",
+      "total": "Totale",
+      "alwaysIncluded": "Sempre incluso",
+      "cta": "Inizia ora",
+      "addons": {
+        "tableArrangement": { "name": "Disposizione dei tavoli",         "description": "Designer della disposizione con drag-and-drop per la tua location" },
+        "photoGallery":     { "name": "Galleria foto degli invitati",    "description": "Gli invitati possono caricare foto in una galleria condivisa e condivisibile" },
+        "guestLimit":       { "name": "Porta il limite a 300 invitati",  "description": "Per matrimoni più grandi del limite Basic di 150 invitati" },
+        "multilingual":     { "name": "Esperienza invitato multilingue", "description": "Pagine invitato disponibili in tutte le 7 lingue supportate" },
+        "extendedStorage":  { "name": "Archiviazione estesa",            "description": "Mantieni tutto online per 1 anno dopo il matrimonio" }
+      }
     }
   },
   "landing": {
@@ -854,6 +869,11 @@
         "title": "Questo link della galleria è scaduto.",
         "description": "Questa galleria condivisa era disponibile per un periodo limitato e non può più essere aperta."
       },
+      "error": {
+        "eyebrow": "Qualcosa è andato storto",
+        "title": "Impossibile caricare questa galleria.",
+        "description": "Prova ad aprire di nuovo il link tra un momento."
+      },
       "contact": "Contatta la persona che ha condiviso questa galleria con te se desideri un nuovo link.",
       "home": "Torna a Wedora"
     }
@@ -938,5 +958,32 @@
       "login": "Usa un altro account",
       "home": "Torna a Wedora"
     }
+  },
+  "rsvpApiKeyManager": {
+    "title": "API RSVP",
+    "description": "Consenti a un sito esterno di confermare o rifiutare gli invitati per nome.",
+    "endpoint": {
+      "keySentAs": "con la chiave inviata come",
+      "or": "o",
+      "queryParamNote": "per strumenti che non possono impostare header personalizzati",
+      "andBody": "e corpo",
+      "readmeNote": "Consulta il README per il riferimento completo richiesta/risposta."
+    },
+    "createKeyFailed": "Impossibile creare la chiave API",
+    "keyCreated": "Chiave API RSVP creata",
+    "revokeFailed": "Impossibile revocare la chiave API",
+    "keyRevoked": "Chiave API revocata",
+    "copySuccess": "Copiato negli appunti",
+    "copyFailed": "Impossibile copiare automaticamente -- copia manualmente",
+    "copyNowWarning": "Copia questa chiave ora -- non verrà più mostrata.",
+    "copyKeyAriaLabel": "Copia chiave API",
+    "labelPlaceholder": "Etichetta (opzionale, es. \"Modulo RSVP Squarespace\")",
+    "createKey": "Crea chiave",
+    "loadingKeys": "Caricamento chiavi...",
+    "noActiveKeys": "Nessuna chiave API attiva ancora.",
+    "untitledKey": "Chiave senza titolo",
+    "neverUsed": "mai utilizzata",
+    "lastUsed": "ultimo utilizzo {date}",
+    "revokeKeyAriaLabel": "Revoca chiave API"
   }
 }

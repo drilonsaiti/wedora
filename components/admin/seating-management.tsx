@@ -1,6 +1,12 @@
 "use client";
 
-import { type ReactNode, useMemo, useState, useTransition } from "react";
+import {
+    type ReactNode,
+    useEffect,
+    useMemo,
+    useState,
+    useTransition,
+} from "react";
 
 import dynamic from "next/dynamic";
 import {
@@ -124,6 +130,47 @@ export function SeatingManagement({
     } | null>(null);
 
     const [rsvpUpdatingId, setRsvpUpdatingId] = useState<string | null>(null);
+
+    /*
+     * Optimistic RSVP override, keyed by guest id.
+     *
+     * `initialGuests` only reflects the new status once
+     * router.refresh()'s server round-trip commits, but
+     * `setRsvpUpdatingId(null)` in handleRsvpCycle's
+     * `finally` runs right away -- so without this, the
+     * button flips back to its non-loading state still
+     * showing the OLD status for a beat, and only catches
+     * up to the truth on the next unrelated re-render
+     * (e.g. clicking another guest's button). This holds
+     * the status the admin just chose until the refreshed
+     * `initialGuests` prop actually agrees with it.
+     */
+    const [optimisticRsvp, setOptimisticRsvp] = useState<
+        Record<string, GuestWithTable["rsvp_status"]>
+    >({});
+
+    useEffect(() => {
+        setOptimisticRsvp((current) => {
+            if (Object.keys(current).length === 0) {
+                return current;
+            }
+
+            const next = { ...current };
+            let changed = false;
+
+            for (const guest of initialGuests) {
+                if (
+                    next[guest.id] !== undefined &&
+                    next[guest.id] === guest.rsvp_status
+                ) {
+                    delete next[guest.id];
+                    changed = true;
+                }
+            }
+
+            return changed ? next : current;
+        });
+    }, [initialGuests]);
 
     /*
      * Wedding name
@@ -253,9 +300,24 @@ export function SeatingManagement({
     };
 
     const handleRsvpCycle = async (guest: GuestWithTable) => {
-        const nextStatus = cycleRsvpStatus(guest.rsvp_status);
+        // Cycle from whatever is currently displayed, not
+        // guest.rsvp_status directly -- if an earlier
+        // update's router.refresh() hasn't landed yet,
+        // guest.rsvp_status here is still stale and would
+        // cycle from the wrong starting point.
+        const nextStatus = cycleRsvpStatus(
+            optimisticRsvp[guest.id] ?? guest.rsvp_status,
+        );
 
         setRsvpUpdatingId(guest.id);
+
+        // Show the new status right away rather than
+        // waiting on router.refresh()'s round trip -- see
+        // the comment on `optimisticRsvp` above.
+        setOptimisticRsvp((current) => ({
+            ...current,
+            [guest.id]: nextStatus,
+        }));
 
         try {
             const result = await updateGuestRsvpAction(wedding.id, {
@@ -264,6 +326,12 @@ export function SeatingManagement({
             });
 
             if (!result.success) {
+                setOptimisticRsvp((current) => {
+                    const next = { ...current };
+                    delete next[guest.id];
+                    return next;
+                });
+
                 toast.error(result.error ?? t("rsvpUpdateFailed"));
                 return;
             }
@@ -278,6 +346,12 @@ export function SeatingManagement({
                 router.refresh();
             });
         } catch (error) {
+            setOptimisticRsvp((current) => {
+                const next = { ...current };
+                delete next[guest.id];
+                return next;
+            });
+
             console.error("Update guest RSVP error:", error);
 
             toast.error(t("rsvpUpdateFailed"));
@@ -470,6 +544,9 @@ export function SeatingManagement({
                                                 guest.initials ||
                                                 `${guest.first_name?.[0] ?? ""}${guest.last_name?.[0] ?? ""}`.toUpperCase();
 
+                                            const displayRsvpStatus =
+                                                optimisticRsvp[guest.id] ?? guest.rsvp_status;
+
                                             return (
                                                 <div
                                                     key={guest.id}
@@ -512,18 +589,18 @@ export function SeatingManagement({
                                                             title={t("rsvpCycleHint")}
                                                             className={cn(
                                                                 "flex h-7 items-center gap-1 rounded-full border px-2.5 text-[11px] font-medium capitalize transition-colors disabled:opacity-50",
-                                                                guest.rsvp_status === "confirmed" &&
+                                                                displayRsvpStatus === "confirmed" &&
                                                                 "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
-                                                                guest.rsvp_status === "declined" &&
+                                                                displayRsvpStatus === "declined" &&
                                                                 "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100",
-                                                                guest.rsvp_status === "pending" &&
+                                                                displayRsvpStatus === "pending" &&
                                                                 "border-border/70 bg-secondary/40 text-muted-foreground hover:bg-secondary",
                                                             )}
                                                         >
                                                             {rsvpUpdatingId === guest.id ? (
                                                                 <Loader2 className="h-3 w-3 animate-spin" />
                                                             ) : (
-                                                                t(`rsvpStatus.${guest.rsvp_status}`)
+                                                                t(`rsvpStatus.${displayRsvpStatus}`)
                                                             )}
                                                         </button>
 
@@ -545,7 +622,7 @@ export function SeatingManagement({
                                                                     name: `${guest.first_name} ${guest.last_name}`.trim(),
                                                                 })
                                                             }
-                                                            aria-label="Delete"
+                                                            aria-label={t("delete")}
                                                             className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive disabled:opacity-50"
                                                         >
                                                             <Trash2 className="h-3.5 w-3.5" />
@@ -619,7 +696,7 @@ export function SeatingManagement({
                                                                 number: table.number,
                                                             })
                                                         }
-                                                        aria-label="Delete"
+                                                        aria-label={t("delete")}
                                                         className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive disabled:opacity-50"
                                                     >
                                                         <Trash2 className="h-3.5 w-3.5" />

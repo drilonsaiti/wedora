@@ -64,6 +64,11 @@
     "redirectingToLogin": "Redirection vers la page de connexion...",
     "saving": "Enregistrement…",
     "changePassword": "Modifier le mot de passe",
+    "accessDeniedCouple": "Accès refusé. Ce compte n'est pas lié à un mariage.",
+    "resetLinkExpiredEyebrow": "Lien expiré",
+    "resetLinkExpiredTitle": "Ce lien a expiré",
+    "resetLinkExpiredDescription": "Ce lien de réinitialisation de mot de passe a expiré ou a déjà été utilisé. Veuillez en demander un nouveau.",
+    "requestNewLink": "Demander un nouveau lien",
     "forgotPassword": {
       "title": "Mot de passe oublié ?",
       "description": "Saisissez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
@@ -127,6 +132,8 @@
       "unapproved": "Non approuvées",
       "loadingPhotos": "Chargement des photos...",
       "loadMore": "Charger plus",
+      "loadPhoto": "Charger la photo",
+      "openPhoto": "Ouvrir la photo",
       "noPhotos": "Aucune photo correspondant à ce filtre",
       "confirmDelete": "Voulez-vous vraiment supprimer cette photo ?",
       "deleteFailed": "Impossible de supprimer la photo",
@@ -219,6 +226,7 @@
         "photoUnfavourited": "Photo retirée des favoris",
         "photoUpdateFailed": "La photo n'a pas pu être mise à jour. Vos modifications ont été annulées.",
         "photoDeleteFailed": "La photo n'a pas pu être supprimée. Aucune modification n'a été effectuée.",
+        "photosLoadFailed": "Les photos n'ont pas pu être chargées. Veuillez réessayer.",
         "galleryLinkCreated": "Lien de galerie créé",
         "galleryLinkCopied": "Lien de galerie copié",
         "galleryLinkCopyFailed": "Impossible de copier le lien de galerie. Veuillez réessayer.",
@@ -485,57 +493,56 @@
     "eyebrow": "Tarifs",
     "title": "Choisissez la formule qui vous convient",
     "description": "Un paiement unique pour votre mariage — sans abonnement mensuel.",
+    "paymentNotice": "Le paiement en ligne n'est pas encore disponible — choisissez une formule ci-dessous et nous vous contacterons par e-mail pour tout mettre en place directement avec vous.",
     "mostPopular": "Le plus populaire",
-    "perWedding": "par mariage",
+    "perWedding": "paiement unique",
     "included": "Ce qui est inclus",
+    "everythingInPlus": "Tout ce qui est inclus dans {plan}, plus :",
+    "everythingIn": "Tout ce qui est inclus dans {plan}",
+    "getStarted": "Commencer",
     "choosePlan": "Choisir {plan}",
-    "plans": {
-      "basic": {
-        "eyebrow": "Essentiel",
-        "name": "Basic",
-        "description": "Pour les petits mariages, uniquement pour trouver sa place"
-      },
-      "standard": {
-        "eyebrow": "Populaire",
-        "name": "Standard",
-        "description": "Notre combinaison la plus populaire — plan de table + photos"
-      },
-      "premium": {
-        "eyebrow": "Complet",
-        "name": "Premium",
-        "description": "Sans limites, pour les mariages plus importants"
-      }
+    "contactUs": "Nous contacter",
+    "onRequest": "Sur demande",
+    "tiers": {
+      "basic":     { "eyebrow": "Basic",               "name": "Basic",               "description": "Tout ce qu'il faut pour bien démarrer" },
+      "premium":   { "eyebrow": "Premium",             "name": "Premium",             "description": "Notre combinaison la plus populaire — placement + photos" },
+      "unlimited": { "eyebrow": "Unlimited",           "name": "Unlimited",           "description": "Aucune limite, pour les grands mariages" },
+      "custom":    { "eyebrow": "Design sur mesure",   "name": "Design sur mesure",   "description": "Une invitation entièrement personnalisée, conçue rien que pour vous" }
     },
     "features": {
-      "basic": {
-        "findSeat": "Trouver ma place",
-        "tableArrangement": "Plan de table",
-        "photoUpload": "Téléchargement de photos",
-        "guestLimit": "Jusqu'à 150 invités",
-        "storage": "30 jours de stockage après le mariage",
-        "publicGallery": "Galerie partageable (lien public)"
-      },
-      "standard": {
-        "findSeat": "Trouver ma place",
-        "tableArrangement": "Plan de table",
-        "photoUpload": "Téléchargement de photos — jusqu'à 300 photos",
-        "guestLimit": "Jusqu'à 300 invités",
-        "storage": "90 jours de stockage après le mariage",
-        "publicGallery": "Galerie partageable (lien public)"
-      },
-      "premium": {
-        "findSeat": "Trouver ma place",
-        "tableArrangement": "Plan de table",
-        "photoUpload": "Téléchargement de photos — illimité",
-        "guestLimit": "Nombre d'invités illimité",
-        "storage": "1 an de stockage après le mariage",
-        "publicGallery": "Galerie partageable (lien public)"
-      }
+      "digitalInvitation": "Page d'invitation numérique",
+      "customTheme": "Thème de couleurs personnalisé",
+      "findSeat": "Trouver ma place",
+      "rsvpManagement": "Suivi et gestion des RSVP",
+      "guestList": "Liste des invités",
+      "shareableLink": "Lien partageable, ouvertures illimitées",
+      "tableArrangement": "Disposition des tables par glisser-déposer",
+      "photoUpload": "Téléversement de photos par les invités — jusqu'à 300 photos",
+      "publicGallery": "Galerie photo partageable (lien public)",
+      "unlimitedGuests": "Invités illimités",
+      "unlimitedGuestsBadge": "Invités illimités",
+      "unlimitedPhotos": "Téléversements de photos illimités",
+      "multilingual": "Expérience invité multilingue (7 langues)",
+      "extendedStorage": "1 an de stockage après le mariage",
+      "customLayout": "Illustrations et mise en page personnalisées",
+      "dedicatedSupport": "Accompagnement dédié par un designer"
     },
-    "customPlan": {
-      "text": "Vous n'avez pas trouvé ce que vous cherchez ?",
-      "contact": "Contactez-nous",
-      "suffix": "pour une formule personnalisée."
+    "builder": {
+      "eyebrow": "Ou composez votre propre formule",
+      "title": "Partez de Basic et ajoutez uniquement ce dont vous avez besoin",
+      "summaryTitle": "Votre formule personnalisée",
+      "oneTimePayment": "paiement unique",
+      "baseLabel": "Invitation Basic",
+      "total": "Total",
+      "alwaysIncluded": "Toujours inclus",
+      "cta": "Commencer",
+      "addons": {
+        "tableArrangement": { "name": "Disposition des tables",       "description": "Concepteur de placement par glisser-déposer pour votre lieu" },
+        "photoGallery":     { "name": "Galerie photo des invités",     "description": "Les invités peuvent téléverser des photos dans une galerie partagée et partageable" },
+        "guestLimit":       { "name": "Augmenter la limite à 300 invités", "description": "Pour les mariages plus grands que la limite Basic de 150 invités" },
+        "multilingual":     { "name": "Expérience invité multilingue", "description": "Pages invité disponibles dans les 7 langues prises en charge" },
+        "extendedStorage":  { "name": "Stockage prolongé",             "description": "Gardez tout en ligne pendant 1 an après le mariage" }
+      }
     }
   },
   "landing": {
@@ -691,6 +698,11 @@
         "title": "Ce lien de galerie a expiré.",
         "description": "Cette galerie partagée était disponible pour une durée limitée et ne peut plus être ouverte."
       },
+      "error": {
+        "eyebrow": "Une erreur est survenue",
+        "title": "Cette galerie n'a pas pu être chargée.",
+        "description": "Veuillez réessayer d'ouvrir le lien dans un instant."
+      },
       "contact": "Veuillez contacter la personne qui vous a partagé cette galerie si vous souhaitez obtenir un nouveau lien.",
       "home": "Retour à Wedora"
     }
@@ -724,6 +736,7 @@
     "total": "Total",
     "noGuests": "Aucun invité trouvé",
     "noTables": "Aucune table créée pour le moment",
+    "noTable": "Aucune table",
     "tableNumber": "Table {number}",
     "seats": "Places",
     "edit": "Modifier",
@@ -833,7 +846,14 @@
       "elementAdded": "Élément du lieu ajouté",
       "elementDeleted": "Élément du lieu supprimé",
       "addElementFailed": "L'élément du lieu n'a pas pu être ajouté.",
-      "deleteElementFailed": "L'élément du lieu n'a pas pu être supprimé."
+      "deleteElementFailed": "L'élément du lieu n'a pas pu être supprimé.",
+      "assignMenu": {
+        "triggerLabel": "Options de placement pour {name}",
+        "currentTable": "Actuellement placé à la table {number}",
+        "unassign": "Retirer de la table",
+        "full": "Complet",
+        "noOtherTables": "Aucune autre table pour l'instant."
+      }
     },
     "venueEditor": {
       "eyebrow": "Éditeur du lieu",
@@ -935,5 +955,32 @@
       "login": "Utiliser un autre compte",
       "home": "Retour à Wedora"
     }
+  },
+  "rsvpApiKeyManager": {
+    "title": "API RSVP",
+    "description": "Permettez à un site externe de confirmer ou de décliner des invités par nom.",
+    "endpoint": {
+      "keySentAs": "avec la clé envoyée comme",
+      "or": "ou",
+      "queryParamNote": "pour les outils qui ne peuvent pas définir d'en-têtes personnalisés",
+      "andBody": "et corps",
+      "readmeNote": "Voir le README pour la référence complète requête/réponse."
+    },
+    "createKeyFailed": "Échec de la création de la clé API",
+    "keyCreated": "Clé API RSVP créée",
+    "revokeFailed": "Échec de la révocation de la clé API",
+    "keyRevoked": "Clé API révoquée",
+    "copySuccess": "Copié dans le presse-papiers",
+    "copyFailed": "Impossible de copier automatiquement -- copiez manuellement",
+    "copyNowWarning": "Copiez cette clé maintenant -- elle ne sera plus affichée.",
+    "copyKeyAriaLabel": "Copier la clé API",
+    "labelPlaceholder": "Étiquette (optionnel, ex. \"Formulaire RSVP Squarespace\")",
+    "createKey": "Créer une clé",
+    "loadingKeys": "Chargement des clés...",
+    "noActiveKeys": "Aucune clé API active pour l'instant.",
+    "untitledKey": "Clé sans nom",
+    "neverUsed": "jamais utilisée",
+    "lastUsed": "dernière utilisation {date}",
+    "revokeKeyAriaLabel": "Révoquer la clé API"
   }
 }

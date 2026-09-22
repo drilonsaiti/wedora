@@ -1,6 +1,16 @@
 "use client";
 
-import {type MouseEvent, type ReactNode, useCallback, useEffect, useRef, useState, useTransition,} from "react";
+import {
+    type MouseEvent,
+    type ReactNode,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+    useTransition,
+} from "react";
+
+import { createPortal } from "react-dom";
 
 import Image from "next/image";
 import {
@@ -26,7 +36,7 @@ import {
     X,
     XCircle,
 } from "lucide-react";
-import {useLocale, useTranslations} from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import {
     createGalleryTokenAction,
@@ -38,12 +48,12 @@ import {
     signOutAction,
     updatePhotoAction,
 } from "@/actions/admin";
-import {ThemeToggle} from "@/components/theme-toggle";
-import {Link, useRouter} from "@/lib/navigation";
-import {cn, formatDate} from "@/lib/utils";
-import type {Photo} from "@/types/database";
-import {toast} from "sonner";
-import {ConfirmationModal} from "@/components/ui/confirmation-modal";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Link, useRouter } from "@/lib/navigation";
+import { cn, formatDate } from "@/lib/utils";
+import type { Photo } from "@/types/database";
+import { toast } from "sonner";
+import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 
 interface AdminDashboardProps {
     initialPhotos: Photo[];
@@ -195,14 +205,14 @@ export function AdminDashboard({
     const [loadingUrls, setLoadingUrls] = useState<Record<string, boolean>>({});
 
     const [actionLoading, setActionLoading] = useState<Record<string, boolean>>(
-        {}
+        {},
     );
 
     /*
      * ZIP
      */
     const [zipLoading, setZipLoading] = useState<"all" | "favourites" | null>(
-        null
+        null,
     );
 
     const [downloadLoading, setDownloadLoading] = useState<
@@ -246,6 +256,41 @@ export function AdminDashboard({
 
     const [galleryLabel, setGalleryLabel] = useState("Wedding Gallery");
 
+    /*
+     * Which filter tab is showing right now.
+     *
+     * Kept as local state -- separate from the `activeFilter`
+     * prop, which only reflects the URL -- so clicking a tab
+     * can update the UI immediately instead of waiting on a
+     * full page navigation. See handleFilterChange below.
+     */
+    const [currentFilter, setCurrentFilter] = useState(activeFilter);
+
+    const [filterSwitching, setFilterSwitching] = useState(false);
+
+    const filterRequestIdRef = useRef(0);
+
+    /*
+     * Synchronise client state with
+     * server-side filter results.
+     *
+     * This still fires on the initial load and on any real
+     * navigation (back/forward, a shared link with ?filter=...),
+     * and it's also what the background router.replace() in
+     * handleFilterChange eventually resolves into -- by then
+     * local state already matches, so this just confirms it.
+     */
+    useEffect(() => {
+        setPhotos(initialPhotos);
+
+        setTotal(initialTotal);
+
+        setError(initialError);
+
+        setSelectedPhoto(null);
+
+        setCurrentFilter(activeFilter);
+    }, [initialPhotos, initialTotal, initialError, activeFilter]);
 
     /*
      * Signed URLs
@@ -296,7 +341,7 @@ export function AdminDashboard({
                 }));
             }
         },
-        [signedUrls]
+        [signedUrls],
     );
 
     /*
@@ -332,8 +377,8 @@ export function AdminDashboard({
                 t(
                     update.approved
                         ? "notifications.photoApproved"
-                        : "notifications.photoUnapproved"
-                )
+                        : "notifications.photoUnapproved",
+                ),
             );
 
             return;
@@ -344,8 +389,8 @@ export function AdminDashboard({
                 t(
                     update.hidden
                         ? "notifications.photoHidden"
-                        : "notifications.photoShown"
-                )
+                        : "notifications.photoShown",
+                ),
             );
 
             return;
@@ -356,8 +401,8 @@ export function AdminDashboard({
                 t(
                     update.favourite
                         ? "notifications.photoFavourited"
-                        : "notifications.photoUnfavourited"
-                )
+                        : "notifications.photoUnfavourited",
+                ),
             );
         }
     };
@@ -388,7 +433,7 @@ export function AdminDashboard({
             ...update,
         };
 
-        const remainsVisible = matchesActivePhotoFilter(nextPhoto, activeFilter);
+        const remainsVisible = matchesActivePhotoFilter(nextPhoto, currentFilter);
 
         const wasSelected = selectedPhoto?.id === id;
 
@@ -415,10 +460,10 @@ export function AdminDashboard({
                     ...update,
                 };
 
-                return matchesActivePhotoFilter(updatedPhoto, activeFilter)
+                return matchesActivePhotoFilter(updatedPhoto, currentFilter)
                     ? [updatedPhoto]
                     : [];
-            })
+            }),
         );
 
         if (!remainsVisible) {
@@ -471,7 +516,7 @@ export function AdminDashboard({
                 restored.splice(
                     Math.min(previousIndex, restored.length),
                     0,
-                    previousPhoto
+                    previousPhoto,
                 );
 
                 return restored;
@@ -585,7 +630,7 @@ export function AdminDashboard({
                 restored.splice(
                     Math.min(previousIndex, restored.length),
                     0,
-                    previousPhoto
+                    previousPhoto,
                 );
 
                 return restored;
@@ -687,7 +732,7 @@ export function AdminDashboard({
      * Download ZIP
      */
     const waitForQueuedZip = async (
-        statusUrl: string
+        statusUrl: string,
     ): Promise<QueuedZipStatusResponse> => {
         const startedAt = Date.now();
 
@@ -704,7 +749,7 @@ export function AdminDashboard({
                 throw new Error(
                     `ZIP status failed with ${response.status}: ${
                         payload?.errorCode ?? "unknown"
-                    }`
+                    }`,
                 );
             }
 
@@ -722,7 +767,7 @@ export function AdminDashboard({
 
             const retrySeconds = Math.min(
                 10,
-                Math.max(2, payload.retryAfterSeconds ?? 2)
+                Math.max(2, payload.retryAfterSeconds ?? 2),
             );
 
             await sleep(retrySeconds * 1000);
@@ -760,7 +805,7 @@ export function AdminDashboard({
                 toast.info(
                     t("notifications.zipQueued", {
                         count: queued.photoCount,
-                    })
+                    }),
                 );
 
                 let ready: QueuedZipStatusResponse;
@@ -797,7 +842,7 @@ export function AdminDashboard({
                 throw new Error(
                     `ZIP generation failed with ${response.status}: ${
                         detail?.code ?? "unknown"
-                    }`
+                    }`,
                 );
             }
 
@@ -825,7 +870,7 @@ export function AdminDashboard({
             toast.error(
                 queuedFailure
                     ? t("notifications.zipExportFailed")
-                    : t("notifications.zipDownloadFailed")
+                    : t("notifications.zipDownloadFailed"),
             );
         } finally {
             setZipLoading(null);
@@ -844,15 +889,15 @@ export function AdminDashboard({
 
         try {
             const filters =
-                activeFilter === "favourites"
+                currentFilter === "favourites"
                     ? {
                         favourite: true,
                     }
-                    : activeFilter === "hidden"
+                    : currentFilter === "hidden"
                         ? {
                             hidden: true,
                         }
-                        : activeFilter === "unapproved"
+                        : currentFilter === "unapproved"
                             ? {
                                 approved: false,
                             }
@@ -862,7 +907,7 @@ export function AdminDashboard({
                 weddingId,
                 filters,
                 PAGE_SIZE,
-                photos.length
+                photos.length,
             );
 
             if (result.photos) {
@@ -977,7 +1022,7 @@ export function AdminDashboard({
             } catch (clipboardError) {
                 console.warn(
                     "Clipboard API unavailable, using fallback:",
-                    clipboardError
+                    clipboardError,
                 );
             }
         }
@@ -1115,8 +1160,78 @@ export function AdminDashboard({
 
     /*
      * Filters
+     *
+     * Switching tabs used to be a plain router.push(), which on
+     * this force-dynamic route means: full navigation, re-run
+     * the server component (re-check auth, re-query Supabase),
+     * re-render, then finally show anything -- visibly slower
+     * than it needs to be for what's really just "run a
+     * differently-filtered query and swap a list". Instead, we
+     * fetch the new filter's first page directly (the same
+     * server action handleLoadMore already uses) and update the
+     * UI as soon as that one query resolves, then bring the URL
+     * in line in the background so the tab stays linkable/
+     * bookmarkable and back/forward still works.
      */
     const handleFilterChange = (filter?: string) => {
+        if (filter === currentFilter) {
+            return;
+        }
+
+        const requestId = ++filterRequestIdRef.current;
+
+        setCurrentFilter(filter);
+
+        setFilterSwitching(true);
+
+        setSelectedPhoto(null);
+
+        const filters =
+            filter === "favourites"
+                ? {
+                    favourite: true,
+                }
+                : filter === "hidden"
+                    ? {
+                        hidden: true,
+                    }
+                    : filter === "unapproved"
+                        ? {
+                            approved: false,
+                        }
+                        : undefined;
+
+        void getPhotosAction(weddingId, filters, PAGE_SIZE, 0)
+            .then((result) => {
+                /*
+                 * A newer tab click already landed --
+                 * discard this now-stale response.
+                 */
+                if (requestId !== filterRequestIdRef.current) {
+                    return;
+                }
+
+                setPhotos(result.photos ?? []);
+
+                setTotal(result.total ?? 0);
+
+                setError(result.error);
+            })
+            .catch((filterError) => {
+                if (requestId !== filterRequestIdRef.current) {
+                    return;
+                }
+
+                console.error("Filter switch error:", filterError);
+
+                setError(t("notifications.photosLoadFailed"));
+            })
+            .finally(() => {
+                if (requestId === filterRequestIdRef.current) {
+                    setFilterSwitching(false);
+                }
+            });
+
         const base =
             role === "admin"
                 ? `/admin/weddings/${weddingId}/photos`
@@ -1124,14 +1239,18 @@ export function AdminDashboard({
 
         const url = filter ? `${base}?filter=${filter}` : base;
 
-        router.push(url);
+        startTransition(() => {
+            router.replace(url, {
+                scroll: false,
+            });
+        });
     };
 
     /*
      * Viewer navigation
      */
     const modalIndex = photos.findIndex(
-        (photo) => photo.id === selectedPhoto?.id
+        (photo) => photo.id === selectedPhoto?.id,
     );
 
     const goPrev = async () => {
@@ -1154,14 +1273,13 @@ export function AdminDashboard({
         <div
             className={cn(
                 "relative overflow-hidden bg-background",
-                role === "admin" ? "min-h-[calc(100vh-4rem)]" : "min-h-screen"
+                role === "admin" ? "min-h-[calc(100vh-4rem)]" : "min-h-screen",
             )}
         >
             {/* Couple ambient only */}
             {role === "couple" && (
                 <div aria-hidden className="pointer-events-none absolute inset-0">
-                    <div
-                        className="absolute left-1/2 top-[-320px] h-[680px] w-[920px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/20 blur-[150px]"/>
+                    <div className="absolute left-1/2 top-[-320px] h-[680px] w-[920px] -translate-x-1/2 rounded-full bg-[hsl(var(--blush))]/20 blur-[150px]" />
                 </div>
             )}
 
@@ -1176,9 +1294,8 @@ export function AdminDashboard({
                             href={`/couple/weddings/${weddingId}`}
                             className="flex items-center gap-2.5"
                         >
-                            <div
-                                className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
-                                <Heart className="h-3.5 w-3.5" fill="currentColor"/>
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-white shadow-sm">
+                                <Heart className="h-3.5 w-3.5" fill="currentColor" />
                             </div>
 
                             <span className="font-serif text-xl tracking-tight text-foreground">
@@ -1187,14 +1304,14 @@ export function AdminDashboard({
                         </Link>
 
                         <div className="flex items-center gap-1 sm:gap-2">
-                            <ThemeToggle/>
+                            <ThemeToggle />
 
                             <Link
                                 href={`/couple/weddings/${weddingId}/seating`}
                                 aria-label={t("seating")}
                                 className="flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:px-4"
                             >
-                                <Armchair className="h-3.5 w-3.5" strokeWidth={1.6}/>
+                                <Armchair className="h-3.5 w-3.5" strokeWidth={1.6} />
 
                                 <span className="hidden sm:inline">{t("seating")}</span>
                             </Link>
@@ -1205,7 +1322,7 @@ export function AdminDashboard({
                                 aria-label={t("shareGallery")}
                                 className="flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:px-4"
                             >
-                                <Share2 className="h-3.5 w-3.5" strokeWidth={1.6}/>
+                                <Share2 className="h-3.5 w-3.5" strokeWidth={1.6} />
 
                                 <span className="hidden md:inline">{t("shareGallery")}</span>
                             </button>
@@ -1222,7 +1339,7 @@ export function AdminDashboard({
                                 aria-label={tc("logout")}
                                 className="flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-card text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:w-auto sm:px-3"
                             >
-                                <LogOut className="h-3.5 w-3.5" strokeWidth={1.6}/>
+                                <LogOut className="h-3.5 w-3.5" strokeWidth={1.6} />
 
                                 <span className="ml-2 hidden lg:inline">{tc("logout")}</span>
                             </button>
@@ -1243,7 +1360,7 @@ export function AdminDashboard({
                             href={`/admin/weddings/${weddingId}`}
                             className="mb-6 inline-flex items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
                         >
-                            <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.6}/>
+                            <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.6} />
 
                             {t("backToWedding")}
                         </Link>
@@ -1276,8 +1393,7 @@ export function AdminDashboard({
 
                         <div className="flex flex-wrap items-center gap-2">
                             {/* Count */}
-                            <div
-                                className="rounded-full border border-border/70 bg-card px-4 py-2.5 text-xs text-muted-foreground shadow-sm">
+                            <div className="rounded-full border border-border/70 bg-card px-4 py-2.5 text-xs text-muted-foreground shadow-sm">
                                 {t("photoCount", {
                                     count: total,
                                 })}
@@ -1291,7 +1407,7 @@ export function AdminDashboard({
                                         onClick={openShareModal}
                                         className="btn-secondary justify-center"
                                     >
-                                        <Share2 className="h-4 w-4"/>
+                                        <Share2 className="h-4 w-4" />
 
                                         {t("shareGallery")}
                                     </button>
@@ -1310,8 +1426,8 @@ export function AdminDashboard({
                     FILTERS
                 ===================================== */}
                 <div className="mb-7 flex items-center gap-2 overflow-x-auto pb-1">
-                    {FILTERS.map(({key, label}) => {
-                        const active = activeFilter === key || (!activeFilter && !key);
+                    {FILTERS.map(({ key, label }) => {
+                        const active = currentFilter === key || (!currentFilter && !key);
 
                         return (
                             <button
@@ -1319,12 +1435,16 @@ export function AdminDashboard({
                                 type="button"
                                 onClick={() => handleFilterChange(key)}
                                 className={cn(
-                                    "shrink-0 rounded-full border px-4 py-2 text-[11px] font-medium transition-all",
+                                    "flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-[11px] font-medium transition-all",
                                     active
                                         ? "border-foreground bg-foreground text-background shadow-sm"
-                                        : "border-border/70 bg-card text-muted-foreground hover:border-foreground/15 hover:text-foreground"
+                                        : "border-border/70 bg-card text-muted-foreground hover:border-foreground/15 hover:text-foreground",
                                 )}
                             >
+                                {active && filterSwitching && (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                )}
+
                                 {label}
                             </button>
                         );
@@ -1343,10 +1463,8 @@ export function AdminDashboard({
 
                 {/* Empty */}
                 {photos.length === 0 && (
-                    <div
-                        className="rounded-[2rem] border border-border/60 bg-card/70 px-6 py-20 text-center shadow-sm backdrop-blur">
-                        <div
-                            className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-secondary">
+                    <div className="rounded-[2rem] border border-border/60 bg-card/70 px-6 py-20 text-center shadow-sm backdrop-blur">
+                        <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-secondary">
                             <Images
                                 className="h-5 w-5 text-muted-foreground"
                                 strokeWidth={1.5}
@@ -1394,7 +1512,7 @@ export function AdminDashboard({
                         >
                             {loadingMore ? (
                                 <>
-                                    <Loader2 className="h-4 w-4 animate-spin"/>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
 
                                     {tc("loading")}
                                 </>
@@ -1527,13 +1645,13 @@ function ZipMenu({
                 className={cn(
                     compact
                         ? "flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-50 sm:px-4"
-                        : "btn-secondary justify-center disabled:opacity-50"
+                        : "btn-secondary justify-center disabled:opacity-50",
                 )}
             >
                 {zipLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin"/>
+                    <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                    <ArchiveIcon className="h-4 w-4" strokeWidth={1.6}/>
+                    <ArchiveIcon className="h-4 w-4" strokeWidth={1.6} />
                 )}
 
                 <span className={cn(compact ? "hidden lg:inline" : "hidden sm:inline")}>
@@ -1551,8 +1669,7 @@ function ZipMenu({
                         onClick={() => setOpen(false)}
                     />
 
-                    <div
-                        className="absolute right-0 top-full z-30 mt-2 w-52 overflow-hidden rounded-2xl border border-border/70 bg-card p-1.5 shadow-xl">
+                    <div className="absolute right-0 top-full z-30 mt-2 w-52 overflow-hidden rounded-2xl border border-border/70 bg-card p-1.5 shadow-xl">
                         <button
                             type="button"
                             onClick={() => {
@@ -1563,7 +1680,7 @@ function ZipMenu({
                             disabled={zipLoading !== null}
                             className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs text-foreground transition-colors hover:bg-secondary"
                         >
-                            <Download className="h-3.5 w-3.5 text-muted-foreground"/>
+                            <Download className="h-3.5 w-3.5 text-muted-foreground" />
 
                             {t("allPhotos")}
                         </button>
@@ -1578,7 +1695,7 @@ function ZipMenu({
                             disabled={zipLoading !== null}
                             className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs text-foreground transition-colors hover:bg-secondary"
                         >
-                            <Heart className="h-3.5 w-3.5 text-muted-foreground"/>
+                            <Heart className="h-3.5 w-3.5 text-muted-foreground" />
 
                             {t("onlyFavourites")}
                         </button>
@@ -1615,6 +1732,8 @@ function PhotoCard({
     onUrlNeeded: (photo: Photo) => void;
     eager?: boolean;
 }) {
+    const t = useTranslations("dashboard.photos");
+
     const cardRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -1643,7 +1762,7 @@ function PhotoCard({
             },
             {
                 rootMargin: "300px",
-            }
+            },
         );
 
         observer.observe(element);
@@ -1657,8 +1776,20 @@ function PhotoCard({
         <div
             ref={cardRef}
             className={cn(
-                "group relative aspect-[4/5] overflow-hidden rounded-[1.4rem] bg-muted",
-                photo.hidden && "opacity-50"
+                /*
+                 * Thumbnails are generated server-side as a
+                 * plain 300x300 square (lib/sharp.ts, `fit:
+                 * "cover"` with content-aware "attention"
+                 * cropping) -- so this box has to be square
+                 * too. It used to be a 4:5 portrait box, which
+                 * made object-cover crop the *already-cropped*
+                 * square thumbnail a second time, dumbly (no
+                 * attention weighting), often slicing right
+                 * through whatever the server-side crop had
+                 * deliberately kept (a face, most often).
+                 */
+                "group relative aspect-square overflow-hidden rounded-[1.4rem] bg-muted",
+                photo.hidden && "opacity-50",
             )}
             onMouseEnter={() => {
                 onUrlNeeded(photo);
@@ -1678,15 +1809,14 @@ function PhotoCard({
             ) : (
                 <button
                     type="button"
-                    aria-label="Load photo"
+                    aria-label={t("loadPhoto")}
                     onClick={() => onUrlNeeded(photo)}
                     className="absolute inset-0 w-full bg-muted"
                 >
-                    <div className="absolute inset-0 shimmer"/>
+                    <div className="absolute inset-0 shimmer" />
 
                     {isLoadingUrl && (
-                        <Loader2
-                            className="absolute left-1/2 top-1/2 z-10 h-5 w-5 -translate-x-1/2 -translate-y-1/2 animate-spin text-muted-foreground"/>
+                        <Loader2 className="absolute left-1/2 top-1/2 z-10 h-5 w-5 -translate-x-1/2 -translate-y-1/2 animate-spin text-muted-foreground" />
                     )}
                 </button>
             )}
@@ -1695,7 +1825,7 @@ function PhotoCard({
             {thumbnailUrl && (
                 <button
                     type="button"
-                    aria-label="Open photo"
+                    aria-label={t("openPhoto")}
                     onClick={onOpen}
                     className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 opacity-0 transition-opacity duration-300 sm:group-hover:opacity-100"
                 />
@@ -1704,30 +1834,26 @@ function PhotoCard({
             {/* Status */}
             <div className="pointer-events-none absolute left-3 top-3 flex gap-1.5">
                 {photo.favourite && (
-                    <div
-                        className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white backdrop-blur-md">
-                        <Heart className="h-3.5 w-3.5 fill-current"/>
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white backdrop-blur-md">
+                        <Heart className="h-3.5 w-3.5 fill-current" />
                     </div>
                 )}
 
                 {photo.hidden && (
-                    <div
-                        className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white backdrop-blur-md">
-                        <EyeOff className="h-3.5 w-3.5"/>
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white backdrop-blur-md">
+                        <EyeOff className="h-3.5 w-3.5" />
                     </div>
                 )}
 
                 {!photo.approved && (
-                    <div
-                        className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white backdrop-blur-md">
-                        <XCircle className="h-3.5 w-3.5"/>
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white backdrop-blur-md">
+                        <XCircle className="h-3.5 w-3.5" />
                     </div>
                 )}
             </div>
 
             {/* Quick actions */}
-            <div
-                className="absolute right-3 top-3 flex gap-1.5 opacity-100 transition-all duration-200 sm:-translate-y-1 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
+            <div className="absolute right-3 top-3 flex gap-1.5 opacity-100 transition-all duration-200 sm:-translate-y-1 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
                 <QuickActionBtn
                     onClick={(event) => {
                         event.stopPropagation();
@@ -1755,9 +1881,9 @@ function PhotoCard({
                     loading={isActionLoading}
                 >
                     {photo.hidden ? (
-                        <Eye className="h-3.5 w-3.5"/>
+                        <Eye className="h-3.5 w-3.5" />
                     ) : (
-                        <EyeOff className="h-3.5 w-3.5"/>
+                        <EyeOff className="h-3.5 w-3.5" />
                     )}
                 </QuickActionBtn>
 
@@ -1770,14 +1896,13 @@ function PhotoCard({
                     loading={isActionLoading}
                     danger
                 >
-                    <Trash2 className="h-3.5 w-3.5"/>
+                    <Trash2 className="h-3.5 w-3.5" />
                 </QuickActionBtn>
             </div>
 
             {/* Guest name */}
             {photo.guest_name && (
-                <div
-                    className="pointer-events-none absolute inset-x-0 bottom-0 px-4 pb-4 opacity-100 transition-all duration-300 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 px-4 pb-4 opacity-100 transition-all duration-300 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
                     <p className="truncate text-left text-xs font-medium text-white drop-shadow">
                         {photo.guest_name}
                     </p>
@@ -1814,10 +1939,10 @@ function QuickActionBtn({
                 "flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white backdrop-blur-md transition-colors disabled:opacity-50",
                 active && "bg-white text-black hover:bg-white/90",
                 !active && !danger && "hover:bg-white/20",
-                danger && "hover:bg-destructive/80 hover:text-white"
+                danger && "hover:bg-destructive/80 hover:text-white",
             )}
         >
-            {loading ? <Loader2 className="h-3 w-3 animate-spin"/> : children}
+            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : children}
         </button>
     );
 }
@@ -1894,7 +2019,23 @@ function PhotoModal({
         };
     }, [hasPrev, hasNext, onClose, onPrev, onNext]);
 
-    return (
+    /*
+     * Rendered through a portal straight onto <body>.
+     *
+     * The admin layout wraps page content in a div with its
+     * own `z-index: 10` (to sit above a decorative background),
+     * which -- because setting z-index creates a new stacking
+     * context -- caps EVERY descendant's stacking at that layer
+     * no matter what z-index they claim for themselves. This
+     * modal's own `z-50` was therefore still being painted
+     * *underneath* the admin nav bar's `z-50` sticky header,
+     * which lives outside that wrapper: the top of the photo
+     * and its controls rendered hidden behind the nav instead
+     * of on top of everything, as a real fullscreen viewer
+     * needs to. Portaling to `document.body` escapes that
+     * trapped stacking context entirely.
+     */
+    return createPortal(
         <div
             className="fixed inset-0 z-50 flex bg-[#090909] text-white"
             onClick={onClose}
@@ -1918,7 +2059,7 @@ function PhotoModal({
                             className="scale-110 object-cover blur-[90px]"
                         />
 
-                        <div className="absolute inset-0 bg-black/50"/>
+                        <div className="absolute inset-0 bg-black/50" />
                     </div>
                 )}
 
@@ -1927,10 +2068,10 @@ function PhotoModal({
                     <button
                         type="button"
                         onClick={onClose}
-                        aria-label="Close"
+                        aria-label={t("close")}
                         className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/25 text-white backdrop-blur-md transition-colors hover:bg-white/15 lg:hidden"
                     >
-                        <X className="h-4 w-4"/>
+                        <X className="h-4 w-4" />
                     </button>
 
                     <button
@@ -1941,16 +2082,15 @@ function PhotoModal({
                         className="ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/25 text-white backdrop-blur-md transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {isDownloadLoading ? (
-                            <Loader2 className="h-4 w-4 animate-spin"/>
+                            <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                            <Download className="h-4 w-4"/>
+                            <Download className="h-4 w-4" />
                         )}
                     </button>
                 </div>
 
                 {/* Image */}
-                <div
-                    className="relative flex h-full min-h-screen items-center justify-center px-3 pb-[310px] pt-16 lg:min-h-0 lg:pb-3 lg:pr-3 lg:pt-3">
+                <div className="relative flex h-full min-h-screen items-center justify-center px-3 pb-[310px] pt-16 lg:min-h-0 lg:pb-3 lg:pr-3 lg:pt-3">
                     {urls?.original ? (
                         <Image
                             key={photo.id}
@@ -1962,9 +2102,9 @@ function PhotoModal({
                             className="object-contain px-3 py-16 lg:py-8"
                         />
                     ) : isLoadingUrl ? (
-                        <Loader2 className="h-6 w-6 animate-spin text-white/50"/>
+                        <Loader2 className="h-6 w-6 animate-spin text-white/50" />
                     ) : (
-                        <div className="h-52 w-52 rounded-3xl bg-white/5"/>
+                        <div className="h-52 w-52 rounded-3xl bg-white/5" />
                     )}
 
                     {hasPrev && (
@@ -1974,7 +2114,7 @@ function PhotoModal({
                             aria-label="Previous photo"
                             className="absolute left-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/25 text-white backdrop-blur-md transition-colors hover:bg-white/15 sm:left-6"
                         >
-                            <ChevronLeft className="h-5 w-5"/>
+                            <ChevronLeft className="h-5 w-5" />
                         </button>
                     )}
 
@@ -1985,7 +2125,7 @@ function PhotoModal({
                             aria-label="Next photo"
                             className="absolute right-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/25 text-white backdrop-blur-md transition-colors hover:bg-white/15 lg:right-6"
                         >
-                            <ChevronRight className="h-5 w-5"/>
+                            <ChevronRight className="h-5 w-5" />
                         </button>
                     )}
                 </div>
@@ -2010,10 +2150,10 @@ function PhotoModal({
                     <button
                         type="button"
                         onClick={onClose}
-                        aria-label="Close"
+                        aria-label={t("close")}
                         className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:flex"
                     >
-                        <X className="h-4 w-4"/>
+                        <X className="h-4 w-4" />
                     </button>
                 </div>
 
@@ -2031,28 +2171,28 @@ function PhotoModal({
                     <div className="mt-5 flex flex-wrap gap-2">
                         {photo.favourite && (
                             <StatusBadge
-                                icon={<Heart className="h-3 w-3 fill-current"/>}
+                                icon={<Heart className="h-3 w-3 fill-current" />}
                                 label={t("favourites")}
                             />
                         )}
 
                         {photo.hidden && (
                             <StatusBadge
-                                icon={<EyeOff className="h-3 w-3"/>}
+                                icon={<EyeOff className="h-3 w-3" />}
                                 label={t("hidden")}
                             />
                         )}
 
                         {!photo.approved && (
                             <StatusBadge
-                                icon={<XCircle className="h-3 w-3"/>}
+                                icon={<XCircle className="h-3 w-3" />}
                                 label={t("unapproved")}
                             />
                         )}
                     </div>
                 )}
 
-                <div className="my-6 h-px bg-border/60"/>
+                <div className="my-6 h-px bg-border/60" />
 
                 {/* Actions */}
                 <div className="space-y-1">
@@ -2082,9 +2222,9 @@ function PhotoModal({
                         active={photo.hidden}
                         icon={
                             photo.hidden ? (
-                                <Eye className="h-4 w-4"/>
+                                <Eye className="h-4 w-4" />
                             ) : (
-                                <EyeOff className="h-4 w-4"/>
+                                <EyeOff className="h-4 w-4" />
                             )
                         }
                         label={photo.hidden ? t("show") : t("hide")}
@@ -2100,9 +2240,9 @@ function PhotoModal({
                         active={!photo.approved}
                         icon={
                             photo.approved ? (
-                                <XCircle className="h-4 w-4"/>
+                                <XCircle className="h-4 w-4" />
                             ) : (
-                                <CheckCircle className="h-4 w-4"/>
+                                <CheckCircle className="h-4 w-4" />
                             )
                         }
                         label={photo.approved ? t("unapprove") : t("approve")}
@@ -2111,14 +2251,14 @@ function PhotoModal({
                     <ActionButton
                         onClick={() => onDownload(photo)}
                         loading={isDownloadLoading}
-                        icon={<Download className="h-4 w-4"/>}
+                        icon={<Download className="h-4 w-4" />}
                         label={t("download")}
                     />
 
                     <ActionButton
                         onClick={() => onDelete(photo.id)}
                         loading={isActionLoading}
-                        icon={<Trash2 className="h-4 w-4"/>}
+                        icon={<Trash2 className="h-4 w-4" />}
                         label={t("deletePermanently")}
                         danger
                     />
@@ -2139,7 +2279,8 @@ function PhotoModal({
                     </div>
                 </div>
             </aside>
-        </div>
+        </div>,
+        document.body,
     );
 }
 
@@ -2148,10 +2289,9 @@ function PhotoModal({
  * STATUS BADGE
  * ============================================
  */
-function StatusBadge({icon, label}: { icon: ReactNode; label: string }) {
+function StatusBadge({ icon, label }: { icon: ReactNode; label: string }) {
     return (
-        <span
-            className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-[10px] font-medium text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-[10px] font-medium text-muted-foreground">
       {icon}
 
             {label}
@@ -2190,11 +2330,11 @@ function ActionButton({
                     ? "text-destructive hover:bg-destructive/[0.07]"
                     : active
                         ? "bg-secondary text-foreground"
-                        : "text-foreground hover:bg-secondary"
+                        : "text-foreground hover:bg-secondary",
             )}
         >
       <span className="flex h-7 w-7 shrink-0 items-center justify-center">
-        {loading ? <Loader2 className="h-4 w-4 animate-spin"/> : icon}
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : icon}
       </span>
 
             {label}
@@ -2320,7 +2460,7 @@ function ShareGalleryModal({
                         aria-label="Close"
                         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        <X className="h-4 w-4"/>
+                        <X className="h-4 w-4" />
                     </button>
                 </div>
 
@@ -2332,11 +2472,10 @@ function ShareGalleryModal({
                                     {/* Existing links */}
                                     {loadingTokens ? (
                                         <div className="flex justify-center py-12">
-                                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground"/>
+                                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                                         </div>
                                     ) : galleryTokensError ? (
-                                        <div
-                                            className="rounded-2xl border border-destructive/15 bg-destructive/[0.05] px-5 py-7 text-center">
+                                        <div className="rounded-2xl border border-destructive/15 bg-destructive/[0.05] px-5 py-7 text-center">
                                             <p className="text-sm font-medium text-foreground">
                                                 {t("galleryLinksLoadFailed")}
                                             </p>
@@ -2351,8 +2490,7 @@ function ShareGalleryModal({
                                         </div>
                                     ) : galleryTokens.length === 0 ? (
                                         <div className="py-8 text-center">
-                                            <div
-                                                className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-secondary">
+                                            <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-secondary">
                                                 <LinkIcon
                                                     className="h-4 w-4 text-muted-foreground"
                                                     strokeWidth={1.5}
@@ -2400,11 +2538,11 @@ function ShareGalleryModal({
                                                             className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                                                         >
                                                             {copyingTokenId === token.id ? (
-                                                                <Loader2 className="h-3.5 w-3.5 animate-spin"/>
+                                                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
                                                             ) : copiedTokenId === token.id ? (
-                                                                <Check className="h-3.5 w-3.5"/>
+                                                                <Check className="h-3.5 w-3.5" />
                                                             ) : (
-                                                                <Copy className="h-3.5 w-3.5"/>
+                                                                <Copy className="h-3.5 w-3.5" />
                                                             )}
                                                         </button>
 
@@ -2417,14 +2555,14 @@ function ShareGalleryModal({
                                                                 copyingTokenId !== null
                                                             }
                                                             aria-label={t(
-                                                                "confirmations.deleteGalleryLink.confirm"
+                                                                "confirmations.deleteGalleryLink.confirm",
                                                             )}
                                                             className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive disabled:cursor-not-allowed disabled:opacity-50"
                                                         >
                                                             {deletingTokenId === token.id ? (
-                                                                <Loader2 className="h-3.5 w-3.5 animate-spin"/>
+                                                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
                                                             ) : (
-                                                                <Trash2 className="h-3.5 w-3.5"/>
+                                                                <Trash2 className="h-3.5 w-3.5" />
                                                             )}
                                                         </button>
                                                     </div>
@@ -2438,7 +2576,7 @@ function ShareGalleryModal({
                                         onClick={() => setShowCreateForm(true)}
                                         className="btn-primary w-full justify-center"
                                     >
-                                        <LinkIcon className="h-4 w-4"/>
+                                        <LinkIcon className="h-4 w-4" />
 
                                         {t("createNewGalleryLink")}
                                     </button>
@@ -2477,10 +2615,10 @@ function ShareGalleryModal({
                                                     "flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-xs font-medium transition-all",
                                                     photoFilter === "all"
                                                         ? "border-foreground bg-foreground text-background"
-                                                        : "border-border/70 bg-background text-muted-foreground hover:text-foreground"
+                                                        : "border-border/70 bg-background text-muted-foreground hover:text-foreground",
                                                 )}
                                             >
-                                                <Images className="h-4 w-4"/>
+                                                <Images className="h-4 w-4" />
 
                                                 {t("allPhotos")}
                                             </button>
@@ -2492,10 +2630,10 @@ function ShareGalleryModal({
                                                     "flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-xs font-medium transition-all",
                                                     photoFilter === "favourites"
                                                         ? "border-foreground bg-foreground text-background"
-                                                        : "border-border/70 bg-background text-muted-foreground hover:text-foreground"
+                                                        : "border-border/70 bg-background text-muted-foreground hover:text-foreground",
                                                 )}
                                             >
-                                                <Heart className="h-4 w-4"/>
+                                                <Heart className="h-4 w-4" />
 
                                                 {t("onlyFavourites")}
                                             </button>
@@ -2507,8 +2645,7 @@ function ShareGalleryModal({
                                     </div>
 
                                     {/* Messages */}
-                                    <label
-                                        className="flex cursor-pointer items-start justify-between gap-4 rounded-2xl border border-border/60 bg-secondary/30 p-4">
+                                    <label className="flex cursor-pointer items-start justify-between gap-4 rounded-2xl border border-border/60 bg-secondary/30 p-4">
                                         <div>
                                             <p className="text-sm font-medium text-foreground">
                                                 {t("showMessagesTitle")}
@@ -2564,13 +2701,13 @@ function ShareGalleryModal({
                                     >
                                         {shareLoading ? (
                                             <>
-                                                <Loader2 className="h-4 w-4 animate-spin"/>
+                                                <Loader2 className="h-4 w-4 animate-spin" />
 
                                                 {t("creatingLink")}
                                             </>
                                         ) : (
                                             <>
-                                                <LinkIcon className="h-4 w-4"/>
+                                                <LinkIcon className="h-4 w-4" />
 
                                                 {t("createLink")}
                                             </>
@@ -2609,24 +2746,24 @@ function ShareGalleryModal({
                                     disabled={copying}
                                     className={cn(
                                         "btn-primary flex-1 justify-center disabled:cursor-not-allowed disabled:opacity-60",
-                                        copied && "bg-foreground text-background hover:opacity-90"
+                                        copied && "bg-foreground text-background hover:opacity-90",
                                     )}
                                 >
                                     {copying ? (
                                         <>
-                                            <Loader2 className="h-4 w-4 animate-spin"/>
+                                            <Loader2 className="h-4 w-4 animate-spin" />
 
                                             {t("copyingLink")}
                                         </>
                                     ) : copied ? (
                                         <>
-                                            <Check className="h-4 w-4"/>
+                                            <Check className="h-4 w-4" />
 
                                             {t("linkCopied")}
                                         </>
                                     ) : (
                                         <>
-                                            <Copy className="h-4 w-4"/>
+                                            <Copy className="h-4 w-4" />
 
                                             {t("copyLink")}
                                         </>
@@ -2640,7 +2777,7 @@ function ShareGalleryModal({
                                     aria-label="Open gallery"
                                     className="btn-secondary px-4"
                                 >
-                                    <ExternalLink className="h-4 w-4"/>
+                                    <ExternalLink className="h-4 w-4" />
                                 </a>
                             </div>
 

@@ -70,6 +70,11 @@
     "showPassword": "Şifreyi göster",
     "hidePassword": "Şifreyi gizle",
     "loginEyebrow": "Giriş",
+    "accessDeniedCouple": "Erişim reddedildi. Bu hesap bir düğünle ilişkili değil.",
+    "resetLinkExpiredEyebrow": "Bağlantının süresi doldu",
+    "resetLinkExpiredTitle": "Bu bağlantının süresi doldu",
+    "resetLinkExpiredDescription": "Bu şifre sıfırlama bağlantısının süresi dolmuş veya zaten kullanılmış. Lütfen yeni bir tane isteyin.",
+    "requestNewLink": "Yeni bağlantı iste",
     "forgotPassword": {
       "title": "Şifrenizi mi unuttunuz?",
       "eyebrow": "Şifrenizi mi unuttunuz?",
@@ -146,6 +151,8 @@
       "unapproved": "Onaylanmamış",
       "loadingPhotos": "Fotoğraflar yükleniyor...",
       "loadMore": "Daha fazla yükle",
+      "loadPhoto": "Fotoğraf yükle",
+      "openPhoto": "Fotoğrafı aç",
       "noPhotos": "Bu filtreye uygun fotoğraf bulunamadı",
       "noPhotosMatchingFilter": "Başka bir filtre deneyin veya davetlilerin fotoğraf yüklemesini bekleyin.",
       "confirmDelete": "Bu fotoğrafı silmek istediğinizden emin misiniz?",
@@ -235,6 +242,7 @@
         "photoUnfavourited": "Fotoğraf favorilerden çıkarıldı",
         "photoUpdateFailed": "Fotoğraf güncellenemedi. Değişiklikler geri alındı.",
         "photoDeleteFailed": "Fotoğraf silinemedi. Hiçbir şey değişmedi.",
+        "photosLoadFailed": "Fotoğraflar yüklenemedi. Lütfen tekrar deneyin.",
         "galleryLinkCreated": "Galeri bağlantısı oluşturuldu",
         "galleryLinkCopied": "Galeri bağlantısı kopyalandı",
         "galleryLinkCopyFailed": "Galeri bağlantısı kopyalanamadı. Lütfen tekrar deneyin.",
@@ -273,6 +281,7 @@
     "unseated": "Yerleştirilmeyen",
     "noGuests": "Davetli bulunamadı",
     "noTables": "Henüz masa oluşturulmadı",
+    "noTable": "Masa yok",
     "noTablesCreated": "Henüz masa oluşturulmadı.",
     "confirmDeleteGuest": "Bu davetliyi silmek istediğinizden emin misiniz?",
     "deleteGuestFailed": "Davetli silinemedi",
@@ -378,7 +387,14 @@
       "elementAdded": "Mekan öğesi eklendi",
       "elementDeleted": "Mekan öğesi silindi",
       "addElementFailed": "Mekan öğesi eklenemedi.",
-      "deleteElementFailed": "Mekan öğesi silinemedi."
+      "deleteElementFailed": "Mekan öğesi silinemedi.",
+      "assignMenu": {
+        "triggerLabel": "{name} için oturma seçenekleri",
+        "currentTable": "Şu anda masa {number} konumunda",
+        "unassign": "Masadan kaldır",
+        "full": "Dolu",
+        "noOtherTables": "Henüz başka masa yok."
+      }
     },
     "venueEditor": {
       "eyebrow": "Mekan tasarımcısı",
@@ -646,59 +662,58 @@
   },
   "pricing": {
     "eyebrow": "Fiyatlandırma",
-    "title": "Size uygun paketi seçin",
+    "title": "Size uygun planı seçin",
     "description": "Düğününüz için tek seferlik ödeme — aylık abonelik yok.",
+    "paymentNotice": "Online ödeme henüz aktif değil — aşağıdan bir plan seçin, her şeyi doğrudan sizinle kurmak için e-posta ile iletişime geçeceğiz.",
     "mostPopular": "En popüler",
-    "perWedding": "düğün başına",
-    "included": "Pakete dahil olanlar",
-    "choosePlan": "{plan} paketini seç",
-    "plans": {
-      "basic": {
-        "eyebrow": "Temel",
-        "name": "Basic",
-        "description": "Daha küçük düğünler için, yalnızca oturma yeri bulma"
-      },
-      "standard": {
-        "eyebrow": "Popüler",
-        "name": "Standard",
-        "description": "En popüler kombinasyonumuz — oturma düzeni + fotoğraflar"
-      },
-      "premium": {
-        "eyebrow": "Eksiksiz",
-        "name": "Premium",
-        "description": "Sınırsız özellikler, daha büyük düğünler için"
-      }
+    "perWedding": "tek seferlik",
+    "included": "Neler dahil",
+    "everythingInPlus": "{plan} içindeki her şey, artı:",
+    "everythingIn": "{plan} içindeki her şey",
+    "getStarted": "Başla",
+    "choosePlan": "{plan} seç",
+    "contactUs": "Bize ulaşın",
+    "onRequest": "Talep üzerine",
+    "tiers": {
+      "basic":     { "eyebrow": "Basic",           "name": "Basic",           "description": "Başlamak için ihtiyacınız olan her şey" },
+      "premium":   { "eyebrow": "Premium",         "name": "Premium",         "description": "En popüler kombinasyonumuz — oturma düzeni + fotoğraflar" },
+      "unlimited": { "eyebrow": "Unlimited",       "name": "Unlimited",       "description": "Sınırsız, daha büyük düğünler için" },
+      "custom":    { "eyebrow": "Özel Tasarım",    "name": "Özel Tasarım",    "description": "Yalnızca sizin için tasarlanmış tamamen özel bir davetiye" }
     },
     "features": {
-      "basic": {
-        "findSeat": "Yerimi Bul",
-        "tableArrangement": "Masa düzeni",
-        "photoUpload": "Fotoğraf yükleme",
-        "guestLimit": "150 misafire kadar",
-        "storage": "Düğünden sonra 30 gün depolama",
-        "publicGallery": "Paylaşılabilir galeri (genel bağlantı)"
-      },
-      "standard": {
-        "findSeat": "Yerimi Bul",
-        "tableArrangement": "Masa düzeni",
-        "photoUpload": "Fotoğraf yükleme — 300 fotoğrafa kadar",
-        "guestLimit": "300 misafire kadar",
-        "storage": "Düğünden sonra 90 gün depolama",
-        "publicGallery": "Paylaşılabilir galeri (genel bağlantı)"
-      },
-      "premium": {
-        "findSeat": "Yerimi Bul",
-        "tableArrangement": "Masa düzeni",
-        "photoUpload": "Fotoğraf yükleme — sınırsız",
-        "guestLimit": "Sınırsız misafir",
-        "storage": "Düğünden sonra 1 yıl depolama",
-        "publicGallery": "Paylaşılabilir galeri (genel bağlantı)"
-      }
+      "digitalInvitation": "Dijital davetiye sayfası",
+      "customTheme": "Özel renk teması",
+      "findSeat": "Yerimi bul",
+      "rsvpManagement": "RSVP takibi ve yönetimi",
+      "guestList": "Misafir listesi",
+      "shareableLink": "Paylaşılabilir bağlantı, sınırsız açılış",
+      "tableArrangement": "Sürükle-bırak masa düzeni",
+      "photoUpload": "Misafir fotoğraf yüklemesi — 300 fotoğrafa kadar",
+      "publicGallery": "Paylaşılabilir fotoğraf galerisi (genel bağlantı)",
+      "unlimitedGuests": "Sınırsız misafir",
+      "unlimitedGuestsBadge": "Sınırsız misafir",
+      "unlimitedPhotos": "Sınırsız fotoğraf yüklemesi",
+      "multilingual": "Çok dilli misafir deneyimi (7 dil)",
+      "extendedStorage": "Düğünden sonra 1 yıl depolama",
+      "customLayout": "Özel illüstrasyonlar ve sayfa düzeni",
+      "dedicatedSupport": "Özel tasarımcı desteği"
     },
-    "customPlan": {
-      "text": "Aradığınızı bulamadınız mı?",
-      "contact": "Bize ulaşın",
-      "suffix": "size özel bir paket için."
+    "builder": {
+      "eyebrow": "Ya da kendi paketinizi oluşturun",
+      "title": "Basic ile başlayın ve yalnızca ihtiyacınız olanı ekleyin",
+      "summaryTitle": "Özel paketiniz",
+      "oneTimePayment": "tek seferlik ödeme",
+      "baseLabel": "Basic davetiye",
+      "total": "Toplam",
+      "alwaysIncluded": "Her zaman dahil",
+      "cta": "Başla",
+      "addons": {
+        "tableArrangement": { "name": "Masa düzeni",                   "description": "Mekanınız için sürükle-bırak oturma düzeni tasarımcısı" },
+        "photoGallery":     { "name": "Misafir fotoğraf galerisi",      "description": "Misafirler ortak ve paylaşılabilir bir galeriye fotoğraf yükleyebilir" },
+        "guestLimit":       { "name": "Misafir limitini 300'e çıkar",   "description": "Basic'in 150 misafir limitinden daha büyük düğünler için" },
+        "multilingual":     { "name": "Çok dilli misafir deneyimi",     "description": "Misafir sayfaları desteklenen 7 dilin tümünde mevcut" },
+        "extendedStorage":  { "name": "Uzatılmış depolama",             "description": "Düğünden sonra her şeyi 1 yıl boyunca çevrimiçi tutun" }
+      }
     }
   },
   "landing": {
@@ -854,6 +869,11 @@
         "title": "Bu galeri bağlantısının süresi doldu.",
         "description": "Bu paylaşılan galeri sınırlı bir süre için kullanılabilirdi ve artık açılamıyor."
       },
+      "error": {
+        "eyebrow": "Bir şeyler ters gitti",
+        "title": "Bu galeri yüklenemedi.",
+        "description": "Lütfen bağlantıyı birazdan tekrar açmayı deneyin."
+      },
       "contact": "Yeni bir bağlantı istiyorsanız lütfen bu galeriyi sizinle paylaşan kişiyle iletişime geçin.",
       "home": "Wedora'ya dön"
     }
@@ -938,5 +958,32 @@
       "login": "Başka bir hesap kullan",
       "home": "Wedora'ya dön"
     }
+  },
+  "rsvpApiKeyManager": {
+    "title": "RSVP API",
+    "description": "Harici bir sitenin misafirleri isimle onaylamasına veya reddetmesine izin verin.",
+    "endpoint": {
+      "keySentAs": "anahtar şu şekilde gönderilir:",
+      "or": "veya",
+      "queryParamNote": "özel başlık ayarlayamayan araçlar için",
+      "andBody": "ve gövde",
+      "readmeNote": "Tam istek/yanıt referansı için README'ye bakın."
+    },
+    "createKeyFailed": "API anahtarı oluşturulamadı",
+    "keyCreated": "RSVP API anahtarı oluşturuldu",
+    "revokeFailed": "API anahtarı iptal edilemedi",
+    "keyRevoked": "API anahtarı iptal edildi",
+    "copySuccess": "Panoya kopyalandı",
+    "copyFailed": "Otomatik kopyalanamadı -- manuel olarak kopyalayın",
+    "copyNowWarning": "Bu anahtarı şimdi kopyalayın -- bir daha gösterilmeyecek.",
+    "copyKeyAriaLabel": "API anahtarını kopyala",
+    "labelPlaceholder": "Etiket (isteğe bağlı, örn. \"Squarespace RSVP formu\")",
+    "createKey": "Anahtar oluştur",
+    "loadingKeys": "Anahtarlar yükleniyor...",
+    "noActiveKeys": "Henüz aktif API anahtarı yok.",
+    "untitledKey": "Başlıksız anahtar",
+    "neverUsed": "hiç kullanılmadı",
+    "lastUsed": "son kullanım {date}",
+    "revokeKeyAriaLabel": "API anahtarını iptal et"
   }
 }

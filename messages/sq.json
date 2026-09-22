@@ -70,6 +70,11 @@
     "hidePassword": "Fshih fjalëkalimin",
     "rateLimited": "Shumë përpjekje. Ju lutemi provoni përsëri pas {seconds, plural, one {# sekonde} other {# sekondash}}.",
     "loginEyebrow": "Hyrja",
+    "accessDeniedCouple": "Qasja u refuzua. Kjo llogari nuk është e lidhur me një dasmë.",
+    "resetLinkExpiredEyebrow": "Lidhja ka skaduar",
+    "resetLinkExpiredTitle": "Kjo lidhje ka skaduar",
+    "resetLinkExpiredDescription": "Kjo lidhje për rivendosjen e fjalëkalimit ka skaduar ose është përdorur tashmë. Ju lutemi kërkoni një të re.",
+    "requestNewLink": "Kërko një lidhje të re",
     "forgotPassword": {
       "title": "Keni harruar fjalëkalimin?",
       "eyebrow": "Keni harruar fjalëkalimin?",
@@ -146,6 +151,8 @@
       "unapproved": "Të paaprovuara",
       "loadingPhotos": "Duke ngarkuar fotot...",
       "loadMore": "Ngarko më shumë",
+      "loadPhoto": "Ngarko foto",
+      "openPhoto": "Hap foto",
       "noPhotos": "Nuk u gjet asnjë foto me këtë filtër",
       "noPhotosMatchingFilter": "Provoni një filtër tjetër ose prisni që të ftuarit të ngarkojnë foto.",
       "confirmDelete": "A jeni të sigurt që dëshironi të fshini këtë foto?",
@@ -233,6 +240,7 @@
         "photoShown": "Fotoja është sërish e dukshme",
         "photoFavourited": "Fotoja u shtua te të preferuarat",
         "photoUnfavourited": "Fotoja u hoq nga të preferuarat",
+        "photosLoadFailed": "Fotografitë nuk mund të ngarkoheshin. Ju lutemi provoni përsëri.",
         "photoUpdateFailed": "Fotoja nuk mund të përditësohej. Ndryshimet tuaja u kthyen mbrapsht.",
         "photoDeleteFailed": "Fotoja nuk mund të fshihej. Asgjë nuk u ndryshua.",
         "galleryLinkCreated": "Linku i galerisë u krijua",
@@ -273,6 +281,7 @@
     "unseated": "Pa vend",
     "noGuests": "Nuk u gjet asnjë i ftuar",
     "noTables": "Ende nuk keni krijuar tavolina",
+    "noTable": "Pa tavolinë",
     "noTablesCreated": "Nuk është krijuar asnjë tavolinë ende.",
     "confirmDeleteGuest": "A jeni të sigurt që dëshironi të fshini këtë të ftuar?",
     "deleteGuestFailed": "Dështoi fshirja e të ftuarit",
@@ -378,7 +387,14 @@
       "elementAdded": "Elementi i sallës u shtua",
       "elementDeleted": "Elementi i sallës u fshi",
       "addElementFailed": "Elementi i sallës nuk mund të shtohej.",
-      "deleteElementFailed": "Elementi i sallës nuk mund të fshihej."
+      "deleteElementFailed": "Elementi i sallës nuk mund të fshihej.",
+      "assignMenu": {
+        "triggerLabel": "Opsione vendosjeje për {name}",
+        "currentTable": "Aktualisht i vendosur në tavolinën {number}",
+        "unassign": "Hiqe nga tavolina",
+        "full": "Plot",
+        "noOtherTables": "Nuk ka tavolina të tjera ende."
+      }
     },
     "venueEditor": {
       "eyebrow": "Dizajneri i sallës",
@@ -646,59 +662,58 @@
   },
   "pricing": {
     "eyebrow": "Çmimet",
-    "title": "Zgjidh paketën që të përshtatet",
-    "description": "Një pagesë e vetme për dasmën tuaj — pa abonim mujor.",
-    "mostPopular": "Më e pëlqyera",
-    "perWedding": "për dasmë",
+    "title": "Zgjidh planin që të përshtatet",
+    "description": "Një pagesë e vetme për dasmën tënde — pa abonim mujor.",
+    "paymentNotice": "Pagesa online nuk është aktivizuar ende — zgjidh një plan më poshtë dhe do të kontaktojmë me email për të organizuar gjithçka direkt me ty.",
+    "mostPopular": "Më i zgjedhuri",
+    "perWedding": "një herë",
     "included": "Çfarë përfshihet",
+    "everythingInPlus": "Gjithçka në {plan}, plus:",
+    "everythingIn": "Gjithçka në {plan}",
+    "getStarted": "Fillo tani",
     "choosePlan": "Zgjidh {plan}",
-    "plans": {
-      "basic": {
-        "eyebrow": "Thelbësore",
-        "name": "Basic",
-        "description": "Për dasma më të vogla, vetëm për gjetjen e vendit"
-      },
-      "standard": {
-        "eyebrow": "E popullarizuar",
-        "name": "Standard",
-        "description": "Kombinimi ynë më i pëlqyer — ulëset + fotot"
-      },
-      "premium": {
-        "eyebrow": "Komplete",
-        "name": "Premium",
-        "description": "Pa kufizime, për dasma më të mëdha"
-      }
+    "contactUs": "Na kontakto",
+    "onRequest": "Me kërkesë",
+    "tiers": {
+      "basic":     { "eyebrow": "Basic",               "name": "Basic",               "description": "Gjithçka që të duhet për të filluar" },
+      "premium":   { "eyebrow": "Premium",             "name": "Premium",             "description": "Kombinimi ynë më i zgjedhur — vendosje + foto" },
+      "unlimited": { "eyebrow": "Unlimited",           "name": "Unlimited",           "description": "Pa kufizime, për dasma më të mëdha" },
+      "custom":    { "eyebrow": "Dizajn i personalizuar", "name": "Dizajn i personalizuar", "description": "Një ftesë plotësisht e personalizuar, e dizajnuar vetëm për ju" }
     },
     "features": {
-      "basic": {
-        "findSeat": "Gjej vendin tim",
-        "tableArrangement": "Organizimi i tavolinave",
-        "photoUpload": "Ngarkimi i fotove",
-        "guestLimit": "Deri në 150 të ftuar",
-        "storage": "30 ditë ruajtje pas dasmës",
-        "publicGallery": "Galeri e shpërndashme (link publik)"
-      },
-      "standard": {
-        "findSeat": "Gjej vendin tim",
-        "tableArrangement": "Organizimi i tavolinave",
-        "photoUpload": "Ngarkimi i fotove — deri në 300 foto",
-        "guestLimit": "Deri në 300 të ftuar",
-        "storage": "90 ditë ruajtje pas dasmës",
-        "publicGallery": "Galeri e shpërndashme (link publik)"
-      },
-      "premium": {
-        "findSeat": "Gjej vendin tim",
-        "tableArrangement": "Organizimi i tavolinave",
-        "photoUpload": "Ngarkimi i fotove — pa kufizim",
-        "guestLimit": "Numër i pakufizuar të ftuarish",
-        "storage": "1 vit ruajtje pas dasmës",
-        "publicGallery": "Galeri e shpërndashme (link publik)"
-      }
+      "digitalInvitation": "Faqe ftese digjitale",
+      "customTheme": "Temë ngjyrash e personalizuar",
+      "findSeat": "Gjej vendin tim",
+      "rsvpManagement": "Ndjekje dhe menaxhim i RSVP",
+      "guestList": "Lista e të ftuarve",
+      "shareableLink": "Lidhje e ndashme, hapje pa kufi",
+      "tableArrangement": "Rregullim tavolinash me drag-and-drop",
+      "photoUpload": "Ngarkim fotosh nga të ftuarit — deri në 300 foto",
+      "publicGallery": "Galeri fotosh e ndashme (lidhje publike)",
+      "unlimitedGuests": "Të ftuar pa kufi",
+      "unlimitedGuestsBadge": "Të ftuar pa kufi",
+      "unlimitedPhotos": "Ngarkime fotosh pa kufi",
+      "multilingual": "Përvojë shumë-gjuhësore për të ftuarit (7 gjuhë)",
+      "extendedStorage": "1 vit ruajtje pas dasmës",
+      "customLayout": "Ilustrime dhe plan-faqe të personalizuara",
+      "dedicatedSupport": "Mbështetje e dedikuar nga dizajneri"
     },
-    "customPlan": {
-      "text": "Nuk gjete atë që kërkon?",
-      "contact": "Na kontakto",
-      "suffix": "për një paketë të personalizuar."
+    "builder": {
+      "eyebrow": "Ose ndërto paketën tënde",
+      "title": "Fillo nga Basic dhe shto vetëm atë që të duhet",
+      "summaryTitle": "Paketa jote e personalizuar",
+      "oneTimePayment": "pagesë një herë",
+      "baseLabel": "Ftesa Basic",
+      "total": "Totali",
+      "alwaysIncluded": "Gjithmonë e përfshirë",
+      "cta": "Fillo tani",
+      "addons": {
+        "tableArrangement": { "name": "Rregullim tavolinash",          "description": "Dizajner vendosjeje me drag-and-drop për ambientin tënd" },
+        "photoGallery":     { "name": "Galeri fotosh për të ftuarit",   "description": "Të ftuarit mund të ngarkojnë foto në një galeri të përbashkët dhe të ndashme" },
+        "guestLimit":       { "name": "Rrit kufirin në 300 të ftuar",   "description": "Për dasma më të mëdha se kufiri Basic prej 150 të ftuarve" },
+        "multilingual":     { "name": "Përvojë shumë-gjuhësore",        "description": "Faqet e të ftuarve të disponueshme në të 7 gjuhët e mbështetura" },
+        "extendedStorage":  { "name": "Ruajtje e zgjatur",              "description": "Mbaj gjithçka online për 1 vit pas dasmës" }
+      }
     }
   },
   "landing": {
@@ -854,6 +869,11 @@
         "title": "Ky link i galerisë ka skaduar.",
         "description": "Kjo galeri e shpërndarë ishte e disponueshme për një kohë të kufizuar dhe nuk mund të hapet më."
       },
+      "error": {
+        "eyebrow": "Diçka shkoi keq",
+        "title": "Nuk mundëm ta ngarkonim këtë galeri.",
+        "description": "Ju lutemi provoni ta hapni lidhjen përsëri pas një momenti."
+      },
       "contact": "Ju lutem kontaktoni personin që e ndau këtë galeri me ju nëse dëshironi një link të ri.",
       "home": "Kthehu te Wedora"
     }
@@ -938,5 +958,32 @@
       "login": "Përdor një llogari tjetër",
       "home": "Kthehu te Wedora"
     }
+  },
+  "rsvpApiKeyManager": {
+    "title": "API RSVP",
+    "description": "Lejoni një faqe të jashtme të konfirmojë ose refuzojë të ftuarit me emër.",
+    "endpoint": {
+      "keySentAs": "me çelësin e dërguar si",
+      "or": "ose",
+      "queryParamNote": "për mjete që nuk mund të vendosin header-a të personalizuar",
+      "andBody": "dhe trup",
+      "readmeNote": "Shihni README për referencën e plotë të kërkesës/përgjigjes."
+    },
+    "createKeyFailed": "Krijimi i çelësit API dështoi",
+    "keyCreated": "Çelësi API RSVP u krijua",
+    "revokeFailed": "Shfuqizimi i çelësit API dështoi",
+    "keyRevoked": "Çelësi API u shfuqizua",
+    "copySuccess": "U kopjua në clipboard",
+    "copyFailed": "Nuk mund të kopjohej automatikisht -- kopjojeni manualisht",
+    "copyNowWarning": "Kopjojeni këtë çelës tani -- nuk do të shfaqet përsëri.",
+    "copyKeyAriaLabel": "Kopjo çelësin API",
+    "labelPlaceholder": "Etiketa (opsionale, p.sh. \"Formulari RSVP i Squarespace\")",
+    "createKey": "Krijo çelës",
+    "loadingKeys": "Duke ngarkuar çelësat...",
+    "noActiveKeys": "Nuk ka çelësa API aktivë ende.",
+    "untitledKey": "Çelës pa titull",
+    "neverUsed": "kurrë i përdorur",
+    "lastUsed": "përdorur së fundmi {date}",
+    "revokeKeyAriaLabel": "Shfuqizo çelësin API"
   }
 }

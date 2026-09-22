@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
+import { useState } from "react";
 
 import {
     AlertCircle,
@@ -10,117 +10,80 @@ import {
     Lock,
     LogIn,
     Mail,
-} from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { loginCouple } from '@/actions/auth'
-import { Link } from '@/lib/navigation'
-import {
-    coupleLoginSchema,
-    type CoupleLoginValues,
-} from '@/schemas'
+import { loginCouple } from "@/actions/auth";
+import { Link } from "@/lib/navigation";
+import { coupleLoginSchema, type CoupleLoginValues } from "@/schemas";
 
 export function CoupleLoginForm() {
-    const router = useRouter()
+    const router = useRouter();
 
-    const t = useTranslations('auth')
-    const tv = useTranslations('validation')
-    const tc = useTranslations('common')
+    const t = useTranslations("auth");
+    const tv = useTranslations("validation");
+    const tc = useTranslations("common");
 
-    const [error, setError] =
-        useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null);
 
-    const [loading, setLoading] =
-        useState(false)
+    const [loading, setLoading] = useState(false);
 
-    const [showPassword, setShowPassword] =
-        useState(false)
+    const [showPassword, setShowPassword] = useState(false);
 
     const {
         register,
         handleSubmit,
         formState: { errors },
     } = useForm<CoupleLoginValues>({
-        resolver: zodResolver(
-            coupleLoginSchema
-        ),
-    })
+        resolver: zodResolver(coupleLoginSchema),
+    });
 
-    const onSubmit = async (
-        values: CoupleLoginValues
-    ) => {
-        setError(null)
-        setLoading(true)
+    const onSubmit = async (values: CoupleLoginValues) => {
+        if (loading) {
+            return;
+        }
+
+        setError(null);
+        setLoading(true);
 
         try {
-            const result =
-                await loginCouple(
-                    values.email,
-                    values.password
-                )
+            const result = await loginCouple(values.email, values.password);
 
             if (!result.success) {
-                if (
-                    result.code ===
-                    'RATE_LIMITED'
-                ) {
+                if (result.code === "RATE_LIMITED") {
                     setError(
-                        t(
-                            'rateLimited',
-                            {
-                                seconds:
-                                    result.retryAfterSeconds ??
-                                    60,
-                            }
-                        )
-                    )
-                } else if (
-                    result.code ===
-                    'ACCESS_DENIED'
-                ) {
-                    setError(
-                        t('accessDenied')
-                    )
+                        t("rateLimited", {
+                            seconds: result.retryAfterSeconds ?? 60,
+                        }),
+                    );
+                } else if (result.code === "ACCESS_DENIED") {
+                    setError(t("accessDeniedCouple"));
                 } else {
-                    setError(
-                        t(
-                            'invalidCredentials'
-                        )
-                    )
+                    setError(t("invalidCredentials"));
                 }
 
-                return
+                return;
             }
 
-            router.push(
-                `/couple/weddings/${result.weddingId}`
-            )
+            router.push(`/couple/weddings/${result.weddingId}`);
 
-            router.refresh()
+            router.refresh();
         } catch {
-            setError(tc('error'))
+            setError(tc("error"));
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     return (
-        <form
-            onSubmit={handleSubmit(
-                onSubmit
-            )}
-            className="space-y-5"
-        >
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Email */}
             <div>
-                <label
-                    htmlFor="email"
-                    className="label-wedding"
-                >
-                    {t('email')}
+                <label htmlFor="email" className="label-wedding">
+                    {t("email")}
                 </label>
 
                 <div className="relative">
@@ -130,14 +93,10 @@ export function CoupleLoginForm() {
                     />
 
                     <input
-                        {...register(
-                            'email'
-                        )}
+                        {...register("email")}
                         id="email"
                         type="email"
-                        placeholder={t(
-                            'emailPlaceholder'
-                        )}
+                        placeholder={t("emailPlaceholder")}
                         autoComplete="email"
                         disabled={loading}
                         className="input-wedding h-12 pl-11"
@@ -146,12 +105,7 @@ export function CoupleLoginForm() {
 
                 {errors.email?.message && (
                     <p className="mt-1.5 text-xs leading-5 text-destructive">
-                        {tv(
-                            errors.email.message.replace(
-                                'validation.',
-                                ''
-                            )
-                        )}
+                        {tv(errors.email.message.replace("validation.", ""))}
                     </p>
                 )}
             </div>
@@ -163,16 +117,14 @@ export function CoupleLoginForm() {
                         htmlFor="password"
                         className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground"
                     >
-                        {t('password')}
+                        {t("password")}
                     </label>
 
                     <Link
                         href="/couple/forgot-password"
                         className="text-[11px] font-medium text-muted-foreground transition-colors hover:text-[hsl(var(--primary))]"
                     >
-                        {t(
-                            'forgotPassword.title'
-                        )}
+                        {t("forgotPassword.title")}
                     </Link>
                 </div>
 
@@ -183,18 +135,10 @@ export function CoupleLoginForm() {
                     />
 
                     <input
-                        {...register(
-                            'password'
-                        )}
+                        {...register("password")}
                         id="password"
-                        type={
-                            showPassword
-                                ? 'text'
-                                : 'password'
-                        }
-                        placeholder={t(
-                            'passwordPlaceholder'
-                        )}
+                        type={showPassword ? "text" : "password"}
+                        placeholder={t("passwordPlaceholder")}
                         autoComplete="current-password"
                         disabled={loading}
                         className="input-wedding h-12 pl-11 pr-11"
@@ -202,51 +146,22 @@ export function CoupleLoginForm() {
 
                     <button
                         type="button"
-                        onClick={() =>
-                            setShowPassword(
-                                (current) =>
-                                    !current
-                            )
-                        }
+                        onClick={() => setShowPassword((current) => !current)}
                         disabled={loading}
-                        aria-label={
-                            showPassword
-                                ? t(
-                                    'hidePassword'
-                                )
-                                : t(
-                                    'showPassword'
-                                )
-                        }
+                        aria-label={showPassword ? t("hidePassword") : t("showPassword")}
                         className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
                     >
                         {showPassword ? (
-                            <EyeOff
-                                className="h-4 w-4"
-                                strokeWidth={
-                                    1.6
-                                }
-                            />
+                            <EyeOff className="h-4 w-4" strokeWidth={1.6} />
                         ) : (
-                            <Eye
-                                className="h-4 w-4"
-                                strokeWidth={
-                                    1.6
-                                }
-                            />
+                            <Eye className="h-4 w-4" strokeWidth={1.6} />
                         )}
                     </button>
                 </div>
 
-                {errors.password
-                    ?.message && (
+                {errors.password?.message && (
                     <p className="mt-1.5 text-xs leading-5 text-destructive">
-                        {t(
-                            errors.password.message.replace(
-                                'auth.',
-                                ''
-                            )
-                        )}
+                        {t(errors.password.message.replace("auth.", ""))}
                     </p>
                 )}
             </div>
@@ -259,9 +174,7 @@ export function CoupleLoginForm() {
                 >
                     <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
 
-                    <p className="text-xs leading-5 text-destructive">
-                        {error}
-                    </p>
+                    <p className="text-xs leading-5 text-destructive">{error}</p>
                 </div>
             )}
 
@@ -275,16 +188,16 @@ export function CoupleLoginForm() {
                     <>
                         <Loader2 className="h-4 w-4 animate-spin" />
 
-                        {tc('loading')}
+                        {tc("loading")}
                     </>
                 ) : (
                     <>
                         <LogIn className="h-4 w-4" />
 
-                        {t('signIn')}
+                        {t("signIn")}
                     </>
                 )}
             </button>
         </form>
-    )
+    );
 }

@@ -64,6 +64,11 @@
     "saving": "Wird gespeichert…",
     "changePassword": "Passwort ändern",
     "rateLimited": "Zu viele Versuche. Bitte versuchen Sie es in {seconds, plural, one {# Sekunde} other {# Sekunden}} erneut.",
+    "accessDeniedCouple": "Zugriff verweigert. Dieses Konto ist nicht mit einer Hochzeit verknüpft.",
+    "resetLinkExpiredEyebrow": "Link abgelaufen",
+    "resetLinkExpiredTitle": "Dieser Link ist abgelaufen",
+    "resetLinkExpiredDescription": "Dieser Link zum Zurücksetzen des Passworts ist abgelaufen oder wurde bereits verwendet. Bitte fordere einen neuen an.",
+    "requestNewLink": "Neuen Link anfordern",
     "forgotPassword": {
       "title": "Passwort vergessen?",
       "description": "Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen deines Passworts.",
@@ -127,6 +132,8 @@
       "unapproved": "Nicht freigegeben",
       "loadingPhotos": "Fotos werden geladen...",
       "loadMore": "Mehr laden",
+      "loadPhoto": "Foto laden",
+      "openPhoto": "Foto öffnen",
       "noPhotos": "Keine Fotos für diesen Filter gefunden",
       "confirmDelete": "Möchtest du dieses Foto wirklich löschen?",
       "deleteFailed": "Foto konnte nicht gelöscht werden",
@@ -217,6 +224,7 @@
         "photoShown": "Foto wieder sichtbar",
         "photoFavourited": "Foto zu den Favoriten hinzugefügt",
         "photoUnfavourited": "Foto aus den Favoriten entfernt",
+        "photosLoadFailed": "Fotos konnten nicht geladen werden. Bitte versuche es erneut.",
         "photoUpdateFailed": "Das Foto konnte nicht aktualisiert werden. Deine Änderungen wurden rückgängig gemacht.",
         "photoDeleteFailed": "Das Foto konnte nicht gelöscht werden. Es wurde nichts geändert.",
         "galleryLinkCreated": "Galerielink erstellt",
@@ -483,63 +491,63 @@
     "venueMapDescription": "Folge der markierten Route vom Eingang zu deinem Tisch.",
     "mapInteractionHint": "Ziehe oder scrolle den Plan, um den Raum zu erkunden."
   },
-  "pricing": {
-    "eyebrow": "Preise",
-    "title": "Wähle den passenden Tarif",
-    "description": "Eine einmalige Zahlung für deine Hochzeit — kein monatliches Abonnement.",
-    "mostPopular": "Am beliebtesten",
-    "perWedding": "pro Hochzeit",
-    "included": "Inklusive Leistungen",
-    "choosePlan": "{plan} wählen",
-    "plans": {
-      "basic": {
-        "eyebrow": "Essentiell",
-        "name": "Basic",
-        "description": "Für kleinere Hochzeiten, ausschließlich Sitzplatzsuche"
+    "pricing": {
+      "eyebrow": "Preise",
+      "title": "Wähle den passenden Tarif",
+      "description": "Eine einmalige Zahlung für deine Hochzeit — kein monatliches Abonnement.",
+      "paymentNotice": "Die Online-Zahlung ist noch nicht verfügbar — wähle unten einen Tarif und wir melden uns per E-Mail bei dir, um alles direkt mit dir einzurichten.",
+      "mostPopular": "Am beliebtesten",
+      "perWedding": "einmalig",
+      "included": "Inklusive Leistungen",
+      "everythingInPlus": "Alles aus {plan}, plus:",
+      "everythingIn": "Alles aus {plan}",
+      "getStarted": "Jetzt starten",
+      "choosePlan": "{plan} wählen",
+      "contactUs": "Kontaktiere uns",
+      "onRequest": "Auf Anfrage",
+      "tiers": {
+        "basic":     { "eyebrow": "Basic",          "name": "Basic",          "description": "Alles, was du für den Einstieg brauchst" },
+        "premium":   { "eyebrow": "Premium",        "name": "Premium",        "description": "Unsere beliebteste Kombination — Sitzordnung + Fotos" },
+        "unlimited": { "eyebrow": "Unlimited",      "name": "Unlimited",      "description": "Keine Limits, für größere Hochzeiten" },
+        "custom":    { "eyebrow": "Individuelles Design", "name": "Individuelles Design", "description": "Eine vollständig individuelle Einladung, nur für euch entworfen" }
       },
-      "standard": {
-        "eyebrow": "Beliebt",
-        "name": "Standard",
-        "description": "Unsere beliebteste Kombination — Sitzordnung + Fotos"
+      "features": {
+        "digitalInvitation": "Digitale Einladungsseite",
+        "customTheme": "Individuelles Farbdesign",
+        "findSeat": "Meinen Sitzplatz finden",
+        "rsvpManagement": "RSVP-Verfolgung & Verwaltung",
+        "guestList": "Gästeliste",
+        "shareableLink": "Teilbarer Link, unbegrenzt aufrufbar",
+        "tableArrangement": "Tischanordnung per Drag-and-drop",
+        "photoUpload": "Gäste-Foto-Uploads — bis zu 300 Fotos",
+        "publicGallery": "Teilbare Fotogalerie (öffentlicher Link)",
+        "unlimitedGuests": "Unbegrenzte Gästeanzahl",
+        "unlimitedGuestsBadge": "Unbegrenzte Gäste",
+        "unlimitedPhotos": "Unbegrenzte Foto-Uploads",
+        "multilingual": "Mehrsprachiges Gästeerlebnis (7 Sprachen)",
+        "extendedStorage": "1 Jahr Speicher nach der Hochzeit",
+        "customLayout": "Individuelle Illustrationen & Layout",
+        "dedicatedSupport": "Persönliche Designer-Betreuung"
       },
-      "premium": {
-        "eyebrow": "Komplett",
-        "name": "Premium",
-        "description": "Keine Limits, für größere Hochzeiten"
+      "builder": {
+        "eyebrow": "Oder stelle dein eigenes Paket zusammen",
+        "title": "Starte mit Basic und füge nur hinzu, was du brauchst",
+        "summaryTitle": "Dein individuelles Paket",
+        "oneTimePayment": "einmalige Zahlung",
+        "baseLabel": "Basic-Einladung",
+        "total": "Gesamt",
+        "alwaysIncluded": "Immer inklusive",
+        "cta": "Jetzt starten",
+        "addons": {
+          "tableArrangement": { "name": "Tischanordnung",                 "description": "Drag-and-drop-Sitzplaner für deinen Veranstaltungsort" },
+          "photoGallery":     { "name": "Gäste-Fotogalerie",              "description": "Gäste können Fotos in eine geteilte, teilbare Galerie hochladen" },
+          "guestLimit":       { "name": "Gästelimit auf 300 erhöhen",     "description": "Für Hochzeiten, die über das Basic-Limit von 150 Gästen hinausgehen" },
+          "multilingual":     { "name": "Mehrsprachiges Gästeerlebnis",   "description": "Gästeseiten in allen 7 unterstützten Sprachen verfügbar" },
+          "extendedStorage":  { "name": "Erweiterter Speicher",           "description": "Behalte alles 1 Jahr nach der Hochzeit online" }
+        }
       }
     },
-    "features": {
-      "basic": {
-        "findSeat": "Meinen Sitzplatz finden",
-        "tableArrangement": "Tischanordnung",
-        "photoUpload": "Foto-Uploads",
-        "guestLimit": "Bis zu 150 Gäste",
-        "storage": "30 Tage Speicher nach der Hochzeit",
-        "publicGallery": "Teilbare Galerie (öffentlicher Link)"
-      },
-      "standard": {
-        "findSeat": "Meinen Sitzplatz finden",
-        "tableArrangement": "Tischanordnung",
-        "photoUpload": "Foto-Uploads — bis zu 300 Fotos",
-        "guestLimit": "Bis zu 300 Gäste",
-        "storage": "90 Tage Speicher nach der Hochzeit",
-        "publicGallery": "Teilbare Galerie (öffentlicher Link)"
-      },
-      "premium": {
-        "findSeat": "Meinen Sitzplatz finden",
-        "tableArrangement": "Tischanordnung",
-        "photoUpload": "Foto-Uploads — unbegrenzt",
-        "guestLimit": "Unbegrenzte Gästeanzahl",
-        "storage": "1 Jahr Speicher nach der Hochzeit",
-        "publicGallery": "Teilbare Galerie (öffentlicher Link)"
-      }
-    },
-    "customPlan": {
-      "text": "Nicht das Richtige gefunden?",
-      "contact": "Kontaktiere uns",
-      "suffix": "für einen individuellen Tarif."
-    }
-  },
+
   "landing": {
     "eyebrow": "Plattform für Hochzeitsmanagement",
     "hero": {
@@ -710,6 +718,11 @@
         "title": "Dieser Galerielink ist abgelaufen.",
         "description": "Diese geteilte Galerie war nur für eine begrenzte Zeit verfügbar und kann nicht mehr geöffnet werden."
       },
+      "error": {
+        "eyebrow": "Etwas ist schiefgelaufen",
+        "title": "Diese Galerie konnte nicht geladen werden.",
+        "description": "Bitte versuche, den Link gleich noch einmal zu öffnen."
+      },
       "contact": "Bitte kontaktiere die Person, die diese Galerie mit dir geteilt hat, wenn du einen neuen Link möchtest.",
       "home": "Zurück zu Wedora"
     }
@@ -743,6 +756,7 @@
     "total": "Gesamt",
     "noGuests": "Keine Gäste gefunden",
     "noTables": "Noch keine Tische erstellt",
+    "noTable": "Kein Tisch",
     "tableNumber": "Tisch {number}",
     "seats": "Sitzplätze",
     "edit": "Bearbeiten",
@@ -834,7 +848,14 @@
       "elementAdded": "Raumelement hinzugefügt",
       "elementDeleted": "Raumelement gelöscht",
       "addElementFailed": "Das Raumelement konnte nicht hinzugefügt werden.",
-      "deleteElementFailed": "Das Raumelement konnte nicht gelöscht werden."
+      "deleteElementFailed": "Das Raumelement konnte nicht gelöscht werden.",
+      "assignMenu": {
+        "triggerLabel": "Sitzoptionen für {name}",
+        "currentTable": "Derzeit an Tisch {number} platziert",
+        "unassign": "Vom Tisch entfernen",
+        "full": "Voll",
+        "noOtherTables": "Noch keine anderen Tische."
+      }
     },
     "venueEditor": {
       "name": "Name",
@@ -955,5 +976,32 @@
       "login": "Anderes Konto verwenden",
       "home": "Zurück zu Wedora"
     }
+  },
+  "rsvpApiKeyManager": {
+    "title": "RSVP-API",
+    "description": "Lassen Sie eine externe Website Gäste namentlich bestätigen oder ablehnen.",
+    "endpoint": {
+      "keySentAs": "wobei der Schlüssel gesendet wird als",
+      "or": "oder",
+      "queryParamNote": "für Tools, die keine benutzerdefinierten Header setzen können",
+      "andBody": "und Body",
+      "readmeNote": "Siehe README für die vollständige Anfrage-/Antwortreferenz."
+    },
+    "createKeyFailed": "API-Schlüssel konnte nicht erstellt werden",
+    "keyCreated": "RSVP-API-Schlüssel erstellt",
+    "revokeFailed": "API-Schlüssel konnte nicht widerrufen werden",
+    "keyRevoked": "API-Schlüssel widerrufen",
+    "copySuccess": "In die Zwischenablage kopiert",
+    "copyFailed": "Kopieren nicht möglich -- bitte manuell kopieren",
+    "copyNowWarning": "Kopieren Sie diesen Schlüssel jetzt -- er wird nicht erneut angezeigt.",
+    "copyKeyAriaLabel": "API-Schlüssel kopieren",
+    "labelPlaceholder": "Bezeichnung (optional, z. B. \"Squarespace RSVP-Formular\")",
+    "createKey": "Schlüssel erstellen",
+    "loadingKeys": "Schlüssel werden geladen...",
+    "noActiveKeys": "Noch keine aktiven API-Schlüssel.",
+    "untitledKey": "Unbenannter Schlüssel",
+    "neverUsed": "nie verwendet",
+    "lastUsed": "zuletzt verwendet {date}",
+    "revokeKeyAriaLabel": "API-Schlüssel widerrufen"
   }
 }

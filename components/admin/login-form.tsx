@@ -43,6 +43,10 @@ export function AdminLoginForm() {
     });
 
     const onSubmit = async (values: AdminLoginValues) => {
+        if (loading) {
+            return;
+        }
+
         setError(null);
         setLoading(true);
 

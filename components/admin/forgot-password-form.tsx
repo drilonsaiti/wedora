@@ -1,78 +1,63 @@
-'use client'
+"use client";
 
-import {useState} from 'react'
+import { useState } from "react";
 
-import {AlertCircle, ArrowLeft, Check, Loader2, Mail,} from 'lucide-react'
-import {useTranslations} from 'next-intl'
-import {useForm} from 'react-hook-form'
-import {zodResolver} from '@hookform/resolvers/zod'
+import { AlertCircle, ArrowLeft, Check, Loader2, Mail } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import {Link} from '@/lib/navigation'
-import {createClient} from '@/lib/supabase/client'
-import {forgotPasswordSchema, type ForgotPasswordValues,} from '@/schemas'
+import { Link } from "@/lib/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { forgotPasswordSchema, type ForgotPasswordValues } from "@/schemas";
 
 export function ForgotPasswordForm() {
-    const t = useTranslations(
-        'auth.forgotPassword'
-    )
+    const t = useTranslations("auth.forgotPassword");
 
-    const [error, setError] =
-        useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null);
 
-    const [success, setSuccess] =
-        useState(false)
+    const [success, setSuccess] = useState(false);
 
-    const [loading, setLoading] =
-        useState(false)
+    const [loading, setLoading] = useState(false);
 
     const {
         register,
         handleSubmit,
-        formState: {errors},
+        formState: { errors },
     } = useForm<ForgotPasswordValues>({
-        resolver: zodResolver(
-            forgotPasswordSchema
-        ),
-    })
+        resolver: zodResolver(forgotPasswordSchema),
+    });
 
-    const onSubmit = async (
-        values: ForgotPasswordValues
-    ) => {
-        setError(null)
-        setLoading(true)
+    const onSubmit = async (values: ForgotPasswordValues) => {
+        if (loading) {
+            return;
+        }
+
+        setError(null);
+        setLoading(true);
 
         try {
-            const supabase =
-                await createClient()
+            const supabase = await createClient();
 
-            const {
-                error: resetError,
-            } =
-                await supabase.auth.resetPasswordForEmail(
-                    values.email,
-                    {
-                        redirectTo: `${window.location.origin}/api/auth/callback?next=/admin/reset-password`,
-                    }
-                )
+            const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+                values.email,
+                {
+                    redirectTo: `${window.location.origin}/api/auth/callback?next=/admin/reset-password`,
+                },
+            );
 
             if (resetError) {
-                setError(
-                    resetError.message
-                )
-                return
+                setError(t("unexpectedError"));
+                return;
             }
 
-            setSuccess(true)
+            setSuccess(true);
         } catch {
-            setError(
-                t(
-                    'unexpectedError'
-                )
-            )
+            setError(t("unexpectedError"));
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     /*
      * SUCCESS
@@ -80,8 +65,7 @@ export function ForgotPasswordForm() {
     if (success) {
         return (
             <div className="py-3 text-center">
-                <div
-                    className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]">
+                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]">
                     <Check
                         className="h-6 w-6 text-[hsl(var(--primary))]"
                         strokeWidth={1.7}
@@ -89,51 +73,35 @@ export function ForgotPasswordForm() {
                 </div>
 
                 <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.2em] text-[hsl(var(--primary))]">
-                    {t(
-                        'emailSent'
-                    )}
+                    {t("emailSent")}
                 </p>
 
                 <h2 className="font-serif text-3xl font-light tracking-[-0.02em] text-foreground">
-                    {t(
-                        'checkYourEmail'
-                    )}
+                    {t("checkYourEmail")}
                 </h2>
 
                 <p className="mx-auto mt-3 max-w-xs text-sm leading-6 text-muted-foreground">
-                    {t(
-                        'resetLinkSent'
-                    )}
+                    {t("resetLinkSent")}
                 </p>
 
                 <Link
                     href="/admin/login"
                     className="btn-secondary mt-7 w-full justify-center"
                 >
-                    <ArrowLeft className="h-4 w-4"/>
+                    <ArrowLeft className="h-4 w-4" />
 
-                    {t(
-                        'backToLogin'
-                    )}
+                    {t("backToLogin")}
                 </Link>
             </div>
-        )
+        );
     }
 
     return (
-        <form
-            onSubmit={handleSubmit(
-                onSubmit
-            )}
-            className="space-y-6"
-        >
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Email */}
             <div>
-                <label
-                    htmlFor="email"
-                    className="label-wedding"
-                >
-                    {t('email')}
+                <label htmlFor="email" className="label-wedding">
+                    {t("email")}
                 </label>
 
                 <div className="relative">
@@ -143,14 +111,10 @@ export function ForgotPasswordForm() {
                     />
 
                     <input
-                        {...register(
-                            'email'
-                        )}
+                        {...register("email")}
                         id="email"
                         type="email"
-                        placeholder={t(
-                            'emailPlaceholder'
-                        )}
+                        placeholder={t("emailPlaceholder")}
                         autoComplete="email"
                         disabled={loading}
                         className="input-wedding h-12 pl-11"
@@ -159,10 +123,7 @@ export function ForgotPasswordForm() {
 
                 {errors.email && (
                     <p className="mt-1.5 text-xs leading-5 text-destructive">
-                        {
-                            errors.email
-                                .message
-                        }
+                        {errors.email.message}
                     </p>
                 )}
             </div>
@@ -173,11 +134,9 @@ export function ForgotPasswordForm() {
                     role="alert"
                     className="flex items-start gap-3 rounded-2xl border border-destructive/15 bg-destructive/[0.06] px-4 py-3.5"
                 >
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive"/>
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
 
-                    <p className="text-xs leading-5 text-destructive">
-                        {error}
-                    </p>
+                    <p className="text-xs leading-5 text-destructive">{error}</p>
                 </div>
             )}
 
@@ -189,19 +148,15 @@ export function ForgotPasswordForm() {
             >
                 {loading ? (
                     <>
-                        <Loader2 className="h-4 w-4 animate-spin"/>
+                        <Loader2 className="h-4 w-4 animate-spin" />
 
-                        {t(
-                            'sendingLink'
-                        )}
+                        {t("sendingLink")}
                     </>
                 ) : (
                     <>
-                        <Mail className="h-4 w-4"/>
+                        <Mail className="h-4 w-4" />
 
-                        {t(
-                            'sendResetLink'
-                        )}
+                        {t("sendResetLink")}
                     </>
                 )}
             </button>
@@ -211,12 +166,10 @@ export function ForgotPasswordForm() {
                 href="/admin/login"
                 className="group flex items-center justify-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-                <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5"/>
+                <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
 
-                {t(
-                    'backToLogin'
-                )}
+                {t("backToLogin")}
             </Link>
         </form>
-    )
+    );
 }

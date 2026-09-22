@@ -1,14 +1,14 @@
 "use client";
 
-import {useEffect, useSyncExternalStore} from "react";
+import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
-import {AnimatePresence, motion, useReducedMotion} from "framer-motion";
-import {Armchair, MapPin, X} from "lucide-react";
-import {useTranslations} from "next-intl";
-import {createPortal} from "react-dom";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Armchair, MapPin, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { createPortal } from "react-dom";
 
-import {VenueMap} from "@/components/venue-map";
-import type {GuestWithTable, Table, VenueElement} from "@/types/seating";
+import { VenueMap } from "@/components/venue-map";
+import type { GuestWithTable, Table, VenueElement } from "@/types/seating";
 
 interface GuestResultModalProps {
     guest: GuestWithTable | null;
@@ -16,9 +16,6 @@ interface GuestResultModalProps {
     tables: Table[];
     venueElements: VenueElement[];
 }
-
-const emptySubscribe = () => () => {
-};
 
 export function GuestResultModal({
                                      guest,
@@ -30,22 +27,117 @@ export function GuestResultModal({
 
     const prefersReducedMotion = useReducedMotion();
 
-    const mounted = useSyncExternalStore(
-        emptySubscribe,
-        () => true,
-        () => false,
-    );
+    const [mounted, setMounted] = useState(false);
+
+    const dialogRef = useRef<HTMLDivElement>(null);
+
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+    const previousActiveElement = useRef<HTMLElement | null>(null);
 
     /*
-     * Lock body + Escape.
+     * Portal can only render after mount.
+     */
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    /*
+     * Lock body scroll, capture and restore
+     * focus, and move initial focus into the
+     * dialog -- mirrors Modal/ConfirmationModal.
      */
     useEffect(() => {
         if (!guest) {
             return;
         }
 
-        // existing code...
+        previousActiveElement.current =
+            document.activeElement instanceof HTMLElement
+                ? document.activeElement
+                : null;
+
+        const previousOverflow = document.body.style.overflow;
+
+        document.body.style.overflow = "hidden";
+
+        const timer = window.setTimeout(() => {
+            closeButtonRef.current?.focus();
+        }, 0);
+
+        const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+            if (event.key === "Escape") {
+                onClose();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            window.clearTimeout(timer);
+
+            document.body.style.overflow = previousOverflow;
+
+            window.removeEventListener("keydown", handleKeyDown);
+
+            previousActiveElement.current?.focus();
+        };
     }, [guest, onClose]);
+
+    /*
+     * Keep Tab from leaving the dialog while
+     * it's open.
+     */
+    const handleDialogKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+        if (event.key !== "Tab") {
+            return;
+        }
+
+        const dialog = dialogRef.current;
+
+        if (!dialog) {
+            return;
+        }
+
+        const focusableElements = Array.from(
+            dialog.querySelectorAll<HTMLElement>(
+                [
+                    "button:not([disabled])",
+                    "[href]",
+                    "input:not([disabled])",
+                    "select:not([disabled])",
+                    "textarea:not([disabled])",
+                    '[tabindex]:not([tabindex="-1"])',
+                ].join(","),
+            ),
+        ).filter((element) => !element.hasAttribute("aria-hidden"));
+
+        if (focusableElements.length === 0) {
+            event.preventDefault();
+
+            dialog.focus();
+
+            return;
+        }
+
+        const first = focusableElements[0];
+
+        const last = focusableElements[focusableElements.length - 1];
+
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+
+            last.focus();
+
+            return;
+        }
+
+        if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+
+            first.focus();
+        }
+    };
 
     if (!mounted) {
         return null;
@@ -112,9 +204,12 @@ export function GuestResultModal({
                                     damping: 32,
                                 }
                         }
+                        ref={dialogRef}
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby="guest-result-title"
+                        tabIndex={-1}
+                        onKeyDown={handleDialogKeyDown}
                         onClick={(event) => event.stopPropagation()}
                         className="
                             relative flex h-[100dvh] w-full flex-col overflow-hidden bg-card
@@ -126,9 +221,9 @@ export function GuestResultModal({
                         {/* =====================================
                             HEADER
                         ===================================== */}
-                        <header
-                            className="relative shrink-0 border-b border-border/60 px-5 py-5 text-center sm:px-8 sm:py-6">
+                        <header className="relative shrink-0 border-b border-border/60 px-5 py-5 text-center sm:px-8 sm:py-6">
                             <button
+                                ref={closeButtonRef}
                                 type="button"
                                 onClick={onClose}
                                 aria-label={t("close")}
@@ -143,7 +238,7 @@ export function GuestResultModal({
                                     sm:right-6
                                 "
                             >
-                                <X className="h-4 w-4"/>
+                                <X className="h-4 w-4" />
                             </button>
 
                             <p className="mb-1.5 text-[9px] font-medium uppercase tracking-[0.22em] text-[hsl(var(--primary))]">
@@ -159,19 +254,15 @@ export function GuestResultModal({
                         </header>
 
                         {guest.tables ? (
-                            <div
-                                className="min-h-0 flex-1 overflow-y-auto lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:overflow-hidden">
+                            <div className="min-h-0 flex-1 overflow-y-auto lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:overflow-hidden">
                                 {/* =================================
                                     ASSIGNMENT
                                 ================================= */}
-                                <section
-                                    className="border-b border-border/60 bg-secondary/15 px-5 py-4 sm:px-6 sm:py-5 lg:border-b-0 lg:border-r lg:p-6">
+                                <section className="border-b border-border/60 bg-secondary/15 px-5 py-4 sm:px-6 sm:py-5 lg:border-b-0 lg:border-r lg:p-6">
                                     <div className="lg:flex lg:h-full lg:flex-col">
                                         {/* Mobile: compact answer */}
-                                        <div
-                                            className="flex items-center gap-3 rounded-2xl border border-border/70 bg-background px-4 py-3.5 lg:hidden">
-                                            <div
-                                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                                        <div className="flex items-center gap-3 rounded-2xl border border-border/70 bg-background px-4 py-3.5 lg:hidden">
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
                                                 <Armchair
                                                     className="h-4 w-4 text-[hsl(var(--primary))]"
                                                     strokeWidth={1.6}
@@ -192,7 +283,7 @@ export function GuestResultModal({
 
                                             {seatNumber != null && (
                                                 <>
-                                                    <div className="h-8 w-px bg-border/70"/>
+                                                    <div className="h-8 w-px bg-border/70" />
 
                                                     <div className="shrink-0 text-right">
                                                         <p className="text-[9px] font-medium uppercase tracking-[0.17em] text-muted-foreground">
@@ -255,8 +346,7 @@ export function GuestResultModal({
                                             </p>
                                         </div>
 
-                                        <div
-                                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
                                             <MapPin
                                                 className="h-4 w-4 text-[hsl(var(--primary))]"
                                                 strokeWidth={1.6}
@@ -277,14 +367,11 @@ export function GuestResultModal({
                             </div>
                         ) : (
                             /* =================================
-                                                            NO TABLE
-                                                        ================================= */
-                            <section
-                                className="flex flex-1 items-center justify-center overflow-y-auto px-5 py-8 sm:px-8">
-                                <div
-                                    className="w-full max-w-md rounded-[1.5rem] border border-border/60 bg-secondary/25 px-6 py-10 text-center">
-                                    <div
-                                        className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
+                                              NO TABLE
+                                          ================================= */
+                            <section className="flex flex-1 items-center justify-center overflow-y-auto px-5 py-8 sm:px-8">
+                                <div className="w-full max-w-md rounded-[1.5rem] border border-border/60 bg-secondary/25 px-6 py-10 text-center">
+                                    <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--accent))]">
                                         <Armchair
                                             className="h-5 w-5 text-[hsl(var(--primary))]"
                                             strokeWidth={1.5}
