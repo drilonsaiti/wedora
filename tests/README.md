@@ -24,6 +24,15 @@ security surface, rather than attempting broad coverage:
   surfacing as 500 rather than silently passing through. This is the part of the
   codebase where a subtle bug would be a real security hole, not just a broken
   feature, so it gets the most thorough coverage here.
+- **`lib/plans.ts`** — `getWeddingEntitlements`, the single source of truth every
+  plan/add-on gate in the app (UI hiding *and* server-side enforcement) calls
+  through: each plan's base entitlements, that add-ons only ever add on top of the
+  plan (never remove something it already grants), the `guestLimit`/`storageDays`
+  numeric-cap logic specifically (never lowering an uncapped plan, always raising
+  to at least the add-on's floor), and that malformed input (an unrecognized plan
+  or add-on id, `null`/`undefined`) falls back to the most restrictive plan
+  (`basic`) instead of throwing — this runs on every gated page/action, so it can
+  never be the thing that 500s or accidentally grants access.
 - **`schemas/index.ts`** — the validation rules an attacker or a careless client
   could actually hit: the create/edit-wedding "at least one guest feature must stay
   on" refine, the RSVP status enum, party-size bounds, note length, and the

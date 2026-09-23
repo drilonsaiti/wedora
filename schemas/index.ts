@@ -237,12 +237,21 @@ export const createWeddingSchema = z
                 .optional(),
         ),
 
+        /*
+         * No admin UI sets this today -- when omitted, the action layer
+         * defaults it to the selected plan's `storageDays` entitlement
+         * (see lib/plans.ts) rather than a fixed number here, so a Basic
+         * wedding doesn't get handed more retention than it paid for and
+         * an Unlimited one doesn't get handed less. Kept optional (not
+         * defaulted here) so the schema can't quietly reintroduce a
+         * plan-independent default; still capped at a hard outer bound.
+         */
         photo_retention_days: z
             .number()
             .int("validation.invalidNumber")
             .min(1, "validation.minimumOne")
             .max(3650, "validation.maxRetentionDays")
-            .default(90),
+            .optional(),
 
         // Which plan this wedding was actually sold on, and any a la
         // carte add-ons bought on top of it -- see lib/plans.ts, the

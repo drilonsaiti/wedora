@@ -6,6 +6,7 @@ import { CreateWeddingInput, createWeddingSchema } from "@/schemas";
 import { generateWeddingTheme } from "@/lib/theme";
 import { generateRandomPassword } from "@/lib/generate-password";
 import { WeddingSettingsUpdate, WeddingUpdate } from "@/types/database";
+import { getWeddingEntitlements } from "@/lib/plans";
 
 export async function getWeddingBySlug(slug: string) {
     return unstable_cache(
@@ -78,6 +79,26 @@ export async function createWedding(input: CreateWeddingInput) {
 
     const theme = generateWeddingTheme(parsed.data.theme_hue);
 
+    /*
+     * The cron job at app/api/cron/cleanup-photos hard-deletes a wedding's
+     * photos once wedding_settings.photo_retention_days has passed. That
+     * field used to be independent of the sold plan (always defaulting to
+     * 90 days for every tier), so a Basic wedding kept photos 3x longer
+     * than entitled and an Unlimited one lost them 4x sooner than
+     * promised. No admin UI sets this value today, so the plan's
+     * `storageDays` IS the real default; an explicit value (from a future
+     * UI, or a direct API caller) is still honoured but can never exceed
+     * what the plan grants.
+     */
+    const entitlements = getWeddingEntitlements(
+        parsed.data.plan,
+        parsed.data.addons,
+    );
+    const photoRetentionDays =
+        parsed.data.photo_retention_days !== undefined
+            ? Math.min(parsed.data.photo_retention_days, entitlements.storageDays)
+            : entitlements.storageDays;
+
     const { data: wedding, error } = await supabase
         .from("weddings")
         .insert({
@@ -107,7 +128,7 @@ export async function createWedding(input: CreateWeddingInput) {
             auto_approve_uploads: parsed.data.auto_approve_uploads,
             max_photos_total: parsed.data.max_photos_total ?? null,
             max_photos_per_guest: parsed.data.max_photos_per_guest ?? null,
-            photo_retention_days: parsed.data.photo_retention_days,
+            photo_retention_days: photoRetentionDays,
         });
 
     if (settingsError) {
@@ -217,7 +238,7 @@ export async function updateWedding(
 
     const { data: currentWedding, error: fetchError } = await supabase
         .from("weddings")
-        .select("groom_email, bride_email")
+        .select("groom_email, bride_email, plan, addons")
         .eq("id", weddingId)
         .single();
 
@@ -247,11 +268,15 @@ export async function updateWedding(
             };
     }
 
+    const planChanged = input.plan !== undefined || input.addons !== undefined;
+
     if (
         input.theme_hue !== undefined ||
         input.enable_find_seat !== undefined ||
         input.enable_photo_upload !== undefined ||
-        input.auto_approve_uploads !== undefined
+        input.auto_approve_uploads !== undefined ||
+        input.photo_retention_days !== undefined ||
+        planChanged
     ) {
         const settingsUpdates: WeddingSettingsUpdate = {};
         if (input.theme_hue !== undefined)
@@ -266,8 +291,30 @@ export async function updateWedding(
             settingsUpdates.max_photos_total = input.max_photos_total || null;
         if (input.max_photos_per_guest !== undefined)
             settingsUpdates.max_photos_per_guest = input.max_photos_per_guest || null;
-        if (input.photo_retention_days !== undefined)
-            settingsUpdates.photo_retention_days = input.photo_retention_days; // ← shtuar
+
+        /*
+         * Same reasoning as createWedding: photo_retention_days must
+         * never exceed what the wedding's *current* plan grants. If the
+         * plan/add-ons are changing in this same call, use the new ones;
+         * otherwise the wedding's existing plan. When the caller didn't
+         * ask to change retention explicitly but the plan itself just
+         * changed, resync retention to the new plan's storageDays so an
+         * upgrade/downgrade actually takes effect instead of leaving a
+         * stale number from whatever the wedding started at.
+         */
+        if (input.photo_retention_days !== undefined || planChanged) {
+            const effectivePlan = input.plan ?? currentWedding.plan;
+            const effectiveAddons = input.addons ?? currentWedding.addons;
+            const entitlements = getWeddingEntitlements(
+                effectivePlan,
+                effectiveAddons,
+            );
+
+            settingsUpdates.photo_retention_days =
+                input.photo_retention_days !== undefined
+                    ? Math.min(input.photo_retention_days, entitlements.storageDays)
+                    : entitlements.storageDays;
+        }
 
         const { error } = await supabase
             .from("wedding_settings")

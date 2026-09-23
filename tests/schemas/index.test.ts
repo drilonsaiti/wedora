@@ -1,198 +1,256 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from 'vitest'
 
-const sendMock = vi.fn();
+import {
+    createWeddingSchema,
+    editWeddingSchema,
+    rsvpManualUpdateSchema,
+    rsvpUpdateSchema,
+} from '@/schemas'
 
-/*
- * `Resend` is called with `new Resend(...)` in lib/email.ts, so the mock
- * implementation must be a real constructor -- an arrow function has no
- * `[[Construct]]` internal method and throws "is not a constructor" under
- * `new`. vitest's own mocking used to paper over this by not actually
- * emulating `new`, but from vitest 4 it uses real construct semantics.
- */
-vi.mock("resend", () => ({
-    Resend: vi.fn().mockImplementation(function MockResend() {
-        return {
-            emails: { send: sendMock },
-        };
-    }),
-}));
+const validWeddingBase = {
+    groom_name: 'Drilon',
+    bride_name: 'Sara',
+    groom_email: 'drilon@example.com',
+    bride_email: 'sara@example.com',
+    slug: 'sara-drilon',
+    wedding_date: '2026-08-15',
+    theme_hue: 340,
+    enable_find_seat: true,
+    enable_photo_upload: true,
+    auto_approve_uploads: false,
+    photo_retention_days: 90,
+}
 
-describe("getWeddingNotificationEmails", () => {
-    it("returns both addresses when both are set", async () => {
-        const { getWeddingNotificationEmails } = await import("@/lib/email");
+describe('createWeddingSchema', () => {
+    it('accepts a fully valid wedding', () => {
+        expect(createWeddingSchema.safeParse(validWeddingBase).success).toBe(true)
+    })
 
-        expect(
-            getWeddingNotificationEmails({
-                groom_email: "drilon@example.com",
-                bride_email: "sara@example.com",
-            }),
-        ).toEqual(["drilon@example.com", "sara@example.com"]);
-    });
+    it('rejects a slug with uppercase letters (must match the public URL format)', () => {
+        const result = createWeddingSchema.safeParse({
+            ...validWeddingBase,
+            slug: 'Sara-Drilon',
+        })
 
-    it("returns only the non-null address when one is missing", async () => {
-        const { getWeddingNotificationEmails } = await import("@/lib/email");
+        expect(result.success).toBe(false)
+    })
 
-        expect(
-            getWeddingNotificationEmails({
-                groom_email: null,
-                bride_email: "sara@example.com",
-            }),
-        ).toEqual(["sara@example.com"]);
+    it('rejects a slug with spaces', () => {
+        const result = createWeddingSchema.safeParse({
+            ...validWeddingBase,
+            slug: 'sara drilon',
+        })
 
-        expect(
-            getWeddingNotificationEmails({
-                groom_email: "drilon@example.com",
-                bride_email: null,
-            }),
-        ).toEqual(["drilon@example.com"]);
-    });
+        expect(result.success).toBe(false)
+    })
 
-    it("returns an empty array when neither is set", async () => {
-        const { getWeddingNotificationEmails } = await import("@/lib/email");
+    it('rejects when both enable_find_seat and enable_photo_upload are off', () => {
+        /*
+         * A wedding with neither guest feature enabled would have no
+         * public functionality at all -- this refine exists specifically
+         * to stop that from being saved by accident.
+         */
+        const result = createWeddingSchema.safeParse({
+            ...validWeddingBase,
+            enable_find_seat: false,
+            enable_photo_upload: false,
+        })
 
-        expect(
-            getWeddingNotificationEmails({ groom_email: null, bride_email: null }),
-        ).toEqual([]);
-    });
-});
+        expect(result.success).toBe(false)
+    })
 
-describe("sendEmail", () => {
-    const originalApiKey = process.env.RESEND_API_KEY;
+    it('accepts when only one of the two guest features is enabled', () => {
+        const result = createWeddingSchema.safeParse({
+            ...validWeddingBase,
+            enable_find_seat: false,
+            enable_photo_upload: true,
+        })
 
-    beforeEach(() => {
-        vi.resetModules();
-        sendMock.mockReset();
-    });
+        expect(result.success).toBe(true)
+    })
 
-    afterEach(() => {
-        if (originalApiKey === undefined) {
-            delete process.env.RESEND_API_KEY;
-        } else {
-            process.env.RESEND_API_KEY = originalApiKey;
+    it('defaults auto_approve_uploads to false when omitted, matching the always-moderated default', () => {
+        const { auto_approve_uploads: _omit, ...withoutAutoApprove } = validWeddingBase
+
+        const result = createWeddingSchema.safeParse(withoutAutoApprove)
+
+        expect(result.success).toBe(true)
+
+        if (result.success) {
+            expect(result.data.auto_approve_uploads).toBe(false)
         }
-    });
+    })
 
-    it("does not throw and does not call Resend when RESEND_API_KEY is unset", async () => {
-        delete process.env.RESEND_API_KEY;
+    it('rejects a theme hue outside the 0-360 range', () => {
+        const result = createWeddingSchema.safeParse({
+            ...validWeddingBase,
+            theme_hue: 400,
+        })
 
-        const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+        expect(result.success).toBe(false)
+    })
 
-        const { sendEmail } = await import("@/lib/email");
+    it('allows photo_retention_days to be omitted (the action layer defaults it from the plan)', () => {
+        const { photo_retention_days: _omit, ...withoutRetention } = validWeddingBase
 
-        await expect(
-            sendEmail({ to: "couple@example.com", subject: "Hi", html: "<p>Hi</p>" }),
-        ).resolves.toBeUndefined();
+        const result = createWeddingSchema.safeParse(withoutRetention)
 
-        expect(sendMock).not.toHaveBeenCalled();
-        expect(warnSpy).toHaveBeenCalledTimes(1);
+        expect(result.success).toBe(true)
 
-        warnSpy.mockRestore();
-    });
+        if (result.success) {
+            expect(result.data.photo_retention_days).toBeUndefined()
+        }
+    })
 
-    it("only warns once about a missing API key across multiple calls", async () => {
-        delete process.env.RESEND_API_KEY;
+    it('rejects a photo_retention_days outside the 1-3650 hard bound', () => {
+        expect(
+            createWeddingSchema.safeParse({
+                ...validWeddingBase,
+                photo_retention_days: 0,
+            }).success
+        ).toBe(false)
 
-        const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+        expect(
+            createWeddingSchema.safeParse({
+                ...validWeddingBase,
+                photo_retention_days: 3651,
+            }).success
+        ).toBe(false)
+    })
+})
 
-        const { sendEmail } = await import("@/lib/email");
+describe('editWeddingSchema', () => {
+    const validEdit = {
+        groom_name: 'Drilon',
+        bride_name: 'Sara',
+        groom_email: 'drilon@example.com',
+        bride_email: '',
+        wedding_date: '2026-08-15',
+        theme_hue: 340,
+        enable_find_seat: true,
+        enable_photo_upload: true,
+        auto_approve_uploads: false,
+        plan: 'basic' as const,
+        addons: [],
+    }
 
-        await sendEmail({ to: "a@example.com", subject: "Hi", html: "<p>Hi</p>" });
-        await sendEmail({ to: "b@example.com", subject: "Hi", html: "<p>Hi</p>" });
-        await sendEmail({ to: "c@example.com", subject: "Hi", html: "<p>Hi</p>" });
+    it('accepts a valid edit', () => {
+        expect(editWeddingSchema.safeParse(validEdit).success).toBe(true)
+    })
 
-        expect(warnSpy).toHaveBeenCalledTimes(1);
+    it('requires auto_approve_uploads to be present (not optional on edit)', () => {
+        const { auto_approve_uploads: _omit, ...withoutIt } = validEdit
 
-        warnSpy.mockRestore();
-    });
+        expect(editWeddingSchema.safeParse(withoutIt).success).toBe(false)
+    })
 
-    it("sends via Resend when RESEND_API_KEY is set", async () => {
-        process.env.RESEND_API_KEY = "test-key";
-        sendMock.mockResolvedValue({ data: { id: "email_123" }, error: null });
+    it('still enforces at-least-one-guest-feature on edit', () => {
+        const result = editWeddingSchema.safeParse({
+            ...validEdit,
+            enable_find_seat: false,
+            enable_photo_upload: false,
+        })
 
-        const { sendEmail } = await import("@/lib/email");
+        expect(result.success).toBe(false)
+    })
+})
 
-        await sendEmail({
-            to: "couple@example.com",
-            subject: "New RSVP",
-            html: "<p>hi</p>",
-        });
+describe('rsvpUpdateSchema (external RSVP API)', () => {
+    const validUpdate = {
+        weddingSlug: 'sara-drilon',
+        firstName: 'Elira',
+        lastName: 'Krasniqi',
+        status: 'confirmed',
+    }
 
-        expect(sendMock).toHaveBeenCalledTimes(1);
-        expect(sendMock).toHaveBeenCalledWith(
-            expect.objectContaining({
-                to: "couple@example.com",
-                subject: "New RSVP",
-                html: "<p>hi</p>",
-            }),
-        );
-    });
+    it('accepts a minimal valid update', () => {
+        expect(rsvpUpdateSchema.safeParse(validUpdate).success).toBe(true)
+    })
 
-    it("never throws when the Resend API call itself fails", async () => {
-        process.env.RESEND_API_KEY = "test-key";
-        sendMock.mockRejectedValue(new Error("network down"));
+    it('rejects an invalid status value', () => {
+        const result = rsvpUpdateSchema.safeParse({
+            ...validUpdate,
+            status: 'maybe',
+        })
 
-        const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+        expect(result.success).toBe(false)
+    })
 
-        const { sendEmail } = await import("@/lib/email");
+    it('accepts the three real statuses', () => {
+        for (const status of ['pending', 'confirmed', 'declined']) {
+            expect(
+                rsvpUpdateSchema.safeParse({ ...validUpdate, status }).success
+            ).toBe(true)
+        }
+    })
 
-        await expect(
-            sendEmail({ to: "couple@example.com", subject: "Hi", html: "<p>Hi</p>" }),
-        ).resolves.toBeUndefined();
+    it('rejects a negative party size', () => {
+        const result = rsvpUpdateSchema.safeParse({
+            ...validUpdate,
+            partySize: -1,
+        })
 
-        expect(errorSpy).toHaveBeenCalled();
+        expect(result.success).toBe(false)
+    })
 
-        errorSpy.mockRestore();
-    });
+    it('rejects a party size above the 50 cap', () => {
+        const result = rsvpUpdateSchema.safeParse({
+            ...validUpdate,
+            partySize: 51,
+        })
 
-    it("never throws when Resend returns an error payload instead of throwing", async () => {
-        process.env.RESEND_API_KEY = "test-key";
-        sendMock.mockResolvedValue({
-            data: null,
-            error: { name: "validation_error", message: "invalid `to` field" },
-        });
+        expect(result.success).toBe(false)
+    })
 
-        const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    it('treats an empty-string party size as "not provided" rather than a parse error', () => {
+        // The public API is meant to be easy to call from simple no-code
+        // tools, which often send "" instead of omitting a field.
+        const result = rsvpUpdateSchema.safeParse({
+            ...validUpdate,
+            partySize: '',
+        })
 
-        const { sendEmail } = await import("@/lib/email");
+        expect(result.success).toBe(true)
+    })
 
-        await expect(
-            sendEmail({ to: "not-an-email", subject: "Hi", html: "<p>Hi</p>" }),
-        ).resolves.toBeUndefined();
+    it('rejects a note over 500 characters', () => {
+        const result = rsvpUpdateSchema.safeParse({
+            ...validUpdate,
+            note: 'x'.repeat(501),
+        })
 
-        expect(errorSpy).toHaveBeenCalled();
+        expect(result.success).toBe(false)
+    })
 
-        errorSpy.mockRestore();
-    });
-});
+    it('rejects a missing weddingSlug', () => {
+        const { weddingSlug: _omit, ...withoutSlug } = validUpdate
 
-describe("rsvpNotificationEmail", () => {
-    it("builds a subject and html mentioning the guest and status", async () => {
-        const { rsvpNotificationEmail } = await import("@/lib/email");
+        expect(rsvpUpdateSchema.safeParse(withoutSlug).success).toBe(false)
+    })
 
-        const { subject, html } = rsvpNotificationEmail({
-            weddingName: "Sara & Drilon",
-            guestName: "Elira Krasniqi",
-            status: "confirmed",
-            partySize: 2,
-        });
+    it('rejects an empty first name', () => {
+        const result = rsvpUpdateSchema.safeParse({ ...validUpdate, firstName: '' })
 
-        expect(subject).toContain("Elira Krasniqi");
-        expect(html).toContain("Sara &amp; Drilon");
-        expect(html).toContain("Elira Krasniqi");
-        expect(html).toContain("2");
-    });
-});
+        expect(result.success).toBe(false)
+    })
+})
 
-describe("photoUploadNotificationEmail", () => {
-    it('falls back to "A guest" when no guest name is provided', async () => {
-        const { photoUploadNotificationEmail } = await import("@/lib/email");
+describe('rsvpManualUpdateSchema (admin manual override)', () => {
+    it('requires guestId to be a UUID, not an arbitrary string', () => {
+        const result = rsvpManualUpdateSchema.safeParse({
+            guestId: 'not-a-uuid',
+            status: 'confirmed',
+        })
 
-        const { subject, html } = photoUploadNotificationEmail({
-            weddingName: "Sara & Drilon",
-            guestName: null,
-        });
+        expect(result.success).toBe(false)
+    })
 
-        expect(subject).toContain("A guest");
-        expect(html).toContain("A guest");
-    });
-});
+    it('accepts a valid UUID guestId', () => {
+        const result = rsvpManualUpdateSchema.safeParse({
+            guestId: '5b6d2e2e-1234-4567-8901-abcdefabcdef',
+            status: 'confirmed',
+        })
+
+        expect(result.success).toBe(true)
+    })
+})

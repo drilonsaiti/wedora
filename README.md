@@ -26,6 +26,7 @@ hardening pass that was applied on top of the original schema (see
 - [RSVP API](#rsvp-api)
 - [Local development](#local-development)
 - [Tests](#tests)
+- [CI](#ci)
 - [Deployment (Vercel + Supabase)](#deployment-vercel--supabase)
 
 ---
@@ -216,8 +217,8 @@ Copy `.env.example` to `.env.local` and fill in:
 
 1. **Create a project** at supabase.com.
 2. **Run the bootstrap SQL**, in the Supabase SQL Editor, in this order:
-  - `supabase/schema.sql`
-  - `supabase/schema-additions.sql`
+    - `supabase/schema.sql`
+    - `supabase/schema-additions.sql`
 3. **Run every migration in `supabase/migrations/`, in filename order** (they're
    timestamp-prefixed, so sorting the filenames gives you the right order):
    ```
@@ -590,6 +591,26 @@ doesn't mean reaching for the same hammer everywhere.
 
 ---
 
+## CI
+
+`.github/workflows/ci.yml` runs on every push to `main` and every pull request
+into it, as two independent jobs:
+
+- **checks** — `tsc --noEmit`, `eslint .`, `npm run test:coverage` (uploads the
+  coverage report as a build artifact). No database or network access needed —
+  same as running the three locally.
+- **build** — a full `next build`, to catch route/type/static-generation errors
+  the checks above can miss. It runs with placeholder env vars by default (nothing
+  at build time calls out to Supabase for real); if you add the real values as
+  repo secrets with the same names as in [Environment variables](#environment-variables),
+  the build job picks them up automatically instead.
+
+This doesn't deploy anything — Vercel's own GitHub integration (below) handles
+deployment on push independently of this workflow. CI is a merge gate, not a
+release mechanism.
+
+---
+
 ## Deployment (Vercel + Supabase)
 
 1. Push to GitHub, import the repo at vercel.com.
@@ -598,9 +619,9 @@ doesn't mean reaching for the same hammer everywhere.
 3. Deploy. Vercel handles the App Router and Server Actions automatically; Sharp
    needs the Node.js runtime, which is the default here (nothing to change).
 4. `vercel.json` already wires up the two cron jobs:
-  - `/api/cron/cleanup-photos` — daily at 03:00, deletes photos past each wedding's
-    retention window
-  - `/api/internal/photo-zip-worker` — every minute, processes queued ZIP exports
+    - `/api/cron/cleanup-photos` — daily at 03:00, deletes photos past each wedding's
+      retention window
+    - `/api/internal/photo-zip-worker` — every minute, processes queued ZIP exports
 5. Add your custom domain under **Settings → Domains**, then update
    `NEXT_PUBLIC_APP_URL` to match.
 

@@ -1,0 +1,83 @@
+name: CI
+
+# Runs on every push to main and on every pull request targeting main.
+# Two independent jobs:
+#   - checks: type-checking, linting, unit tests -- fast, no network/env needed
+#   - build:  a full `next build` -- catches route/type/static-generation
+#             errors the other three can miss, at the cost of needing
+#             Supabase-shaped env vars to exist (values don't need to be
+#             real; nothing in the build touches a live database).
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel a stale run when new commits land on the same PR/branch.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Type check, lint, test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --legacy-peer-deps
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test:coverage
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14
+
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --legacy-peer-deps
+
+      - name: Build
+        run: npm run build
+        env:
+          # Real values are only needed for a real deployment
+          # (Vercel already has those configured separately).
+          # These just need to be non-empty, well-shaped strings
+          # so client construction doesn't throw during the
+          # build -- nothing here calls out to Supabase at build
+          # time. Set the matching repo secrets to override with
+          # real values if that ever changes.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-role-key' }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL || 'https://example.com' }}
+          NEXT_PUBLIC_EVENT_ID: ${{ secrets.NEXT_PUBLIC_EVENT_ID || '00000000-0000-0000-0000-000000000000' }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET || 'placeholder-cron-secret' }}
+          ZIP_WORKER_SECRET: ${{ secrets.ZIP_WORKER_SECRET || 'placeholder-zip-worker-secret' }}
+          UPLOAD_RATE_LIMIT_SECRET: ${{ secrets.UPLOAD_RATE_LIMIT_SECRET || 'placeholder-upload-rate-limit-secret' }}
+          LOGIN_RATE_LIMIT_SECRET: ${{ secrets.LOGIN_RATE_LIMIT_SECRET || 'placeholder-login-rate-limit-secret' }}
