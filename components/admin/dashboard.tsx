@@ -270,27 +270,7 @@ export function AdminDashboard({
 
     const filterRequestIdRef = useRef(0);
 
-    /*
-     * Synchronise client state with
-     * server-side filter results.
-     *
-     * This still fires on the initial load and on any real
-     * navigation (back/forward, a shared link with ?filter=...),
-     * and it's also what the background router.replace() in
-     * handleFilterChange eventually resolves into -- by then
-     * local state already matches, so this just confirms it.
-     */
-    useEffect(() => {
-        setPhotos(initialPhotos);
 
-        setTotal(initialTotal);
-
-        setError(initialError);
-
-        setSelectedPhoto(null);
-
-        setCurrentFilter(activeFilter);
-    }, [initialPhotos, initialTotal, initialError, activeFilter]);
 
     /*
      * Signed URLs

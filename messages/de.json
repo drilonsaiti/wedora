@@ -333,7 +333,28 @@
     "manageSeating": "Sitzordnung verwalten",
     "managePhotos": "Fotos verwalten",
     "rsvpApiKey": "RSVP-API-Schlüssel",
-    "quickEdit": "Schnellbearbeitung"
+    "quickEdit": "Schnellbearbeitung",
+    "plan": {
+      "sectionTitle": "Tarif",
+      "sectionDescription": "Für welchen Preistarif wurde diese Hochzeit tatsächlich verkauft? Das entscheidet, welche Funktionen dem Paar zur Verfügung stehen -- siehe Preisseite, was jeder Tarif enthält.",
+      "basic": "Basic",
+      "premium": "Premium",
+      "unlimited": "Unlimited",
+      "custom": "Custom Design"
+    },
+    "addons": {
+      "sectionTitle": "Zusatzoptionen",
+      "sectionDescription": "Zusätzliche Funktionen, die zusätzlich zum obigen Tarif erworben wurden.",
+      "tableArrangement": "Tischarrangement-Designer",
+      "photoGallery": "Fotogalerie",
+      "guestLimit": "Höheres Gästelimit",
+      "multilingual": "Mehrsprachige Einladung",
+      "extendedStorage": "Erweiterter Speicher",
+      "bulkPhotoExport": "Massen-Fotoexport",
+      "rsvpApiAccess": "RSVP-API-Zugriff",
+      "qrCode": "QR-Code",
+      "personalGuestLinks": "Persönliche Gästelinks"
+    }
   },
   "status": {
     "upcoming": "Bevorstehend",
@@ -543,7 +564,15 @@
           "photoGallery":     { "name": "Gäste-Fotogalerie",              "description": "Gäste können Fotos in eine geteilte, teilbare Galerie hochladen" },
           "guestLimit":       { "name": "Gästelimit auf 300 erhöhen",     "description": "Für Hochzeiten, die über das Basic-Limit von 150 Gästen hinausgehen" },
           "multilingual":     { "name": "Mehrsprachiges Gästeerlebnis",   "description": "Gästeseiten in allen 7 unterstützten Sprachen verfügbar" },
-          "extendedStorage":  { "name": "Erweiterter Speicher",           "description": "Behalte alles 1 Jahr nach der Hochzeit online" }
+          "extendedStorage":  { "name": "Erweiterter Speicher",           "description": "Behalte alles 1 Jahr nach der Hochzeit online" },
+          "bulkPhotoExport": {
+            "name": "Massen-Fotodownload",
+            "description": "Laden Sie alle Fotos als eine ZIP-Datei herunter, jederzeit bereit"
+          },
+          "rsvpApiAccess": {
+            "name": "RSVP-API-Zugriff",
+            "description": "Verbinden Sie Ihre eigene Website oder Entwicklertools über die API mit Live-RSVP-Daten"
+          }
         }
       }
     },
@@ -739,42 +768,54 @@
     }
   },
   "seating": {
-    "loadingDesigner": "Sitzplan-Designer wird geladen...",
-    "confirmDeleteGuest": "Möchtest du diesen Gast wirklich löschen?",
-    "deleteGuestFailed": "Gast konnte nicht gelöscht werden",
-    "confirmDeleteTable": "Möchtest du diesen Tisch wirklich löschen? Alle zugewiesenen Gäste verlieren ihre Sitzplatzzuordnung.",
-    "deleteTableFailed": "Tisch konnte nicht gelöscht werden",
-    "title": "Gästesitzordnung",
+    "title": "Gäste-Sitzordnung",
+    "description": "Verwalten Sie Gäste, Tische und das Veranstaltungsort-Layout für diese Hochzeit.",
+    "backToWeddings": "Zurück zu den Hochzeiten",
+    "loadingDesigner": "Sitzordnungs-Designer wird geladen...",
     "print": "Liste drucken",
+    "printTitle": "Gästeliste nach Tischen",
     "guests": "Gäste",
     "tables": "Tische",
+    "photos": "Fotos",
+    "rsvpApi": "RSVP-API",
+    "designerLabel": "Designer",
     "searchGuests": "Gäste suchen...",
     "addGuest": "Gast hinzufügen",
     "addTable": "Tisch hinzufügen",
+    "addNewGuest": "Neuen Gast hinzufügen",
+    "addNewTable": "Neuen Tisch hinzufügen",
+    "editGuest": "Gast bearbeiten",
+    "editTable": "Tisch bearbeiten",
+    "total": "Gesamt",
     "seated": "Platziert",
     "unseated": "Nicht platziert",
-    "total": "Gesamt",
     "noGuests": "Keine Gäste gefunden",
     "noTables": "Noch keine Tische erstellt",
     "noTable": "Kein Tisch",
+    "noTablesCreated": "Noch keine Tische erstellt.",
+    "confirmDeleteGuest": "Möchten Sie diesen Gast wirklich löschen?",
+    "deleteGuestFailed": "Gast konnte nicht gelöscht werden",
+    "confirmDeleteTable": "Möchten Sie diesen Tisch wirklich löschen? Alle zugewiesenen Gäste werden entfernt.",
+    "deleteTableFailed": "Tisch konnte nicht gelöscht werden",
+    "rsvpCycleHint": "Klicken, um RSVP-Status zu wechseln: ausstehend -> bestätigt -> abgelehnt",
+    "rsvpUpdateFailed": "RSVP konnte nicht aktualisiert werden",
+    "rsvpStatus": {
+      "pending": "Ausstehend",
+      "confirmed": "Bestätigt",
+      "declined": "Abgelehnt"
+    },
+    "table": "Tisch",
     "tableNumber": "Tisch {number}",
-    "seats": "Sitzplätze",
+    "occupied": "Belegt",
+    "seats": "Sitze",
     "edit": "Bearbeiten",
     "delete": "Löschen",
-    "printTitle": "Gästeliste nach Tischen",
-    "table": "Tisch",
-    "noTablesCreated": "Noch keine Tische erstellt.",
-    "editGuest": "Gast bearbeiten",
-    "addNewGuest": "Neuen Gast hinzufügen",
-    "editTable": "Tisch bearbeiten",
-    "addNewTable": "Neuen Tisch hinzufügen",
-    "occupied": "Belegt",
     "firstName": "Vorname",
-    "firstNamePlaceholder": "z. B. Max",
+    "firstNamePlaceholder": "z. B. John",
     "lastName": "Nachname",
-    "lastNamePlaceholder": "z. B. Mustermann",
+    "lastNamePlaceholder": "z. B. Smith",
     "assignTableOptional": "Tisch zuweisen (optional)",
-    "tableOption": "Tisch {number} ({seats} Plätze)",
+    "tableOption": "Tisch {number} ({seats} Sitze)",
     "updateGuest": "Gast aktualisieren",
     "tableShape": "Tischform",
     "shapeRound": "Rund",
@@ -788,107 +829,10 @@
     "bottom": "Unten",
     "left": "Links",
     "right": "Rechts",
-    "assignedSeats": "{assigned} / {total} Sitzplätze zugewiesen",
+    "assignedSeats": "{assigned} / {total} Sitze zugewiesen",
     "tableLabelOptional": "Bezeichnung (optional)",
-    "tableLabelPlaceholder": "z. B. Familie Mustermann",
+    "tableLabelPlaceholder": "z. B. Familie Saiti",
     "updateTable": "Tisch aktualisieren",
-    "rsvpApi": "RSVP-API",
-    "rsvpCycleHint": "Klicken, um den RSVP-Status zu wechseln: Ausstehend -> Bestätigt -> Abgelehnt",
-    "rsvpUpdateFailed": "RSVP konnte nicht aktualisiert werden",
-    "rsvpStatus": {
-      "pending": "Ausstehend",
-      "confirmed": "Bestätigt",
-      "declined": "Abgelehnt"
-    },
-    "designerLabel": "Designer",
-    "photos": "Fotos",
-    "confirmations": {
-      "deleteGalleryLink": {
-        "confirm": "Link löschen",
-        "title": "Galerielink löschen?",
-        "description": "Dieser geteilte Galerielink funktioniert danach sofort nicht mehr."
-      },
-      "deleteGuest": {
-        "title": "Gast löschen?",
-        "description": "{name} wird dauerhaft aus der Gästeliste entfernt.",
-        "confirm": "Gast löschen"
-      },
-      "deleteTable": {
-        "title": "Tisch löschen?",
-        "description": "Tisch {number} wird entfernt und alle zugewiesenen Gäste verlieren ihre Sitzplatzzuordnung.",
-        "confirm": "Tisch löschen"
-      },
-      "deleteVenueElement": {
-        "title": "Raumelement löschen?",
-        "description": "{name} wird dauerhaft aus dem Raumplan entfernt.",
-        "confirm": "Element löschen"
-      },
-      "deletePhoto": {
-        "title": "Foto löschen?",
-        "description": "Dieses Foto wird dauerhaft gelöscht und kann nicht wiederhergestellt werden.",
-        "confirm": "Foto löschen"
-      }
-    },
-    "designer": {
-      "exitFullscreen": "Vollbild verlassen",
-      "table": "Tisch",
-      "unassignedGuests": "Nicht zugewiesene Gäste ({count})",
-      "searchGuests": "Nach Namen suchen...",
-      "addElement": "Element hinzufügen",
-      "noGuestsFound": "Keine Gäste entsprechen deiner Suche.",
-      "allGuestsAssigned": "Alle Gäste sind zugewiesen.",
-      "showGuests": "Gäste anzeigen",
-      "downloadImage": "Bild herunterladen",
-      "fullscreen": "Vollbild",
-      "exit": "Beenden",
-      "seatOccupied": "Dieser Sitzplatz ist bereits belegt.",
-      "tableFull": "Tisch {number} ist voll.",
-      "assignSeatFailed": "Der Gast konnte diesem Sitzplatz nicht zugewiesen werden.",
-      "assignGuestFailed": "Der Gast konnte diesem Tisch nicht zugewiesen werden.",
-      "elementAdded": "Raumelement hinzugefügt",
-      "elementDeleted": "Raumelement gelöscht",
-      "addElementFailed": "Das Raumelement konnte nicht hinzugefügt werden.",
-      "deleteElementFailed": "Das Raumelement konnte nicht gelöscht werden.",
-      "assignMenu": {
-        "triggerLabel": "Sitzoptionen für {name}",
-        "currentTable": "Derzeit an Tisch {number} platziert",
-        "unassign": "Vom Tisch entfernen",
-        "full": "Voll",
-        "noOtherTables": "Noch keine anderen Tische."
-      }
-    },
-    "venueEditor": {
-      "name": "Name",
-      "shapes": {
-        "square": "Quadratisch",
-        "rectangle": "Rechteckig",
-        "circle": "Kreis"
-      },
-      "eyebrow": "Raumplaner",
-      "title": "Raumelement hinzufügen",
-      "description": "Füge ein häufig verwendetes Raumelement hinzu oder erstelle ein eigenes Element für den Raumplan.",
-      "quickPresets": "Schnellauswahl",
-      "orCustom": "Oder eigenes Element erstellen",
-      "namePlaceholder": "z. B. Fotobox, Hochzeitstorte",
-      "icon": "Symbol",
-      "selectIcon": "Symbol auswählen: {icon}",
-      "shape": "Form",
-      "color": "Farbe",
-      "create": "Element erstellen",
-      "deleteElement": "{name} löschen",
-      "colors": {
-        "blue": "Blau",
-        "rose": "Rosa",
-        "purple": "Violett",
-        "amber": "Bernstein",
-        "gray": "Grau",
-        "green": "Grün",
-        "teal": "Türkis",
-        "pink": "Pink"
-      }
-    },
-    "description": "Verwalte Gäste, Tische und den Raumplan für diese Hochzeit.",
-    "backToWeddings": "Zurück zu den Hochzeiten",
     "venuePresets": {
       "entrance": "Eingang",
       "pool": "Pool",
@@ -897,15 +841,117 @@
       "bar": "Bar",
       "toilet": "WC"
     },
+    "confirmations": {
+      "deleteGuest": {
+        "title": "Gast löschen?",
+        "description": "{name} wird dauerhaft von der Gästeliste entfernt.",
+        "confirm": "Gast löschen"
+      },
+      "deleteTable": {
+        "title": "Tisch löschen?",
+        "description": "Tisch {number} wird entfernt und alle zugewiesenen Gäste werden nicht mehr platziert.",
+        "confirm": "Tisch löschen"
+      },
+      "deleteVenueElement": {
+        "title": "Veranstaltungselement löschen?",
+        "description": "{name} wird dauerhaft aus dem Veranstaltungsort-Layout entfernt.",
+        "confirm": "Element löschen"
+      },
+      "deletePhoto": {
+        "title": "Foto löschen?",
+        "description": "Dieses Foto wird dauerhaft gelöscht und kann nicht wiederhergestellt werden.",
+        "confirm": "Foto löschen"
+      },
+      "deleteGalleryLink": {
+        "title": "Galerie-Link löschen?",
+        "description": "Dieser geteilte Galerie-Link funktioniert sofort nicht mehr.",
+        "confirm": "Link löschen"
+      }
+    },
     "notifications": {
       "guestDeleted": "Gast gelöscht",
       "rsvpUpdated": "RSVP als {status} markiert",
       "tableDeleted": "Tisch gelöscht",
-      "venueElementDeleted": "Raumelement gelöscht",
+      "venueElementDeleted": "Veranstaltungselement gelöscht",
       "photoDeleted": "Foto gelöscht",
-      "galleryLinkDeleted": "Galerielink gelöscht",
-      "galleryLinkDeleteFailed": "Der Galerielink konnte nicht gelöscht werden"
-    }
+      "galleryLinkDeleted": "Galerie-Link gelöscht",
+      "galleryLinkDeleteFailed": "Der Galerie-Link konnte nicht gelöscht werden"
+    },
+    "designer": {
+      "unassignedGuests": "Nicht zugewiesene Gäste ({count})",
+      "searchGuests": "Nach Namen suchen...",
+      "addElement": "Element hinzufügen",
+      "noGuestsFound": "Keine Gäste entsprechen Ihrer Suche.",
+      "allGuestsAssigned": "Alle Gäste sind zugewiesen.",
+      "showGuests": "Gäste anzeigen",
+      "downloadImage": "Bild herunterladen",
+      "fullscreen": "Vollbild",
+      "exitFullscreen": "Vollbild beenden",
+      "exit": "Beenden",
+      "table": "Tisch",
+      "seatOccupied": "Dieser Sitz ist bereits belegt.",
+      "tableFull": "Tisch {number} ist voll.",
+      "assignSeatFailed": "Der Gast konnte diesem Sitz nicht zugewiesen werden.",
+      "assignGuestFailed": "Der Gast konnte diesem Tisch nicht zugewiesen werden.",
+      "elementAdded": "Veranstaltungselement hinzugefügt",
+      "elementDeleted": "Veranstaltungselement gelöscht",
+      "addElementFailed": "Das Veranstaltungselement konnte nicht hinzugefügt werden.",
+      "deleteElementFailed": "Das Veranstaltungselement konnte nicht gelöscht werden.",
+      "assignMenu": {
+        "triggerLabel": "Sitzoptionen für {name}",
+        "currentTable": "Derzeit an Tisch {number}",
+        "unassign": "Von Tisch entfernen",
+        "full": "Voll",
+        "noOtherTables": "Noch keine anderen Tische."
+      }
+    },
+    "venueEditor": {
+      "eyebrow": "Veranstaltungsort-Designer",
+      "title": "Veranstaltungselement hinzufügen",
+      "description": "Fügen Sie ein übliches Veranstaltungsort-Merkmal hinzu oder erstellen Sie ein benutzerdefiniertes Element für den Grundriss.",
+      "quickPresets": "Schnellvorlagen",
+      "orCustom": "Oder eigenes erstellen",
+      "name": "Name",
+      "namePlaceholder": "z. B. Fotobox, Hochzeitstorte",
+      "icon": "Symbol",
+      "selectIcon": "Symbol auswählen: {icon}",
+      "shape": "Form",
+      "color": "Farbe",
+      "create": "Element erstellen",
+      "deleteElement": "{name} löschen",
+      "shapes": {
+        "circle": "Kreis",
+        "square": "Quadrat",
+        "rectangle": "Rechteck"
+      },
+      "colors": {
+        "blue": "Blau",
+        "rose": "Rosé",
+        "purple": "Violett",
+        "amber": "Bernstein",
+        "gray": "Grau",
+        "green": "Grün",
+        "teal": "Blaugrün",
+        "pink": "Rosa"
+      }
+    },
+    "csvImport": {
+      "exportButton": "CSV exportieren",
+      "importButton": "CSV importieren",
+      "exportSuccess": "Gästeliste exportiert",
+      "exportEmpty": "Es gibt noch keine Gäste zum Exportieren",
+      "rsvpStatusColumn": "RSVP-Status",
+      "partySizeColumn": "Gruppengröße",
+      "tableColumn": "Tisch",
+      "emptyFile": "Diese Datei ist leer",
+      "noNameColumns": "Spalten für Vorname / Nachname konnten in dieser CSV nicht gefunden werden",
+      "importSuccess": "{imported} Gäste importiert, {skipped} übersprungen",
+      "importNothingImported": "Aus dieser Datei wurden keine Gäste importiert",
+      "importFailed": "Gäste konnten aus dieser Datei nicht importiert werden"
+    },
+    "copyPersonalLink": "Persönlichen Link kopieren",
+    "personalLinkCopied": "Persönlicher Link in die Zwischenablage kopiert",
+    "personalLinkCopyFailed": "Link konnte nicht kopiert werden"
   },
   "notFound": {
     "admin": {
@@ -1003,5 +1049,51 @@
     "neverUsed": "nie verwendet",
     "lastUsed": "zuletzt verwendet {date}",
     "revokeKeyAriaLabel": "API-Schlüssel widerrufen"
+  },
+  "qrCodeCard": {
+    "title": "QR-Code zum Teilen",
+    "description": "Scannen oder drucken Sie ihn, um Gäste direkt zur Einladungsseite zu schicken.",
+    "downloadPng": "PNG herunterladen",
+    "print": "Drucken"
+  },
+  "rsvpTrend": {
+    "title": "RSVP-Trend",
+    "description": "Kumulative Antworten im Zeitverlauf, basierend darauf, wann jeder Gast geantwortet hat.",
+    "totalInvited": "Eingeladen",
+    "confirmed": "Bestätigt",
+    "declined": "Abgelehnt",
+    "pending": "Ausstehend",
+    "confirmedSeries": "Bestätigt",
+    "declinedSeries": "Abgelehnt",
+    "emptyState": "Noch keine RSVPs. Antworten erscheinen hier, sobald Gäste zu antworten beginnen."
+  },
+  "guestLink": {
+    "title": "Ihre Einladung",
+    "weddingOf": "Die Hochzeit von {bride} & {groom}",
+    "yourTable": "Ihr Tisch",
+    "seat": "Sitzplatz",
+    "noTable": "Noch keinem Tisch zugewiesen",
+    "noTableDescription": "Das Paar hat Ihnen noch keinen Tisch zugewiesen. Schauen Sie später noch einmal vorbei.",
+    "venueMap": "Veranstaltungsort-Karte",
+    "venueMapDescription": "Finden Sie Ihren Tisch auf der Karte unten.",
+    "invalidTitle": "Dieser Link ist ungültig",
+    "invalidDescription": "Er ist möglicherweise abgelaufen, falsch eingegeben oder das Paar hat den öffentlichen Gästezugang deaktiviert. Bitte fragen Sie das Paar nach einem neuen Link.",
+    "backHome": "Zurück zur Hochzeitsseite",
+    "rsvpTitle": "Ihre RSVP",
+    "rsvpDescription": "Lassen Sie das Paar wissen, ob Sie kommen können.",
+    "rsvpStatus": {
+      "pending": "Noch nicht geantwortet",
+      "confirmed": "Ich werde da sein",
+      "declined": "Ich kann nicht kommen"
+    },
+    "partySizeLabel": "Anzahl der Gäste (einschließlich Ihnen)",
+    "partySizePlaceholder": "z. B. 2",
+    "noteLabel": "Notiz für das Paar (optional)",
+    "notePlaceholder": "Ernährungseinschränkungen, Musikwünsche...",
+    "submit": "Meine RSVP speichern",
+    "submitting": "Wird gespeichert...",
+    "submitSuccess": "Ihre RSVP wurde gespeichert",
+    "submitError": "Ihre RSVP konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+    "lastResponded": "Zuletzt aktualisiert {date}"
   }
 }

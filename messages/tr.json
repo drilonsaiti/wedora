@@ -259,35 +259,35 @@
     }
   },
   "seating": {
-    "title": "Davetli Oturma Düzeni",
-    "description": "Bu düğün için davetlileri, masaları ve mekan düzenini yönetin.",
+    "title": "Misafir Oturma Düzeni",
+    "description": "Bu düğün için misafirleri, masaları ve mekan yerleşimini yönetin.",
     "backToWeddings": "Düğünlere dön",
-    "loadingDesigner": "Oturma düzeni editörü yükleniyor...",
+    "loadingDesigner": "Oturma düzeni tasarımcısı yükleniyor...",
     "print": "Listeyi Yazdır",
-    "printTitle": "Masalara Göre Davetli Listesi",
-    "guests": "Davetliler",
+    "printTitle": "Masalara Göre Misafir Listesi",
+    "guests": "Misafirler",
     "tables": "Masalar",
     "photos": "Fotoğraflar",
-    "designerLabel": "Düzenleyici",
-    "searchGuests": "Davetli ara...",
-    "addGuest": "Davetli Ekle",
+    "rsvpApi": "RSVP API",
+    "designerLabel": "Tasarımcı",
+    "searchGuests": "Misafir ara...",
+    "addGuest": "Misafir Ekle",
     "addTable": "Masa Ekle",
-    "addNewGuest": "Yeni Davetli Ekle",
+    "addNewGuest": "Yeni Misafir Ekle",
     "addNewTable": "Yeni Masa Ekle",
-    "editGuest": "Davetliyi Düzenle",
+    "editGuest": "Misafiri Düzenle",
     "editTable": "Masayı Düzenle",
     "total": "Toplam",
-    "seated": "Yerleştirilen",
-    "unseated": "Yerleştirilmeyen",
-    "noGuests": "Davetli bulunamadı",
+    "seated": "Oturtulmuş",
+    "unseated": "Oturtulmamış",
+    "noGuests": "Misafir bulunamadı",
     "noTables": "Henüz masa oluşturulmadı",
     "noTable": "Masa yok",
     "noTablesCreated": "Henüz masa oluşturulmadı.",
-    "confirmDeleteGuest": "Bu davetliyi silmek istediğinizden emin misiniz?",
-    "deleteGuestFailed": "Davetli silinemedi",
-    "confirmDeleteTable": "Bu masayı silmek istediğinizden emin misiniz? Atanan tüm davetliler masasız kalacaktır.",
+    "confirmDeleteGuest": "Bu misafiri silmek istediğinizden emin misiniz?",
+    "deleteGuestFailed": "Misafir silinemedi",
+    "confirmDeleteTable": "Bu masayı silmek istediğinizden emin misiniz? Atanmış tüm misafirlerin oturma yeri kaldırılacak.",
     "deleteTableFailed": "Masa silinemedi",
-    "rsvpApi": "RSVP API",
     "rsvpCycleHint": "RSVP durumunu değiştirmek için tıklayın: beklemede -> onaylandı -> reddedildi",
     "rsvpUpdateFailed": "RSVP güncellenemedi",
     "rsvpStatus": {
@@ -302,12 +302,12 @@
     "edit": "Düzenle",
     "delete": "Sil",
     "firstName": "Ad",
-    "firstNamePlaceholder": "örn. Ahmet",
+    "firstNamePlaceholder": "örn. John",
     "lastName": "Soyad",
-    "lastNamePlaceholder": "örn. Yılmaz",
+    "lastNamePlaceholder": "örn. Smith",
     "assignTableOptional": "Masa ata (isteğe bağlı)",
     "tableOption": "Masa {number} ({seats} koltuk)",
-    "updateGuest": "Davetliyi Güncelle",
+    "updateGuest": "Misafiri Güncelle",
     "tableShape": "Masa şekli",
     "shapeRound": "Yuvarlak",
     "shapeSquare": "Kare",
@@ -315,52 +315,52 @@
     "tableNumberLabel": "Masa numarası",
     "tableNumberPlaceholder": "örn. 1",
     "seatsPlaceholder": "örn. 8",
-    "seatDistribution": "Koltukların kenarlara dağılımı",
+    "seatDistribution": "Tarafa göre koltuk dağılımı",
     "top": "Üst",
     "bottom": "Alt",
     "left": "Sol",
     "right": "Sağ",
     "assignedSeats": "{assigned} / {total} koltuk atandı",
     "tableLabelOptional": "Etiket (isteğe bağlı)",
-    "tableLabelPlaceholder": "örn. Yılmaz Ailesi",
-    "updateTable": "Masayı Güncelle",
+    "tableLabelPlaceholder": "örn. Saiti Ailesi",
+    "updateTable": "Masayı güncelle",
     "venuePresets": {
       "entrance": "Giriş",
       "pool": "Havuz",
-      "couple_table": "Çift Masası",
+      "couple_table": "Çift",
       "music": "Müzik",
       "bar": "Bar",
       "toilet": "Tuvalet"
     },
     "confirmations": {
       "deleteGuest": {
-        "title": "Davetli silinsin mi?",
-        "description": "{name} davetli listesinden kalıcı olarak kaldırılacak.",
-        "confirm": "Davetliyi sil"
+        "title": "Misafir silinsin mi?",
+        "description": "{name} misafir listesinden kalıcı olarak kaldırılacak.",
+        "confirm": "Misafiri sil"
       },
       "deleteTable": {
         "title": "Masa silinsin mi?",
-        "description": "Masa {number} kaldırılacak ve atanan tüm davetliler masasız kalacak.",
+        "description": "Masa {number} kaldırılacak ve atanmış tüm misafirlerin oturma yeri kaldırılacak.",
         "confirm": "Masayı sil"
       },
       "deleteVenueElement": {
         "title": "Mekan öğesi silinsin mi?",
-        "description": "{name} mekan düzeninden kalıcı olarak kaldırılacak.",
+        "description": "{name} mekan yerleşiminden kalıcı olarak kaldırılacak.",
         "confirm": "Öğeyi sil"
       },
       "deletePhoto": {
         "title": "Fotoğraf silinsin mi?",
-        "description": "Bu fotoğraf kalıcı olarak silinecek ve kurtarılamayacaktır.",
+        "description": "Bu fotoğraf kalıcı olarak silinecek ve geri alınamayacak.",
         "confirm": "Fotoğrafı sil"
       },
       "deleteGalleryLink": {
         "title": "Galeri bağlantısı silinsin mi?",
-        "description": "Bu paylaşılan galeri bağlantısı hemen çalışmayı durduracaktır.",
+        "description": "Bu paylaşılan galeri bağlantısı hemen çalışmayı durduracak.",
         "confirm": "Bağlantıyı sil"
       }
     },
     "notifications": {
-      "guestDeleted": "Davetli silindi",
+      "guestDeleted": "Misafir silindi",
       "rsvpUpdated": "RSVP {status} olarak işaretlendi",
       "tableDeleted": "Masa silindi",
       "venueElementDeleted": "Mekan öğesi silindi",
@@ -369,28 +369,28 @@
       "galleryLinkDeleteFailed": "Galeri bağlantısı silinemedi"
     },
     "designer": {
-      "unassignedGuests": "Atanmamış davetliler ({count})",
-      "searchGuests": "İsimle ara...",
+      "unassignedGuests": "Atanmamış misafirler ({count})",
+      "searchGuests": "Ada göre ara...",
       "addElement": "Öğe ekle",
-      "noGuestsFound": "Aramanızla eşleşen davetli yok.",
-      "allGuestsAssigned": "Tüm davetliler atandı.",
-      "showGuests": "Davetlileri göster",
+      "noGuestsFound": "Aramanızla eşleşen misafir yok.",
+      "allGuestsAssigned": "Tüm misafirler atandı.",
+      "showGuests": "Misafirleri göster",
       "downloadImage": "Görseli indir",
       "fullscreen": "Tam ekran",
       "exitFullscreen": "Tam ekrandan çık",
-      "exit": "Çıkış",
+      "exit": "Çık",
       "table": "Masa",
       "seatOccupied": "Bu koltuk zaten dolu.",
       "tableFull": "Masa {number} dolu.",
-      "assignSeatFailed": "Davetli bu koltuğa atanamadı.",
-      "assignGuestFailed": "Davetli bu masaya atanamadı.",
+      "assignSeatFailed": "Misafir bu koltuğa atanamadı.",
+      "assignGuestFailed": "Misafir bu masaya atanamadı.",
       "elementAdded": "Mekan öğesi eklendi",
       "elementDeleted": "Mekan öğesi silindi",
       "addElementFailed": "Mekan öğesi eklenemedi.",
       "deleteElementFailed": "Mekan öğesi silinemedi.",
       "assignMenu": {
         "triggerLabel": "{name} için oturma seçenekleri",
-        "currentTable": "Şu anda masa {number} konumunda",
+        "currentTable": "Şu anda masa {number}'da",
         "unassign": "Masadan kaldır",
         "full": "Dolu",
         "noOtherTables": "Henüz başka masa yok."
@@ -399,10 +399,10 @@
     "venueEditor": {
       "eyebrow": "Mekan tasarımcısı",
       "title": "Mekan öğesi ekle",
-      "description": "Yaygın bir mekan özelliği ekleyin veya kat planı için özel bir öğe oluşturun.",
+      "description": "Yaygın bir mekan özelliği ekleyin veya yerleşim planı için özel bir öğe oluşturun.",
       "quickPresets": "Hızlı ön ayarlar",
-      "orCustom": "Veya kendiniz oluşturun",
-      "name": "İsim",
+      "orCustom": "Veya kendinizinkini oluşturun",
+      "name": "Ad",
       "namePlaceholder": "örn. Fotoğraf kabini, Düğün pastası",
       "icon": "Simge",
       "selectIcon": "Simge seç: {icon}",
@@ -422,12 +422,29 @@
         "amber": "Amber",
         "gray": "Gri",
         "green": "Yeşil",
-        "teal": "Turkuaz",
+        "teal": "Deniz mavisi",
         "pink": "Pembe"
       }
-    }
+    },
+    "csvImport": {
+      "exportButton": "CSV dışa aktar",
+      "importButton": "CSV içe aktar",
+      "exportSuccess": "Misafir listesi dışa aktarıldı",
+      "exportEmpty": "Henüz dışa aktarılacak misafir yok",
+      "rsvpStatusColumn": "RSVP Durumu",
+      "partySizeColumn": "Grup Boyutu",
+      "tableColumn": "Masa",
+      "emptyFile": "Bu dosya boş",
+      "noNameColumns": "Bu CSV'de ad / soyad sütunları bulunamadı",
+      "importSuccess": "{imported} misafir içe aktarıldı, {skipped} atlandı",
+      "importNothingImported": "Bu dosyadan hiç misafir içe aktarılmadı",
+      "importFailed": "Bu dosyadan misafirler içe aktarılamadı"
+    },
+    "copyPersonalLink": "Kişisel bağlantıyı kopyala",
+    "personalLinkCopied": "Kişisel bağlantı panoya kopyalandı",
+    "personalLinkCopyFailed": "Bağlantı kopyalanamadı"
   },
-  "weddings": {
+"weddings": {
     "title": "Düğünler",
     "newWedding": "Yeni Düğün",
     "backToDashboard": "Panele dön",
@@ -502,7 +519,28 @@
         "updated": "Düğün güncellendi",
         "deleted": "Düğün silindi"
       }
-    }
+    },
+  "plan": {
+    "sectionTitle": "Plan",
+    "sectionDescription": "Bu düğün gerçekte hangi fiyat planında satıldı? Bu, çiftin hangi özelliklere erişebileceğini belirler -- her planın neleri içerdiğini görmek için fiyatlandırma sayfasına bakın.",
+    "basic": "Temel",
+    "premium": "Premium",
+    "unlimited": "Sınırsız",
+    "custom": "Özel Tasarım"
+  },
+  "addons": {
+    "sectionTitle": "Ek özellikler",
+    "sectionDescription": "Yukarıdaki plana ek olarak satın alınan ekstra özellikler.",
+    "tableArrangement": "Masa düzeni tasarımcısı",
+    "photoGallery": "Fotoğraf galerisi",
+    "guestLimit": "Daha yüksek misafir limiti",
+    "multilingual": "Çok dilli davetiye",
+    "extendedStorage": "Uzatılmış depolama",
+    "bulkPhotoExport": "Toplu fotoğraf dışa aktarma",
+    "rsvpApiAccess": "RSVP API erişimi",
+    "qrCode": "QR kod",
+    "personalGuestLinks": "Kişisel misafir bağlantıları"
+  }
   },
   "status": {
     "upcoming": "Yaklaşan",
@@ -712,7 +750,15 @@
         "photoGallery":     { "name": "Misafir fotoğraf galerisi",      "description": "Misafirler ortak ve paylaşılabilir bir galeriye fotoğraf yükleyebilir" },
         "guestLimit":       { "name": "Misafir limitini 300'e çıkar",   "description": "Basic'in 150 misafir limitinden daha büyük düğünler için" },
         "multilingual":     { "name": "Çok dilli misafir deneyimi",     "description": "Misafir sayfaları desteklenen 7 dilin tümünde mevcut" },
-        "extendedStorage":  { "name": "Uzatılmış depolama",             "description": "Düğünden sonra her şeyi 1 yıl boyunca çevrimiçi tutun" }
+        "extendedStorage":  { "name": "Uzatılmış depolama",             "description": "Düğünden sonra her şeyi 1 yıl boyunca çevrimiçi tutun" },
+        "bulkPhotoExport": {
+          "name": "Toplu fotoğraf indirme",
+          "description": "Tüm fotoğrafları tek bir ZIP dosyası olarak indirin, her an hazır"
+        },
+        "rsvpApiAccess": {
+          "name": "RSVP API erişimi",
+          "description": "Kendi web sitenizi veya geliştirici araçlarınızı API üzerinden canlı RSVP verilerine bağlayın"
+        }
       }
     }
   },
@@ -985,5 +1031,51 @@
     "neverUsed": "hiç kullanılmadı",
     "lastUsed": "son kullanım {date}",
     "revokeKeyAriaLabel": "API anahtarını iptal et"
+  },
+  "qrCodeCard": {
+    "title": "Paylaşım için QR kod",
+    "description": "Misafirleri doğrudan davetiye sayfasına yönlendirmek için tarayın veya yazdırın.",
+    "downloadPng": "PNG indir",
+    "print": "Yazdır"
+  },
+  "rsvpTrend": {
+    "title": "RSVP eğilimi",
+    "description": "Her misafirin yanıtladığı andan itibaren zaman içindeki kümülatif yanıtlar.",
+    "totalInvited": "Davet edilen",
+    "confirmed": "Onaylayan",
+    "declined": "Reddeden",
+    "pending": "Beklemede",
+    "confirmedSeries": "Onaylayan",
+    "declinedSeries": "Reddeden",
+    "emptyState": "Henüz RSVP yok. Misafirler yanıtlamaya başladığında yanıtlar burada görünecek."
+  },
+  "guestLink": {
+    "title": "Davetiyeniz",
+    "weddingOf": "{bride} & {groom} düğünü",
+    "yourTable": "Masanız",
+    "seat": "Koltuk",
+    "noTable": "Henüz bir masaya atanmadınız",
+    "noTableDescription": "Çift henüz size bir masa atamadı. Daha sonra tekrar kontrol edin.",
+    "venueMap": "Mekan haritası",
+    "venueMapDescription": "Aşağıdaki haritada masanızı bulun.",
+    "invalidTitle": "Bu bağlantı geçerli değil",
+    "invalidDescription": "Süresi dolmuş, yanlış yazılmış veya çift genel misafir erişimini kapatmış olabilir. Lütfen çiftten yeni bir bağlantı isteyin.",
+    "backHome": "Düğün sayfasına dön",
+    "rsvpTitle": "RSVP'niz",
+    "rsvpDescription": "Gelebileceğinizi çifte bildirin.",
+    "rsvpStatus": {
+      "pending": "Henüz yanıt vermediniz",
+      "confirmed": "Orada olacağım",
+      "declined": "Gelemeyeceğim"
+    },
+    "partySizeLabel": "Misafir sayısı (siz dahil)",
+    "partySizePlaceholder": "örn. 2",
+    "noteLabel": "Çift için not (isteğe bağlı)",
+    "notePlaceholder": "Beslenme kısıtlamaları, şarkı istekleri...",
+    "submit": "RSVP'mi kaydet",
+    "submitting": "Kaydediliyor...",
+    "submitSuccess": "RSVP'niz kaydedildi",
+    "submitError": "RSVP'niz kaydedilemedi. Lütfen tekrar deneyin.",
+    "lastResponded": "Son güncelleme {date}"
   }
 }

@@ -93,6 +93,8 @@ const ADDONS: Addon[] = [
     { id: "guestLimit", price: 15 },
     { id: "multilingual", price: 15 },
     { id: "extendedStorage", price: 10 },
+    { id: "bulkPhotoExport", price: 15 },
+    { id: "rsvpApiAccess", price: 39 },
 ];
 
 const BASE_PRICE = 49; // matches TIERS.basic.price

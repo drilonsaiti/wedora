@@ -1,33 +1,48 @@
 "use client";
 
 import {
+    type ChangeEvent,
     type ReactNode,
     useEffect,
     useMemo,
+    useRef,
     useState,
     useTransition,
 } from "react";
 
+import { useVirtualizer } from "@tanstack/react-virtual";
 import dynamic from "next/dynamic";
 import {
     ArrowLeft,
+    Download,
     Edit2,
     Images,
     KeyRound,
     LayoutGrid,
+    Link2,
     Loader2,
     Map as MapIcon,
     Plus,
     Printer,
     Search,
     Trash2,
+    Upload,
     Users,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Papa from "papaparse";
 
-import { deleteGuest, deleteTable } from "@/actions/seating";
+import {
+    bulkImportGuestsAction,
+    deleteGuest,
+    deleteTable,
+    type RsvpTrendPoint,
+} from "@/actions/seating";
 import { updateGuestRsvpAction } from "@/actions/rsvp";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { getWeddingEntitlements } from "@/lib/plans";
 import { GuestForm } from "@/components/admin/guest-form";
+import { RsvpTrendChart } from "@/components/admin/rsvp-trend-chart";
 import { TableForm } from "@/components/admin/table-form";
 import { GuestAvatar } from "@/components/guest-avatar";
 import { Modal } from "@/components/ui/modal";
@@ -73,28 +88,192 @@ const SeatingDesigner = dynamic(
     },
 );
 
+/*
+ * CSV EXPORT
+ *
+ * Hand-rolled, RFC 4149-style escaping: a field is wrapped in
+ * quotes when it contains a comma, quote or newline, and any
+ * embedded quote is doubled. No dependency needed for building
+ * a CSV this simple -- parsing untrusted uploads is a different
+ * matter (see the papaparse import used for CSV import below).
+ */
+function escapeCsvField(value: string): string {
+    if (/[",\n\r]/.test(value)) {
+        return `"${value.replace(/"/g, '""')}"`;
+    }
+
+    return value;
+}
+
+function buildGuestsCsv(
+    guests: GuestWithTable[],
+    headers: [string, string, string, string, string],
+): string {
+    const rows = [
+        headers,
+        ...guests.map((guest) => [
+            guest.first_name ?? "",
+            guest.last_name ?? "",
+            guest.rsvp_status ?? "",
+            guest.rsvp_party_size != null ? String(guest.rsvp_party_size) : "",
+            guest.tables ? String(guest.tables.number) : "",
+        ]),
+    ];
+
+    return rows
+        .map((row) => row.map((field) => escapeCsvField(field)).join(","))
+        .join("\r\n");
+}
+
+function downloadTextFile(filename: string, content: string, mimeType: string) {
+    /*
+     * Leading BOM helps Excel correctly detect UTF-8 when the
+     * file is reopened there instead of guessing Latin-1.
+     */
+    const blob = new Blob(["﻿", content], {
+        type: mimeType,
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+}
+
+/*
+ * CSV IMPORT
+ *
+ * Matches header columns case-insensitively and tolerates any
+ * reasonable header order/spelling for the two required
+ * columns. Returns null when no usable name column was found
+ * at all, so the caller can show a clear error instead of
+ * silently importing zero guests.
+ */
+const FIRST_NAME_HEADER_ALIASES = [
+    "firstname",
+    "first_name",
+    "first",
+    "given_name",
+    "givenname",
+];
+
+const LAST_NAME_HEADER_ALIASES = [
+    "lastname",
+    "last_name",
+    "last",
+    "surname",
+    "family_name",
+    "familyname",
+];
+
+function normalizeHeader(header: string): string {
+    return header
+        .trim()
+        .toLowerCase()
+        .replace(/[\s-]+/g, "_");
+}
+
+function parseGuestsCsv(csvText: string): {
+    rows: {
+        firstName: string;
+        lastName: string;
+    }[];
+    error: "empty" | "noNameColumns" | null;
+} {
+    const parsed = Papa.parse<Record<string, string>>(csvText, {
+        header: true,
+        skipEmptyLines: true,
+        transformHeader: normalizeHeader,
+    });
+
+    const fields = parsed.meta.fields ?? [];
+
+    if (fields.length === 0) {
+        return {
+            rows: [],
+            error: "empty",
+        };
+    }
+
+    const firstNameKey = fields.find((field) =>
+        FIRST_NAME_HEADER_ALIASES.includes(field),
+    );
+
+    const lastNameKey = fields.find((field) =>
+        LAST_NAME_HEADER_ALIASES.includes(field),
+    );
+
+    if (!firstNameKey && !lastNameKey) {
+        return {
+            rows: [],
+            error: "noNameColumns",
+        };
+    }
+
+    const rows = (parsed.data ?? []).map((row) => ({
+        firstName: (firstNameKey ? row[firstNameKey] : "")?.trim() ?? "",
+
+        lastName: (lastNameKey ? row[lastNameKey] : "")?.trim() ?? "",
+    }));
+
+    return {
+        rows,
+        error: null,
+    };
+}
+
 interface WeddingContext {
     id: string;
     groom_name: string | null;
     bride_name: string | null;
     slug: string | null;
+    plan?: string | null;
+    addons?: string[] | null;
 }
 
 interface SeatingManagementProps {
     wedding: WeddingContext;
+    locale: string;
     initialGuests: GuestWithTable[];
     initialTables: TableWithSeats[];
     initialVenueElements: VenueElement[];
+    rsvpTrend: RsvpTrendPoint[];
 }
 
 type Tab = "guests" | "tables" | "designer";
 
+/*
+ * Builds a guest's personal link
+ * (/{locale}/{slug}/g/{guest_token}), matching the share-URL pattern
+ * QrCodeCard uses for the wedding's own invitation link.
+ */
+function buildGuestPersonalLink(
+    locale: string,
+    slug: string,
+    guestToken: string,
+) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "";
+
+    return `${appUrl}/${locale}/${slug}/g/${guestToken}`;
+}
+
 export function SeatingManagement({
                                       wedding,
+                                      locale,
                                       initialGuests,
                                       initialTables,
                                       initialVenueElements,
+                                      rsvpTrend,
                                   }: SeatingManagementProps) {
+    "use no memo";
+
     const router = useRouter();
 
     const t = useTranslations("seating");
@@ -102,6 +281,19 @@ export function SeatingManagement({
     const td = useTranslations("dashboard");
 
     const tc = useTranslations("common");
+
+    /*
+     * UI-level gating only -- purely cosmetic (hides a button/tab this
+     * wedding's plan doesn't include). The actual enforcement is
+     * server-side: getGuestByToken()/submitGuestRsvpByTokenAction() in
+     * actions/seating.ts + actions/rsvp.ts re-check this same
+     * entitlement independently, and addTable()/createVenueElement()
+     * re-check tableArrangement independently, so a disallowed action
+     * is rejected on the backend even if this hidden button were somehow
+     * still triggered.
+     */
+    const entitlements = getWeddingEntitlements(wedding.plan, wedding.addons);
+
     const [isPending, startTransition] = useTransition();
 
     const [activeTab, setActiveTab] = useState<Tab>("guests");
@@ -130,6 +322,10 @@ export function SeatingManagement({
     } | null>(null);
 
     const [rsvpUpdatingId, setRsvpUpdatingId] = useState<string | null>(null);
+
+    const [isImportingCsv, setIsImportingCsv] = useState(false);
+
+    const csvFileInputRef = useRef<HTMLInputElement>(null);
 
     /*
      * Optimistic RSVP override, keyed by guest id.
@@ -182,9 +378,18 @@ export function SeatingManagement({
 
     /*
      * Search
+     *
+     * The input itself stays bound to `searchQuery` so every
+     * keystroke is reflected instantly, but the expensive part
+     * -- filtering the (potentially large) guest array and
+     * re-rendering the whole list -- only runs against
+     * `debouncedSearchQuery`, which settles 200ms after typing
+     * stops instead of on every single keystroke.
      */
+    const debouncedSearchQuery = useDebouncedValue(searchQuery, 200);
+
     const filteredGuests = useMemo(() => {
-        const query = searchQuery.trim().toLowerCase();
+        const query = debouncedSearchQuery.trim().toLowerCase();
 
         if (!query) {
             return initialGuests;
@@ -193,7 +398,28 @@ export function SeatingManagement({
         return initialGuests.filter((guest) =>
             `${guest.first_name} ${guest.last_name}`.toLowerCase().includes(query),
         );
-    }, [initialGuests, searchQuery]);
+    }, [initialGuests, debouncedSearchQuery]);
+
+    /*
+     * Virtualized guest list.
+     *
+     * The list previously rendered every filtered guest's full
+     * row markup (avatar, RSVP badge, edit/delete buttons) on
+     * every render, unbounded -- fine for a handful of guests,
+     * but a wedding with hundreds of guests re-rendered hundreds
+     * of DOM rows on every keystroke and RSVP update. Only the
+     * rows actually scrolled into view (plus a small overscan
+     * buffer) are mounted now; the container gets a bounded
+     * height so this list scrolls independently of the page.
+     */
+    const guestListParentRef = useRef<HTMLDivElement>(null);
+
+    const guestRowVirtualizer = useVirtualizer({
+        count: filteredGuests.length,
+        getScrollElement: () => guestListParentRef.current,
+        estimateSize: () => 80,
+        overscan: 8,
+    });
 
     /*
      * Guest statistics
@@ -209,6 +435,35 @@ export function SeatingManagement({
             total,
             seated,
             unseated: total - seated,
+        };
+    }, [initialGuests]);
+
+    /*
+     * RSVP statistics
+     *
+     * Reuses the already-fetched `initialGuests` prop -- no extra
+     * query needed for the stat row above the trend chart.
+     */
+    const rsvpStats = useMemo(() => {
+        let confirmed = 0;
+        let declined = 0;
+        let pending = 0;
+
+        for (const guest of initialGuests) {
+            if (guest.rsvp_status === "confirmed") {
+                confirmed += 1;
+            } else if (guest.rsvp_status === "declined") {
+                declined += 1;
+            } else {
+                pending += 1;
+            }
+        }
+
+        return {
+            total: initialGuests.length,
+            confirmed,
+            declined,
+            pending,
         };
     }, [initialGuests]);
 
@@ -360,8 +615,122 @@ export function SeatingManagement({
         }
     };
 
+    const handleCopyPersonalLink = async (guest: GuestWithTable) => {
+        if (!wedding.slug) {
+            return;
+        }
+
+        const link = buildGuestPersonalLink(
+            locale,
+            wedding.slug,
+            guest.guest_token,
+        );
+
+        try {
+            await navigator.clipboard.writeText(link);
+
+            toast.success(t("personalLinkCopied"));
+        } catch (error) {
+            console.error("Copy personal link error:", error);
+
+            toast.error(t("personalLinkCopyFailed"));
+        }
+    };
+
     const handlePrint = () => {
         window.print();
+    };
+
+    const handleExportCsv = () => {
+        if (initialGuests.length === 0) {
+            toast.error(t("csvImport.exportEmpty"));
+            return;
+        }
+
+        const csv = buildGuestsCsv(initialGuests, [
+            t("firstName"),
+            t("lastName"),
+            t("csvImport.rsvpStatusColumn"),
+            t("csvImport.partySizeColumn"),
+            t("csvImport.tableColumn"),
+        ]);
+
+        const filename = `${wedding.slug ?? "guests"}-guest-list.csv`;
+
+        downloadTextFile(filename, csv, "text/csv;charset=utf-8;");
+
+        toast.success(t("csvImport.exportSuccess"));
+    };
+
+    const openCsvFilePicker = () => {
+        csvFileInputRef.current?.click();
+    };
+
+    const handleCsvFileSelected = async (
+        event: ChangeEvent<HTMLInputElement>,
+    ) => {
+        const file = event.target.files?.[0];
+
+        /*
+         * Reset the input immediately so selecting the same
+         * file twice in a row still fires onChange.
+         */
+        event.target.value = "";
+
+        if (!file) {
+            return;
+        }
+
+        setIsImportingCsv(true);
+
+        try {
+            const text = await file.text();
+
+            if (!text.trim()) {
+                toast.error(t("csvImport.emptyFile"));
+                return;
+            }
+
+            const { rows, error: parseError } = parseGuestsCsv(text);
+
+            if (parseError === "empty") {
+                toast.error(t("csvImport.emptyFile"));
+                return;
+            }
+
+            if (parseError === "noNameColumns") {
+                toast.error(t("csvImport.noNameColumns"));
+                return;
+            }
+
+            if (rows.length === 0) {
+                toast.error(t("csvImport.emptyFile"));
+                return;
+            }
+
+            const result = await bulkImportGuestsAction(wedding.id, rows);
+
+            if (result.imported > 0) {
+                toast.success(
+                    t("csvImport.importSuccess", {
+                        imported: result.imported,
+                        skipped: result.skipped,
+                    }),
+                );
+
+                startTransition(() => {
+                    router.refresh();
+                });
+            } else {
+                toast.error(t("csvImport.importNothingImported"));
+            }
+        } catch (error) {
+            console.error("CSV import error:", error);
+
+            toast.error(t("csvImport.importFailed"));
+        } finally {
+            setIsImportingCsv(false);
+        }
     };
 
     const openNewGuest = () => {
@@ -472,19 +841,23 @@ export function SeatingManagement({
                             label={t("guests")}
                         />
 
-                        <TabButton
-                            active={activeTab === "tables"}
-                            onClick={() => setActiveTab("tables")}
-                            icon={<LayoutGrid className="h-3.5 w-3.5" />}
-                            label={t("tables")}
-                        />
+                        {entitlements.tableArrangement && (
+                            <>
+                                <TabButton
+                                    active={activeTab === "tables"}
+                                    onClick={() => setActiveTab("tables")}
+                                    icon={<LayoutGrid className="h-3.5 w-3.5" />}
+                                    label={t("tables")}
+                                />
 
-                        <TabButton
-                            active={activeTab === "designer"}
-                            onClick={() => setActiveTab("designer")}
-                            icon={<MapIcon className="h-3.5 w-3.5" />}
-                            label={t("designerLabel")}
-                        />
+                                <TabButton
+                                    active={activeTab === "designer"}
+                                    onClick={() => setActiveTab("designer")}
+                                    icon={<MapIcon className="h-3.5 w-3.5" />}
+                                    label={t("designerLabel")}
+                                />
+                            </>
+                        )}
                     </section>
 
                     {/* ==================================
@@ -507,6 +880,11 @@ export function SeatingManagement({
                                 <StatCard value={initialTables.length} label={t("tables")} />
                             </div>
 
+                            {/* RSVP trend */}
+                            <div className="mb-6">
+                                <RsvpTrendChart data={rsvpTrend} stats={rsvpStats} />
+                            </div>
+
                             {/* Toolbar */}
                             <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                                 <div className="relative w-full sm:max-w-sm">
@@ -524,113 +902,191 @@ export function SeatingManagement({
                                     />
                                 </div>
 
-                                <button
-                                    type="button"
-                                    onClick={openNewGuest}
-                                    className="btn-primary justify-center"
-                                >
-                                    <Plus className="h-4 w-4" />
+                                <div className="flex flex-wrap gap-2">
+                                    <input
+                                        ref={csvFileInputRef}
+                                        type="file"
+                                        accept=".csv,text/csv"
+                                        className="hidden"
+                                        onChange={handleCsvFileSelected}
+                                    />
 
-                                    {t("addGuest")}
-                                </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleExportCsv}
+                                        className="btn-secondary justify-center"
+                                    >
+                                        <Download className="h-4 w-4" />
+
+                                        {t("csvImport.exportButton")}
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        disabled={isImportingCsv}
+                                        onClick={openCsvFilePicker}
+                                        className="btn-secondary justify-center disabled:opacity-50"
+                                    >
+                                        {isImportingCsv ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <Upload className="h-4 w-4" />
+                                        )}
+
+                                        {t("csvImport.importButton")}
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={openNewGuest}
+                                        className="btn-primary justify-center"
+                                    >
+                                        <Plus className="h-4 w-4" />
+
+                                        {t("addGuest")}
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Guest list */}
                             <div className="overflow-hidden rounded-[2rem] border border-border/70 bg-card/80 shadow-sm backdrop-blur">
                                 {filteredGuests.length > 0 ? (
-                                    <div className="divide-y divide-border/60">
-                                        {filteredGuests.map((guest) => {
-                                            const initials =
-                                                guest.initials ||
-                                                `${guest.first_name?.[0] ?? ""}${guest.last_name?.[0] ?? ""}`.toUpperCase();
+                                    <div
+                                        ref={guestListParentRef}
+                                        className="max-h-[68vh] overflow-y-auto"
+                                    >
+                                        <div
+                                            style={{
+                                                height: `${guestRowVirtualizer.getTotalSize()}px`,
+                                                position: "relative",
+                                            }}
+                                        >
+                                            {guestRowVirtualizer
+                                                .getVirtualItems()
+                                                .map((virtualRow) => {
+                                                    const guest = filteredGuests[virtualRow.index];
 
-                                            const displayRsvpStatus =
-                                                optimisticRsvp[guest.id] ?? guest.rsvp_status;
+                                                    const initials =
+                                                        guest.initials ||
+                                                        `${guest.first_name?.[0] ?? ""}${guest.last_name?.[0] ?? ""}`.toUpperCase();
 
-                                            return (
-                                                <div
-                                                    key={guest.id}
-                                                    className="group flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-secondary/20 sm:px-6"
-                                                >
-                                                    <div className="flex min-w-0 items-center gap-4">
-                                                        <GuestAvatar initials={initials} />
+                                                    const displayRsvpStatus =
+                                                        optimisticRsvp[guest.id] ?? guest.rsvp_status;
 
-                                                        <div className="min-w-0">
-                                                            <p className="truncate text-sm font-medium text-foreground">
-                                                                {guest.first_name} {guest.last_name}
-                                                            </p>
+                                                    return (
+                                                        <div
+                                                            key={guest.id}
+                                                            data-index={virtualRow.index}
+                                                            ref={guestRowVirtualizer.measureElement}
+                                                            style={{
+                                                                position: "absolute",
+                                                                top: 0,
+                                                                left: 0,
+                                                                width: "100%",
+                                                                transform: `translateY(${virtualRow.start}px)`,
+                                                            }}
+                                                            className={cn(
+                                                                "group flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-secondary/20 sm:px-6",
+                                                                virtualRow.index !==
+                                                                filteredGuests.length - 1 &&
+                                                                "border-b border-border/60",
+                                                            )}
+                                                        >
+                                                            <div className="flex min-w-0 items-center gap-4">
+                                                                <GuestAvatar initials={initials} />
 
-                                                            <div className="mt-1 flex items-center gap-2">
-                                <span
-                                    className={cn(
-                                        "h-1.5 w-1.5 rounded-full",
-                                        guest.tables
-                                            ? "bg-[hsl(var(--primary))]"
-                                            : "bg-muted-foreground/35",
-                                    )}
-                                />
+                                                                <div className="min-w-0">
+                                                                    <p className="truncate text-sm font-medium text-foreground">
+                                                                        {guest.first_name} {guest.last_name}
+                                                                    </p>
 
-                                                                <p className="text-xs text-muted-foreground">
-                                                                    {guest.tables
-                                                                        ? t("tableNumber", {
-                                                                            number: guest.tables.number,
+                                                                    <div className="mt-1 flex items-center gap-2">
+                                    <span
+                                        className={cn(
+                                            "h-1.5 w-1.5 rounded-full",
+                                            guest.tables
+                                                ? "bg-[hsl(var(--primary))]"
+                                                : "bg-muted-foreground/35",
+                                        )}
+                                    />
+
+                                                                        <p className="text-xs text-muted-foreground">
+                                                                            {guest.tables
+                                                                                ? t("tableNumber", {
+                                                                                    number: guest.tables.number,
+                                                                                })
+                                                                                : t("unseated")}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex shrink-0 items-center gap-2">
+                                                                <button
+                                                                    type="button"
+                                                                    disabled={rsvpUpdatingId === guest.id}
+                                                                    onClick={() => void handleRsvpCycle(guest)}
+                                                                    title={t("rsvpCycleHint")}
+                                                                    className={cn(
+                                                                        "flex h-7 items-center gap-1 rounded-full border px-2.5 text-[11px] font-medium capitalize transition-colors disabled:opacity-50",
+                                                                        displayRsvpStatus === "confirmed" &&
+                                                                        "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+                                                                        displayRsvpStatus === "declined" &&
+                                                                        "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100",
+                                                                        displayRsvpStatus === "pending" &&
+                                                                        "border-border/70 bg-secondary/40 text-muted-foreground hover:bg-secondary",
+                                                                    )}
+                                                                >
+                                                                    {rsvpUpdatingId === guest.id ? (
+                                                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                                                    ) : (
+                                                                        t(`rsvpStatus.${displayRsvpStatus}`)
+                                                                    )}
+                                                                </button>
+
+                                                                {entitlements.personalGuestLinks && (
+                                                                    <button
+                                                                        type="button"
+                                                                        disabled={!wedding.slug}
+                                                                        onClick={() =>
+                                                                            void handleCopyPersonalLink(guest)
+                                                                        }
+                                                                        aria-label={t("copyPersonalLink")}
+                                                                        title={t("copyPersonalLink")}
+                                                                        className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-50"
+                                                                    >
+                                                                        <Link2 className="h-3.5 w-3.5" />
+                                                                    </button>
+                                                                )}
+
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => openGuest(guest)}
+                                                                    aria-label={t("editGuest")}
+                                                                    className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                                                                >
+                                                                    <Edit2 className="h-3.5 w-3.5" />
+                                                                </button>
+
+                                                                <button
+                                                                    type="button"
+                                                                    disabled={isPending}
+                                                                    onClick={() =>
+                                                                        setGuestToDelete({
+                                                                            id: guest.id,
+                                                                            name: `${guest.first_name} ${guest.last_name}`.trim(),
                                                                         })
-                                                                        : t("unseated")}
-                                                                </p>
+                                                                    }
+                                                                    aria-label={t("delete")}
+                                                                    className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive disabled:opacity-50"
+                                                                >
+                                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                                </button>
                                                             </div>
                                                         </div>
-                                                    </div>
-
-                                                    <div className="flex shrink-0 items-center gap-2">
-                                                        <button
-                                                            type="button"
-                                                            disabled={rsvpUpdatingId === guest.id}
-                                                            onClick={() => void handleRsvpCycle(guest)}
-                                                            title={t("rsvpCycleHint")}
-                                                            className={cn(
-                                                                "flex h-7 items-center gap-1 rounded-full border px-2.5 text-[11px] font-medium capitalize transition-colors disabled:opacity-50",
-                                                                displayRsvpStatus === "confirmed" &&
-                                                                "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
-                                                                displayRsvpStatus === "declined" &&
-                                                                "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100",
-                                                                displayRsvpStatus === "pending" &&
-                                                                "border-border/70 bg-secondary/40 text-muted-foreground hover:bg-secondary",
-                                                            )}
-                                                        >
-                                                            {rsvpUpdatingId === guest.id ? (
-                                                                <Loader2 className="h-3 w-3 animate-spin" />
-                                                            ) : (
-                                                                t(`rsvpStatus.${displayRsvpStatus}`)
-                                                            )}
-                                                        </button>
-
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => openGuest(guest)}
-                                                            aria-label={t("editGuest")}
-                                                            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                                                        >
-                                                            <Edit2 className="h-3.5 w-3.5" />
-                                                        </button>
-
-                                                        <button
-                                                            type="button"
-                                                            disabled={isPending}
-                                                            onClick={() =>
-                                                                setGuestToDelete({
-                                                                    id: guest.id,
-                                                                    name: `${guest.first_name} ${guest.last_name}`.trim(),
-                                                                })
-                                                            }
-                                                            aria-label={t("delete")}
-                                                            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/[0.08] hover:text-destructive disabled:opacity-50"
-                                                        >
-                                                            <Trash2 className="h-3.5 w-3.5" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
+                                                    );
+                                                })}
+                                        </div>
                                     </div>
                                 ) : (
                                     <EmptyState icon={Search} title={t("noGuests")} />

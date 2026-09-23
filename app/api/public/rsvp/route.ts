@@ -1,9 +1,18 @@
-import {NextResponse} from "next/server";
-import {revalidateTag} from "next/cache";
+import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 
-import {enforceRsvpRateLimit, resolveRsvpApiActor, RsvpApiError,} from "@/lib/rsvp-auth";
-import {normalizeGuestName} from "@/lib/utils";
-import {rsvpLookupSchema, rsvpUpdateSchema} from "@/schemas";
+import {
+    enforceRsvpRateLimit,
+    resolveRsvpApiActor,
+    RsvpApiError,
+} from "@/lib/rsvp-auth";
+import { normalizeGuestName } from "@/lib/utils";
+import { rsvpLookupSchema, rsvpUpdateSchema } from "@/schemas";
+import {
+    getWeddingNotificationEmails,
+    rsvpNotificationEmail,
+    sendEmail,
+} from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
@@ -37,19 +46,19 @@ function jsonError(
     status: number,
     code: string,
     message: string,
-    retryAfterSeconds?: number
+    retryAfterSeconds?: number,
 ) {
     return NextResponse.json(
-        {error: message, code},
+        { error: message, code },
         {
             status,
             headers: {
                 "Cache-Control": "no-store",
                 ...(retryAfterSeconds
-                    ? {"Retry-After": String(retryAfterSeconds)}
+                    ? { "Retry-After": String(retryAfterSeconds) }
                     : {}),
             },
-        }
+        },
     );
 }
 
@@ -59,7 +68,7 @@ function handleError(error: unknown) {
             error.status,
             error.code,
             error.message,
-            error.retryAfterSeconds
+            error.retryAfterSeconds,
         );
     }
 
@@ -79,16 +88,16 @@ async function findGuestByName(
     service: Awaited<ReturnType<typeof resolveRsvpApiActor>>["service"],
     weddingId: string,
     firstName: string,
-    lastName: string
+    lastName: string,
 ): Promise<
     | { status: "found"; guest: GuestRow }
     | { status: "not_found" }
     | { status: "ambiguous"; count: number }
 > {
-    const {data, error} = await service
+    const { data, error } = await service
         .from("guests")
         .select(
-            "id, first_name, last_name, rsvp_status, rsvp_party_size, rsvp_note, rsvp_responded_at"
+            "id, first_name, last_name, rsvp_status, rsvp_party_size, rsvp_note, rsvp_responded_at",
         )
         .eq("wedding_id", weddingId);
 
@@ -102,18 +111,69 @@ async function findGuestByName(
 
     const matches = (data ?? []).filter(
         (guest) =>
-            normalizeGuestName(`${guest.first_name} ${guest.last_name}`) === target
+            normalizeGuestName(`${guest.first_name} ${guest.last_name}`) === target,
     );
 
     if (matches.length === 0) {
-        return {status: "not_found"};
+        return { status: "not_found" };
     }
 
     if (matches.length > 1) {
-        return {status: "ambiguous", count: matches.length};
+        return { status: "ambiguous", count: matches.length };
     }
 
-    return {status: "found", guest: matches[0] as GuestRow};
+    return { status: "found", guest: matches[0] as GuestRow };
+}
+
+/*
+ * Notifies the couple that a guest RSVP'd via the external API. Fired
+ * only from this guest/integration-facing endpoint -- never from an
+ * admin-triggered change. Awaited (not fire-and-forget): Route Handlers
+ * run in a serverless request/response lifecycle, so anything not
+ * awaited before the response is sent risks being cut off; sendEmail()
+ * itself is fast and never throws, so awaiting it here costs little.
+ */
+async function notifyCoupleOfApiRsvp(
+    service: Awaited<ReturnType<typeof resolveRsvpApiActor>>["service"],
+    weddingId: string,
+    guestName: string,
+    status: "pending" | "confirmed" | "declined",
+    partySize: number | null | undefined,
+): Promise<void> {
+    try {
+        const { data: wedding, error } = await service
+            .from("weddings")
+            .select("groom_name, bride_name, groom_email, bride_email")
+            .eq("id", weddingId)
+            .maybeSingle();
+
+        if (error || !wedding) {
+            console.error("RSVP notification wedding lookup failed:", error);
+
+            return;
+        }
+
+        const recipients = getWeddingNotificationEmails(wedding);
+
+        if (recipients.length === 0) {
+            return;
+        }
+
+        const weddingName = [wedding.groom_name, wedding.bride_name]
+            .filter(Boolean)
+            .join(" & ");
+
+        const { subject, html } = rsvpNotificationEmail({
+            weddingName: weddingName || "your wedding",
+            guestName,
+            status,
+            partySize,
+        });
+
+        await sendEmail({ to: recipients, subject, html });
+    } catch (error) {
+        console.error("RSVP notification failed:", error);
+    }
 }
 
 /*
@@ -124,7 +184,7 @@ async function findGuestByName(
  */
 export async function GET(request: Request) {
     try {
-        const {searchParams} = new URL(request.url);
+        const { searchParams } = new URL(request.url);
 
         const parsed = rsvpLookupSchema.safeParse({
             weddingSlug: searchParams.get("weddingSlug"),
@@ -136,7 +196,7 @@ export async function GET(request: Request) {
             return jsonError(
                 400,
                 "VALIDATION_ERROR",
-                parsed.error.issues[0]?.message ?? "Invalid input"
+                parsed.error.issues[0]?.message ?? "Invalid input",
             );
         }
 
@@ -147,14 +207,14 @@ export async function GET(request: Request) {
             actor.wedding.id,
             actor.apiKeyHash,
             READ_RATE_LIMIT,
-            RATE_WINDOW_SECONDS
+            RATE_WINDOW_SECONDS,
         );
 
         const result = await findGuestByName(
             actor.service,
             actor.wedding.id,
             parsed.data.firstName,
-            parsed.data.lastName
+            parsed.data.lastName,
         );
 
         if (result.status === "not_found") {
@@ -165,13 +225,13 @@ export async function GET(request: Request) {
             return jsonError(
                 409,
                 "AMBIGUOUS_GUEST",
-                `${result.count} guests share that name; ask the couple to disambiguate`
+                `${result.count} guests share that name; ask the couple to disambiguate`,
             );
         }
 
         return NextResponse.json(
-            {guest: serializeGuest(result.guest)},
-            {headers: {"Cache-Control": "no-store"}}
+            { guest: serializeGuest(result.guest) },
+            { headers: { "Cache-Control": "no-store" } },
         );
     } catch (error) {
         return handleError(error);
@@ -206,7 +266,7 @@ export async function POST(request: Request) {
             return jsonError(
                 400,
                 "VALIDATION_ERROR",
-                parsed.error.issues[0]?.message ?? "Invalid input"
+                parsed.error.issues[0]?.message ?? "Invalid input",
             );
         }
 
@@ -217,14 +277,14 @@ export async function POST(request: Request) {
             actor.wedding.id,
             actor.apiKeyHash,
             WRITE_RATE_LIMIT,
-            RATE_WINDOW_SECONDS
+            RATE_WINDOW_SECONDS,
         );
 
         const result = await findGuestByName(
             actor.service,
             actor.wedding.id,
             parsed.data.firstName,
-            parsed.data.lastName
+            parsed.data.lastName,
         );
 
         if (result.status === "not_found") {
@@ -235,11 +295,11 @@ export async function POST(request: Request) {
             return jsonError(
                 409,
                 "AMBIGUOUS_GUEST",
-                `${result.count} guests share that name; ask the couple to disambiguate`
+                `${result.count} guests share that name; ask the couple to disambiguate`,
             );
         }
 
-        const {data: updated, error: updateError} = await actor.service
+        const { data: updated, error: updateError } = await actor.service
             .from("guests")
             .update({
                 rsvp_status: parsed.data.status,
@@ -252,7 +312,7 @@ export async function POST(request: Request) {
             .eq("id", result.guest.id)
             .eq("wedding_id", actor.wedding.id)
             .select(
-                "id, first_name, last_name, rsvp_status, rsvp_party_size, rsvp_note, rsvp_responded_at"
+                "id, first_name, last_name, rsvp_status, rsvp_party_size, rsvp_note, rsvp_responded_at",
             )
             .maybeSingle();
 
@@ -268,9 +328,17 @@ export async function POST(request: Request) {
             console.error("RSVP cache revalidation failed:", error);
         }
 
+        await notifyCoupleOfApiRsvp(
+            actor.service,
+            actor.wedding.id,
+            `${result.guest.first_name} ${result.guest.last_name}`,
+            parsed.data.status,
+            parsed.data.partySize,
+        );
+
         return NextResponse.json(
-            {guest: serializeGuest(updated as GuestRow)},
-            {headers: {"Cache-Control": "no-store"}}
+            { guest: serializeGuest(updated as GuestRow) },
+            { headers: { "Cache-Control": "no-store" } },
         );
     } catch (error) {
         return handleError(error);

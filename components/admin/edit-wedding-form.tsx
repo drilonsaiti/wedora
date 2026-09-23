@@ -8,11 +8,13 @@ import {
     CalendarDays,
     Check,
     Copy,
+    CreditCard,
     ImageUp,
     KeyRound,
     Loader2,
     Mail,
     MapPin,
+    Package,
     Palette,
     Save,
     Settings2,
@@ -20,15 +22,20 @@ import {
     Users,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useForm } from "react-hook-form";
+import {useForm, useWatch} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { updateWedding } from "@/actions/wedding";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { Link } from "@/lib/navigation";
 import { generateWeddingTheme } from "@/lib/theme";
+import { ADDON_IDS, PLAN_IDS, type AddonId, type PlanId } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 import { editWeddingSchema, type EditWeddingInput } from "@/schemas";
+
+function isPlanId(value: string | null | undefined): value is PlanId {
+    return !!value && (PLAN_IDS as readonly string[]).includes(value);
+}
 
 interface WeddingSettings {
     theme_color?: string | null;
@@ -45,6 +52,8 @@ export interface Wedding {
     bride_email?: string | null;
     wedding_date: string | null;
     slug: string | null;
+    plan?: string | null;
+    addons?: string[] | null;
 
     wedding_settings: WeddingSettings | WeddingSettings[] | null;
 }
@@ -127,7 +136,7 @@ export function EditWeddingForm({
     const {
         register,
         handleSubmit,
-        watch,
+        control,
         setValue,
         formState: { errors, isSubmitting },
     } = useForm<EditWeddingInput>({
@@ -151,16 +160,42 @@ export function EditWeddingForm({
             enable_photo_upload: settings.enable_photo_upload ?? true,
 
             auto_approve_uploads: settings.auto_approve_uploads ?? false,
+
+            plan: isPlanId(wedding.plan) ? wedding.plan : "basic",
+
+            addons: (wedding.addons as AddonId[] | null | undefined) ?? [],
         },
     });
 
-    const themeHue = watch("theme_hue");
-
-    const groomName = watch("groom_name");
-
-    const brideName = watch("bride_name");
+    const [
+        themeHue,
+        groomName,
+        brideName,
+        selectedPlan,
+        selectedAddons = [],
+    ] = useWatch({
+        control,
+        name: [
+            "theme_hue",
+            "groom_name",
+            "bride_name",
+            "plan",
+            "addons",
+        ],
+    });
 
     const previewTheme = generateWeddingTheme(themeHue);
+
+
+    const toggleAddon = (addon: AddonId) => {
+        setValue(
+            "addons",
+            selectedAddons.includes(addon)
+                ? selectedAddons.filter((a) => a !== addon)
+                : [...selectedAddons, addon],
+            { shouldValidate: true },
+        );
+    };
 
     /*
      * Reset visual "saved" status.
@@ -433,6 +468,77 @@ export function EditWeddingForm({
                                 }}
                             />
                         </div>
+                    </div>
+                </SettingsSection>
+
+                {/* =====================================
+                    PLAN
+                ===================================== */}
+                <SettingsSection
+                    icon={CreditCard}
+                    title={tw("plan.sectionTitle")}
+                    modal={modal}
+                >
+                    <p className="mb-3 text-xs leading-5 text-muted-foreground">
+                        {tw("plan.sectionDescription")}
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                        {PLAN_IDS.map((planId: PlanId) => (
+                            <label
+                                key={planId}
+                                className={cn(
+                                    "cursor-pointer rounded-2xl border p-3 text-center transition-colors",
+                                    selectedPlan === planId
+                                        ? "border-[hsl(var(--primary))] bg-[hsl(var(--accent))]"
+                                        : "border-border/60 bg-background hover:bg-secondary/30",
+                                )}
+                            >
+                                <input
+                                    type="radio"
+                                    value={planId}
+                                    className="sr-only"
+                                    {...register("plan")}
+                                />
+
+                                <span className="text-xs font-medium text-foreground">
+                  {tw(`plan.${planId}`)}
+                </span>
+                            </label>
+                        ))}
+                    </div>
+                </SettingsSection>
+
+                {/* =====================================
+                    ADD-ONS
+                ===================================== */}
+                <SettingsSection
+                    icon={Package}
+                    title={tw("addons.sectionTitle")}
+                    modal={modal}
+                >
+                    <p className="mb-3 text-xs leading-5 text-muted-foreground">
+                        {tw("addons.sectionDescription")}
+                    </p>
+
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {ADDON_IDS.map((addonId: AddonId) => (
+                            <label
+                                key={addonId}
+                                className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-border/60 bg-background p-3 transition-colors hover:bg-secondary/30"
+                            >
+                <span className="text-xs font-medium text-foreground">
+                  {tw(`addons.${addonId}`)}
+                </span>
+
+                                <input
+                                    type="checkbox"
+                                    checked={selectedAddons.includes(addonId)}
+                                    onChange={() => toggleAddon(addonId)}
+                                    className="h-4 w-4 shrink-0 accent-[hsl(var(--primary))]"
+                                />
+                            </label>
+                        ))}
                     </div>
                 </SettingsSection>
 

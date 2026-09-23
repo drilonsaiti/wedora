@@ -268,6 +268,7 @@
     "guests": "Guests",
     "tables": "Tables",
     "photos": "Photos",
+    "rsvpApi": "RSVP API",
     "designerLabel": "Designer",
     "searchGuests": "Search guests...",
     "addGuest": "Add Guest",
@@ -289,7 +290,6 @@
     "deleteTableFailed": "Failed to delete table",
     "rsvpCycleHint": "Click to cycle RSVP status: pending -> confirmed -> declined",
     "rsvpUpdateFailed": "Failed to update RSVP",
-    "rsvpApi": "RSVP API",
     "rsvpStatus": {
       "pending": "Pending",
       "confirmed": "Confirmed",
@@ -425,7 +425,24 @@
         "teal": "Teal",
         "pink": "Pink"
       }
-    }
+    },
+    "csvImport": {
+      "exportButton": "Export CSV",
+      "importButton": "Import CSV",
+      "exportSuccess": "Guest list exported",
+      "exportEmpty": "There are no guests to export yet",
+      "rsvpStatusColumn": "RSVP Status",
+      "partySizeColumn": "Party Size",
+      "tableColumn": "Table",
+      "emptyFile": "That file is empty",
+      "noNameColumns": "Could not find first name / last name columns in that CSV",
+      "importSuccess": "Imported {imported} guests, skipped {skipped}",
+      "importNothingImported": "No guests were imported from that file",
+      "importFailed": "Failed to import guests from that file"
+    },
+    "copyPersonalLink": "Copy personal link",
+    "personalLinkCopied": "Personal link copied to clipboard",
+    "personalLinkCopyFailed": "Failed to copy link"
   },
   "weddings": {
     "title": "Weddings",
@@ -502,6 +519,27 @@
         "updated": "Wedding updated",
         "deleted": "Wedding deleted"
       }
+    },
+    "plan": {
+      "sectionTitle": "Plan",
+      "sectionDescription": "Which pricing tier was this wedding actually sold on? This decides which features are available to the couple -- see the pricing page for what each tier includes.",
+      "basic": "Basic",
+      "premium": "Premium",
+      "unlimited": "Unlimited",
+      "custom": "Custom Design"
+    },
+    "addons": {
+      "sectionTitle": "Add-ons",
+      "sectionDescription": "Extra features purchased on top of the plan above.",
+      "tableArrangement": "Table arrangement designer",
+      "photoGallery": "Photo gallery",
+      "guestLimit": "Higher guest limit",
+      "multilingual": "Multilingual invitation",
+      "extendedStorage": "Extended storage",
+      "bulkPhotoExport": "Bulk photo export",
+      "rsvpApiAccess": "RSVP API access",
+      "qrCode": "QR code",
+      "personalGuestLinks": "Personal guest links"
     }
   },
   "status": {
@@ -743,6 +781,14 @@
         "extendedStorage": {
           "name": "Extended storage",
           "description": "Keep everything online for 1 year after the wedding"
+        },
+        "bulkPhotoExport": {
+          "name": "Bulk photo download",
+          "description": "Download every photo as one ZIP file, ready anytime"
+        },
+        "rsvpApiAccess": {
+          "name": "RSVP API access",
+          "description": "Connect your own website or developer tools to live RSVP data via API"
         }
       }
     }
@@ -1017,5 +1063,51 @@
     "neverUsed": "never used",
     "lastUsed": "last used {date}",
     "revokeKeyAriaLabel": "Revoke API key"
+  },
+  "qrCodeCard": {
+    "title": "QR code for sharing",
+    "description": "Scan it or print it to send guests straight to the invitation page.",
+    "downloadPng": "Download PNG",
+    "print": "Print"
+  },
+  "rsvpTrend": {
+    "title": "RSVP trend",
+    "description": "Cumulative responses over time, from when each guest replied.",
+    "totalInvited": "Invited",
+    "confirmed": "Confirmed",
+    "declined": "Declined",
+    "pending": "Pending",
+    "confirmedSeries": "Confirmed",
+    "declinedSeries": "Declined",
+    "emptyState": "No RSVPs yet. Responses will appear here once guests start replying."
+  },
+  "guestLink": {
+    "title": "Your Invitation",
+    "weddingOf": "The wedding of {bride} & {groom}",
+    "yourTable": "Your table",
+    "seat": "Seat",
+    "noTable": "Not assigned to a table yet",
+    "noTableDescription": "The couple hasn't assigned you a table yet. Check back later.",
+    "venueMap": "Venue map",
+    "venueMapDescription": "Find your table on the map below.",
+    "invalidTitle": "This link isn't valid",
+    "invalidDescription": "It may have expired, been mistyped, or the couple may have turned off public guest access. Please ask the couple for a new link.",
+    "backHome": "Back to the wedding page",
+    "rsvpTitle": "Your RSVP",
+    "rsvpDescription": "Let the couple know if you can make it.",
+    "rsvpStatus": {
+      "pending": "Not responded yet",
+      "confirmed": "I'll be there",
+      "declined": "I can't make it"
+    },
+    "partySizeLabel": "Number of guests (including you)",
+    "partySizePlaceholder": "e.g. 2",
+    "noteLabel": "Note for the couple (optional)",
+    "notePlaceholder": "Dietary restrictions, song requests...",
+    "submit": "Save my RSVP",
+    "submitting": "Saving...",
+    "submitSuccess": "Your RSVP has been saved",
+    "submitError": "Failed to save your RSVP. Please try again.",
+    "lastResponded": "Last updated {date}"
   }
 }

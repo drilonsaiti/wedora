@@ -1,6 +1,6 @@
 "use client";
 
-import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import {type KeyboardEvent, useEffect, useRef, useState, useSyncExternalStore} from "react";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Armchair, MapPin, X } from "lucide-react";
@@ -17,6 +17,8 @@ interface GuestResultModalProps {
     venueElements: VenueElement[];
 }
 
+const emptySubscribe = () => () => {};
+
 export function GuestResultModal({
                                      guest,
                                      onClose,
@@ -27,7 +29,11 @@ export function GuestResultModal({
 
     const prefersReducedMotion = useReducedMotion();
 
-    const [mounted, setMounted] = useState(false);
+    const mounted = useSyncExternalStore(
+        emptySubscribe,
+        () => true,
+        () => false,
+    );
 
     const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -35,12 +41,6 @@ export function GuestResultModal({
 
     const previousActiveElement = useRef<HTMLElement | null>(null);
 
-    /*
-     * Portal can only render after mount.
-     */
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     /*
      * Lock body scroll, capture and restore

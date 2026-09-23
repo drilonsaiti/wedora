@@ -419,6 +419,7 @@ export function GallerySlideshow({
                     <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center px-3 pb-28 sm:px-14 sm:pb-32">
                         <div className="relative h-full w-full">
                             <GalleryViewerImage
+                                key={currentPhoto.id}
                                 photo={currentPhoto}
                                 alt={currentPhoto.guest_name ?? t("weddingPhoto")}
                                 unavailableTitle={t("imageUnavailable.title")}
@@ -663,12 +664,6 @@ function GalleryViewerImage({
     const [imageSource, setImageSource] =
         useState<ImageSource>(resolveInitialSource);
 
-    /*
-     * Reset when moving to another photo.
-     */
-    useEffect(() => {
-        setImageSource(resolveInitialSource());
-    }, [photo.id, resolveInitialSource]);
 
     const src =
         imageSource === "original"

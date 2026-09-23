@@ -1,31 +1,35 @@
 "use client";
 
-import {type CSSProperties, useState} from "react";
+import { type CSSProperties, useState } from "react";
 
 import {
     ArrowRight,
     CalendarDays,
     Check,
     Copy,
+    CreditCard,
+    Heart,
     ImageUp,
     Link as LinkIcon,
     Loader2,
     Mail,
     MapPin,
+    Package,
     Palette,
     Users,
 } from "lucide-react";
-import {useTranslations} from "next-intl";
+import { useTranslations } from "next-intl";
 import {useForm, useWatch} from "react-hook-form";
-import {zodResolver} from "@hookform/resolvers/zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import {createWedding} from "@/actions/wedding";
-import {ColorPicker} from "@/components/ui/color-picker";
-import {useRouter} from "@/lib/navigation";
-import {type CreateWeddingInput, createWeddingSchema} from "@/schemas";
-import {generateWeddingTheme} from "@/lib/theme";
-import {cn} from "@/lib/utils";
-import {toast} from "sonner";
+import { createWedding } from "@/actions/wedding";
+import { ColorPicker } from "@/components/ui/color-picker";
+import { useRouter } from "@/lib/navigation";
+import { createWeddingSchema, type CreateWeddingInput } from "@/schemas";
+import { generateWeddingTheme } from "@/lib/theme";
+import { ADDON_IDS, PLAN_IDS, type AddonId, type PlanId } from "@/lib/plans";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface CreateWeddingFormProps {
     adminEmail: string;
@@ -62,12 +66,13 @@ export function CreateWeddingForm({
         undefined,
     );
 
+
     const {
         register,
         handleSubmit,
         control,
         setValue,
-        formState: {errors, isSubmitting},
+        formState: { errors, isSubmitting },
     } = useForm<CreateWeddingInput>({
         resolver: zodResolver(createWeddingSchema),
         defaultValues: {
@@ -80,13 +85,19 @@ export function CreateWeddingForm({
             wedding_date: "",
             enable_find_seat: true,
             enable_photo_upload: true,
+            plan: "basic",
+            addons: [],
         },
     });
+
+
     const [
         themeHue,
         groomName,
         brideName,
         photoUploadEnabled,
+        plan,
+        addons,
     ] = useWatch({
         control,
         name: [
@@ -94,11 +105,23 @@ export function CreateWeddingForm({
             "groom_name",
             "bride_name",
             "enable_photo_upload",
+            "plan",
+            "addons",
         ],
     });
 
     const previewTheme = generateWeddingTheme(themeHue);
 
+
+    const toggleAddon = (addon: AddonId) => {
+        setValue(
+            "addons",
+            addons.includes(addon)
+                ? addons.filter((a) => a !== addon)
+                : [...addons, addon],
+            { shouldValidate: true },
+        );
+    };
 
     const handleNameBlur = () => {
         if (slugTouched) {
@@ -143,8 +166,7 @@ export function CreateWeddingForm({
         return (
             <div className="mx-auto w-full max-w-lg">
                 <div className="text-center">
-                    <div
-                        className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]">
+                    <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-[hsl(var(--primary))]/15 bg-[hsl(var(--accent))]">
                         <Check
                             className="h-6 w-6 text-[hsl(var(--primary))]"
                             strokeWidth={1.7}
@@ -183,12 +205,11 @@ export function CreateWeddingForm({
                                             </p>
                                         </div>
 
-                                        <Mail className="h-4 w-4 text-muted-foreground"/>
+                                        <Mail className="h-4 w-4 text-muted-foreground" />
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        <code
-                                            className="min-w-0 flex-1 truncate rounded-xl bg-secondary px-3 py-2.5 font-mono text-xs text-foreground">
+                                        <code className="min-w-0 flex-1 truncate rounded-xl bg-secondary px-3 py-2.5 font-mono text-xs text-foreground">
                                             {credential.password}
                                         </code>
 
@@ -205,9 +226,9 @@ export function CreateWeddingForm({
                                             )}
                                         >
                                             {copiedIndex === index ? (
-                                                <Check className="h-4 w-4"/>
+                                                <Check className="h-4 w-4" />
                                             ) : (
-                                                <Copy className="h-4 w-4"/>
+                                                <Copy className="h-4 w-4" />
                                             )}
                                         </button>
                                     </div>
@@ -256,7 +277,7 @@ export function CreateWeddingForm({
                 >
                     {t("continueToDashboard")}
 
-                    <ArrowRight className="h-4 w-4"/>
+                    <ArrowRight className="h-4 w-4" />
                 </button>
             </div>
         );
@@ -359,8 +380,7 @@ export function CreateWeddingForm({
 
                     <div className="mt-4">
                         <FormField label={t("publicUrl")} error={errors.slug?.message}>
-                            <div
-                                className="flex h-12 items-center rounded-xl border border-input bg-background px-4 transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20">
+                            <div className="flex h-12 items-center rounded-xl border border-input bg-background px-4 transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20">
                                 <LinkIcon
                                     className="mr-3 h-4 w-4 shrink-0 text-muted-foreground"
                                     strokeWidth={1.6}
@@ -408,6 +428,65 @@ export function CreateWeddingForm({
                                 }}
                             />
                         </div>
+                    </div>
+                </FormSection>
+
+                {/* Plan */}
+                <FormSection icon={CreditCard} title={tw("plan.sectionTitle")}>
+                    <p className="mb-3 text-xs leading-5 text-muted-foreground">
+                        {tw("plan.sectionDescription")}
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                        {PLAN_IDS.map((planId: PlanId) => (
+                            <label
+                                key={planId}
+                                className={cn(
+                                    "cursor-pointer rounded-2xl border p-3 text-center transition-colors",
+                                    plan === planId
+                                        ? "border-[hsl(var(--primary))] bg-[hsl(var(--accent))]"
+                                        : "border-border/60 bg-background hover:bg-secondary/30",
+                                )}
+                            >
+                                <input
+                                    type="radio"
+                                    value={planId}
+                                    className="sr-only"
+                                    {...register("plan")}
+                                />
+
+                                <span className="text-xs font-medium text-foreground">
+                  {tw(`plan.${planId}`)}
+                </span>
+                            </label>
+                        ))}
+                    </div>
+                </FormSection>
+
+                {/* Add-ons */}
+                <FormSection icon={Package} title={tw("addons.sectionTitle")}>
+                    <p className="mb-3 text-xs leading-5 text-muted-foreground">
+                        {tw("addons.sectionDescription")}
+                    </p>
+
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {ADDON_IDS.map((addonId: AddonId) => (
+                            <label
+                                key={addonId}
+                                className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-border/60 bg-background p-3 transition-colors hover:bg-secondary/30"
+                            >
+                <span className="text-xs font-medium text-foreground">
+                  {tw(`addons.${addonId}`)}
+                </span>
+
+                                <input
+                                    type="checkbox"
+                                    checked={addons.includes(addonId)}
+                                    onChange={() => toggleAddon(addonId)}
+                                    className="h-4 w-4 shrink-0 accent-[hsl(var(--primary))]"
+                                />
+                            </label>
+                        ))}
                     </div>
                 </FormSection>
 
@@ -503,13 +582,13 @@ export function CreateWeddingForm({
                 >
                     {isSubmitting ? (
                         <>
-                            <Loader2 className="h-4 w-4 animate-spin"/>
+                            <Loader2 className="h-4 w-4 animate-spin" />
 
                             {t("creating")}
                         </>
                     ) : (
                         <>
-                            <PlusIcon/>
+                            <PlusIcon />
 
                             {tw("create")}
                         </>
@@ -597,8 +676,7 @@ function FeatureToggle({
     children: React.ReactNode;
 }) {
     return (
-        <label
-            className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-border/60 bg-background p-4 transition-colors hover:bg-secondary/30">
+        <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-border/60 bg-background p-4 transition-colors hover:bg-secondary/30">
             <div className="flex min-w-0 items-start gap-3">
                 <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-secondary">
                     <Icon
@@ -630,7 +708,7 @@ function PlusIcon() {
             strokeWidth="1.8"
             className="h-4 w-4"
         >
-            <path d="M12 5v14M5 12h14" strokeLinecap="round"/>
+            <path d="M12 5v14M5 12h14" strokeLinecap="round" />
         </svg>
     );
 }

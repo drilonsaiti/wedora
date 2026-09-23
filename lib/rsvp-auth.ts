@@ -1,6 +1,7 @@
-import {createHash, randomBytes, timingSafeEqual} from "node:crypto";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 
-import {createServiceClient} from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
+import { getWeddingEntitlements } from "@/lib/plans";
 
 /*
  * ============================================================
@@ -64,7 +65,7 @@ export class RsvpApiError extends Error {
         status: number,
         code: string,
         message: string,
-        retryAfterSeconds?: number
+        retryAfterSeconds?: number,
     ) {
         super(message);
         this.name = "RsvpApiError";
@@ -123,7 +124,7 @@ function extractRawApiKey(request: Request): string {
     }
 
     try {
-        const {searchParams} = new URL(request.url);
+        const { searchParams } = new URL(request.url);
         const fromQuery = searchParams.get("api_key")?.trim();
 
         if (fromQuery) {
@@ -151,14 +152,10 @@ function extractRawApiKey(request: Request): string {
  */
 export async function resolveRsvpApiActor(
     request: Request,
-    weddingSlug: string | null | undefined
+    weddingSlug: string | null | undefined,
 ): Promise<RsvpApiActor> {
     if (!weddingSlug || !weddingSlug.trim()) {
-        throw new RsvpApiError(
-            400,
-            "MISSING_WEDDING",
-            "weddingSlug is required"
-        );
+        throw new RsvpApiError(400, "MISSING_WEDDING", "weddingSlug is required");
     }
 
     const rawKey = extractRawApiKey(request);
@@ -168,15 +165,15 @@ export async function resolveRsvpApiActor(
             401,
             "MISSING_API_KEY",
             "Missing API key: send it as 'Authorization: Bearer <key>', " +
-            "'X-Api-Key: <key>', or an '?api_key=<key>' query parameter"
+            "'X-Api-Key: <key>', or an '?api_key=<key>' query parameter",
         );
     }
 
     const service = createServiceClient();
 
-    const {data: wedding, error: weddingError} = await service
+    const { data: wedding, error: weddingError } = await service
         .from("weddings")
-        .select("id, slug")
+        .select("id, slug, plan, addons")
         .eq("slug", weddingSlug.trim())
         .maybeSingle();
 
@@ -186,7 +183,7 @@ export async function resolveRsvpApiActor(
         throw new RsvpApiError(
             500,
             "WEDDING_LOOKUP_FAILED",
-            "Unable to load wedding"
+            "Unable to load wedding",
         );
     }
 
@@ -197,7 +194,7 @@ export async function resolveRsvpApiActor(
     const prefix = rawKey.slice(0, KEY_PREFIX_LENGTH);
     const providedHash = hashRsvpApiKey(rawKey);
 
-    const {data: apiKey, error: keyError} = await service
+    const { data: apiKey, error: keyError } = await service
         .from("wedding_rsvp_api_keys")
         .select("id, wedding_id, key_hash, revoked_at")
         .eq("wedding_id", wedding.id)
@@ -210,7 +207,7 @@ export async function resolveRsvpApiActor(
         throw new RsvpApiError(
             500,
             "KEY_LOOKUP_FAILED",
-            "Unable to verify API key"
+            "Unable to verify API key",
         );
     }
 
@@ -222,14 +219,30 @@ export async function resolveRsvpApiActor(
         throw new RsvpApiError(
             401,
             "INVALID_API_KEY",
-            "Invalid or revoked API key"
+            "Invalid or revoked API key",
+        );
+    }
+
+    // Enforced here (not just at key-creation time), after the key itself
+    // has been validated, so a wedding that gets downgraded off the
+    // rsvpApiAccess add-on immediately loses API access, even for keys it
+    // created while still entitled -- revoking the add-on shouldn't
+    // require separately revoking every existing key. Checked after key
+    // validation (not before) so an invalid key always gets the same
+    // 401 regardless of the wedding's plan, rather than leaking plan
+    // info to an unauthenticated caller.
+    if (!getWeddingEntitlements(wedding.plan, wedding.addons).rsvpApiAccess) {
+        throw new RsvpApiError(
+            403,
+            "PLAN_DOES_NOT_INCLUDE_API",
+            "RSVP API access is not included in this wedding's plan",
         );
     }
 
     // Best-effort bookkeeping; never block the request on this.
     void service
         .from("wedding_rsvp_api_keys")
-        .update({last_used_at: new Date().toISOString()})
+        .update({ last_used_at: new Date().toISOString() })
         .eq("id", apiKey.id)
         .then(undefined, (error) => {
             console.error("RSVP API key last_used_at update failed:", error);
@@ -257,23 +270,23 @@ export async function enforceRsvpRateLimit(
     weddingId: string,
     keyHash: string,
     limit: number,
-    windowSeconds: number
+    windowSeconds: number,
 ): Promise<void> {
     const rpc = service as unknown as {
         rpc<T>(
             name: string,
-            args: Record<string, unknown>
+            args: Record<string, unknown>,
         ): Promise<{ data: T | null; error: { message: string } | null }>;
     };
 
-    const {data, error} = await rpc.rpc<number | number[]>(
+    const { data, error } = await rpc.rpc<number | number[]>(
         "consume_rsvp_rate_bucket",
         {
             p_wedding_id: weddingId,
             p_key_hash: keyHash,
             p_limit: limit,
             p_window_seconds: windowSeconds,
-        }
+        },
     );
 
     if (error) {
@@ -282,7 +295,7 @@ export async function enforceRsvpRateLimit(
         throw new RsvpApiError(
             500,
             "RATE_LIMIT_UNAVAILABLE",
-            "Unable to verify rate limit"
+            "Unable to verify rate limit",
         );
     }
 
@@ -293,7 +306,7 @@ export async function enforceRsvpRateLimit(
             429,
             "RATE_LIMITED",
             "Too many requests, please slow down",
-            retryAfterSeconds
+            retryAfterSeconds,
         );
     }
 }

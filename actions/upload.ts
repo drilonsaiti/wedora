@@ -1,17 +1,22 @@
 "use server";
 
-import {createHmac} from "node:crypto";
+import { createHmac } from "node:crypto";
 
-import {revalidateTag} from "next/cache";
-import {headers} from "next/headers";
-import {v4 as uuidv4} from "uuid";
+import { revalidateTag } from "next/cache";
+import { headers } from "next/headers";
+import { v4 as uuidv4 } from "uuid";
 
-import {createServiceClient} from "@/lib/supabase/server";
-import {processImage} from "@/lib/sharp";
-import {serverUploadSchema} from "@/schemas";
+import { createServiceClient } from "@/lib/supabase/server";
+import { processImage } from "@/lib/sharp";
+import { serverUploadSchema } from "@/schemas";
+import { getWeddingEntitlements } from "@/lib/plans";
+import {
+    getWeddingNotificationEmails,
+    photoUploadNotificationEmail,
+    sendEmail,
+} from "@/lib/email";
 
-const MAX_FILE_BYTES =
-    Number(process.env.MAX_FILE_SIZE_MB ?? 10) * 1024 * 1024;
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
 const RATE_LIMIT_WINDOW_SECONDS = 60;
 
@@ -60,7 +65,7 @@ type RpcError = {
 type RpcClient = {
     rpc<T>(
         name: string,
-        args?: Record<string, unknown>
+        args?: Record<string, unknown>,
     ): Promise<{
         data: T | null;
         error: RpcError | null;
@@ -96,7 +101,7 @@ function getRpcClient(supabase: ServiceClient): RpcClient {
 
 function failure(
     code: UploadPhotoErrorCode,
-    retryAfterSeconds?: number
+    retryAfterSeconds?: number,
 ): UploadResult {
     return retryAfterSeconds === undefined
         ? {
@@ -172,11 +177,11 @@ async function getClientIpHash(): Promise<string | null> {
 
 async function completeCleanupJob(
     supabase: ServiceClient,
-    photoId: string
+    photoId: string,
 ): Promise<boolean> {
     const rpc = getRpcClient(supabase);
 
-    const {error} = await rpc.rpc<null>("complete_photo_upload_cleanup_job", {
+    const { error } = await rpc.rpc<null>("complete_photo_upload_cleanup_job", {
         p_photo_id: photoId,
     });
 
@@ -192,11 +197,11 @@ async function completeCleanupJob(
 async function markCleanupFailure(
     supabase: ServiceClient,
     photoId: string,
-    message: string
+    message: string,
 ): Promise<void> {
     const rpc = getRpcClient(supabase);
 
-    const {error} = await rpc.rpc<null>("mark_photo_upload_cleanup_failed", {
+    const { error } = await rpc.rpc<null>("mark_photo_upload_cleanup_failed", {
         p_photo_id: photoId,
         p_error: message,
     });
@@ -208,7 +213,7 @@ async function markCleanupFailure(
 
 async function cleanupStorageArtifacts(
     supabase: ServiceClient,
-    job: CleanupJob
+    job: CleanupJob,
 ): Promise<boolean> {
     const [originalResult, thumbnailResult] = await Promise.all([
         supabase.storage.from("photos").remove([job.original_path]),
@@ -217,7 +222,7 @@ async function cleanupStorageArtifacts(
     ]);
 
     const errors = [originalResult.error, thumbnailResult.error].filter(
-        Boolean
+        Boolean,
     ) as Array<{
         message: string;
     }>;
@@ -240,12 +245,12 @@ async function cleanupStorageArtifacts(
 async function drainStaleCleanupJobs(supabase: ServiceClient): Promise<void> {
     const rpc = getRpcClient(supabase);
 
-    const {data, error} = await rpc.rpc<CleanupJob[]>(
+    const { data, error } = await rpc.rpc<CleanupJob[]>(
         "get_stale_photo_upload_cleanup_jobs",
         {
             p_limit: CLEANUP_BATCH_SIZE,
             p_older_than_seconds: CLEANUP_STALE_AFTER_SECONDS,
-        }
+        },
     );
 
     if (error) {
@@ -263,11 +268,11 @@ async function drainStaleCleanupJobs(supabase: ServiceClient): Promise<void> {
 
 async function registerCleanupJob(
     supabase: ServiceClient,
-    job: CleanupJob
+    job: CleanupJob,
 ): Promise<boolean> {
     const rpc = getRpcClient(supabase);
 
-    const {error} = await rpc.rpc<null>("register_photo_upload_cleanup_job", {
+    const { error } = await rpc.rpc<null>("register_photo_upload_cleanup_job", {
         p_photo_id: job.photo_id,
         p_original_path: job.original_path,
         p_thumbnail_path: job.thumbnail_path,
@@ -285,7 +290,7 @@ async function registerCleanupJob(
 async function runUploadPreflight(
     supabase: ServiceClient,
     eventId: string,
-    sessionId: string
+    sessionId: string,
 ): Promise<
     | {
     ok: true;
@@ -303,7 +308,7 @@ async function runUploadPreflight(
 
     const ipKeyHash = await getClientIpHash();
 
-    const {data, error} = await rpc.rpc<BeginUploadRow[]>(
+    const { data, error } = await rpc.rpc<BeginUploadRow[]>(
         "begin_guest_photo_upload",
         {
             p_event_id: eventId,
@@ -313,7 +318,7 @@ async function runUploadPreflight(
             p_session_limit: SESSION_RATE_LIMIT_MAX,
             p_ip_limit: IP_RATE_LIMIT_MAX,
             p_window_seconds: RATE_LIMIT_WINDOW_SECONDS,
-        }
+        },
     );
 
     if (error) {
@@ -362,11 +367,57 @@ async function runUploadPreflight(
     };
 }
 
+/*
+ * Notifies the couple that a guest uploaded a new photo. Best-effort
+ * and awaited for the same reason as the RSVP notifications: this
+ * server action has no background-job primitive to keep work running
+ * after the action returns, and sendEmail() is fast and never throws,
+ * so awaiting it here is a safe, simple way to guarantee it runs.
+ */
+async function notifyCoupleOfPhotoUpload(
+    supabase: ServiceClient,
+    weddingId: string,
+    guestName: string | null,
+): Promise<void> {
+    try {
+        const { data: wedding, error } = await supabase
+            .from("weddings")
+            .select("groom_name, bride_name, groom_email, bride_email")
+            .eq("id", weddingId)
+            .maybeSingle();
+
+        if (error || !wedding) {
+            console.error("Photo upload notification wedding lookup failed:", error);
+
+            return;
+        }
+
+        const recipients = getWeddingNotificationEmails(wedding);
+
+        if (recipients.length === 0) {
+            return;
+        }
+
+        const weddingName = [wedding.groom_name, wedding.bride_name]
+            .filter(Boolean)
+            .join(" & ");
+
+        const { subject, html } = photoUploadNotificationEmail({
+            weddingName: weddingName || "your wedding",
+            guestName,
+        });
+
+        await sendEmail({ to: recipients, subject, html });
+    } catch (error) {
+        console.error("Photo upload notification failed:", error);
+    }
+}
+
 async function verifyPhotoCommit(
     supabase: ServiceClient,
-    photoId: string
+    photoId: string,
 ): Promise<"committed" | "not_committed" | "unknown"> {
-    const {data, error} = await supabase
+    const { data, error } = await supabase
         .from("photos")
         .select("id")
         .eq("id", photoId)
@@ -396,7 +447,7 @@ async function finalizeUpload(
         width: number;
         height: number;
         isPublic: boolean;
-    }
+    },
 ): Promise<
     | {
     ok: true;
@@ -408,7 +459,7 @@ async function finalizeUpload(
 > {
     const rpc = getRpcClient(supabase);
 
-    const {data, error} = await rpc.rpc<FinalizeUploadRow[]>(
+    const { data, error } = await rpc.rpc<FinalizeUploadRow[]>(
         "finalize_guest_photo_upload",
         {
             p_photo_id: input.photoId,
@@ -423,7 +474,7 @@ async function finalizeUpload(
             p_width: input.width,
             p_height: input.height,
             p_is_public: input.isPublic,
-        }
+        },
     );
 
     if (error) {
@@ -457,7 +508,7 @@ async function finalizeUpload(
 }
 
 export async function uploadPhotoAction(
-    formData: FormData
+    formData: FormData,
 ): Promise<UploadResult> {
     try {
         /*
@@ -521,7 +572,7 @@ export async function uploadPhotoAction(
             return failure("UNKNOWN");
         }
 
-        const {eventId, guestName, message, isPublic, sessionId} = parsed.data;
+        const { eventId, guestName, message, isPublic, sessionId } = parsed.data;
 
         const supabase = createServiceClient();
 
@@ -539,6 +590,30 @@ export async function uploadPhotoAction(
         }
 
         const weddingId = preflight.weddingId;
+
+        /*
+         * ============================================
+         * PLAN ENTITLEMENT
+         * ============================================
+         * `wedding_settings.enable_photo_upload` (checked inside the
+         * begin_guest_photo_upload RPC above) is the couple's own on/off
+         * switch. This is the separate, non-negotiable check: photo
+         * upload is a paid-plan feature (see lib/plans.ts), so even a
+         * wedding with the switch flipped on can't accept uploads if its
+         * plan/addons don't actually include it.
+         */
+        const { data: weddingPlan } = await supabase
+            .from("weddings")
+            .select("plan, addons")
+            .eq("id", weddingId)
+            .maybeSingle();
+
+        if (
+            !getWeddingEntitlements(weddingPlan?.plan, weddingPlan?.addons)
+                .photoUpload
+        ) {
+            return failure("UPLOAD_DISABLED");
+        }
 
         /*
          * Opportunistically recover orphaned objects from an earlier
@@ -616,7 +691,7 @@ export async function uploadPhotoAction(
         let deferCleanup = false;
 
         try {
-            const {error: originalError} = await supabase.storage
+            const { error: originalError } = await supabase.storage
                 .from("photos")
                 .upload(originalPath, optimizedBuffer, {
                     contentType: "image/webp",
@@ -629,7 +704,7 @@ export async function uploadPhotoAction(
                 return failure("STORAGE_ERROR");
             }
 
-            const {error: thumbnailError} = await supabase.storage
+            const { error: thumbnailError } = await supabase.storage
                 .from("thumbnails")
                 .upload(thumbnailPath, thumbnailBuffer, {
                     contentType: "image/webp",
@@ -714,6 +789,8 @@ export async function uploadPhotoAction(
             } catch (error) {
                 console.error("Gallery cache revalidation failed:", error);
             }
+
+            await notifyCoupleOfPhotoUpload(supabase, weddingId, guestName ?? null);
 
             return {
                 success: true,

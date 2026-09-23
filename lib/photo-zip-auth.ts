@@ -1,6 +1,7 @@
-import type {User} from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 
-import {createClient, createServiceClient} from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { getWeddingEntitlements } from "@/lib/plans";
 
 export type PhotoZipRole = "admin" | "owner" | "couple";
 
@@ -20,7 +21,7 @@ export async function getPhotoZipActor() {
     const authClient = await createClient();
 
     const {
-        data: {user},
+        data: { user },
         error,
     } = await authClient.auth.getUser();
 
@@ -39,16 +40,16 @@ export async function authorizePhotoZipWedding(
         user: User;
         service: ReturnType<typeof createServiceClient>;
     },
-    weddingId: string
+    weddingId: string,
 ) {
-    const {user, service} = actor;
+    const { user, service } = actor;
 
     const [adminResult, weddingResult] = await Promise.all([
         service.from("admins").select("id").eq("id", user.id).maybeSingle(),
 
         service
             .from("weddings")
-            .select("id, owner_user_id")
+            .select("id, owner_user_id, plan, addons")
             .eq("id", weddingId)
             .maybeSingle(),
     ]);
@@ -59,7 +60,7 @@ export async function authorizePhotoZipWedding(
         throw new PhotoZipHttpError(
             500,
             "AUTHORIZATION_FAILED",
-            "Unable to verify access"
+            "Unable to verify access",
         );
     }
 
@@ -69,7 +70,7 @@ export async function authorizePhotoZipWedding(
         throw new PhotoZipHttpError(
             500,
             "WEDDING_LOOKUP_FAILED",
-            "Unable to load wedding"
+            "Unable to load wedding",
         );
     }
 
@@ -99,7 +100,7 @@ export async function authorizePhotoZipWedding(
             appMetadata.role === "couple" &&
             appMetadata.wedding_id === wedding.id
         ) {
-            const {data: settings, error: settingsError} = await service
+            const { data: settings, error: settingsError } = await service
                 .from("wedding_settings")
                 .select("enable_couple_login")
                 .eq("wedding_id", wedding.id)
@@ -111,7 +112,7 @@ export async function authorizePhotoZipWedding(
                 throw new PhotoZipHttpError(
                     500,
                     "AUTHORIZATION_FAILED",
-                    "Unable to verify access"
+                    "Unable to verify access",
                 );
             }
 
@@ -123,6 +124,18 @@ export async function authorizePhotoZipWedding(
 
     if (!role) {
         throw new PhotoZipHttpError(403, "FORBIDDEN", "Forbidden");
+    }
+
+    // Bulk photo ZIP export is a paid-plan feature (see lib/plans.ts) --
+    // gated here, the one place every ZIP request passes through,
+    // regardless of who's asking (admin/owner/couple) or which route
+    // triggered it.
+    if (!getWeddingEntitlements(wedding.plan, wedding.addons).bulkPhotoExport) {
+        throw new PhotoZipHttpError(
+            403,
+            "PLAN_DOES_NOT_INCLUDE_EXPORT",
+            "Bulk photo export is not included in this wedding's plan",
+        );
     }
 
     return {

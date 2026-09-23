@@ -259,36 +259,36 @@
     }
   },
   "seating": {
-    "title": "Распоред на гости",
-    "description": "Управувајте со гости, маси и изгледот на просторот за оваа свадба.",
+    "title": "Сместување на гости",
+    "description": "Управувајте со гости, маси и распоредот на местото за оваа свадба.",
     "backToWeddings": "Назад кон свадби",
-    "loadingDesigner": "Се вчитува уредувачот на распоредот...",
-    "print": "Печати листа",
+    "loadingDesigner": "Се вчитува дизајнерот за седишта...",
+    "print": "Испечати листа",
     "printTitle": "Листа на гости по маси",
     "guests": "Гости",
     "tables": "Маси",
     "photos": "Фотографии",
-    "designerLabel": "Уредувач",
+    "rsvpApi": "RSVP API",
+    "designerLabel": "Дизајнер",
     "searchGuests": "Пребарај гости...",
-    "addGuest": "Додај гостин",
+    "addGuest": "Додај гост",
     "addTable": "Додај маса",
-    "addNewGuest": "Додај нов гостин",
+    "addNewGuest": "Додај нов гост",
     "addNewTable": "Додај нова маса",
-    "editGuest": "Уреди гостин",
+    "editGuest": "Уреди гост",
     "editTable": "Уреди маса",
     "total": "Вкупно",
-    "seated": "Распоредени",
-    "unseated": "Нераспоредени",
+    "seated": "Сместени",
+    "unseated": "Несместени",
     "noGuests": "Нема пронајдени гости",
     "noTables": "Сè уште нема креирани маси",
     "noTable": "Нема маса",
     "noTablesCreated": "Сè уште нема креирани маси.",
-    "confirmDeleteGuest": "Дали сте сигурни дека сакате да го избришете овој гостин?",
-    "deleteGuestFailed": "Не успеа бришењето на гостинот",
-    "confirmDeleteTable": "Дали сте сигурни дека сакате да ја избришете оваа маса? Сите доделени гости ќе останат без доделена маса.",
-    "deleteTableFailed": "Не успеа бришењето на масата",
-    "rsvpApi": "RSVP API",
-    "rsvpCycleHint": "Кликнете за да го смените статусот на RSVP: во чекање -> потврдено -> одбиено",
+    "confirmDeleteGuest": "Дали сте сигурни дека сакате да го избришете овој гост?",
+    "deleteGuestFailed": "Не успеа бришењето на гост",
+    "confirmDeleteTable": "Дали сте сигурни дека сакате да ја избришете оваа маса? Сите доделени гости ќе бидат отстранети.",
+    "deleteTableFailed": "Не успеа бришењето на маса",
+    "rsvpCycleHint": "Кликнете за да го менувате RSVP статусот: во чекање -> потврдено -> одбиено",
     "rsvpUpdateFailed": "Не успеа ажурирањето на RSVP",
     "rsvpStatus": {
       "pending": "Во чекање",
@@ -297,55 +297,55 @@
     },
     "table": "Маса",
     "tableNumber": "Маса {number}",
-    "occupied": "Зафатено",
-    "seats": "Места",
+    "occupied": "Заземена",
+    "seats": "Седишта",
     "edit": "Уреди",
     "delete": "Избриши",
     "firstName": "Име",
-    "firstNamePlaceholder": "на пр. Марко",
+    "firstNamePlaceholder": "пр. John",
     "lastName": "Презиме",
-    "lastNamePlaceholder": "на пр. Петровски",
+    "lastNamePlaceholder": "пр. Smith",
     "assignTableOptional": "Додели маса (опционално)",
-    "tableOption": "Маса {number} ({seats} места)",
-    "updateGuest": "Ажурирај гостин",
-    "tableShape": "Форма на масата",
-    "shapeRound": "Кружна",
+    "tableOption": "Маса {number} ({seats} седишта)",
+    "updateGuest": "Ажурирај гост",
+    "tableShape": "Форма на маса",
+    "shapeRound": "Тркалезна",
     "shapeSquare": "Квадратна",
     "shapeRectangle": "Правоаголна",
     "tableNumberLabel": "Број на маса",
-    "tableNumberPlaceholder": "на пр. 1",
-    "seatsPlaceholder": "на пр. 8",
-    "seatDistribution": "Распределба на места по страни",
+    "tableNumberPlaceholder": "пр. 1",
+    "seatsPlaceholder": "пр. 8",
+    "seatDistribution": "Распределба на седишта по страна",
     "top": "Горе",
     "bottom": "Долу",
     "left": "Лево",
     "right": "Десно",
-    "assignedSeats": "{assigned} / {total} доделени места",
+    "assignedSeats": "{assigned} / {total} доделени седишта",
     "tableLabelOptional": "Ознака (опционално)",
-    "tableLabelPlaceholder": "на пр. Семејство Петровски",
+    "tableLabelPlaceholder": "пр. Семејство Saiti",
     "updateTable": "Ажурирај маса",
     "venuePresets": {
       "entrance": "Влез",
       "pool": "Базен",
-      "couple_table": "Маса на парот",
+      "couple_table": "Пар",
       "music": "Музика",
       "bar": "Бар",
       "toilet": "Тоалет"
     },
     "confirmations": {
       "deleteGuest": {
-        "title": "Избриши гостин?",
+        "title": "Избриши гост?",
         "description": "{name} ќе биде трајно отстранет од листата на гости.",
-        "confirm": "Избриши гостин"
+        "confirm": "Избриши гост"
       },
       "deleteTable": {
         "title": "Избриши маса?",
-        "description": "Маса {number} ќе биде отстранета и сите гости доделени на неа ќе останат без маса.",
+        "description": "Масата {number} ќе биде отстранета и сите доделени гости ќе станат несместени.",
         "confirm": "Избриши маса"
       },
       "deleteVenueElement": {
-        "title": "Избриши елемент од просторот?",
-        "description": "{name} ќе биде трајно отстранет од изгледот на просторот.",
+        "title": "Избриши елемент на местото?",
+        "description": "{name} ќе биде трајно отстранет од распоредот на местото.",
         "confirm": "Избриши елемент"
       },
       "deletePhoto": {
@@ -354,19 +354,19 @@
         "confirm": "Избриши фотографија"
       },
       "deleteGalleryLink": {
-        "title": "Избриши линк до галеријата?",
-        "description": "Овој споделен линк до галеријата веднаш ќе престане да функционира.",
+        "title": "Избриши линк од галерија?",
+        "description": "Овој споделен линк од галерија веднаш ќе престане да работи.",
         "confirm": "Избриши линк"
       }
     },
     "notifications": {
-      "guestDeleted": "Гостинот е избришан",
-      "rsvpUpdated": "RSVP е означен како {status}",
-      "tableDeleted": "Масата е избришана",
-      "venueElementDeleted": "Елементот од просторот е избришан",
-      "photoDeleted": "Фотографијата е избришана",
-      "galleryLinkDeleted": "Линкот до галеријата е избришан",
-      "galleryLinkDeleteFailed": "Линкот до галеријата не можеше да се избрише"
+      "guestDeleted": "Гост избришан",
+      "rsvpUpdated": "RSVP означен како {status}",
+      "tableDeleted": "Маса избришана",
+      "venueElementDeleted": "Елемент на местото избришан",
+      "photoDeleted": "Фотографија избришана",
+      "galleryLinkDeleted": "Линк од галерија избришан",
+      "galleryLinkDeleteFailed": "Линкот од галерија не можеше да се избрише"
     },
     "designer": {
       "unassignedGuests": "Недоделени гости ({count})",
@@ -376,34 +376,34 @@
       "allGuestsAssigned": "Сите гости се доделени.",
       "showGuests": "Прикажи гости",
       "downloadImage": "Преземи слика",
-      "fullscreen": "Цел екран",
-      "exitFullscreen": "Излези од цел екран",
-      "exit": "Излези",
+      "fullscreen": "Целосен екран",
+      "exitFullscreen": "Излези од целосен екран",
+      "exit": "Излез",
       "table": "Маса",
-      "seatOccupied": "Ова место е веќе зафатено.",
-      "tableFull": "Маса {number} е полна.",
-      "assignSeatFailed": "Гостинот не можеше да се додели на ова место.",
-      "assignGuestFailed": "Гостинот не можеше да се додели на оваа маса.",
-      "elementAdded": "Елементот од просторот е додаден",
-      "elementDeleted": "Елементот од просторот е избришан",
-      "addElementFailed": "Елементот од просторот не можеше да се додаде.",
-      "deleteElementFailed": "Елементот од просторот не можеше да се избрише.",
+      "seatOccupied": "Ова седиште е веќе заземено.",
+      "tableFull": "Масата {number} е полна.",
+      "assignSeatFailed": "Гостот не можеше да се додели на ова седиште.",
+      "assignGuestFailed": "Гостот не можеше да се додели на оваа маса.",
+      "elementAdded": "Елемент на местото додаден",
+      "elementDeleted": "Елемент на местото избришан",
+      "addElementFailed": "Елементот на местото не можеше да се додаде.",
+      "deleteElementFailed": "Елементот на местото не можеше да се избрише.",
       "assignMenu": {
-        "triggerLabel": "Опции за седење за {name}",
-        "currentTable": "Моментално сместен на маса {number}",
+        "triggerLabel": "Опции за седиште за {name}",
+        "currentTable": "Моментално на маса {number}",
         "unassign": "Отстрани од маса",
         "full": "Полна",
         "noOtherTables": "Сè уште нема други маси."
       }
     },
     "venueEditor": {
-      "eyebrow": "Дизајнер на простор",
-      "title": "Додај елемент од просторот",
-      "description": "Додајте чест елемент од просторот или креирајте прилагоден елемент за планот.",
-      "quickPresets": "Брзи претпоставки",
-      "orCustom": "Или креирајте свој",
+      "eyebrow": "Дизајнер на место",
+      "title": "Додај елемент на местото",
+      "description": "Додајте вообичаена карактеристика на местото или креирајте прилагоден елемент за планот.",
+      "quickPresets": "Брзи предефинирани",
+      "orCustom": "Или креирајте свое",
       "name": "Име",
-      "namePlaceholder": "на пр. Фото кабина, Свадбена торта",
+      "namePlaceholder": "пр. Фото-кабина, Свадбена торта",
       "icon": "Икона",
       "selectIcon": "Избери икона: {icon}",
       "shape": "Форма",
@@ -417,15 +417,32 @@
       },
       "colors": {
         "blue": "Сина",
-        "rose": "Роза",
+        "rose": "Розова",
         "purple": "Виолетова",
         "amber": "Килибарна",
         "gray": "Сива",
         "green": "Зелена",
         "teal": "Тиркизна",
-        "pink": "Розова"
+        "pink": "Розева"
       }
-    }
+    },
+    "csvImport": {
+      "exportButton": "Извези CSV",
+      "importButton": "Увези CSV",
+      "exportSuccess": "Листата на гости е извезена",
+      "exportEmpty": "Сè уште нема гости за извоз",
+      "rsvpStatusColumn": "RSVP статус",
+      "partySizeColumn": "Големина на група",
+      "tableColumn": "Маса",
+      "emptyFile": "Оваа датотека е празна",
+      "noNameColumns": "Не можеше да се најдат колони за име / презиме во овој CSV",
+      "importSuccess": "Увезени {imported} гости, прескокнати {skipped}",
+      "importNothingImported": "Нема увезени гости од оваа датотека",
+      "importFailed": "Не успеа увозот на гости од оваа датотека"
+    },
+    "copyPersonalLink": "Копирај личен линк",
+    "personalLinkCopied": "Личниот линк е копиран во клипборд",
+    "personalLinkCopyFailed": "Не успеа копирањето на линкот"
   },
   "weddings": {
     "title": "Свадби",
@@ -502,6 +519,27 @@
         "updated": "Свадбата е ажурирана",
         "deleted": "Свадбата е избришана"
       }
+    },
+    "plan": {
+      "sectionTitle": "План",
+      "sectionDescription": "На кој ценовен план всушност е продадена оваа свадба? Ова одлучува кои функции се достапни за парот -- видете ја страницата со цени за тоа што вклучува секој план.",
+      "basic": "Основен",
+      "premium": "Премиум",
+      "unlimited": "Неограничен",
+      "custom": "Прилагоден дизајн"
+    },
+    "addons": {
+      "sectionTitle": "Додатоци",
+      "sectionDescription": "Дополнителни функции купени над планот погоре.",
+      "tableArrangement": "Дизајнер за распоред на маси",
+      "photoGallery": "Фото галерија",
+      "guestLimit": "Поголем лимит на гости",
+      "multilingual": "Повеќејазична покана",
+      "extendedStorage": "Продолжено складирање",
+      "bulkPhotoExport": "Групно извезување фотографии",
+      "rsvpApiAccess": "Пристап до RSVP API",
+      "qrCode": "QR код",
+      "personalGuestLinks": "Лични линкови за гости"
     }
   },
   "status": {
@@ -712,7 +750,15 @@
         "photoGallery":     { "name": "Фото-галерија за гости",          "description": "Гостите можат да качуваат фотографии во споделена, споделива галерија" },
         "guestLimit":       { "name": "Зголеми го лимитот на 300 гости", "description": "За свадби поголеми од Basic лимитот од 150 гости" },
         "multilingual":     { "name": "Повеќејазично искуство за гости", "description": "Страниците за гости достапни на сите 7 поддржани јазици" },
-        "extendedStorage":  { "name": "Продолжено складирање",           "description": "Задржете сè онлајн 1 година по свадбата" }
+        "extendedStorage":  { "name": "Продолжено складирање",           "description": "Задржете сè онлајн 1 година по свадбата" },
+        "bulkPhotoExport": {
+          "name": "Групно преземање фотографии",
+          "description": "Преземете ги сите фотографии како една ZIP-датотека, подготвена во секое време"
+        },
+        "rsvpApiAccess": {
+          "name": "Пристап до RSVP API",
+          "description": "Поврзете ја вашата веб-страница или алатки за развој со податоците за RSVP во реално време преку API"
+        }
       }
     }
   },
@@ -985,5 +1031,51 @@
     "neverUsed": "никогаш неискористен",
     "lastUsed": "последно искористен {date}",
     "revokeKeyAriaLabel": "Отповикај API клуч"
+  },
+  "qrCodeCard": {
+    "title": "QR код за споделување",
+    "description": "Скенирајте го или испечатете го за да ги испратите гостите директно на страницата за покана.",
+    "downloadPng": "Преземи PNG",
+    "print": "Печати"
+  },
+  "rsvpTrend": {
+    "title": "Тренд на RSVP",
+    "description": "Кумулативни одговори со текот на времето, од кога секој гост одговорил.",
+    "totalInvited": "Поканети",
+    "confirmed": "Потврдени",
+    "declined": "Одбиени",
+    "pending": "Во чекање",
+    "confirmedSeries": "Потврдени",
+    "declinedSeries": "Одбиени",
+    "emptyState": "Сè уште нема RSVP. Одговорите ќе се појават овде штом гостите почнат да одговараат."
+  },
+  "guestLink": {
+    "title": "Вашата покана",
+    "weddingOf": "Свадбата на {bride} и {groom}",
+    "yourTable": "Вашата маса",
+    "seat": "Седиште",
+    "noTable": "Сè уште не сте доделени на маса",
+    "noTableDescription": "Парот сè уште не ви доделил маса. Проверете повторно подоцна.",
+    "venueMap": "Карта на местото",
+    "venueMapDescription": "Најдете ја вашата маса на картата подолу.",
+    "invalidTitle": "Овој линк не е валиден",
+    "invalidDescription": "Можеби е истечен, погрешно внесен или парот го исклучил јавниот пристап за гости. Побарајте нов линк од парот.",
+    "backHome": "Назад на страницата за свадбата",
+    "rsvpTitle": "Вашиот RSVP",
+    "rsvpDescription": "Известете го парот дали можете да дојдете.",
+    "rsvpStatus": {
+      "pending": "Сè уште нема одговор",
+      "confirmed": "Ќе бидам таму",
+      "declined": "Не можам да дојдам"
+    },
+    "partySizeLabel": "Број на гости (вклучувајќи ве)",
+    "partySizePlaceholder": "пр. 2",
+    "noteLabel": "Белешка за парот (опционално)",
+    "notePlaceholder": "Ограничувања во исхраната, барања за песни...",
+    "submit": "Зачувај го мојот RSVP",
+    "submitting": "Се зачувува...",
+    "submitSuccess": "Вашиот RSVP е зачуван",
+    "submitError": "Не успеа зачувувањето на вашиот RSVP. Обидете се повторно.",
+    "lastResponded": "Последно ажурирано {date}"
   }
 }

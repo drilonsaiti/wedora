@@ -331,6 +331,27 @@
         "updated": "Mariage mis à jour",
         "deleted": "Mariage supprimé"
       }
+    },
+    "plan": {
+      "sectionTitle": "Formule",
+      "sectionDescription": "Sur quelle formule tarifaire ce mariage a-t-il été réellement vendu ? Cela détermine les fonctionnalités disponibles pour le couple -- voir la page tarifs pour ce que chaque formule inclut.",
+      "basic": "Basique",
+      "premium": "Premium",
+      "unlimited": "Illimité",
+      "custom": "Design personnalisé"
+    },
+    "addons": {
+      "sectionTitle": "Options",
+      "sectionDescription": "Fonctionnalités supplémentaires achetées en plus de la formule ci-dessus.",
+      "tableArrangement": "Concepteur de plan de table",
+      "photoGallery": "Galerie photo",
+      "guestLimit": "Limite d'invités plus élevée",
+      "multilingual": "Invitation multilingue",
+      "extendedStorage": "Stockage étendu",
+      "bulkPhotoExport": "Export groupé de photos",
+      "rsvpApiAccess": "Accès API RSVP",
+      "qrCode": "Code QR",
+      "personalGuestLinks": "Liens personnels pour les invités"
     }
   },
   "status": {
@@ -541,7 +562,15 @@
         "photoGallery":     { "name": "Galerie photo des invités",     "description": "Les invités peuvent téléverser des photos dans une galerie partagée et partageable" },
         "guestLimit":       { "name": "Augmenter la limite à 300 invités", "description": "Pour les mariages plus grands que la limite Basic de 150 invités" },
         "multilingual":     { "name": "Expérience invité multilingue", "description": "Pages invité disponibles dans les 7 langues prises en charge" },
-        "extendedStorage":  { "name": "Stockage prolongé",             "description": "Gardez tout en ligne pendant 1 an après le mariage" }
+        "extendedStorage":  { "name": "Stockage prolongé",             "description": "Gardez tout en ligne pendant 1 an après le mariage" },
+        "bulkPhotoExport": {
+          "name": "Téléchargement groupé de photos",
+          "description": "Téléchargez toutes les photos dans un seul fichier ZIP, prêt à tout moment"
+        },
+        "rsvpApiAccess": {
+          "name": "Accès API RSVP",
+          "description": "Connectez votre propre site web ou vos outils de développement aux données RSVP en direct via l'API"
+        }
       }
     }
   },
@@ -719,41 +748,53 @@
     }
   },
   "seating": {
-    "loadingDesigner": "Chargement du créateur de plan de table...",
-    "confirmDeleteGuest": "Voulez-vous vraiment supprimer cet invité ?",
-    "deleteGuestFailed": "Impossible de supprimer l'invité",
-    "confirmDeleteTable": "Voulez-vous vraiment supprimer cette table ? Tous les invités assignés ne seront plus placés.",
-    "deleteTableFailed": "Impossible de supprimer la table",
     "title": "Plan de table des invités",
+    "description": "Gérez les invités, les tables et l'agencement du lieu pour ce mariage.",
+    "backToWeddings": "Retour aux mariages",
+    "loadingDesigner": "Chargement du concepteur de plan de table...",
     "print": "Imprimer la liste",
+    "printTitle": "Liste des invités par table",
     "guests": "Invités",
     "tables": "Tables",
+    "photos": "Photos",
+    "rsvpApi": "API RSVP",
+    "designerLabel": "Concepteur",
     "searchGuests": "Rechercher des invités...",
     "addGuest": "Ajouter un invité",
     "addTable": "Ajouter une table",
+    "addNewGuest": "Ajouter un nouvel invité",
+    "addNewTable": "Ajouter une nouvelle table",
+    "editGuest": "Modifier l'invité",
+    "editTable": "Modifier la table",
+    "total": "Total",
     "seated": "Placés",
     "unseated": "Non placés",
-    "total": "Total",
     "noGuests": "Aucun invité trouvé",
-    "noTables": "Aucune table créée pour le moment",
+    "noTables": "Aucune table créée pour l'instant",
     "noTable": "Aucune table",
+    "noTablesCreated": "Aucune table créée pour l'instant.",
+    "confirmDeleteGuest": "Voulez-vous vraiment supprimer cet invité ?",
+    "deleteGuestFailed": "Échec de la suppression de l'invité",
+    "confirmDeleteTable": "Voulez-vous vraiment supprimer cette table ? Tous les invités assignés seront désassignés.",
+    "deleteTableFailed": "Échec de la suppression de la table",
+    "rsvpCycleHint": "Cliquez pour faire défiler le statut RSVP : en attente -> confirmé -> refusé",
+    "rsvpUpdateFailed": "Échec de la mise à jour du RSVP",
+    "rsvpStatus": {
+      "pending": "En attente",
+      "confirmed": "Confirmé",
+      "declined": "Refusé"
+    },
+    "table": "Table",
     "tableNumber": "Table {number}",
+    "occupied": "Occupée",
     "seats": "Places",
     "edit": "Modifier",
     "delete": "Supprimer",
-    "printTitle": "Liste des invités par table",
-    "table": "Table",
-    "noTablesCreated": "Aucune table créée pour le moment.",
-    "editGuest": "Modifier l'invité",
-    "addNewGuest": "Ajouter un nouvel invité",
-    "editTable": "Modifier la table",
-    "addNewTable": "Ajouter une nouvelle table",
-    "occupied": "Occupée",
     "firstName": "Prénom",
-    "firstNamePlaceholder": "ex. Jean",
+    "firstNamePlaceholder": "ex. John",
     "lastName": "Nom",
-    "lastNamePlaceholder": "ex. Dupont",
-    "assignTableOptional": "Attribuer une table (facultatif)",
+    "lastNamePlaceholder": "ex. Smith",
+    "assignTableOptional": "Assigner une table (facultatif)",
     "tableOption": "Table {number} ({seats} places)",
     "updateGuest": "Mettre à jour l'invité",
     "tableShape": "Forme de la table",
@@ -768,21 +809,10 @@
     "bottom": "Bas",
     "left": "Gauche",
     "right": "Droite",
-    "assignedSeats": "{assigned} / {total} places attribuées",
+    "assignedSeats": "{assigned} / {total} places assignées",
     "tableLabelOptional": "Libellé (facultatif)",
-    "tableLabelPlaceholder": "ex. Famille Dupont",
+    "tableLabelPlaceholder": "ex. Famille Saiti",
     "updateTable": "Mettre à jour la table",
-    "designerLabel": "Éditeur",
-    "description": "Gérez les invités, les tables et l'aménagement du lieu pour ce mariage.",
-    "backToWeddings": "Retour aux mariages",
-    "photos": "Photos",
-    "rsvpCycleHint": "Cliquez pour changer le statut RSVP : en attente -> confirmé -> refusé",
-    "rsvpUpdateFailed": "Échec de la mise à jour du RSVP",
-    "rsvpStatus": {
-      "pending": "En attente",
-      "confirmed": "Confirmé",
-      "declined": "Refusé"
-    },
     "venuePresets": {
       "entrance": "Entrée",
       "pool": "Piscine",
@@ -794,17 +824,17 @@
     "confirmations": {
       "deleteGuest": {
         "title": "Supprimer l'invité ?",
-        "description": "{name} sera définitivement supprimé de la liste des invités.",
+        "description": "{name} sera définitivement retiré de la liste des invités.",
         "confirm": "Supprimer l'invité"
       },
       "deleteTable": {
         "title": "Supprimer la table ?",
-        "description": "La table {number} sera supprimée et tous les invités qui y sont assignés ne seront plus placés.",
+        "description": "La table {number} sera supprimée et tous les invités assignés seront désassignés.",
         "confirm": "Supprimer la table"
       },
       "deleteVenueElement": {
         "title": "Supprimer l'élément du lieu ?",
-        "description": "{name} sera définitivement supprimé du plan du lieu.",
+        "description": "{name} sera définitivement retiré de l'agencement du lieu.",
         "confirm": "Supprimer l'élément"
       },
       "deletePhoto": {
@@ -813,8 +843,8 @@
         "confirm": "Supprimer la photo"
       },
       "deleteGalleryLink": {
-        "title": "Supprimer le lien de galerie ?",
-        "description": "Ce lien de galerie partagée cessera immédiatement de fonctionner.",
+        "title": "Supprimer le lien de la galerie ?",
+        "description": "Ce lien de galerie partagé cessera immédiatement de fonctionner.",
         "confirm": "Supprimer le lien"
       }
     },
@@ -825,7 +855,7 @@
       "venueElementDeleted": "Élément du lieu supprimé",
       "photoDeleted": "Photo supprimée",
       "galleryLinkDeleted": "Lien de galerie supprimé",
-      "galleryLinkDeleteFailed": "Impossible de supprimer le lien de galerie"
+      "galleryLinkDeleteFailed": "Le lien de galerie n'a pas pu être supprimé"
     },
     "designer": {
       "unassignedGuests": "Invités non assignés ({count})",
@@ -849,20 +879,20 @@
       "deleteElementFailed": "L'élément du lieu n'a pas pu être supprimé.",
       "assignMenu": {
         "triggerLabel": "Options de placement pour {name}",
-        "currentTable": "Actuellement placé à la table {number}",
+        "currentTable": "Actuellement à la table {number}",
         "unassign": "Retirer de la table",
         "full": "Complet",
         "noOtherTables": "Aucune autre table pour l'instant."
       }
     },
     "venueEditor": {
-      "eyebrow": "Éditeur du lieu",
-      "title": "Ajouter un élément au lieu",
-      "description": "Ajoutez un élément courant du lieu ou créez un élément personnalisé pour le plan.",
+      "eyebrow": "Concepteur de lieu",
+      "title": "Ajouter un élément de lieu",
+      "description": "Ajoutez une caractéristique courante du lieu ou créez un élément personnalisé pour le plan.",
       "quickPresets": "Préréglages rapides",
       "orCustom": "Ou créez le vôtre",
       "name": "Nom",
-      "namePlaceholder": "ex. Photomaton, gâteau de mariage",
+      "namePlaceholder": "ex. Photobooth, Gâteau de mariage",
       "icon": "Icône",
       "selectIcon": "Sélectionner l'icône : {icon}",
       "shape": "Forme",
@@ -881,10 +911,27 @@
         "amber": "Ambre",
         "gray": "Gris",
         "green": "Vert",
-        "teal": "Sarcelle",
+        "teal": "Bleu canard",
         "pink": "Rose"
       }
-    }
+    },
+    "csvImport": {
+      "exportButton": "Exporter CSV",
+      "importButton": "Importer CSV",
+      "exportSuccess": "Liste des invités exportée",
+      "exportEmpty": "Il n'y a pas encore d'invités à exporter",
+      "rsvpStatusColumn": "Statut RSVP",
+      "partySizeColumn": "Taille du groupe",
+      "tableColumn": "Table",
+      "emptyFile": "Ce fichier est vide",
+      "noNameColumns": "Impossible de trouver les colonnes prénom / nom dans ce CSV",
+      "importSuccess": "{imported} invités importés, {skipped} ignorés",
+      "importNothingImported": "Aucun invité n'a été importé depuis ce fichier",
+      "importFailed": "Échec de l'importation des invités depuis ce fichier"
+    },
+    "copyPersonalLink": "Copier le lien personnel",
+    "personalLinkCopied": "Lien personnel copié dans le presse-papiers",
+    "personalLinkCopyFailed": "Échec de la copie du lien"
   },
   "notFound": {
     "eyebrow": "Page introuvable",
@@ -982,5 +1029,51 @@
     "neverUsed": "jamais utilisée",
     "lastUsed": "dernière utilisation {date}",
     "revokeKeyAriaLabel": "Révoquer la clé API"
+  },
+  "qrCodeCard": {
+    "title": "Code QR à partager",
+    "description": "Scannez-le ou imprimez-le pour envoyer les invités directement à la page d'invitation.",
+    "downloadPng": "Télécharger PNG",
+    "print": "Imprimer"
+  },
+  "rsvpTrend": {
+    "title": "Tendance RSVP",
+    "description": "Réponses cumulées dans le temps, selon la date de réponse de chaque invité.",
+    "totalInvited": "Invités",
+    "confirmed": "Confirmés",
+    "declined": "Refusés",
+    "pending": "En attente",
+    "confirmedSeries": "Confirmés",
+    "declinedSeries": "Refusés",
+    "emptyState": "Pas encore de RSVP. Les réponses apparaîtront ici dès que les invités commenceront à répondre."
+  },
+  "guestLink": {
+    "title": "Votre invitation",
+    "weddingOf": "Le mariage de {bride} & {groom}",
+    "yourTable": "Votre table",
+    "seat": "Place",
+    "noTable": "Pas encore assigné à une table",
+    "noTableDescription": "Le couple ne vous a pas encore assigné de table. Revenez plus tard.",
+    "venueMap": "Plan du lieu",
+    "venueMapDescription": "Trouvez votre table sur le plan ci-dessous.",
+    "invalidTitle": "Ce lien n'est pas valide",
+    "invalidDescription": "Il a peut-être expiré, été mal saisi, ou le couple a peut-être désactivé l'accès public des invités. Veuillez demander un nouveau lien au couple.",
+    "backHome": "Retour à la page du mariage",
+    "rsvpTitle": "Votre RSVP",
+    "rsvpDescription": "Faites savoir au couple si vous pouvez venir.",
+    "rsvpStatus": {
+      "pending": "Pas encore répondu",
+      "confirmed": "Je serai là",
+      "declined": "Je ne peux pas venir"
+    },
+    "partySizeLabel": "Nombre d'invités (vous inclus)",
+    "partySizePlaceholder": "ex. 2",
+    "noteLabel": "Note pour le couple (facultatif)",
+    "notePlaceholder": "Restrictions alimentaires, demandes de chansons...",
+    "submit": "Enregistrer mon RSVP",
+    "submitting": "Enregistrement...",
+    "submitSuccess": "Votre RSVP a été enregistré",
+    "submitError": "Échec de l'enregistrement de votre RSVP. Veuillez réessayer.",
+    "lastResponded": "Dernière mise à jour {date}"
   }
 }
