@@ -1,8 +1,8 @@
-import {getPhotosAction} from "@/actions/admin";
-import {AdminDashboard} from "@/components/admin/dashboard";
-import {redirect} from "@/lib/navigation";
-import {createClient} from "@/lib/supabase/server";
-import {notFound} from "next/navigation";
+import { getPhotosAction } from "@/actions/admin";
+import { AdminDashboard } from "@/components/admin/dashboard";
+import { redirect } from "@/lib/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -20,12 +20,12 @@ export default async function AdminWeddingPhotosPage({
                                                          params,
                                                          searchParams,
                                                      }: Props) {
-    const {locale, weddingId} = await params;
+    const { locale, weddingId } = await params;
 
     const supabase = await createClient();
 
     const {
-        data: {user},
+        data: { user },
     } = await supabase.auth.getUser();
 
     if (!user) {
@@ -37,7 +37,7 @@ export default async function AdminWeddingPhotosPage({
         return null;
     }
 
-    const {data: admin} = await supabase
+    const { data: admin } = await supabase
         .from("admins")
         .select("id")
         .eq("id", user.id)
@@ -50,14 +50,16 @@ export default async function AdminWeddingPhotosPage({
         });
     }
 
-    const {data: wedding} = await supabase
+    const { data: wedding } = await supabase
         .from("weddings")
         .select(
             `
                 id,
                 groom_name,
                 bride_name,
-                slug
+                slug,
+                plan,
+                addons
             `,
         )
         .eq("id", weddingId)
@@ -72,7 +74,7 @@ export default async function AdminWeddingPhotosPage({
         notFound();
     }
 
-    const {filter} = await searchParams;
+    const { filter } = await searchParams;
 
     const filters =
         filter === "favourites"
@@ -98,7 +100,6 @@ export default async function AdminWeddingPhotosPage({
 
     return (
         <AdminDashboard
-            key={filter ?? "all"}
             initialPhotos={photoResult.photos}
             initialTotal={photoResult.total ?? 0}
             adminEmail={user.email ?? ""}
@@ -107,6 +108,8 @@ export default async function AdminWeddingPhotosPage({
             error={photoResult.error}
             activeFilter={filter}
             role="admin"
+            plan={wedding.plan}
+            addons={wedding.addons}
         />
     );
 }

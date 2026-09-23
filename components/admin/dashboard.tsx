@@ -54,6 +54,7 @@ import { cn, formatDate } from "@/lib/utils";
 import type { Photo } from "@/types/database";
 import { toast } from "sonner";
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
+import { getWeddingEntitlements } from "@/lib/plans";
 
 interface AdminDashboardProps {
     initialPhotos: Photo[];
@@ -64,6 +65,8 @@ interface AdminDashboardProps {
     role: "admin" | "couple";
     error?: string;
     activeFilter?: string;
+    plan?: string | null;
+    addons?: string[] | null;
 }
 
 interface GalleryToken {
@@ -143,8 +146,12 @@ export function AdminDashboard({
                                    role,
                                    error: initialError,
                                    activeFilter,
+                                   plan,
+                                   addons,
                                }: AdminDashboardProps) {
     const router = useRouter();
+
+    const entitlements = getWeddingEntitlements(plan, addons);
 
     const t = useTranslations("dashboard.photos");
 
@@ -270,7 +277,51 @@ export function AdminDashboard({
 
     const filterRequestIdRef = useRef(0);
 
+    /*
+     * Synchronise client state with server-side filter results.
+     *
+     * This still fires on the initial load and on any real navigation
+     * (back/forward, a shared link with ?filter=...), and it's also what
+     * the background router.replace() in handleFilterChange eventually
+     * resolves into -- by then local state already matches, so this just
+     * confirms it.
+     *
+     * Adjusted directly during render (comparing against the previous
+     * props, React's documented pattern for "state that resets when a
+     * prop changes") rather than in an effect, so a fresh server payload
+     * lands in the same render/commit instead of a render showing stale
+     * state followed by an effect-triggered re-render.
+     */
+    const [prevSyncProps, setPrevSyncProps] = useState({
+        initialPhotos,
+        initialTotal,
+        initialError,
+        activeFilter,
+    });
 
+    if (
+        prevSyncProps.initialPhotos !== initialPhotos ||
+        prevSyncProps.initialTotal !== initialTotal ||
+        prevSyncProps.initialError !== initialError ||
+        prevSyncProps.activeFilter !== activeFilter
+    ) {
+        setPrevSyncProps({
+            initialPhotos,
+            initialTotal,
+            initialError,
+            activeFilter,
+        });
+
+        setPhotos(initialPhotos);
+
+        setTotal(initialTotal);
+
+        setError(initialError);
+
+        setSelectedPhoto(null);
+
+        setCurrentFilter(activeFilter);
+    }
 
     /*
      * Signed URLs
@@ -1296,22 +1347,26 @@ export function AdminDashboard({
                                 <span className="hidden sm:inline">{t("seating")}</span>
                             </Link>
 
-                            <button
-                                type="button"
-                                onClick={openShareModal}
-                                aria-label={t("shareGallery")}
-                                className="flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:px-4"
-                            >
-                                <Share2 className="h-3.5 w-3.5" strokeWidth={1.6} />
+                            {entitlements.publicGallery && (
+                                <button
+                                    type="button"
+                                    onClick={openShareModal}
+                                    aria-label={t("shareGallery")}
+                                    className="flex h-9 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:px-4"
+                                >
+                                    <Share2 className="h-3.5 w-3.5" strokeWidth={1.6} />
 
-                                <span className="hidden md:inline">{t("shareGallery")}</span>
-                            </button>
+                                    <span className="hidden md:inline">{t("shareGallery")}</span>
+                                </button>
+                            )}
 
-                            <ZipMenu
-                                zipLoading={zipLoading}
-                                onDownload={handleZipDownload}
-                                compact
-                            />
+                            {entitlements.bulkPhotoExport && (
+                                <ZipMenu
+                                    zipLoading={zipLoading}
+                                    onDownload={handleZipDownload}
+                                    compact
+                                />
+                            )}
 
                             <button
                                 type="button"
@@ -1382,20 +1437,24 @@ export function AdminDashboard({
                             {/* Admin actions */}
                             {role === "admin" && (
                                 <>
-                                    <button
-                                        type="button"
-                                        onClick={openShareModal}
-                                        className="btn-secondary justify-center"
-                                    >
-                                        <Share2 className="h-4 w-4" />
+                                    {entitlements.publicGallery && (
+                                        <button
+                                            type="button"
+                                            onClick={openShareModal}
+                                            className="btn-secondary justify-center"
+                                        >
+                                            <Share2 className="h-4 w-4" />
 
-                                        {t("shareGallery")}
-                                    </button>
+                                            {t("shareGallery")}
+                                        </button>
+                                    )}
 
-                                    <ZipMenu
-                                        zipLoading={zipLoading}
-                                        onDownload={handleZipDownload}
-                                    />
+                                    {entitlements.bulkPhotoExport && (
+                                        <ZipMenu
+                                            zipLoading={zipLoading}
+                                            onDownload={handleZipDownload}
+                                        />
+                                    )}
                                 </>
                             )}
                         </div>

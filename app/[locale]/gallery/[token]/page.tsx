@@ -2,6 +2,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { getGalleryPhotosAction } from "@/actions/gallery";
 import { GalleryUnavailable } from "@/components/gallery/gallery-unavailable";
 import { GallerySlideshow } from "@/app/[locale]/gallery/[token]/slideshow-client";
+import { getWeddingEntitlements } from "@/lib/plans";
 
 type Props = {
     params: Promise<{
@@ -37,11 +38,43 @@ export default async function GalleryPage({ params }: Props) {
         return <GalleryUnavailable reason="invalid" />;
     }
 
-    const now = new Date().getTime();
+    /*
+     * Re-check the entitlement at read time, not just when the link was
+     * created -- a wedding can be downgraded to a plan that no longer
+     * includes public gallery sharing after tokens already exist, and
+     * those existing links should stop working rather than keep serving
+     * photos to whoever already has the URL.
+     */
+    const { data: weddingRow, error: weddingError } = await supabase
+        .from("weddings")
+        .select("plan, addons")
+        .eq("id", galleryToken.wedding_id)
+        .maybeSingle();
+
+    if (weddingError || !weddingRow) {
+        return <GalleryUnavailable reason="invalid" />;
+    }
+
+    const entitlements = getWeddingEntitlements(
+        weddingRow.plan,
+        weddingRow.addons,
+    );
+
+    if (!entitlements.publicGallery) {
+        return <GalleryUnavailable reason="invalid" />;
+    }
+
+    // `force-dynamic` means this Server Component already runs fresh
+    // per request -- it has no client-side re-render/memoization for
+    // react-hooks/purity to protect, but the rule's static check can't
+    // tell a Server Component from a memoizable client one, so it flags
+    // this regardless of hoisting the call out to its own line.
+    // eslint-disable-next-line react-hooks/purity -- see comment above
+    const requestTimeMs = Date.now();
 
     if (
         galleryToken.expires_at &&
-        new Date(galleryToken.expires_at).getTime() <= now
+        new Date(galleryToken.expires_at).getTime() <= requestTimeMs
     ) {
         return <GalleryUnavailable reason="expired" />;
     }
