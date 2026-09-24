@@ -17,7 +17,12 @@ vi.mock("next/cache", () => ({
     unstable_cache: vi.fn((fn: (...args: unknown[]) => unknown) => fn),
 }));
 
-import { bulkImportGuestsAction, getGuestByToken } from "@/actions/seating";
+import {
+    bulkImportGuestsAction,
+    deleteTable,
+    getGuestByToken,
+    updateTable,
+} from "@/actions/seating";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 /*
@@ -204,6 +209,140 @@ describe("bulkImportGuestsAction", () => {
                 { firstName: "Jane", lastName: "Doe" },
             ]),
         ).rejects.toThrow("insert failed");
+    });
+});
+
+/*
+ * ============================================================
+ * updateTable / deleteTable -- table-arrangement entitlement
+ * ============================================================
+ *
+ * addTable()/createVenueElement() were the only table-arrangement call
+ * sites ever gated on entitlements.tableArrangement; a wedding downgraded
+ * off a plan that includes it kept full access to redesign tables it
+ * already had. updateTable() (and its siblings: updateTablePosition(),
+ * updateVenueElementPosition(), assignGuestToTable()/assignGuestToSeat()
+ * when actually assigning) now check it too -- deleteTable() and
+ * deleteVenueElement() deliberately don't, matching how guest-limit
+ * downgrades work elsewhere (shrinking down to fit stays allowed, only
+ * growing/rearranging beyond the plan is not). This exercises the
+ * representative pair (one blocked, one not) rather than all five sites,
+ * since they all share the same getEntitlementsForWedding() check.
+ */
+describe("updateTable / deleteTable (table-arrangement entitlement)", () => {
+    function makeTableServiceClient(options: {
+        admin?: MockResult<{ id: string }>;
+        wedding?: MockResult<{
+            id: string;
+            owner_user_id: string | null;
+            plan: string;
+            addons: string[];
+        }>;
+        table?: MockResult<{ wedding_id: string }>;
+    }) {
+        const adminResult = options.admin ?? {
+            data: { id: "admin-1" },
+            error: null,
+        };
+        const weddingResult = options.wedding ?? {
+            data: {
+                id: "wedding-1",
+                owner_user_id: null,
+                plan: "basic",
+                addons: [],
+            },
+            error: null,
+        };
+        const tableResult = options.table ?? {
+            data: { wedding_id: "wedding-1" },
+            error: null,
+        };
+
+        return {
+            from: (table: string) => {
+                if (table === "admins") {
+                    return {
+                        select: () => ({
+                            eq: () => ({
+                                maybeSingle: async () => adminResult,
+                            }),
+                        }),
+                    };
+                }
+
+                if (table === "weddings") {
+                    return {
+                        select: () => ({
+                            eq: () => ({
+                                eq: () => ({
+                                    maybeSingle: async () => weddingResult,
+                                }),
+                                maybeSingle: async () => weddingResult,
+                            }),
+                        }),
+                    };
+                }
+
+                if (table === "tables") {
+                    return {
+                        // requireTableAccess()'s lookup:
+                        // .select('wedding_id').eq('id', id).maybeSingle()
+                        select: () => ({
+                            eq: () => ({
+                                maybeSingle: async () => tableResult,
+                            }),
+                        }),
+                        // deleteTable()'s mutation:
+                        // .delete().eq('id', id).eq('wedding_id', weddingId)
+                        delete: () => ({
+                            eq: () => ({
+                                eq: async () => ({ error: null }),
+                            }),
+                        }),
+                    };
+                }
+
+                throw new Error(`Unexpected table in mock: ${table}`);
+            },
+        };
+    }
+
+    const validFormData = {
+        number: 1,
+        seats: 4,
+        shape: "round" as const,
+    };
+
+    it("rejects redesigning an existing table when the wedding's current plan doesn't include table arrangement", async () => {
+        vi.mocked(createClient).mockResolvedValue(
+            makeAuthClient("admin-1") as unknown as Awaited<
+                ReturnType<typeof createClient>
+            >,
+        );
+        vi.mocked(createServiceClient).mockReturnValue(
+            makeTableServiceClient({}) as unknown as ReturnType<
+                typeof createServiceClient
+            >,
+        );
+
+        await expect(updateTable("table-1", validFormData)).rejects.toThrow(
+            "Table arrangement is not included",
+        );
+    });
+
+    it("still allows deleting an existing table on a plan without table arrangement (shrinking down to fit is always allowed)", async () => {
+        vi.mocked(createClient).mockResolvedValue(
+            makeAuthClient("admin-1") as unknown as Awaited<
+                ReturnType<typeof createClient>
+            >,
+        );
+        vi.mocked(createServiceClient).mockReturnValue(
+            makeTableServiceClient({}) as unknown as ReturnType<
+                typeof createServiceClient
+            >,
+        );
+
+        await expect(deleteTable("table-1")).resolves.toBeUndefined();
     });
 });
 

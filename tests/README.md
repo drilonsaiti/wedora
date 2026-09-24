@@ -49,10 +49,16 @@ security surface, rather than attempting broad coverage:
   exhausted rate-limit bucket blocking the attempt *before* Supabase Auth is ever
   called, and a rate-limit RPC error failing closed (denied, not let through)
   rather than silently disabling the limit.
-- **`next.config.js`** — the Content-Security-Policy header: production vs.
-  development script-src, the next-themes script's hash allowlist, and the
-  security-relevant directives (`object-src`, `frame-ancestors`, `form-action`,
-  no open wildcard in `img-src`).
+- **`lib/csp.ts`** — `buildContentSecurityPolicy`, called per-request from
+  middleware.ts with a fresh nonce: production vs. development script-src, that
+  the nonce is actually scoped per-request (two different nonces never both
+  appear allowlisted), and the other security-relevant directives (`object-src`,
+  `frame-ancestors`, `form-action`, no open wildcard in `img-src`). This used to
+  test a static CSP header built once in `next.config.js`, with the one inline
+  script this app renders (next-themes' theme-flash-prevention bootstrap)
+  allowlisted by a hardcoded SHA-256 hash instead of a nonce -- see lib/csp.ts's
+  doc comment for why a real production outage is what prompted moving off that
+  hash.
 
 ## What's NOT covered, and why
 

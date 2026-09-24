@@ -828,6 +828,19 @@ export async function assignGuestToTable(
     const { supabase, weddingId } = await requireGuestAccess(guestId);
 
     if (tableId) {
+        /*
+         * Only the assign path needs the entitlement check -- passing
+         * tableId=null (unseating a guest) is cleanup, same as
+         * deleteTable()/deleteVenueElement(), and stays allowed
+         * regardless of plan.
+         */
+        const entitlements = await getEntitlementsForWedding(supabase, weddingId);
+        if (!entitlements.tableArrangement) {
+            throw new Error(
+                "Table arrangement is not included in this wedding's plan",
+            );
+        }
+
         const tableWeddingId = await getTableWeddingId(supabase, tableId);
 
         if (tableWeddingId !== weddingId) {
@@ -1035,6 +1048,15 @@ export async function assignGuestToSeat(
     }
 
     /*
+     * Assigning to an actual seat is "using" the feature; removing one
+     * (handled above) is cleanup and stays allowed regardless of plan.
+     */
+    const entitlements = await getEntitlementsForWedding(supabase, weddingId);
+    if (!entitlements.tableArrangement) {
+        throw new Error("Table arrangement is not included in this wedding's plan");
+    }
+
+    /*
      * Verify destination table belongs
      * to the same wedding.
      */
@@ -1086,6 +1108,21 @@ export async function updateTable(
     },
 ) {
     const { supabase, weddingId } = await requireTableAccess(id);
+
+    /*
+     * Same reasoning as addTable()/createVenueElement() below: a wedding
+     * downgraded off a plan that includes table arrangement shouldn't be
+     * able to keep redesigning tables it already has just because they
+     * predate the downgrade -- only addTable()/createVenueElement() were
+     * ever checked, so this kept working indefinitely after a downgrade
+     * until now. deleteTable() deliberately has NO such check, matching
+     * how guest-limit downgrades work elsewhere: shrinking down to fit is
+     * always allowed, only growing/rearranging beyond the plan is not.
+     */
+    const entitlements = await getEntitlementsForWedding(supabase, weddingId);
+    if (!entitlements.tableArrangement) {
+        throw new Error("Table arrangement is not included in this wedding's plan");
+    }
 
     const parsed = tableSchema.safeParse(formData);
 
@@ -1197,6 +1234,15 @@ export async function updateTablePosition(
 ) {
     const { supabase, weddingId } = await requireTableAccess(id);
 
+    /*
+     * Dragging a table around the designer canvas is still "using" the
+     * table-arrangement feature, same as updateTable() above.
+     */
+    const entitlements = await getEntitlementsForWedding(supabase, weddingId);
+    if (!entitlements.tableArrangement) {
+        throw new Error("Table arrangement is not included in this wedding's plan");
+    }
+
     const { error } = await supabase
         .from("tables")
         .update({
@@ -1304,6 +1350,18 @@ export async function updateVenueElementPosition(
     posY: number,
 ) {
     const { supabase, weddingId } = await requireVenueElementAccess(id);
+
+    /*
+     * Same reasoning as updateTablePosition() -- moving a venue element
+     * around the canvas is "using" the table-arrangement designer.
+     * deleteVenueElement() below deliberately has no such check, mirroring
+     * deleteTable(): removing things is always allowed, only
+     * adding/rearranging beyond the plan is not.
+     */
+    const entitlements = await getEntitlementsForWedding(supabase, weddingId);
+    if (!entitlements.tableArrangement) {
+        throw new Error("Table arrangement is not included in this wedding's plan");
+    }
 
     const { error } = await supabase
         .from("venue_elements")
